@@ -756,30 +756,6 @@ export default function EventRequestsManagement() {
                           Complete Event Details
                         </Button>
                       )}
-                      
-                      {/* Admin actions - small icon buttons */}
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setSelectedRequest(request);
-                          setCurrentEditingStatus(request.status);
-                          setShowEditDialog(true);
-                        }}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => {
-                          if (confirm("Are you sure you want to delete this event request?")) {
-                            deleteMutation.mutate(request.id);
-                          }
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
                     </div>
                   </div>
                 </div>
