@@ -36,7 +36,7 @@ export function MessageLikeButton({ messageId, className = "" }: MessageLikeButt
     staleTime: 30000, // 30 seconds
   });
 
-  const hasUserLiked = likes.some((like: MessageLike) => like.userId === user?.id);
+  const hasUserLiked = (likes || []).some((like: MessageLike) => like.userId === user?.id);
   const likeCount = likes.length;
 
   // Like/unlike mutation

@@ -1072,7 +1072,7 @@ export function GroupMessaging({ currentUser }: GroupMessagesProps) {
                     <SelectContent>
                       {allUsers
                         .filter(user => 
-                          !groupMembers.some(member => member.userId === user.id) &&
+                          !(groupMembers || []).some(member => member.userId === user.id) &&
                           !addMemberForm.memberIds.includes(user.id)
                         )
                         .map((user) => (
