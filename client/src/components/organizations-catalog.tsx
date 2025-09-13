@@ -465,13 +465,12 @@ export default function GroupCatalog({ onNavigateToEventPlanning }: GroupCatalog
                     </span>
                     <span className="flex items-center space-x-1">
                       <Calendar className="w-4 h-4" />
-                      <span>{group.totalRequests} total requests</span>
+                      <span>{group.totalRequests} event requests</span>
                     </span>
-                    {group.hasHostedEvent && (
-                      <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
-                        ✓ Has hosted events
-                      </Badge>
-                    )}
+                    <span className="flex items-center space-x-1">
+                      <span className="w-4 h-4 text-orange-600">🥪</span>
+                      <span>{group.departments.reduce((total, org) => total + (org.totalSandwiches || 0), 0)} total sandwiches</span>
+                    </span>
                   </div>
                 </div>
               </div>
@@ -548,30 +547,37 @@ export default function GroupCatalog({ onNavigateToEventPlanning }: GroupCatalog
                           )}
                         </div>
                         
-                        {/* Consolidated Status Bar */}
-                        <div className="bg-transparent p-2 border border-gray-200 rounded-md">
-                          <div className="text-xs text-gray-700 flex items-center space-x-1">
-                            <span>Status: <span className="font-medium text-gray-900">{getStatusText(org.status)}</span></span>
-                            <span className="text-gray-400">•</span>
-                            <span>Requests: <span className="font-medium text-gray-900">{org.totalRequests}</span></span>
-                            <span className="text-gray-400">•</span>
-                            <span>Hosted: <span className="font-medium text-gray-900">{org.hasHostedEvent ? 'Yes' : 'No'}</span></span>
+                        {/* Key Metrics Bar */}
+                        <div className="bg-gradient-to-r from-orange-50 to-yellow-50 p-3 border border-orange-200 rounded-md">
+                          <div className="text-sm text-gray-700 flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                              <span>Status: <span className="font-semibold text-orange-700">{getStatusText(org.status)}</span></span>
+                              <span className="text-gray-400">•</span>
+                              <span>🥪 <span className="font-semibold text-orange-700">{org.totalSandwiches || 0} sandwiches</span></span>
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {org.totalRequests} request{org.totalRequests !== 1 ? 's' : ''}
+                            </div>
                           </div>
                         </div>
                       </div>
                     </CardHeader>
               
               <CardContent>
-                <div className="space-y-2">
-                  {/* Hosted Event Status */}
-                  <div className="pt-2 border-t">
-                    <div className="text-sm mb-3">
-                      <strong>Hosted Event with Us?</strong> {
-                        org.hasHostedEvent
-                          ? <span className="text-orange-600 font-semibold">Yes</span>
-                          : <span className="text-gray-500">No</span>
-                      }
+                <div className="space-y-3">
+                  {/* Contact Information - Most Important */}
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-2 text-base">
+                      <User className="w-5 h-5 text-teal-600" />
+                      <span className="font-semibold text-gray-900">{org.contactName}</span>
                     </div>
+                    {org.email && (
+                      <div className="flex items-center space-x-2 text-sm">
+                        <Mail className="w-4 h-4 text-teal-500" />
+                        <span className="text-teal-700 hover:text-teal-800">{org.email}</span>
+                      </div>
+                    )}
+                  </div>
                     
                     {/* Sandwich Count for Completed Events */}
                     {org.totalSandwiches && org.totalSandwiches > 0 ? (
@@ -600,8 +606,7 @@ export default function GroupCatalog({ onNavigateToEventPlanning }: GroupCatalog
                       View Event Details
                     </Button>
                   </div>
-                </div>
-              </CardContent>
+                </CardContent>
                     </Card>
                   ))}
                 </div>
@@ -638,12 +643,10 @@ export default function GroupCatalog({ onNavigateToEventPlanning }: GroupCatalog
                           <Users className="w-4 h-4 mr-2" />
                           <span>Historical host location</span>
                         </div>
-                        {group.hasHostedEvent && (
-                          <div className="flex items-center text-sm text-green-700">
-                            <CheckCircle className="w-4 h-4 mr-2" />
-                            <span>Previously hosted sandwiches</span>
-                          </div>
-                        )}
+                        <div className="flex items-center text-sm text-gray-600">
+                          <span className="w-4 h-4 text-orange-600 mr-2">🥪</span>
+                          <span>Sandwich collection host</span>
+                        </div>
                         <div className="pt-2 mt-3 border-t">
                           <small className="text-gray-500">From sandwich collections records</small>
                         </div>
