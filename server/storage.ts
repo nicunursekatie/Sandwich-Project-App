@@ -360,6 +360,10 @@ export interface IStorage {
 
   // Event reminders
   getEventRemindersCount(userId?: string): Promise<number>;
+  getAllEventReminders(userId?: string): Promise<any[]>;
+  createEventReminder(reminderData: any): Promise<any>;
+  updateEventReminder(id: number, updates: any): Promise<any>;
+  deleteEventReminder(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -2195,6 +2199,67 @@ export class MemStorage implements IStorage {
 
   async deleteEventVolunteer(id: number): Promise<boolean> {
     return this.eventVolunteers.delete(id);
+  }
+
+  // Event reminders methods
+  private eventReminders: Map<number, any> = new Map();
+  private nextEventReminderId = 1;
+
+  async getEventRemindersCount(userId?: string): Promise<number> {
+    if (userId) {
+      return Array.from(this.eventReminders.values()).filter(reminder => 
+        reminder.assignedToUserId === userId && reminder.status === 'pending'
+      ).length;
+    }
+    return Array.from(this.eventReminders.values()).filter(reminder => 
+      reminder.status === 'pending'
+    ).length;
+  }
+
+  async getAllEventReminders(userId?: string): Promise<any[]> {
+    let reminders = Array.from(this.eventReminders.values());
+    if (userId) {
+      reminders = reminders.filter(reminder => 
+        reminder.assignedToUserId === userId || reminder.createdBy === userId
+      );
+    }
+    return reminders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  async createEventReminder(reminderData: any): Promise<any> {
+    const reminder = {
+      id: this.nextEventReminderId++,
+      ...reminderData,
+      status: reminderData.status || 'pending',
+      priority: reminderData.priority || 'medium',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.eventReminders.set(reminder.id, reminder);
+    return reminder;
+  }
+
+  async updateEventReminder(id: number, updates: any): Promise<any> {
+    const reminder = this.eventReminders.get(id);
+    if (!reminder) return null;
+    
+    const updated = {
+      ...reminder,
+      ...updates,
+      updatedAt: new Date()
+    };
+    
+    // Handle completion
+    if (updates.status === 'completed' && !reminder.completedAt) {
+      updated.completedAt = new Date();
+    }
+    
+    this.eventReminders.set(id, updated);
+    return updated;
+  }
+
+  async deleteEventReminder(id: number): Promise<boolean> {
+    return this.eventReminders.delete(id);
   }
 }
 
