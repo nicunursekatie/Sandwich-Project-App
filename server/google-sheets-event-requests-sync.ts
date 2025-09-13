@@ -434,18 +434,17 @@ export class EventRequestsGoogleSheetsService extends GoogleSheetsService {
     }
     
     return rows.map((row: string[], index: number) => ({
-      // Match the updated Google Sheet structure from the screenshot
-      submittedOn: row[0] || '', // Submitted On (A) - the actual form submission date
-      contactName: row[1] || '', // Name (B)
-      email: row[2] || '', // Email (C)
-      organizationName: row[3] || '', // Group/Organization Name (D)
-      phone: row[4] || '', // Phone (E)
-      desiredEventDate: row[5] || '', // Desired Event Date (F)
-      message: row[6] || '', // Message (G)
-      department: row[7] || '', // departmentteam if applicable (H)
-      previouslyHosted: row[8] || 'i_dont_know', // has your organization done an event with us before (I)
-      // Note: row[9] appears to be "your email" - duplicate of email field
-      status: row[10] || 'new', // status (K) - read from your new status column, default to 'new'
+      // Match the corrected Google Sheet structure based on actual layout
+      submittedOn: row[0] || '', // Submission Date/Time (A)
+      contactName: `${row[1] || ''} ${row[2] || ''}`.trim(), // First Name (B) + Last Name (C) combined
+      email: row[3] || '', // Email (D)
+      organizationName: row[4] || '', // Group/Organization Name (E)
+      phone: row[5] || '', // Phone (F)
+      desiredEventDate: row[6] || '', // Desired Event Date (G)
+      message: row[7] || '', // Message (H)
+      department: row[8] || '', // Additional fields if present (I)
+      previouslyHosted: row[9] || 'i_dont_know', // Additional fields if present (J)
+      status: row[10] || 'new', // Status column if present (K) - default to 'new'
       createdDate: '', // Legacy field, not used for mapping
       lastUpdated: new Date().toISOString(),
       duplicateCheck: 'No',
