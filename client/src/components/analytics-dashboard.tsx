@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts";
 import { Award, TrendingUp, Target, Users2, Calendar, Trophy } from "lucide-react";
 import type { SandwichCollection } from "@shared/schema";
+import { calculateGroupSandwiches, calculateTotalSandwiches, calculateActualWeeklyAverage, getRecordWeek } from "@/lib/analytics-utils";
 
 export default function AnalyticsDashboard() {
   const { data: collections, isLoading: collectionsLoading } = useQuery<SandwichCollection[]>({
@@ -39,15 +40,9 @@ export default function AnalyticsDashboard() {
     const totalHosts = 34; // Fixed count per Marcy's manual verification
     const activeHosts = 34; // Fixed count per Marcy's manual verification
 
-    const calculateGroupTotal = (collection: SandwichCollection): number => {
-      const groupCount1 = (collection as any).group1Count || 0;
-      const groupCount2 = (collection as any).group2Count || 0;
-      return groupCount1 + groupCount2;
-    };
-
     const hostStats = collections.reduce((acc, c) => {
       const host = c.hostName || 'Unknown';
-      const sandwiches = (c.individualSandwiches || 0) + calculateGroupTotal(c);
+      const sandwiches = calculateTotalSandwiches(c);
       
       if (!acc[host]) {
         acc[host] = { total: 0, collections: 0 };
@@ -66,7 +61,7 @@ export default function AnalyticsDashboard() {
     const monthlyTrends = collections.reduce((acc, c) => {
       const date = new Date(c.collectionDate || '');
       const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-      const sandwiches = (c.individualSandwiches || 0) + calculateGroupTotal(c);
+      const sandwiches = calculateTotalSandwiches(c);
       
       if (!acc[monthKey]) {
         acc[monthKey] = { month: monthKey, sandwiches: 0 };
@@ -104,9 +99,9 @@ export default function AnalyticsDashboard() {
       activeLocations: Object.keys(hostStats).length,
       totalHosts,
       activeHosts,
-      avgWeekly: 8700,
+      avgWeekly: calculateActualWeeklyAverage(collections), // Calculate actual weekly average from real weekly buckets
       topPerformer: topPerformer ? { name: topPerformer[0], total: topPerformer[1].total } : null,
-      recordWeek: { total: 38828, date: '2023-11-15' },
+      recordWeek: getRecordWeek(collections), // Get actual best performing week
       trendData,
       topHosts
     };

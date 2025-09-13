@@ -22,6 +22,7 @@ import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tool
 import { apiRequest } from "@/lib/queryClient";
 import { useState } from "react";
 import MonthlyComparisonAnalytics from "@/components/monthly-comparison-analytics";
+import { calculateTotalSandwiches } from "@/lib/analytics-utils";
 
 export default function ImpactDashboard() {
   const [chartView, setChartView] = useState<'daily' | 'weekly' | 'monthly'>('monthly');
@@ -52,33 +53,10 @@ export default function ImpactDashboard() {
     console.log('processCollectionData - collections length:', collections?.length);
     console.log('processCollectionData - collectionsData:', collectionsData);
     
-    // Use sample data if collections is not available, not an array, or is empty
+    // Return empty array if no collections data available
     if (!Array.isArray(collections) || collections.length === 0) {
-      console.log('Using sample data - collections not available or empty');
-      if (chartView === 'weekly') {
-        // Generate sample weekly data
-        return [
-          { week: 'Week 1', sandwiches: 8750, collections: 12, hosts: 8 },
-          { week: 'Week 2', sandwiches: 9200, collections: 14, hosts: 9 },
-          { week: 'Week 3', sandwiches: 8900, collections: 13, hosts: 8 },
-          { week: 'Week 4', sandwiches: 9100, collections: 13, hosts: 9 },
-          { week: 'Week 5', sandwiches: 8800, collections: 12, hosts: 8 },
-          { week: 'Week 6', sandwiches: 9400, collections: 15, hosts: 10 },
-          { week: 'Week 7', sandwiches: 9000, collections: 14, hosts: 9 },
-          { week: 'Week 8', sandwiches: 8750, collections: 12, hosts: 8 }
-        ];
-      }
-      // Generate sample trend data based on verified monthly breakdown
-      return [
-        { month: '2023-01', sandwiches: 35000, collections: 45, hosts: 8 },
-        { month: '2023-06', sandwiches: 42000, collections: 52, hosts: 10 },
-        { month: '2023-12', sandwiches: 38000, collections: 48, hosts: 9 },
-        { month: '2024-01', sandwiches: 41000, collections: 50, hosts: 11 },
-        { month: '2024-06', sandwiches: 45000, collections: 55, hosts: 12 },
-        { month: '2024-12', sandwiches: 43000, collections: 53, hosts: 11 },
-        { month: '2025-01', sandwiches: 39000, collections: 48, hosts: 10 },
-        { month: '2025-06', sandwiches: 37000, collections: 45, hosts: 9 }
-      ];
+      console.log('No collections data available - returning empty array');
+      return [];
     }
     
     console.log('Processing real collections data...');
@@ -117,33 +95,10 @@ export default function ImpactDashboard() {
           };
         }
         
-        // Use correct API field names (camelCase)
-        const individualCount = collection.individualSandwiches || 0;
-        let groupCount = 0;
+        // Use standardized total calculation
+        const totalSandwiches = calculateTotalSandwiches(collection);
         
-        // Handle groupCollections properly
-        if (collection.groupCollections && Array.isArray(collection.groupCollections) && collection.groupCollections.length > 0) {
-          groupCount = collection.groupCollections.reduce((sum, group) => {
-            // Handle both 'count' and 'sandwichCount' field names
-            const count = group.count || group.sandwichCount || 0;
-            console.log('Group data:', group, 'Count:', count);
-            return sum + count;
-          }, 0);
-        } else if (collection.groupCollections && typeof collection.groupCollections === 'string' && collection.groupCollections !== '' && collection.groupCollections !== '[]') {
-          try {
-            const groupData = JSON.parse(collection.groupCollections);
-            if (Array.isArray(groupData)) {
-              groupCount = groupData.reduce((sum, group) => sum + (group.count || group.sandwichCount || 0), 0);
-            }
-          } catch (e) {
-            console.log('Error parsing groupCollections JSON:', e);
-            groupCount = 0;
-          }
-        }
-        
-        console.log(`Collection ${collection.id}: individual=${individualCount}, group=${groupCount}, date=${collectionDate}`);
-        
-        timeData[periodKey].sandwiches += individualCount + groupCount;
+        timeData[periodKey].sandwiches += totalSandwiches;
         timeData[periodKey].collections += 1;
         const hostName = collection.hostName;
         if (hostName) {
@@ -164,20 +119,9 @@ export default function ImpactDashboard() {
   };
 
   const processHostPerformance = () => {
+    // Return empty array if no collections data available
     if (!Array.isArray(collections) || collections.length === 0) {
-      // Generate representative host performance data
-      return [
-        { name: 'Alpharetta', totalSandwiches: 95000, totalCollections: 180, avgPerCollection: 528 },
-        { name: 'Brookhaven', totalSandwiches: 78000, totalCollections: 155, avgPerCollection: 503 },
-        { name: 'Buckhead', totalSandwiches: 72000, totalCollections: 142, avgPerCollection: 507 },
-        { name: 'Decatur', totalSandwiches: 65000, totalCollections: 128, avgPerCollection: 508 },
-        { name: 'Dunwoody', totalSandwiches: 58000, totalCollections: 115, avgPerCollection: 504 },
-        { name: 'Johns Creek', totalSandwiches: 52000, totalCollections: 98, avgPerCollection: 531 },
-        { name: 'Marietta', totalSandwiches: 48000, totalCollections: 92, avgPerCollection: 522 },
-        { name: 'Roswell', totalSandwiches: 45000, totalCollections: 89, avgPerCollection: 506 },
-        { name: 'Sandy Springs', totalSandwiches: 42000, totalCollections: 82, avgPerCollection: 512 },
-        { name: 'Smyrna', totalSandwiches: 38000, totalCollections: 75, avgPerCollection: 507 }
-      ];
+      return [];
     }
     
     const hostData: Record<string, {
@@ -199,25 +143,10 @@ export default function ImpactDashboard() {
         };
       }
       
-      // Use correct API field names (camelCase)
-      const individualCount = collection.individualSandwiches || 0;
-      let groupCount = 0;
+      // Use standardized total calculation
+      const totalSandwiches = calculateTotalSandwiches(collection);
       
-      // Handle groupCollections properly
-      if (collection.groupCollections && collection.groupCollections !== '' && collection.groupCollections !== '[]') {
-        try {
-          const groupData = typeof collection.groupCollections === 'string' 
-            ? JSON.parse(collection.groupCollections) 
-            : collection.groupCollections;
-          if (Array.isArray(groupData)) {
-            groupCount = (groupData || []).reduce((sum, group) => sum + (group.sandwichCount || 0), 0);
-          }
-        } catch (e) {
-          groupCount = 0;
-        }
-      }
-      
-      hostData[hostName].totalSandwiches += individualCount + groupCount;
+      hostData[hostName].totalSandwiches += totalSandwiches;
       hostData[hostName].totalCollections += 1;
     });
 
@@ -233,22 +162,53 @@ export default function ImpactDashboard() {
     const totalCollections = collections?.length || 0;
     const uniqueHosts = Array.isArray(hosts) ? hosts.length : 0;
     
-    // Use verified weekly breakdown data from authenticated sources
-    const verifiedYearTotals = {
-      2023: 438876,  // From verified weekly breakdown analysis
-      2024: 449643,  // Peak year from verified data
-      2025: 193674   // Year-to-date from verified data
+    // Calculate year totals from actual collections data
+    const yearTotals = {
+      2023: 0,
+      2024: 0,
+      2025: 0
     };
-    
 
-    
-
+    if (Array.isArray(collections)) {
+      collections.forEach((collection: any) => {
+        if (collection.collectionDate) {
+          const date = new Date(collection.collectionDate);
+          const year = date.getFullYear();
+          
+          if (yearTotals[year] !== undefined) {
+            // Calculate total sandwiches for this collection
+            const individualSandwiches = collection.individualSandwiches || 0;
+            let groupSandwiches = 0;
+            
+            // Handle groupCollections properly
+            if (collection.groupCollections && Array.isArray(collection.groupCollections) && collection.groupCollections.length > 0) {
+              groupSandwiches = collection.groupCollections.reduce((sum, group) => {
+                const count = group.count || group.sandwichCount || 0;
+                return sum + count;
+              }, 0);
+            } else if (collection.groupCollections && typeof collection.groupCollections === 'string' && collection.groupCollections !== '' && collection.groupCollections !== '[]') {
+              try {
+                const groupData = JSON.parse(collection.groupCollections);
+                if (Array.isArray(groupData)) {
+                  groupSandwiches = groupData.reduce((sum, group) => sum + (group.count || group.sandwichCount || 0), 0);
+                }
+              } catch (e) {
+                console.log('Error parsing groupCollections JSON:', e);
+                groupSandwiches = 0;
+              }
+            }
+            
+            yearTotals[year] += individualSandwiches + groupSandwiches;
+          }
+        }
+      });
+    }
     
     return {
       totalSandwiches,
-      year2023Total: verifiedYearTotals[2023],
-      year2024Total: verifiedYearTotals[2024],
-      year2025YTD: verifiedYearTotals[2025],
+      year2023Total: yearTotals[2023],
+      year2024Total: yearTotals[2024],
+      year2025YTD: yearTotals[2025],
       totalCollections,
       uniqueHosts
     };
@@ -382,34 +342,44 @@ export default function ImpactDashboard() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <AreaChart data={chartData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis 
-                        dataKey={chartView === 'weekly' ? 'week' : 'month'} 
-                        tick={{ fontSize: 12 }}
-                        tickFormatter={(value) => {
-                          if (chartView === 'weekly') {
-                            return value.includes('Week of') ? value.replace('Week of ', '') : value;
-                          }
-                          const parts = (value || '').split('-');
-                          return parts.length >= 2 ? parts[1] + '/' + parts[0].slice(2) : value;
-                        }}
-                      />
-                      <YAxis tick={{ fontSize: 12 }} />
-                      <Tooltip 
-                        labelFormatter={(value) => `${chartView === 'weekly' ? 'Week' : 'Month'}: ${value}`}
-                        formatter={(value, name) => [value, name === 'sandwiches' ? 'Sandwiches' : 'Collections']}
-                      />
-                      <Area 
-                        type="monotone" 
-                        dataKey="sandwiches" 
-                        stroke="#8884d8" 
-                        fill="#8884d8" 
-                        fillOpacity={0.6}
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
+                  {chartData && chartData.length > 0 ? (
+                    <ResponsiveContainer width="100%" height={300}>
+                      <AreaChart data={chartData}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis 
+                          dataKey={chartView === 'weekly' ? 'week' : 'month'} 
+                          tick={{ fontSize: 12 }}
+                          tickFormatter={(value) => {
+                            if (chartView === 'weekly') {
+                              return value.includes('Week of') ? value.replace('Week of ', '') : value;
+                            }
+                            const parts = (value || '').split('-');
+                            return parts.length >= 2 ? parts[1] + '/' + parts[0].slice(2) : value;
+                          }}
+                        />
+                        <YAxis tick={{ fontSize: 12 }} />
+                        <Tooltip 
+                          labelFormatter={(value) => `${chartView === 'weekly' ? 'Week' : 'Month'}: ${value}`}
+                          formatter={(value, name) => [value, name === 'sandwiches' ? 'Sandwiches' : 'Collections']}
+                        />
+                        <Area 
+                          type="monotone" 
+                          dataKey="sandwiches" 
+                          stroke="#8884d8" 
+                          fill="#8884d8" 
+                          fillOpacity={0.6}
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="flex items-center justify-center h-[300px] text-gray-500">
+                      <div className="text-center">
+                        <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                        <p className="text-lg mb-2">No collection data available</p>
+                        <p className="text-sm">Chart will display when collections are recorded</p>
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 

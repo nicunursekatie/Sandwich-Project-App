@@ -36,6 +36,7 @@ import {
   Activity
 } from "lucide-react";
 import type { SandwichCollection } from "@shared/schema";
+import { calculateGroupSandwiches, calculateTotalSandwiches } from "@/lib/analytics-utils";
 
 interface MonthlyStats {
   month: string;
@@ -118,42 +119,24 @@ export default function MonthlyComparisonAnalytics() {
 
       const stats = monthlyStats[monthKey];
       
-      // Calculate sandwich totals using proper groupCollections logic
+      // Calculate sandwich totals using standardized calculation
       const individualSandwiches = collection.individualSandwiches || 0;
-      let groupSandwiches = 0;
+      const groupSandwiches = calculateGroupSandwiches(collection);
+      const totalSandwiches = calculateTotalSandwiches(collection);
       
-      // Handle groupCollections properly (same logic as impact-dashboard.tsx)
-      if (collection.groupCollections && Array.isArray(collection.groupCollections) && collection.groupCollections.length > 0) {
-        groupSandwiches = collection.groupCollections.reduce((sum, group) => {
-          // Handle both 'count' and 'sandwichCount' field names
-          const count = group.count || group.sandwichCount || 0;
-          return sum + count;
-        }, 0);
-      } else if (collection.groupCollections && typeof collection.groupCollections === 'string' && collection.groupCollections !== '' && collection.groupCollections !== '[]') {
-        try {
-          const groupData = JSON.parse(collection.groupCollections);
-          if (Array.isArray(groupData)) {
-            groupSandwiches = groupData.reduce((sum, group) => sum + (group.count || group.sandwichCount || 0), 0);
-          }
-        } catch (e) {
-          console.log('Error parsing groupCollections JSON:', e);
-          groupSandwiches = 0;
-        }
-      }
-      
-      stats.totalSandwiches += individualSandwiches + groupSandwiches;
+      stats.totalSandwiches += totalSandwiches;
       stats.individualCount += individualSandwiches;
       stats.groupCount += groupSandwiches;
       stats.totalCollections += 1;
 
       // Track host participation
       const hostName = collection.hostName || 'Unknown';
-      stats.hostParticipation[hostName] = (stats.hostParticipation[hostName] || 0) + individualSandwiches + groupSandwiches;
+      stats.hostParticipation[hostName] = (stats.hostParticipation[hostName] || 0) + totalSandwiches;
 
       // Weekly distribution within month
       const dayOfMonth = date.getDate();
       const weekIndex = Math.min(Math.floor((dayOfMonth - 1) / 7), 3);
-      stats.weeklyDistribution[weekIndex] += individualSandwiches + groupSandwiches;
+      stats.weeklyDistribution[weekIndex] += totalSandwiches;
     });
 
     // Calculate derived metrics

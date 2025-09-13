@@ -25,8 +25,19 @@ collectionsRouter.get("/stats", async (req, res) => {
         collections.forEach((collection) => {
           individualTotal += collection.individualSandwiches || 0;
 
-          // PHASE 5: Use new column structure only
-          const collectionGroupTotal = (collection.group1Count || 0) + (collection.group2Count || 0);
+          // Calculate group total using standardized method: groupCollections JSONB with fallback to legacy columns
+          let collectionGroupTotal = 0;
+          
+          // Primary: Use groupCollections JSONB array if available and non-empty
+          if (collection.groupCollections && Array.isArray(collection.groupCollections) && collection.groupCollections.length > 0) {
+            collectionGroupTotal = collection.groupCollections.reduce((sum, group) => {
+              return sum + (group.count || 0);
+            }, 0);
+          } 
+          // Fallback: Use legacy group1Count + group2Count for older records
+          else {
+            collectionGroupTotal = (collection.group1Count || 0) + (collection.group2Count || 0);
+          }
           
           groupTotal += collectionGroupTotal;
         });
