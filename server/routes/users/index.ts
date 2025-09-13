@@ -1,17 +1,15 @@
 import { Router } from "express";
 import { userService } from "../../services/users";
-import { requirePermission, createStandardMiddleware, validateRequest, createErrorHandler } from "../../middleware";
+import { requirePermission, createErrorHandler } from "../../middleware";
 
 const usersRouter = Router();
 
-// Add standard middleware and error handling for this module
-const standardMiddleware = createStandardMiddleware();
+// Error handling for this module (standard middleware applied at mount level)
 const errorHandler = createErrorHandler('users');
 
 // User list for project assignments (available to anyone who can create projects)
 usersRouter.get(
   "/for-assignments",
-  ...standardMiddleware,
   async (req, res, next) => {
     try {
       const assignableUsers = await userService.getUsersForAssignments();
@@ -25,7 +23,6 @@ usersRouter.get(
 // User management routes requiring USERS_EDIT permission
 usersRouter.get(
   "/",
-  ...standardMiddleware,
   requirePermission("USERS_EDIT"),
   async (req, res, next) => {
     try {
@@ -39,7 +36,6 @@ usersRouter.get(
 
 usersRouter.post(
   "/",
-  ...standardMiddleware,
   requirePermission("USERS_EDIT"),
   async (req, res, next) => {
     try {
@@ -69,7 +65,6 @@ usersRouter.post(
 
 usersRouter.patch(
   "/:id",
-  ...standardMiddleware,
   requirePermission("USERS_EDIT"),
   async (req, res, next) => {
     try {
@@ -91,7 +86,6 @@ usersRouter.patch(
 
 usersRouter.patch(
   "/:id/status",
-  ...standardMiddleware,
   requirePermission("USERS_EDIT"),
   async (req, res, next) => {
     try {
@@ -108,7 +102,6 @@ usersRouter.patch(
 
 usersRouter.patch(
   "/:id/profile",
-  ...standardMiddleware,
   requirePermission("USERS_EDIT"),
   async (req, res, next) => {
     try {
@@ -130,7 +123,6 @@ usersRouter.patch(
 
 usersRouter.delete(
   "/:id",
-  ...standardMiddleware,
   requirePermission("USERS_EDIT"),
   async (req, res, next) => {
     try {
@@ -145,7 +137,6 @@ usersRouter.delete(
 
 usersRouter.patch(
   "/:id/password",
-  ...standardMiddleware,
   requirePermission("USERS_EDIT"),
   async (req, res, next) => {
     try {

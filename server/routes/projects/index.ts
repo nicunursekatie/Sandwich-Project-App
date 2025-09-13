@@ -1,6 +1,6 @@
 import { Router, type Request, type Response } from "express";
 import { createProjectService, type ProjectService } from "../../services/projects";
-import { createStandardMiddleware, createErrorHandler, projectFilesUpload } from "../../middleware";
+import { createErrorHandler, projectFilesUpload } from "../../middleware";
 import { logger } from "../../middleware/logger";
 import type { IStorage } from "../../storage";
 
@@ -38,11 +38,7 @@ export default function createProjectRoutes(options: {
   // Create project service instance
   const projectService = createProjectService(storage);
   
-  // Apply standard middleware
-  const standardMiddleware = createStandardMiddleware();
-  projectsRouter.use(standardMiddleware);
-  
-  // Apply error handling middleware
+  // Error handling for this module (standard middleware applied at mount level)
   const errorHandler = createErrorHandler('projects');
   
   // Helper function to get user from request

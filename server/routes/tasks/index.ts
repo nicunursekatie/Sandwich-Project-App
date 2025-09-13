@@ -1,5 +1,5 @@
 import { Router, type Request, type Response } from "express";
-import { createStandardMiddleware, createErrorHandler } from "../../middleware";
+import { createErrorHandler } from "../../middleware";
 import { logger } from "../../middleware/logger";
 import { insertTaskCompletionSchema } from "@shared/schema";
 import { storage } from "../../storage-wrapper";
@@ -30,8 +30,7 @@ interface AuthenticatedRequest extends Request {
 // Create task routes router
 const tasksRouter = Router();
 
-// Apply standard middleware and error handling
-const standardMiddleware = createStandardMiddleware();
+// Error handling for this module (standard middleware applied at mount level)
 const errorHandler = createErrorHandler('tasks');
 
 // Helper function to get user from request
@@ -40,7 +39,7 @@ const getUser = (req: AuthenticatedRequest) => {
 };
 
 // PATCH /:id - Update task
-tasksRouter.patch("/:id", ...standardMiddleware, async (req: AuthenticatedRequest, res: Response) => {
+tasksRouter.patch("/:id", async (req: AuthenticatedRequest, res: Response) => {
     try {
       const taskId = parseInt(req.params.id);
       const updates = req.body;
@@ -81,7 +80,7 @@ tasksRouter.patch("/:id", ...standardMiddleware, async (req: AuthenticatedReques
   });
 
 // DELETE /:id - Delete task
-tasksRouter.delete("/:id", ...standardMiddleware, async (req: AuthenticatedRequest, res: Response) => {
+tasksRouter.delete("/:id", async (req: AuthenticatedRequest, res: Response) => {
     try {
       const taskId = parseInt(req.params.id);
       const user = getUser(req);
@@ -104,7 +103,7 @@ tasksRouter.delete("/:id", ...standardMiddleware, async (req: AuthenticatedReque
   });
 
 // POST /:taskId/complete - Complete a task
-tasksRouter.post("/:taskId/complete", ...standardMiddleware, async (req: AuthenticatedRequest, res: Response) => {
+tasksRouter.post("/:taskId/complete", async (req: AuthenticatedRequest, res: Response) => {
     try {
       const taskId = parseInt(req.params.taskId);
       const user = getUser(req);
@@ -160,7 +159,7 @@ tasksRouter.post("/:taskId/complete", ...standardMiddleware, async (req: Authent
   });
 
 // DELETE /:taskId/complete - Remove task completion
-tasksRouter.delete("/:taskId/complete", ...standardMiddleware, async (req: AuthenticatedRequest, res: Response) => {
+tasksRouter.delete("/:taskId/complete", async (req: AuthenticatedRequest, res: Response) => {
     try {
       const taskId = parseInt(req.params.taskId);
       const user = getUser(req);
@@ -190,7 +189,7 @@ tasksRouter.delete("/:taskId/complete", ...standardMiddleware, async (req: Authe
   });
 
 // GET /:taskId/completions - Get task completions
-tasksRouter.get("/:taskId/completions", ...standardMiddleware, async (req: AuthenticatedRequest, res: Response) => {
+tasksRouter.get("/:taskId/completions", async (req: AuthenticatedRequest, res: Response) => {
     try {
       const taskId = parseInt(req.params.taskId);
       const completions = await storage.getTaskCompletions(taskId);
