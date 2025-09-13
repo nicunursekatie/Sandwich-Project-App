@@ -39,6 +39,10 @@ export class EventRequestsGoogleSheetsService extends GoogleSheetsService {
    */
   private eventRequestToSheetRow(eventRequest: EventRequest): EventRequestSheetRow {
     return {
+      submittedOn: eventRequest.createdAt ? (() => {
+        const date = eventRequest.createdAt instanceof Date ? eventRequest.createdAt : new Date(eventRequest.createdAt);
+        return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+      })() : '',
       organizationName: eventRequest.organizationName || '',
       contactName: `${eventRequest.firstName || ''} ${eventRequest.lastName || ''}`.trim(),
       email: eventRequest.email || '',
@@ -46,44 +50,19 @@ export class EventRequestsGoogleSheetsService extends GoogleSheetsService {
       department: eventRequest.department || '',
       desiredEventDate: eventRequest.desiredEventDate ? (() => {
         // Timezone-safe date formatting for Google Sheets
-        const dateStr = eventRequest.desiredEventDate;
-        if (dateStr.match(/^\d{4}-\d{2}-\d{2}T00:00:00(\.\d{3})?Z?$/)) {
-          // Handle ISO midnight format that causes timezone shifting
-          const datePart = dateStr.split('T')[0];
-          const safeDate = new Date(datePart + 'T12:00:00');
-          return safeDate.toLocaleDateString();
-        } else {
-          // Standard date parsing
-          const date = new Date(dateStr + 'T12:00:00');
-          return date.toLocaleDateString();
-        }
+        const date = eventRequest.desiredEventDate instanceof Date ? eventRequest.desiredEventDate : new Date(eventRequest.desiredEventDate);
+        return date.toLocaleDateString();
       })() : '',
       status: eventRequest.status || 'new',
       message: eventRequest.message || '',
       previouslyHosted: eventRequest.previouslyHosted || '',
       createdDate: eventRequest.createdAt ? (() => {
-        // Timezone-safe date formatting for Google Sheets
-        if (eventRequest.createdAt.match(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/)) {
-          // Database timestamp format
-          const [datePart] = eventRequest.createdAt.split(' ');
-          const date = new Date(datePart + 'T12:00:00');
-          return date.toLocaleDateString();
-        } else {
-          const date = new Date(eventRequest.createdAt + 'T12:00:00');
-          return date.toLocaleDateString();
-        }
+        const date = eventRequest.createdAt instanceof Date ? eventRequest.createdAt : new Date(eventRequest.createdAt);
+        return date.toLocaleDateString();
       })() : '',
       lastUpdated: eventRequest.updatedAt ? (() => {
-        // Timezone-safe date formatting for Google Sheets
-        if (eventRequest.updatedAt.match(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/)) {
-          // Database timestamp format
-          const [datePart] = eventRequest.updatedAt.split(' ');
-          const date = new Date(datePart + 'T12:00:00');
-          return date.toLocaleDateString();
-        } else {
-          const date = new Date(eventRequest.updatedAt + 'T12:00:00');
-          return date.toLocaleDateString();
-        }
+        const date = eventRequest.updatedAt instanceof Date ? eventRequest.updatedAt : new Date(eventRequest.updatedAt);
+        return date.toLocaleDateString();
       })() : '',
       duplicateCheck: eventRequest.organizationExists ? 'Yes' : 'No',
       notes: eventRequest.duplicateNotes || ''
