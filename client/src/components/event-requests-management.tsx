@@ -4837,18 +4837,6 @@ export default function EventRequestsManagement() {
               )}
             </div>
             <div className="flex flex-wrap gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setEmailComposerRequest(request);
-                  setShowEmailComposer(true);
-                }}
-                className="text-teal-600 hover:text-teal-800 bg-gradient-to-r from-teal-50 to-cyan-100 hover:from-teal-100 hover:to-cyan-200 flex-shrink-0"
-              >
-                <Mail className="h-4 w-4 mr-1" />
-                Email Contact
-              </Button>
 
 
               {/* Show "Toolkit Sent" for new requests that haven't sent toolkit yet */}
@@ -9069,7 +9057,7 @@ export default function EventRequestsManagement() {
                           <SelectValue placeholder="Select a van driver" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">No driver assigned</SelectItem>
+                          <SelectItem value="none">No driver assigned</SelectItem>
                           {availableDrivers?.filter((driver: any) => driver.isActive).map((driver: any) => (
                             <SelectItem key={driver.id} value={driver.id}>
                               {driver.name} {driver.vanApproved && "✓ Van Approved"}
@@ -9143,7 +9131,7 @@ export default function EventRequestsManagement() {
                           <SelectValue placeholder="Select primary contact" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">No contact assigned</SelectItem>
+                          <SelectItem value="none">No contact assigned</SelectItem>
                           {users?.map((user: any) => (
                             <SelectItem key={user.id} value={user.id}>
                               {user.firstName && user.lastName
@@ -9203,7 +9191,7 @@ export default function EventRequestsManagement() {
                           <SelectValue placeholder="How was contact made?" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">Not specified</SelectItem>
+                          <SelectItem value="unspecified">Not specified</SelectItem>
                           <SelectItem value="phone">Phone Call</SelectItem>
                           <SelectItem value="email">Email</SelectItem>
                           <SelectItem value="in_person">In Person</SelectItem>
@@ -9230,7 +9218,7 @@ export default function EventRequestsManagement() {
                           <SelectValue placeholder="Toolkit sent status" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">Not specified</SelectItem>
+                          <SelectItem value="unspecified">Not specified</SelectItem>
                           <SelectItem value="sent">Toolkit sent</SelectItem>
                           <SelectItem value="pending">Pending send</SelectItem>
                           <SelectItem value="not_needed">Not needed</SelectItem>
