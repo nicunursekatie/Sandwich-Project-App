@@ -471,10 +471,6 @@ export default function GroupCatalog({ onNavigateToEventPlanning }: GroupCatalog
                       <Calendar className="w-4 h-4" />
                       <span>{group.totalRequests} event requests</span>
                     </span>
-                    <span className="flex items-center space-x-1">
-                      <span className="w-4 h-4 text-orange-600">🥪</span>
-                      <span>{group.departments.reduce((total, org) => total + (org.totalSandwiches || 0), 0)} total sandwiches</span>
-                    </span>
                   </div>
                 </div>
               </div>
@@ -583,16 +579,6 @@ export default function GroupCatalog({ onNavigateToEventPlanning }: GroupCatalog
                     )}
                   </div>
                     
-                    {/* Sandwich Count for Completed Events */}
-                    {org.totalSandwiches && org.totalSandwiches > 0 ? (
-                      <div className="text-sm mb-3 bg-orange-50 p-2 rounded-lg border border-orange-200">
-                        <div className="flex items-center space-x-2">
-                          <span className="text-orange-600">🥪</span>
-                          <strong className="text-orange-800">Sandwiches Made:</strong>
-                          <span className="text-orange-800 font-semibold">{org.totalSandwiches}</span>
-                        </div>
-                      </div>
-                    ) : null}
                     
                     {/* View Event Details Button */}
                     <Button 
