@@ -129,6 +129,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const recipientsRoutes = await import("./routes/recipients");
   app.use("/api/recipients", recipientsRoutes.default);
 
+  // Add missing drivers and volunteers endpoints that were lost during refactoring
+  app.get("/api/drivers", isAuthenticated, async (req, res) => {
+    try {
+      const drivers = await storage.getAllDrivers();
+      res.json(drivers);
+    } catch (error) {
+      console.error("Failed to get drivers", error);
+      res.status(500).json({ message: "Failed to get drivers" });
+    }
+  });
+
+  app.get("/api/volunteers", isAuthenticated, async (req, res) => {
+    try {
+      const volunteers = await storage.getAllVolunteers();
+      res.json(volunteers);
+    } catch (error) {
+      console.error("Failed to get volunteers", error);
+      res.status(500).json({ message: "Failed to get volunteers" });
+    }
+  });
+
   // Import and register recipient TSP contacts routes
   const recipientTspContactRoutes = await import("./routes/recipient-tsp-contacts");
   app.use("/api/recipient-tsp-contacts", recipientTspContactRoutes.default);
