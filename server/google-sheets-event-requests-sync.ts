@@ -313,23 +313,36 @@ export class EventRequestsGoogleSheetsService extends GoogleSheetsService {
           };
           
           try {
-            await this.storage.createEventRequest(sanitizedData as any);
+            console.log(`🔍 Attempting to create event request with data:`, JSON.stringify(sanitizedData, null, 2));
+            const result = await this.storage.createEventRequest(sanitizedData as any);
+            console.log(`✅ Successfully created event request with ID: ${result.id}`);
             createdCount++;
           } catch (error) {
-            console.error('Primary storage operation failed, using fallback:', error);
-            // Fallback: try with minimal required fields only
-            await this.storage.createEventRequest({
-              organizationName: eventRequestData.organizationName || 'Unknown Organization',
-              firstName: eventRequestData.firstName || '',
-              lastName: eventRequestData.lastName || '',
-              email: eventRequestData.email || '',
-              phone: eventRequestData.phone || '',
-              status: eventRequestData.status || 'new',
-              createdBy: 'google_sheets_sync',
-              createdAt: new Date(),
-              updatedAt: new Date()
-            } as any);
-            createdCount++;
+            console.error('❌ Primary storage operation failed:', error);
+            console.error('❌ Failed data was:', JSON.stringify(sanitizedData, null, 2));
+            
+            try {
+              // Fallback: try with minimal required fields only
+              const fallbackData = {
+                organizationName: eventRequestData.organizationName || 'Unknown Organization',
+                firstName: eventRequestData.firstName || '',
+                lastName: eventRequestData.lastName || '',
+                email: eventRequestData.email || '',
+                phone: eventRequestData.phone || '',
+                status: eventRequestData.status || 'new',
+                createdBy: 'google_sheets_sync',
+                createdAt: new Date(),
+                updatedAt: new Date()
+              };
+              console.log(`🔄 Attempting fallback creation with minimal data:`, JSON.stringify(fallbackData, null, 2));
+              const fallbackResult = await this.storage.createEventRequest(fallbackData as any);
+              console.log(`✅ Fallback creation succeeded with ID: ${fallbackResult.id}`);
+              createdCount++;
+            } catch (fallbackError) {
+              console.error('❌ Fallback storage operation also failed:', fallbackError);
+              console.error('❌ Skipping this record - unable to create event request');
+              // Do NOT increment createdCount if both attempts failed
+            }
           }
         }
       }
