@@ -50,7 +50,7 @@ const SUBJECT_SUGGESTIONS = [
   'The Sandwich Project - Event Resources',
   'Event Planning - {organizationName}',
   'Follow-up: {organizationName}',
-  ''  // Custom subject
+  'custom'  // Custom subject
 ];
 
 interface EventEmailComposerProps {
@@ -95,7 +95,7 @@ export function EventEmailComposer({ isOpen, onClose, eventRequest, onEmailSent 
 
   // Apply subject suggestion when selected
   useEffect(() => {
-    if (selectedSubjectSuggestion) {
+    if (selectedSubjectSuggestion && selectedSubjectSuggestion !== 'custom') {
       const processedSubject = selectedSubjectSuggestion
         .replace('{organizationName}', eventRequest.organizationName);
       setSubject(processedSubject);
@@ -270,7 +270,7 @@ Website: thesandwichproject.org | Email: info@thesandwichproject.org`;
               <SelectContent>
                 {SUBJECT_SUGGESTIONS.map((suggestion, index) => (
                   <SelectItem key={index} value={suggestion}>
-                    {suggestion ? suggestion.replace('{organizationName}', eventRequest.organizationName) : 'Custom subject'}
+                    {suggestion === 'custom' ? 'Custom subject' : suggestion.replace('{organizationName}', eventRequest.organizationName)}
                   </SelectItem>
                 ))}
               </SelectContent>
