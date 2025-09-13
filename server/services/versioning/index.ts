@@ -1,155 +1,124 @@
 /**
- * Versioning Service Module
- * 
- * Centralizes all version control and change tracking business logic including:
- * - Entity version management
- * - Change history tracking
- * - Rollback capabilities
- * - Audit trails and compliance
- * - Conflict resolution
+ * Versioning Service - Wraps version control functionality for routes
  */
 
-import { storage } from "../../storage-wrapper";
-import type { User, Project, Task, SandwichCollection } from "../../../shared/schema";
+import { VersionControl } from "../../middleware/version-control";
 
-// TODO: Move version control logic from version-control.ts middleware
-export interface VersioningService {
-  // Version management
-  createVersion<T>(entityType: string, entityId: string, data: T, userId: string, changeDescription?: string): Promise<string>;
-  getVersionHistory(entityType: string, entityId: string): Promise<any[]>;
-  getVersionData<T>(versionId: string): Promise<T>;
-  compareVersions(versionId1: string, versionId2: string): Promise<any>;
-  
-  // Rollback operations
-  rollbackToVersion(versionId: string, userId: string): Promise<boolean>;
-  createRestorePoint(entityType: string, entityId: string, userId: string, description: string): Promise<string>;
-  
-  // Change tracking
-  trackChanges<T>(entityType: string, entityId: string, oldData: T, newData: T, userId: string): Promise<void>;
-  getChangesSince(entityType: string, entityId: string, timestamp: Date): Promise<any[]>;
-  getChangesBy(userId: string, entityType?: string, limit?: number): Promise<any[]>;
-  
-  // Audit and compliance
-  generateAuditTrail(entityType: string, entityId: string, startDate?: Date, endDate?: Date): Promise<any[]>;
-  exportComplianceReport(startDate: Date, endDate: Date, entityTypes?: string[]): Promise<any>;
-  
-  // Conflict resolution
-  detectConflicts<T>(entityType: string, entityId: string, newData: T): Promise<any[]>;
-  resolveConflict(conflictId: string, resolution: any, userId: string): Promise<boolean>;
-  
-  // Bulk operations
-  createBulkVersions(items: Array<{ entityType: string; entityId: string; data: any }>, userId: string): Promise<string[]>;
-  rollbackBulkChanges(versionIds: string[], userId: string): Promise<boolean>;
-  
-  // Cleanup and maintenance
-  cleanupOldVersions(olderThanDays: number, keepMinimumVersions: number): Promise<number>;
-  compactVersionHistory(entityType: string, entityId: string): Promise<boolean>;
-  
-  // Schema versioning
-  upgradeSchemaVersion(fromVersion: string, toVersion: string): Promise<boolean>;
-  validateSchemaCompatibility(entityType: string, version: string): Promise<boolean>;
-}
+export class VersioningService {
+  /**
+   * Get version history for an entity
+   */
+  static async getVersionHistory(entityType: string, entityId: number) {
+    try {
+      return await VersionControl.getVersionHistory(entityType as any, entityId);
+    } catch (error) {
+      throw new Error(`Failed to get version history: ${error.message}`);
+    }
+  }
 
-// TODO: Implement concrete versioning service class
-export class VersioningServiceImpl implements VersioningService {
-  async createVersion<T>(entityType: string, entityId: string, data: T, userId: string, changeDescription?: string): Promise<string> {
-    // TODO: Implement version creation
-    throw new Error("Not implemented");
+  /**
+   * Get specific version of an entity
+   */
+  static async getVersion(entityType: string, entityId: number, version: number) {
+    try {
+      const versionData = await VersionControl.getVersion(
+        entityType as any,
+        entityId,
+        version
+      );
+      if (!versionData) {
+        return null;
+      }
+      return versionData;
+    } catch (error) {
+      throw new Error(`Failed to get version: ${error.message}`);
+    }
   }
-  
-  async getVersionHistory(entityType: string, entityId: string): Promise<any[]> {
-    // TODO: Implement version history retrieval
-    throw new Error("Not implemented");
+
+  /**
+   * Restore a specific version of an entity
+   */
+  static async restoreVersion(entityType: string, entityId: number, version: number, userId: string) {
+    try {
+      const success = await VersionControl.restoreVersion(
+        entityType as any,
+        entityId,
+        version,
+        userId
+      );
+      return success;
+    } catch (error) {
+      throw new Error(`Failed to restore version: ${error.message}`);
+    }
   }
-  
-  async getVersionData<T>(versionId: string): Promise<T> {
-    // TODO: Implement version data retrieval
-    throw new Error("Not implemented");
+
+  /**
+   * Compare two versions of an entity
+   */
+  static async compareVersions(
+    entityType: string, 
+    entityId: number, 
+    version1: number, 
+    version2: number
+  ) {
+    try {
+      return await VersionControl.compareVersions(
+        entityType as any,
+        entityId,
+        version1,
+        version2
+      );
+    } catch (error) {
+      throw new Error(`Failed to compare versions: ${error.message}`);
+    }
   }
-  
-  async compareVersions(versionId1: string, versionId2: string): Promise<any> {
-    // TODO: Implement version comparison
-    throw new Error("Not implemented");
+
+  /**
+   * Create a changeset
+   */
+  static async createChangeset(changesetData: any, userId: string) {
+    try {
+      return await VersionControl.createChangeset({
+        ...changesetData,
+        userId
+      });
+    } catch (error) {
+      throw new Error(`Failed to create changeset: ${error.message}`);
+    }
   }
-  
-  async rollbackToVersion(versionId: string, userId: string): Promise<boolean> {
-    // TODO: Implement rollback to version
-    throw new Error("Not implemented");
+
+  /**
+   * Get change statistics
+   */
+  static async getChangeStats(
+    entityType?: string, 
+    userId?: string, 
+    startDate?: Date, 
+    endDate?: Date
+  ) {
+    try {
+      return await VersionControl.getChangeStats(
+        entityType as any,
+        userId,
+        startDate,
+        endDate
+      );
+    } catch (error) {
+      throw new Error(`Failed to get change stats: ${error.message}`);
+    }
   }
-  
-  async createRestorePoint(entityType: string, entityId: string, userId: string, description: string): Promise<string> {
-    // TODO: Implement restore point creation
-    throw new Error("Not implemented");
-  }
-  
-  async trackChanges<T>(entityType: string, entityId: string, oldData: T, newData: T, userId: string): Promise<void> {
-    // TODO: Implement change tracking
-    throw new Error("Not implemented");
-  }
-  
-  async getChangesSince(entityType: string, entityId: string, timestamp: Date): Promise<any[]> {
-    // TODO: Implement changes since timestamp retrieval
-    throw new Error("Not implemented");
-  }
-  
-  async getChangesBy(userId: string, entityType?: string, limit?: number): Promise<any[]> {
-    // TODO: Implement changes by user retrieval
-    throw new Error("Not implemented");
-  }
-  
-  async generateAuditTrail(entityType: string, entityId: string, startDate?: Date, endDate?: Date): Promise<any[]> {
-    // TODO: Implement audit trail generation
-    throw new Error("Not implemented");
-  }
-  
-  async exportComplianceReport(startDate: Date, endDate: Date, entityTypes?: string[]): Promise<any> {
-    // TODO: Implement compliance report export
-    throw new Error("Not implemented");
-  }
-  
-  async detectConflicts<T>(entityType: string, entityId: string, newData: T): Promise<any[]> {
-    // TODO: Implement conflict detection
-    throw new Error("Not implemented");
-  }
-  
-  async resolveConflict(conflictId: string, resolution: any, userId: string): Promise<boolean> {
-    // TODO: Implement conflict resolution
-    throw new Error("Not implemented");
-  }
-  
-  async createBulkVersions(items: Array<{ entityType: string; entityId: string; data: any }>, userId: string): Promise<string[]> {
-    // TODO: Implement bulk version creation
-    throw new Error("Not implemented");
-  }
-  
-  async rollbackBulkChanges(versionIds: string[], userId: string): Promise<boolean> {
-    // TODO: Implement bulk rollback
-    throw new Error("Not implemented");
-  }
-  
-  async cleanupOldVersions(olderThanDays: number, keepMinimumVersions: number): Promise<number> {
-    // TODO: Implement old versions cleanup
-    throw new Error("Not implemented");
-  }
-  
-  async compactVersionHistory(entityType: string, entityId: string): Promise<boolean> {
-    // TODO: Implement version history compaction
-    throw new Error("Not implemented");
-  }
-  
-  async upgradeSchemaVersion(fromVersion: string, toVersion: string): Promise<boolean> {
-    // TODO: Implement schema version upgrade
-    throw new Error("Not implemented");
-  }
-  
-  async validateSchemaCompatibility(entityType: string, version: string): Promise<boolean> {
-    // TODO: Implement schema compatibility validation
-    throw new Error("Not implemented");
+
+  /**
+   * Export version history
+   */
+  static async exportVersionHistory(entityType?: string, entityId?: number) {
+    try {
+      return await VersionControl.exportVersionHistory(
+        entityType as any,
+        entityId
+      );
+    } catch (error) {
+      throw new Error(`Failed to export version history: ${error.message}`);
+    }
   }
 }
-
-// Export singleton instance
-export const versioningService = new VersioningServiceImpl();
-
-// Export types for external use
-export type { VersioningService };
