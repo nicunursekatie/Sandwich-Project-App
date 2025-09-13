@@ -106,32 +106,48 @@ export function EventEmailComposer({ isOpen, onClose, eventRequest, onEmailSent 
   useEffect(() => {
     if (isOpen && !content) {
       const eventDetails = formatEventDetails();
-      const template = `Hi ${eventRequest.firstName},
+      const template = `Hi ${eventRequest.firstName}!
 
-Thank you for your interest in The Sandwich Project! We're excited to help support your ${eventRequest.organizationName} event${eventRequest.department ? ` with ${eventRequest.department}` : ''}.
-${eventDetails}
-To help ensure your event is successful, I've attached our complete toolkit which includes:
-• Food safety guidelines for volunteers
-• Step-by-step sandwich making instructions for both deli and PB&J sandwiches
-• Printable labels for sandwich identification
 
-**Important Resources:**
-🧮 **Inventory Calculator**: https://nicunursekatie.github.io/sandwichinventory/inventorycalculator.html
-Use this tool to determine exactly how much food to purchase based on your guest count.
 
-📅 **Schedule a Planning Call with Steph**: https://thesandwichproject.as.me/
-I'd love to schedule a brief call to discuss your event details and answer any questions you might have.
+Thanks for reaching out and for your interest in making sandwiches for us. I've attached our toolkit link with what you will need to prepare for a sandwich-making event. 
 
-Our toolkit ensures all volunteers follow proper food safety protocols and maintain consistency in sandwich preparation. Please review the attached documents and don't hesitate to reach out if you have any questions.
 
-Looking forward to partnering with you to make your event a success!
 
-Best regards,
-The Sandwich Project Team
+Groups can hold their events any day of the week if they can make 200 or more sandwiches. We also use volunteer drivers to pick up deli sandwiches, so you don't have to transport them. Once you set a date for your event, we'd appreciate at least two weeks' notice to add you to our schedule. 
 
----
-The Sandwich Project is a 501(c)(3) nonprofit organization
-Website: thesandwichproject.org | Email: info@thesandwichproject.org`;
+
+
+Food safety is our top priority, so please take a look at the attached link:
+
+TSP Toolkit: 
+Inventory calculator (with link)
+Food safety guidelines
+
+A couple of important things I want to highlight are:
+
+A refrigerator is necessary to make deli sandwiches so that meat, cheese, and sandwiches are always cold
+Food- safe Gloves must be worn
+Anyone with long hair must tie it back
+Sandwiches must be made indoors
+Do not use the heel of the bread loaf
+
+
+Once you've reviewed everything, we'd love to schedule a chat. Please use the link below to schedule a brief call to take place within 2-3 business days of receiving this email.
+
+
+
+We look forward to working with you!
+
+
+
+Schedule a Call with The Sandwich Project
+
+
+
+Stephanie Luis
+678.372.9024
+info@thesandwichproject.org`;
       
       setContent(template);
       setSubject(`The Sandwich Project - Event Resources for ${eventRequest.organizationName}`);

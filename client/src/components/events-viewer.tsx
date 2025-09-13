@@ -9,7 +9,7 @@ export default function EventsViewer() {
   const [zoomLevel, setZoomLevel] = useState(85); // Default zoom level (85%)
   
   // Convert the Google Sheets URL to an embed URL
-  const spreadsheetId = "1HxPIt3jCx1Y4LuKOh9WzAlM5RMr2fkUlXCI1Yn1hx7w";
+  const spreadsheetId = "1WYHS8Yj9Ef8SFDkVnf4bqWn-gjo94KqU-btEcyju4Q0";
   const embedUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/edit?usp=sharing&rm=minimal`;
   const fullViewUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/edit?usp=sharing`;
 

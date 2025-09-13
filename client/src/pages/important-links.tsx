@@ -14,7 +14,7 @@ export default function ImportantLinks() {
   const inventoryCalculatorUrl = "https://nicunursekatie.github.io/sandwichinventory/inventorycalculator.html";
   
   // Events Google Sheet (from events-viewer.tsx)
-  const eventsSpreadsheetId = "1HxPIt3jCx1Y4LuKOh9WzAlM5RMr2fkUlXCI1Yn1hx7w";
+  const eventsSpreadsheetId = "1WYHS8Yj9Ef8SFDkVnf4bqWn-gjo94KqU-btEcyju4Q0";
   const eventsEmbedUrl = `https://docs.google.com/spreadsheets/d/${eventsSpreadsheetId}/edit?usp=sharing&rm=minimal`;
   const eventsFullViewUrl = `https://docs.google.com/spreadsheets/d/${eventsSpreadsheetId}/edit?usp=sharing`;
   

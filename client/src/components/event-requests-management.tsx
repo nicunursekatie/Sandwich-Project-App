@@ -6265,7 +6265,7 @@ export default function EventRequestsManagement() {
               size="sm"
               onClick={() =>
                 window.open(
-                  `https://docs.google.com/spreadsheets/d/${import.meta.env.VITE_EVENT_REQUESTS_SHEET_ID || "1GsiY_Nafzt_AYr4lXd-Nc-tKiCcSIc4_FW3lDJWX_ss"}/edit`,
+                  `https://docs.google.com/spreadsheets/d/${import.meta.env.VITE_EVENT_REQUESTS_SHEET_ID || "1WYHS8Yj9Ef8SFDkVnf4bqWn-gjo94KqU-btEcyju4Q0"}/edit`,
                   "_blank",
                 )
               }
