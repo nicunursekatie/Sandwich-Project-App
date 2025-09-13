@@ -9,13 +9,17 @@ import { calculateGroupSandwiches, calculateTotalSandwiches, calculateActualWeek
 
 export default function AnalyticsDashboard() {
   const { data: collections, isLoading: collectionsLoading } = useQuery<SandwichCollection[]>({
-    queryKey: ['/api/sandwich-collections/all'],
+    queryKey: ['/api/sandwich-collections/all', 'v2'], // Force cache refresh
     queryFn: async () => {
+      console.log('🔄 Analytics Dashboard: Fetching all collections...');
       const response = await fetch('/api/sandwich-collections?limit=10000');
       if (!response.ok) throw new Error('Failed to fetch collections');
       const data = await response.json();
+      console.log('✅ Analytics Dashboard: Got', data.collections?.length || 0, 'collections');
       return data.collections || [];
-    }
+    },
+    staleTime: 0, // Force fresh data every time
+    cacheTime: 0   // Don't cache the data
   });
 
   const { data: statsData, isLoading: statsLoading } = useQuery({
@@ -58,6 +62,7 @@ export default function AnalyticsDashboard() {
       .sort(([,a], [,b]) => b.total - a.total)[0];
 
     // Monthly trends for chart
+    console.log('🔢 Analytics Dashboard: Processing', collections.length, 'collections for monthly trends');
     const monthlyTrends = collections.reduce((acc, c) => {
       const date = new Date(c.collectionDate || '');
       const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
@@ -71,6 +76,8 @@ export default function AnalyticsDashboard() {
       return acc;
     }, {} as Record<string, { month: string; sandwiches: number }>);
 
+    console.log('📊 Analytics Dashboard: Monthly trends calculated:', monthlyTrends);
+    
     const trendData = Object.values(monthlyTrends)
       .sort((a, b) => a.month.localeCompare(b.month))
       .slice(-12) // Last 12 months
@@ -82,6 +89,8 @@ export default function AnalyticsDashboard() {
           sandwiches: m.sandwiches
         };
       });
+      
+    console.log('📈 Analytics Dashboard: Final trend data for chart:', trendData);
 
     // Top performing hosts
     const topHosts = Object.entries(hostStats)
