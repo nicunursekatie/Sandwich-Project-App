@@ -32,7 +32,7 @@ interface OrganizationContact {
   department?: string;
   latestRequestDate: string;
   totalRequests: number;
-  status: 'new' | 'contacted' | 'completed' | 'scheduled' | 'past' | 'declined' | 'contact_completed';
+  status: 'new' | 'contacted' | 'completed' | 'scheduled' | 'past' | 'declined' | 'contact_completed' | 'in_process';
   hasHostedEvent: boolean;
   eventDate?: string | null;
   totalSandwiches?: number;
@@ -263,6 +263,8 @@ export default function GroupCatalog({ onNavigateToEventPlanning }: GroupCatalog
         return 'New Request';
       case 'contacted':
         return 'Contacted';
+      case 'in_process':
+        return 'In Process';
       case 'contact_completed':
         return 'Event Complete';
       case 'scheduled':
@@ -284,6 +286,8 @@ export default function GroupCatalog({ onNavigateToEventPlanning }: GroupCatalog
         return <Badge className="bg-gradient-to-r from-teal-100 to-cyan-200 text-teal-800 border border-teal-300 shadow-sm">New Request</Badge>;
       case 'contacted':
         return <Badge className="bg-gradient-to-r from-emerald-100 to-teal-200 text-teal-700 border border-teal-300 shadow-sm">Contacted</Badge>;
+      case 'in_process':
+        return <Badge className="bg-gradient-to-r from-blue-100 to-indigo-200 text-blue-800 border border-blue-300 shadow-sm">In Process</Badge>;
       case 'contact_completed':
         return <Badge className="bg-gradient-to-r from-orange-100 to-amber-200 text-orange-800 border border-orange-300 shadow-sm">Event Complete</Badge>;
       case 'scheduled':
@@ -797,6 +801,7 @@ export default function GroupCatalog({ onNavigateToEventPlanning }: GroupCatalog
                             const statusConfig = {
                               'new': { color: 'bg-teal-100 text-teal-800 border-teal-200', label: 'New Request' },
                               'contacted': { color: 'bg-yellow-100 text-yellow-800 border-yellow-200', label: 'Contact Made' },
+                              'in_process': { color: 'bg-blue-100 text-blue-800 border-blue-200', label: 'In Process' },
                               'scheduled': { color: 'bg-purple-100 text-purple-800 border-purple-200', label: 'Event Scheduled' },
                               'completed': { color: 'bg-orange-100 text-orange-800 border-orange-200', label: 'Event Completed' },
                               'past': { color: 'bg-gray-100 text-gray-800 border-gray-200', label: 'Past Event' }

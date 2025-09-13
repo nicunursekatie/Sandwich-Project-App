@@ -93,13 +93,33 @@ export function createGroupsCatalogRoutes(deps: GroupsCatalogDependencies) {
             } else {
               dept.latestStatus = 'scheduled'; // Scheduled but no date specified
             }
+          } else if (request.status === 'contacted') {
+            // For contacted events with a future date, consider them "in process"
+            const eventDate = request.desiredEventDate ? new Date(request.desiredEventDate) : null;
+            const now = new Date();
+            if (eventDate && eventDate > now) {
+              dept.latestStatus = 'in_process'; // Event being planned
+            } else {
+              dept.latestStatus = 'contacted';
+            }
           } else {
             dept.latestStatus = request.status || 'new';
           }
           
-          // Update event date from most recent request
+          // Update event date from most recent request (normalize to ISO format)
           if (request.desiredEventDate) {
-            dept.eventDate = request.desiredEventDate;
+            try {
+              // Normalize date to ISO format for consistent frontend parsing
+              const dateObj = new Date(request.desiredEventDate);
+              if (!isNaN(dateObj.getTime())) {
+                // Format as YYYY-MM-DD for date-only or full ISO string
+                dept.eventDate = dateObj.toISOString().split('T')[0];
+              } else {
+                dept.eventDate = null;
+              }
+            } catch {
+              dept.eventDate = null;
+            }
           }
         }
       });
