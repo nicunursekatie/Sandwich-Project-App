@@ -715,4 +715,4 @@ router.post("/:messageId/reply", async (req, res) => {
   }
 });
 
-export { router as messagingRoutes };
+export default router;

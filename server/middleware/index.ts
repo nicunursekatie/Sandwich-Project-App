@@ -8,6 +8,11 @@
  * import { requirePermission, sanitizeMiddleware, requestLogger } from '../middleware';
  */
 
+// Import functions for use within this file
+import { requestLogger, errorLogger, logger } from './logger';
+import { sanitizeMiddleware, sanitizeHtml, sanitizeText } from './sanitizer';
+import { requirePermission, requireOwnershipPermission } from './auth';
+
 // Authentication and authorization middleware
 export { requirePermission, requireOwnershipPermission } from './auth';
 
@@ -35,11 +40,6 @@ export { createActivityLogger } from './activity-logger';
  * authorization, sanitization before validation, etc.
  */
 export function createStandardMiddleware(permissions?: string[]) {
-  // Import middleware locally to avoid re-export issues
-  const { requestLogger } = require('./logger');
-  const { sanitizeMiddleware } = require('./sanitizer');
-  const { requirePermission } = require('./auth');
-  
   const middleware = [
     requestLogger,
     sanitizeMiddleware
@@ -58,9 +58,6 @@ export function createStandardMiddleware(permissions?: string[]) {
  * Includes basic logging and sanitization but no auth checks
  */
 export function createPublicMiddleware() {
-  const { requestLogger } = require('./logger');
-  const { sanitizeMiddleware } = require('./sanitizer');
-  
   return [
     requestLogger,
     sanitizeMiddleware

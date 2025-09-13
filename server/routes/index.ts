@@ -10,6 +10,7 @@ import tasksRouter from "./tasks";
 import collectionsRouter from "./collections";
 import meetingsRouter from "./meetings";
 import messagingRouter from "./messaging";
+import importCollectionsRouter from "./import-collections";
 import notificationsRouter from "./notifications";
 import reportsRouter from "./reports";
 import searchRouter from "./search";
@@ -61,11 +62,30 @@ export function createMainRoutes(deps: RouterDependencies) {
   router.use("/api/tasks", deps.isAuthenticated, ...createStandardMiddleware(), tasksRouter);
   router.use("/api/tasks", createErrorHandler("tasks"));
 
-  router.use("/api/collections", deps.isAuthenticated, ...createStandardMiddleware(), collectionsRouter);
-  router.use("/api/collections", createErrorHandler("collections"));
+  router.use("/api/sandwich-collections", deps.isAuthenticated, ...createStandardMiddleware(), collectionsRouter);
+  router.use("/api/sandwich-collections", createErrorHandler("collections"));
+  
+  router.use("/api/import-collections", deps.isAuthenticated, ...createStandardMiddleware(), importCollectionsRouter);
+  router.use("/api/import-collections", createErrorHandler("import-collections"));
 
+  // Mount meetings routes with multiple paths to match existing routes
+  router.use("/api/meeting-minutes", deps.isAuthenticated, ...createStandardMiddleware(), meetingsRouter);
+  router.use("/api/meeting-minutes", createErrorHandler("meetings"));
+  
+  router.use("/api/agenda-items", deps.isAuthenticated, ...createStandardMiddleware(), meetingsRouter);
+  router.use("/api/agenda-items", createErrorHandler("meetings"));
+  
+  router.use("/api/current-meeting", deps.isAuthenticated, ...createStandardMiddleware(), meetingsRouter);
+  router.use("/api/current-meeting", createErrorHandler("meetings"));
+  
   router.use("/api/meetings", deps.isAuthenticated, ...createStandardMiddleware(), meetingsRouter);
   router.use("/api/meetings", createErrorHandler("meetings"));
+  
+  router.use("/api/drive-links", deps.isAuthenticated, ...createStandardMiddleware(), meetingsRouter);
+  router.use("/api/drive-links", createErrorHandler("meetings"));
+  
+  router.use("/api/files", deps.isAuthenticated, ...createStandardMiddleware(), meetingsRouter);
+  router.use("/api/files", createErrorHandler("meetings"));
 
   router.use("/api/messaging", deps.isAuthenticated, ...createStandardMiddleware(), messagingRouter);
   router.use("/api/messaging", createErrorHandler("messaging"));

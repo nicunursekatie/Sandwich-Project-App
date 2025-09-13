@@ -711,4 +711,4 @@ router.patch("/projects/:id/assignments/:userId", async (req, res) => {
   }
 });
 
-export { router as projectsRoutes };
+export default router;
