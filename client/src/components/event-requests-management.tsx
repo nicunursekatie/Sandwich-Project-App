@@ -809,6 +809,17 @@ export default function EventRequestsManagement() {
   // Toolkit Sent Dialog state
   const [showToolkitSentDialog, setShowToolkitSentDialog] = useState(false);
   const [toolkitSentRequest, setToolkitSentRequest] = useState<EventRequest | null>(null);
+  
+  // Form state for Mark Scheduled dialog to track Select values
+  const [markScheduledFormData, setMarkScheduledFormData] = useState({
+    assignedVanDriverId: "",
+    hasRefrigeration: "",
+    tspContact: "",
+    communicationMethod: "",
+    toolkitStatus: "",
+    vanDriverNeeded: false
+  });
+  
   const [pastEventsPage, setPastEventsPage] = useState(1);
   const [pastEventsPerPage] = useState(10);
   const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false);
@@ -5063,6 +5074,15 @@ export default function EventRequestsManagement() {
                     }
                     
                     setSchedulingRequest(request);
+                    // Initialize form data with existing values
+                    setMarkScheduledFormData({
+                      assignedVanDriverId: (request as any).assignedVanDriverId || "",
+                      hasRefrigeration: request.hasRefrigeration ? "true" : request.hasRefrigeration === false ? "false" : "none",
+                      tspContact: (request as any).tspContact || "",
+                      communicationMethod: request.communicationMethod || "",
+                      toolkitStatus: (request as any).toolkitStatus || "",
+                      vanDriverNeeded: (request as any).vanDriverNeeded || false
+                    });
                     setShowSchedulingDialog(true);
                   }}
                   className="bg-gradient-to-r from-teal-600 to-cyan-700 hover:from-teal-700 hover:to-cyan-800 text-white border-0 shadow-lg"
@@ -6193,6 +6213,11 @@ export default function EventRequestsManagement() {
         : 0,
       volunteersNeeded: formData.get("volunteersNeeded") === "on",
       volunteerNotes: formData.get("volunteerNotes") || null,
+      // Van driver assignment
+      vanDriverNeeded: formData.get("vanDriverNeeded") === "on",
+      assignedVanDriverId: formData.get("assignedVanDriverId") || null,
+      customVanDriverName: formData.get("customVanDriverName") || null,
+      vanDriverNotes: formData.get("vanDriverNotes") || null,
       planningNotes: formData.get("planningNotes") || null,
       additionalRequirements: formData.get("additionalRequirements") || null,
       // Toolkit and communication
@@ -8884,7 +8909,19 @@ export default function EventRequestsManagement() {
                   </div>
                   <div className="mt-4">
                     <Label htmlFor="hasRefrigeration">Refrigeration Available?</Label>
-                    <Select name="hasRefrigeration" defaultValue={schedulingRequest.hasRefrigeration ? "true" : "false"}>
+                    {/* Hidden input for form submission */}
+                    <input 
+                      type="hidden" 
+                      name="hasRefrigeration" 
+                      value={markScheduledFormData.hasRefrigeration}
+                    />
+                    <Select 
+                      value={markScheduledFormData.hasRefrigeration}
+                      onValueChange={(value) => setMarkScheduledFormData(prev => ({ 
+                        ...prev, 
+                        hasRefrigeration: value || ""
+                      }))}
+                    >
                       <SelectTrigger className="bg-white">
                         <SelectValue />
                       </SelectTrigger>
@@ -8991,6 +9028,112 @@ export default function EventRequestsManagement() {
                   </div>
                 </div>
 
+                {/* Van Driver Section */}
+                <div className="border rounded-lg p-4 bg-gradient-to-r from-indigo-50 to-purple-50">
+                  <h3 className="text-lg font-semibold mb-3 text-gray-800 flex items-center">
+                    <Truck className="h-4 w-4 mr-2 text-indigo-600" />
+                    Van Driver Assignment
+                  </h3>
+                  
+                  {/* Van Driver Needed Checkbox */}
+                  <div className="mb-4">
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        name="vanDriverNeeded"
+                        id="vanDriverNeeded"
+                        checked={markScheduledFormData.vanDriverNeeded}
+                        onChange={(e) => {
+                          const isChecked = e.target.checked;
+                          setMarkScheduledFormData(prev => ({ 
+                            ...prev, 
+                            vanDriverNeeded: isChecked,
+                            // Clear driver fields when unchecked
+                            assignedVanDriverId: isChecked ? prev.assignedVanDriverId : ""
+                          }));
+                        }}
+                        className="h-4 w-4 text-indigo-600"
+                        data-testid="checkbox-van-driver-needed"
+                      />
+                      <Label htmlFor="vanDriverNeeded" className="text-sm font-medium">
+                        Van driver needed for this event
+                      </Label>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-1 ml-6">
+                      Check if this event requires a van driver for transportation or logistics
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Assigned Van Driver */}
+                    <div>
+                      <Label htmlFor="assignedVanDriverId">Assigned Van Driver</Label>
+                      {/* Hidden input for form submission */}
+                      <input 
+                        type="hidden" 
+                        name="assignedVanDriverId" 
+                        value={markScheduledFormData.assignedVanDriverId}
+                      />
+                      <Select 
+                        value={markScheduledFormData.assignedVanDriverId}
+                        onValueChange={(value) => setMarkScheduledFormData(prev => ({ 
+                          ...prev, 
+                          assignedVanDriverId: value || ""
+                        }))}
+                        disabled={!markScheduledFormData.vanDriverNeeded}
+                      >
+                        <SelectTrigger className={`bg-white ${!markScheduledFormData.vanDriverNeeded ? 'opacity-50' : ''}`}>
+                          <SelectValue placeholder="Select a van driver" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">No driver assigned</SelectItem>
+                          {availableDrivers?.filter((driver: any) => driver.isActive).map((driver: any) => (
+                            <SelectItem key={driver.id} value={driver.id}>
+                              {driver.name} {driver.vanApproved && "✓ Van Approved"}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-gray-600 mt-1">
+                        Select from available drivers with van approval
+                      </p>
+                    </div>
+
+                    {/* Custom Van Driver Name */}
+                    <div>
+                      <Label htmlFor="customVanDriverName">Custom Van Driver Name</Label>
+                      <Input
+                        name="customVanDriverName"
+                        defaultValue={schedulingRequest.customVanDriverName || ""}
+                        placeholder="External driver name or contact"
+                        className={`bg-white ${!markScheduledFormData.vanDriverNeeded ? 'opacity-50' : ''}`}
+                        disabled={!markScheduledFormData.vanDriverNeeded}
+                        data-testid="input-custom-van-driver-name"
+                      />
+                      <p className="text-xs text-gray-600 mt-1">
+                        For external drivers not in our system
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Van Driver Notes */}
+                  <div className="mt-4">
+                    <Label htmlFor="vanDriverNotes">Van Driver Notes</Label>
+                    <Textarea
+                      name="vanDriverNotes"
+                      rows={2}
+                      defaultValue={schedulingRequest.vanDriverNotes || ""}
+                      placeholder="Special instructions, vehicle requirements, pickup/drop-off details, etc."
+                      className={`bg-white ${!markScheduledFormData.vanDriverNeeded ? 'opacity-50' : ''}`}
+                      disabled={!markScheduledFormData.vanDriverNeeded}
+                      data-testid="textarea-van-driver-notes"
+                    />
+                    <p className="text-xs text-gray-600 mt-1">
+                      Any special requirements or instructions for the van driver
+                    </p>
+                  </div>
+                </div>
+
                 {/* TSP Contact Assignment Section */}
                 <div className="border rounded-lg p-4 bg-gradient-to-r from-green-50 to-emerald-50">
                   <h3 className="text-lg font-semibold mb-3 text-gray-800 flex items-center">
@@ -9000,7 +9143,19 @@ export default function EventRequestsManagement() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="tspContact">Primary TSP Contact</Label>
-                      <Select name="tspContact" defaultValue={schedulingRequest.tspContact || ""}>
+                      {/* Hidden input for form submission */}
+                      <input 
+                        type="hidden" 
+                        name="tspContact" 
+                        value={markScheduledFormData.tspContact}
+                      />
+                      <Select 
+                        value={markScheduledFormData.tspContact}
+                        onValueChange={(value) => setMarkScheduledFormData(prev => ({ 
+                          ...prev, 
+                          tspContact: value || ""
+                        }))}
+                      >
                         <SelectTrigger className="bg-white">
                           <SelectValue placeholder="Select primary contact" />
                         </SelectTrigger>
@@ -9048,7 +9203,19 @@ export default function EventRequestsManagement() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="communicationMethod">Communication Method</Label>
-                      <Select name="communicationMethod" defaultValue={schedulingRequest.communicationMethod || ""}>
+                      {/* Hidden input for form submission */}
+                      <input 
+                        type="hidden" 
+                        name="communicationMethod" 
+                        value={markScheduledFormData.communicationMethod}
+                      />
+                      <Select 
+                        value={markScheduledFormData.communicationMethod}
+                        onValueChange={(value) => setMarkScheduledFormData(prev => ({ 
+                          ...prev, 
+                          communicationMethod: value || ""
+                        }))}
+                      >
                         <SelectTrigger className="bg-white">
                           <SelectValue placeholder="How was contact made?" />
                         </SelectTrigger>
@@ -9063,7 +9230,19 @@ export default function EventRequestsManagement() {
                     </div>
                     <div>
                       <Label htmlFor="toolkitStatus">Toolkit Status</Label>
-                      <Select name="toolkitStatus" defaultValue={schedulingRequest.toolkitStatus || ""}>
+                      {/* Hidden input for form submission */}
+                      <input 
+                        type="hidden" 
+                        name="toolkitStatus" 
+                        value={markScheduledFormData.toolkitStatus}
+                      />
+                      <Select 
+                        value={markScheduledFormData.toolkitStatus}
+                        onValueChange={(value) => setMarkScheduledFormData(prev => ({ 
+                          ...prev, 
+                          toolkitStatus: value || ""
+                        }))}
+                      >
                         <SelectTrigger className="bg-white">
                           <SelectValue placeholder="Toolkit sent status" />
                         </SelectTrigger>
