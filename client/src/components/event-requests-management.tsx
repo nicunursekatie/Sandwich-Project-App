@@ -354,6 +354,7 @@ interface EventRequest {
   followUpMethod?: string;
   updatedEmail?: string;
   followUpDate?: string;
+  scheduledCallDate?: string;
 }
 
 const statusColors = {
@@ -896,6 +897,9 @@ export default function EventRequestsManagement() {
     useState<EventRequest | null>(null);
   const [showSchedulingDialog, setShowSchedulingDialog] = useState(false);
   const [schedulingRequest, setSchedulingRequest] =
+    useState<EventRequest | null>(null);
+  const [showScheduleCallDialog, setShowScheduleCallDialog] = useState(false);
+  const [scheduleCallRequest, setScheduleCallRequest] =
     useState<EventRequest | null>(null);
 
   // Get current user for permission checking
@@ -1767,6 +1771,53 @@ export default function EventRequestsManagement() {
       );
       toast({
         title: "Error marking toolkit as sent",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Schedule Call mutation
+  const scheduleCallMutation = useMutation({
+    mutationFn: ({ eventId, scheduledCallDate }: { eventId: number; scheduledCallDate: string }) =>
+      apiRequest("PATCH", `/api/event-requests/${eventId}`, {
+        scheduledCallDate
+      }),
+    onMutate: async ({ eventId, scheduledCallDate }) => {
+      await queryClient.cancelQueries({ queryKey: ["/api/event-requests"] });
+      const previousEvents = queryClient.getQueryData(["/api/event-requests"]);
+
+      // Optimistically update the event
+      queryClient.setQueryData(["/api/event-requests"], (old: any) => {
+        if (!old) return old;
+        return old.map((event: any) =>
+          event.id === eventId
+            ? {
+                ...event,
+                scheduledCallDate
+              }
+            : event,
+        );
+      });
+
+      return { previousEvents };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/event-requests"] });
+      setShowScheduleCallDialog(false);
+      setScheduleCallRequest(null);
+      toast({
+        title: "Call scheduled successfully",
+        description: "The scheduled call date has been saved",
+      });
+    },
+    onError: (error: any, variables, context: any) => {
+      queryClient.setQueryData(
+        ["/api/event-requests"],
+        context?.previousEvents,
+      );
+      toast({
+        title: "Error scheduling call",
         description: error.message,
         variant: "destructive",
       });
@@ -4856,6 +4907,23 @@ export default function EventRequestsManagement() {
                 >
                   <XCircle className="h-4 w-4 mr-1" />
                   Manage Unresponsive
+                </Button>
+              )}
+
+              {/* Show "Schedule Call" only for in_process events without scheduled call date */}
+              {request.status === "in_process" && !request.scheduledCallDate && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setScheduleCallRequest(request);
+                    setShowScheduleCallDialog(true);
+                  }}
+                  className="text-teal-600 hover:text-teal-800 bg-gradient-to-r from-teal-50 to-cyan-100 hover:from-teal-100 hover:to-cyan-200 border-teal-300 flex-shrink-0"
+                  data-testid="button-schedule-call"
+                >
+                  <Phone className="h-4 w-4 mr-1" />
+                  Schedule Call
                 </Button>
               )}
 
@@ -9966,6 +10034,92 @@ export default function EventRequestsManagement() {
         }}
         isLoading={toolkitSentMutation.isPending}
       />
+
+      {/* Schedule Call Dialog */}
+      {showScheduleCallDialog && scheduleCallRequest && (
+        <Dialog
+          open={showScheduleCallDialog}
+          onOpenChange={setShowScheduleCallDialog}
+        >
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Schedule Call</DialogTitle>
+              <DialogDescription>
+                Schedule a follow-up call for {scheduleCallRequest.organizationName}
+              </DialogDescription>
+            </DialogHeader>
+            <form 
+              onSubmit={(e) => {
+                e.preventDefault();
+                const formData = new FormData(e.currentTarget);
+                const scheduledDate = formData.get('scheduledDate') as string;
+                const scheduledTime = formData.get('scheduledTime') as string;
+                
+                if (!scheduledDate || !scheduledTime) {
+                  toast({
+                    title: "Error",
+                    description: "Please select both date and time",
+                    variant: "destructive",
+                  });
+                  return;
+                }
+
+                // Combine date and time into ISO string
+                const scheduledDateTime = new Date(`${scheduledDate}T${scheduledTime}`).toISOString();
+                
+                scheduleCallMutation.mutate({
+                  eventId: scheduleCallRequest.id,
+                  scheduledCallDate: scheduledDateTime
+                });
+              }} 
+              className="space-y-4"
+            >
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="scheduledDate">Call Date</Label>
+                  <Input
+                    id="scheduledDate"
+                    name="scheduledDate"
+                    type="date"
+                    required
+                    min={new Date().toISOString().split('T')[0]}
+                    className="mt-1"
+                    data-testid="input-scheduled-date"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="scheduledTime">Call Time</Label>
+                  <Input
+                    id="scheduledTime"
+                    name="scheduledTime"
+                    type="time"
+                    required
+                    className="mt-1"
+                    data-testid="input-scheduled-time"
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowScheduleCallDialog(false)}
+                  disabled={scheduleCallMutation.isPending}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={scheduleCallMutation.isPending}
+                  data-testid="button-confirm-schedule-call"
+                >
+                  {scheduleCallMutation.isPending ? "Scheduling..." : "Schedule Call"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+      )}
 
     </TooltipProvider>
   );
