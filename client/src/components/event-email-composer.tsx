@@ -155,7 +155,7 @@ Website: thesandwichproject.org | Email: info@thesandwichproject.org`;
     }) => {
       return apiRequest('/api/emails/event', {
         method: 'POST',
-        body: {
+        body: JSON.stringify({
           eventRequestId: eventRequest.id,
           recipientId: 'external', // External contact
           recipientName: `${eventRequest.firstName} ${eventRequest.lastName}`,
@@ -167,7 +167,7 @@ Website: thesandwichproject.org | Email: info@thesandwichproject.org`;
           contextType: 'event_request',
           contextId: eventRequest.id.toString(),
           contextTitle: `Event: ${eventRequest.organizationName}`
-        }
+        })
       });
     },
     onSuccess: () => {
