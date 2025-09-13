@@ -22,7 +22,7 @@ interface MonthlyStats {
 }
 
 export default function HostAnalytics({ selectedHost, onHostChange }: HostAnalyticsProps) {
-  const [timeRange, setTimeRange] = useState<'3months' | '6months' | '1year' | 'all'>('6months');
+  const [timeRange, setTimeRange] = useState<'3months' | '6months' | '1year' | 'all'>('all');
 
   // Fetch all collections data
   const { data: collectionsResponse, isLoading } = useQuery({
