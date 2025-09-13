@@ -1,15 +1,19 @@
 import { Router } from "express";
 import { CoreService } from "../../services/core";
 import { runWeeklyMonitoring } from "../../weekly-monitoring";
+import { createPublicMiddleware, createStandardMiddleware, createErrorHandler } from "../../middleware";
 
 const router = Router();
+
+// Apply error handling for this module
+const errorHandler = createErrorHandler('core');
 
 /**
  * Core Routes - Health checks and system monitoring
  */
 
-// Basic health check endpoint for deployment monitoring
-router.get("/health", (req, res) => {
+// Basic health check endpoint for deployment monitoring (public - no auth required)
+router.get("/health", ...createPublicMiddleware(), (req, res) => {
   try {
     const healthData = CoreService.getBasicHealth();
     res.status(200).json(healthData);
@@ -19,7 +23,7 @@ router.get("/health", (req, res) => {
 });
 
 // System health check with performance stats (authenticated)
-router.get("/system/health", async (req, res) => {
+router.get("/system/health", ...createStandardMiddleware(), async (req, res) => {
   try {
     const healthData = CoreService.getSystemHealth();
     res.json(healthData);
@@ -28,8 +32,8 @@ router.get("/system/health", async (req, res) => {
   }
 });
 
-// Weekly monitoring endpoints
-router.get("/monitoring/weekly-status", async (req, res) => {
+// Weekly monitoring endpoints (all require authentication)
+router.get("/monitoring/weekly-status", ...createStandardMiddleware(), async (req, res) => {
   try {
     const submissionStatus = await CoreService.getWeeklyMonitoringStatus();
     res.json(submissionStatus);
@@ -39,7 +43,7 @@ router.get("/monitoring/weekly-status", async (req, res) => {
   }
 });
 
-router.get("/monitoring/stats", async (req, res) => {
+router.get("/monitoring/stats", ...createStandardMiddleware(), async (req, res) => {
   try {
     const stats = await CoreService.getMonitoringStats();
     res.json(stats);
@@ -49,7 +53,7 @@ router.get("/monitoring/stats", async (req, res) => {
   }
 });
 
-router.post("/monitoring/check-now", async (req, res) => {
+router.post("/monitoring/check-now", ...createStandardMiddleware(), async (req, res) => {
   try {
     await runWeeklyMonitoring();
     res.json({ success: true, message: 'Weekly monitoring check completed' });
@@ -59,8 +63,8 @@ router.post("/monitoring/check-now", async (req, res) => {
   }
 });
 
-// Project data status check
-router.get("/project-data/status", async (req, res) => {
+// Project data status check (authenticated)
+router.get("/project-data/status", ...createStandardMiddleware(), async (req, res) => {
   try {
     const status = await CoreService.getProjectDataStatus();
     res.json(status);
@@ -73,5 +77,8 @@ router.get("/project-data/status", async (req, res) => {
     });
   }
 });
+
+// Apply error handler at the end
+router.use(errorHandler);
 
 export default router;

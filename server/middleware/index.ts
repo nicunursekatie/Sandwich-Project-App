@@ -54,6 +54,65 @@ export function createStandardMiddleware(permissions?: string[]) {
 }
 
 /**
+ * Create middleware stack for public routes (no authentication required)
+ * Includes basic logging and sanitization but no auth checks
+ */
+export function createPublicMiddleware() {
+  const { requestLogger } = require('./logger');
+  const { sanitizeMiddleware } = require('./sanitizer');
+  
+  return [
+    requestLogger,
+    sanitizeMiddleware
+  ];
+}
+
+/**
+ * Create middleware stack for authenticated routes with optional permissions
+ * Combines authentication check with standard middleware
+ */
+export function createAuthenticatedMiddleware(permissions?: string[], isAuthenticated?: any) {
+  const middleware = createStandardMiddleware(permissions);
+  
+  if (isAuthenticated) {
+    return [isAuthenticated, ...middleware];
+  }
+  
+  return middleware;
+}
+
+/**
+ * Create a complete middleware stack for a route module
+ * Includes authentication, standard middleware, and error handling
+ */
+export function createCompleteMiddlewareStack(options: {
+  moduleId: string;
+  isAuthenticated?: any;
+  permissions?: string[];
+  requireAuth?: boolean;
+}) {
+  const { moduleId, isAuthenticated, permissions, requireAuth = true } = options;
+  
+  const middleware = [];
+  
+  // Add authentication if required
+  if (requireAuth && isAuthenticated) {
+    middleware.push(isAuthenticated);
+  }
+  
+  // Add standard middleware (logging, sanitization, permissions)
+  middleware.push(...createStandardMiddleware(permissions));
+  
+  // Add error handler
+  const errorHandler = createErrorHandler(moduleId);
+  
+  return {
+    middleware,
+    errorHandler
+  };
+}
+
+/**
  * Validation middleware factory using shared schemas
  * 
  * @param schema - Zod schema for validation

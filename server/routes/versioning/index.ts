@@ -1,14 +1,20 @@
 import { Router } from "express";
 import { VersioningService } from "../../services/versioning";
+import { createStandardMiddleware, createErrorHandler } from "../../middleware";
 
 const router = Router();
 
+// Apply standard middleware and error handling for this module  
+const standardMiddleware = createStandardMiddleware();
+const errorHandler = createErrorHandler('versioning');
+
 /**
  * Version Control Routes - Entity versioning and change management
+ * All routes require authentication as they deal with sensitive version data
  */
 
 // Get version history for an entity
-router.get("/:entityType/:entityId/history", async (req, res) => {
+router.get("/:entityType/:entityId/history", ...standardMiddleware, async (req, res) => {
   try {
     const { entityType, entityId } = req.params;
     const history = await VersioningService.getVersionHistory(
@@ -22,7 +28,7 @@ router.get("/:entityType/:entityId/history", async (req, res) => {
 });
 
 // Get specific version of an entity
-router.get("/:entityType/:entityId/version/:version", async (req, res) => {
+router.get("/:entityType/:entityId/version/:version", ...standardMiddleware, async (req, res) => {
   try {
     const { entityType, entityId, version } = req.params;
     const versionData = await VersioningService.getVersion(
@@ -40,7 +46,7 @@ router.get("/:entityType/:entityId/version/:version", async (req, res) => {
 });
 
 // Restore a specific version of an entity
-router.post("/:entityType/:entityId/restore/:version", async (req, res) => {
+router.post("/:entityType/:entityId/restore/:version", ...standardMiddleware, async (req, res) => {
   try {
     const { entityType, entityId, version } = req.params;
     const userId = req.user?.claims?.sub;
@@ -63,7 +69,7 @@ router.post("/:entityType/:entityId/restore/:version", async (req, res) => {
 });
 
 // Compare two versions of an entity
-router.get("/:entityType/:entityId/compare/:version1/:version2", async (req, res) => {
+router.get("/:entityType/:entityId/compare/:version1/:version2", ...standardMiddleware, async (req, res) => {
   try {
     const { entityType, entityId, version1, version2 } = req.params;
     const comparison = await VersioningService.compareVersions(
@@ -79,7 +85,7 @@ router.get("/:entityType/:entityId/compare/:version1/:version2", async (req, res
 });
 
 // Create a changeset
-router.post("/changeset", async (req, res) => {
+router.post("/changeset", ...standardMiddleware, async (req, res) => {
   try {
     const userId = req.user?.claims?.sub;
     const result = await VersioningService.createChangeset(req.body, userId);
@@ -90,7 +96,7 @@ router.post("/changeset", async (req, res) => {
 });
 
 // Get change statistics
-router.get("/stats", async (req, res) => {
+router.get("/stats", ...standardMiddleware, async (req, res) => {
   try {
     const { entityType, userId, startDate, endDate } = req.query;
     const stats = await VersioningService.getChangeStats(
@@ -106,7 +112,7 @@ router.get("/stats", async (req, res) => {
 });
 
 // Export version history
-router.get("/export", async (req, res) => {
+router.get("/export", ...standardMiddleware, async (req, res) => {
   try {
     const { entityType, entityId } = req.query;
     const history = await VersioningService.exportVersionHistory(
@@ -118,5 +124,8 @@ router.get("/export", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+// Apply error handler at the end
+router.use(errorHandler);
 
 export default router;
