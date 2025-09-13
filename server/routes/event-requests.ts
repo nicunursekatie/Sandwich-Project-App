@@ -1066,10 +1066,11 @@ router.put(
       }
 
       // Validate scheduled status transition and required fields
-      if (processedUpdates.status === "scheduled") {
-        console.log("🎯 Processing scheduled status transition with comprehensive data");
+      // Only enforce strict validation when TRANSITIONING TO scheduled status (not when editing existing scheduled events)
+      if (processedUpdates.status === "scheduled" && originalEvent.status !== "scheduled") {
+        console.log("🎯 Processing NEW scheduled status transition - validating required fields");
         
-        // Check required fields for scheduled events
+        // Check required fields for NEW scheduled events
         const requiredFields = {
           desiredEventDate: processedUpdates.desiredEventDate || originalEvent.desiredEventDate,
           eventAddress: processedUpdates.eventAddress || originalEvent.eventAddress,
@@ -1078,11 +1079,9 @@ router.put(
 
         const missingFields = [];
         if (!requiredFields.desiredEventDate) missingFields.push('Event Date');
-        if (!requiredFields.eventAddress) missingFields.push('Event Address');  
-        if (!requiredFields.estimatedSandwichCount || requiredFields.estimatedSandwichCount <= 0) {
-          missingFields.push('Estimated Sandwich Count');
-        }
-
+        // Make Event Address and Estimated Sandwich Count optional for basic scheduled status
+        // They can be filled in later during the workflow
+        
         if (missingFields.length > 0) {
           return res.status(400).json({ 
             message: `Cannot mark event as scheduled. Missing required fields: ${missingFields.join(', ')}`,
@@ -1090,9 +1089,13 @@ router.put(
             missingFields
           });
         }
+      } else if (processedUpdates.status === "scheduled") {
+        console.log("🎯 Editing existing scheduled event - allowing flexible updates");
+      }
 
-        // Process comprehensive scheduling data
-        console.log("✅ All required fields present for scheduled status");
+      // Process comprehensive scheduling data if status is scheduled
+      if (processedUpdates.status === "scheduled") {
+        console.log("✅ Processing scheduling data for scheduled status");
         
         // Process sandwich types if provided
         if (processedUpdates.sandwichTypes) {

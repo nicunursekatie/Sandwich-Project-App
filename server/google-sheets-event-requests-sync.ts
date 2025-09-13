@@ -31,7 +31,7 @@ export class EventRequestsGoogleSheetsService extends GoogleSheetsService {
 
   // Make ensureInitialized method accessible
   async ensureInitialized() {
-    return (this as any).ensureInitialized();
+    return super.ensureInitialized();
   }
 
   /**
