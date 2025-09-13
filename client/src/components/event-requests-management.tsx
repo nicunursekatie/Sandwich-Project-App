@@ -585,6 +585,193 @@ const SandwichTypesSelector = ({
   );
 };
 
+// ToolkitSentDialog Component - handles marking toolkit as sent and optionally sending email
+interface ToolkitSentDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  eventRequest: EventRequest | null;
+  onToolkitSent: (toolkitSentDate: string) => void;
+  isLoading: boolean;
+}
+
+const ToolkitSentDialog = ({ 
+  isOpen, 
+  onClose, 
+  eventRequest, 
+  onToolkitSent,
+  isLoading 
+}: ToolkitSentDialogProps) => {
+  const [toolkitSentDate, setToolkitSentDate] = useState("");
+  const [toolkitSentTime, setToolkitSentTime] = useState("");
+  const [showEmailComposer, setShowEmailComposer] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
+
+  // Initialize date/time when dialog opens
+  useEffect(() => {
+    if (isOpen && eventRequest) {
+      const now = new Date();
+      const dateStr = now.toISOString().split('T')[0]; // YYYY-MM-DD format
+      const timeStr = now.toTimeString().slice(0, 5); // HH:MM format
+      setToolkitSentDate(dateStr);
+      setToolkitSentTime(timeStr);
+      setShowEmailComposer(false);
+      setEmailSent(false);
+    }
+  }, [isOpen, eventRequest]);
+
+  const handleSubmit = () => {
+    if (!toolkitSentDate || !toolkitSentTime) return;
+    
+    // Combine date and time into ISO string
+    const combinedDateTime = new Date(`${toolkitSentDate}T${toolkitSentTime}`).toISOString();
+    onToolkitSent(combinedDateTime);
+  };
+
+  const handleEmailSent = () => {
+    setEmailSent(true);
+    setShowEmailComposer(false);
+  };
+
+  if (!eventRequest) return null;
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center space-x-2">
+            <Shield className="w-5 h-5 text-green-600" />
+            <span>Mark Toolkit as Sent</span>
+          </DialogTitle>
+          <DialogDescription>
+            Record when the toolkit was sent to{" "}
+            <strong>{eventRequest.firstName} {eventRequest.lastName}</strong> at{" "}
+            <strong>{eventRequest.organizationName}</strong>.
+            This will move the event to "In Process" status.
+          </DialogDescription>
+        </DialogHeader>
+
+        {!showEmailComposer ? (
+          <div className="space-y-6">
+            {/* Date and Time Selection */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="toolkit-sent-date">Toolkit Sent Date</Label>
+                <Input
+                  id="toolkit-sent-date"
+                  type="date"
+                  value={toolkitSentDate}
+                  onChange={(e) => setToolkitSentDate(e.target.value)}
+                  data-testid="input-toolkit-sent-date"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="toolkit-sent-time">Toolkit Sent Time</Label>
+                <Input
+                  id="toolkit-sent-time"
+                  type="time"
+                  value={toolkitSentTime}
+                  onChange={(e) => setToolkitSentTime(e.target.value)}
+                  data-testid="input-toolkit-sent-time"
+                />
+              </div>
+            </div>
+
+            {/* Email Status Display */}
+            {emailSent && (
+              <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                <div className="flex items-center space-x-2 text-green-700">
+                  <CheckCircle className="w-5 h-5" />
+                  <span className="font-medium">Email successfully sent!</span>
+                </div>
+                <p className="text-sm text-green-600 mt-1">
+                  The toolkit email has been sent to {eventRequest.email}
+                </p>
+              </div>
+            )}
+
+            {/* Action Summary */}
+            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <h4 className="font-medium text-blue-900 mb-2">What happens next:</h4>
+              <ul className="text-sm text-blue-700 space-y-1">
+                <li>• Toolkit will be marked as sent on {toolkitSentDate} at {toolkitSentTime}</li>
+                <li>• Event status will change from "New" to "In Process"</li>
+                <li>• Event will appear in the "In Process" tab</li>
+                {!emailSent && <li>• You can optionally send a toolkit email before submitting</li>}
+              </ul>
+            </div>
+          </div>
+        ) : (
+          // Email Composer embedded in the dialog
+          <div className="min-h-[500px]">
+            <EventEmailComposer
+              isOpen={true}
+              onClose={() => setShowEmailComposer(false)}
+              eventRequest={eventRequest}
+              onEmailSent={handleEmailSent}
+            />
+          </div>
+        )}
+
+        <DialogFooter className="flex-col sm:flex-row gap-3">
+          {!showEmailComposer && (
+            <>
+              {/* Draft Email Button */}
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowEmailComposer(true)}
+                className="bg-gradient-to-r from-teal-50 to-cyan-100 hover:from-teal-100 hover:to-cyan-200 text-teal-700 border-teal-300"
+                data-testid="button-draft-email"
+              >
+                <Mail className="w-4 h-4 mr-2" />
+                Draft Email
+              </Button>
+
+              {/* Cancel Button */}
+              <Button 
+                type="button"
+                variant="outline" 
+                onClick={onClose}
+                disabled={isLoading}
+              >
+                Cancel
+              </Button>
+
+              {/* Submit Button */}
+              <Button
+                type="button"
+                onClick={handleSubmit}
+                disabled={!toolkitSentDate || !toolkitSentTime || isLoading}
+                className="bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-700 hover:to-emerald-800 text-white"
+                data-testid="button-submit-toolkit-sent"
+              >
+                {isLoading ? (
+                  <>
+                    <Clock className="w-4 h-4 mr-2 animate-spin" />
+                    Recording...
+                  </>
+                ) : (
+                  <>
+                    <Shield className="w-4 h-4 mr-2" />
+                    Mark Toolkit as Sent
+                  </>
+                )}
+              </Button>
+            </>
+          )}
+
+          {showEmailComposer && (
+            <div className="text-sm text-gray-600">
+              The email composer will remain open until you send the email or close it.
+              You can submit the toolkit record after sending the email.
+            </div>
+          )}
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 export default function EventRequestsManagement() {
   const [activeTab, setActiveTab] = useState("requests");
   const [searchTerm, setSearchTerm] = useState("");
@@ -618,6 +805,9 @@ export default function EventRequestsManagement() {
   const [showEmailComposer, setShowEmailComposer] = useState(false);
   const [emailComposerRequest, setEmailComposerRequest] =
     useState<EventRequest | null>(null);
+  // Toolkit Sent Dialog state
+  const [showToolkitSentDialog, setShowToolkitSentDialog] = useState(false);
+  const [toolkitSentRequest, setToolkitSentRequest] = useState<EventRequest | null>(null);
   const [pastEventsPage, setPastEventsPage] = useState(1);
   const [pastEventsPerPage] = useState(10);
   const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false);
@@ -1526,6 +1716,57 @@ export default function EventRequestsManagement() {
     onError: (error: any) => {
       toast({
         title: "Error recording distribution",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Toolkit sent mutation
+  const toolkitSentMutation = useMutation({
+    mutationFn: ({ eventId, toolkitSentDate }: { eventId: number; toolkitSentDate: string }) =>
+      apiRequest("PATCH", `/api/event-requests/${eventId}`, {
+        toolkitSent: true,
+        toolkitSentDate,
+        status: "in_process"
+      }),
+    onMutate: async ({ eventId }) => {
+      await queryClient.cancelQueries({ queryKey: ["/api/event-requests"] });
+      const previousEvents = queryClient.getQueryData(["/api/event-requests"]);
+
+      // Optimistically update the event
+      queryClient.setQueryData(["/api/event-requests"], (old: any) => {
+        if (!old) return old;
+        return old.map((event: any) =>
+          event.id === eventId
+            ? {
+                ...event,
+                toolkitSent: true,
+                toolkitSentDate: new Date().toISOString(),
+                status: "in_process"
+              }
+            : event,
+        );
+      });
+
+      return { previousEvents };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/event-requests"] });
+      setShowToolkitSentDialog(false);
+      setToolkitSentRequest(null);
+      toast({
+        title: "Toolkit sent successfully",
+        description: "Event has been moved to 'In Process' status",
+      });
+    },
+    onError: (error: any, variables, context: any) => {
+      queryClient.setQueryData(
+        ["/api/event-requests"],
+        context?.previousEvents,
+      );
+      toast({
+        title: "Error marking toolkit as sent",
         description: error.message,
         variant: "destructive",
       });
@@ -4562,6 +4803,25 @@ export default function EventRequestsManagement() {
                   >
                     <CheckCircle className="h-4 w-4 mr-1" />
                     Followed Up
+                  </Button>
+                )}
+
+              {/* Show "Toolkit Sent" for new requests that haven't sent toolkit yet */}
+              {activeTab === "requests" &&
+                request.status === "new" &&
+                !request.toolkitSent && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setToolkitSentRequest(request);
+                      setShowToolkitSentDialog(true);
+                    }}
+                    className="bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-700 hover:to-emerald-800 text-white border-0 shadow-md flex-shrink-0"
+                    data-testid={`button-toolkit-sent-${request.id}`}
+                  >
+                    <Shield className="h-4 w-4 mr-1" />
+                    Toolkit Sent
                   </Button>
                 )}
 
@@ -9687,6 +9947,25 @@ export default function EventRequestsManagement() {
           eventId={assigningVolunteerRequest.id}
         />
       )}
+
+      {/* Toolkit Sent Dialog */}
+      <ToolkitSentDialog
+        isOpen={showToolkitSentDialog}
+        onClose={() => {
+          setShowToolkitSentDialog(false);
+          setToolkitSentRequest(null);
+        }}
+        eventRequest={toolkitSentRequest}
+        onToolkitSent={(toolkitSentDate) => {
+          if (toolkitSentRequest) {
+            toolkitSentMutation.mutate({
+              eventId: toolkitSentRequest.id,
+              toolkitSentDate
+            });
+          }
+        }}
+        isLoading={toolkitSentMutation.isPending}
+      />
 
     </TooltipProvider>
   );

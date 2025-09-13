@@ -879,6 +879,105 @@ router.patch(
   },
 );
 
+// Update event request (PATCH) - handles basic updates like toolkit sent
+router.patch(
+  "/:id",
+  isAuthenticated,
+  requirePermission("EVENT_REQUESTS_EDIT"),
+  async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updates = req.body;
+
+      console.log("=== EVENT REQUEST UPDATE (PATCH) ===");
+      console.log("Request ID:", id);
+      console.log("Updates received:", JSON.stringify(updates, null, 2));
+
+      // Get original data for audit logging
+      const originalEvent = await storage.getEventRequestById(id);
+      if (!originalEvent) {
+        return res.status(404).json({ message: "Event request not found" });
+      }
+
+      // Process timestamp fields to ensure they're proper Date objects
+      const processedUpdates = { ...updates };
+      
+      // Convert timestamp fields that might come as strings to Date objects
+      const timestampFields = [
+        'toolkitSentDate', 'contactedAt', 'desiredEventDate', 'duplicateCheckDate',
+        'markedUnresponsiveAt', 'lastContactAttempt', 'nextFollowUpDate',
+        'contactCompletedAt', 'callScheduledAt', 'callCompletedAt'
+      ];
+      timestampFields.forEach(field => {
+        if (processedUpdates[field] && typeof processedUpdates[field] === 'string') {
+          try {
+            processedUpdates[field] = new Date(processedUpdates[field]);
+          } catch (error) {
+            console.error(`Failed to parse date field ${field}:`, processedUpdates[field]);
+            delete processedUpdates[field]; // Remove invalid date fields
+          }
+        }
+      });
+
+      // Always update the updatedAt timestamp
+      const updatedEventRequest = await storage.updateEventRequest(id, {
+        ...processedUpdates,
+        updatedAt: new Date(),
+      });
+
+      if (!updatedEventRequest) {
+        return res.status(404).json({ message: "Event request not found" });
+      }
+
+      // Update Google Sheets if status was changed
+      if (processedUpdates.status) {
+        try {
+          const googleSheetsService = getEventRequestsGoogleSheetsService(storage);
+          if (googleSheetsService) {
+            const contactName = `${updatedEventRequest.firstName} ${updatedEventRequest.lastName}`.trim();
+            await googleSheetsService.updateEventRequestStatus(
+              updatedEventRequest.organizationName,
+              contactName,
+              processedUpdates.status
+            );
+          }
+        } catch (error) {
+          console.warn('Failed to update Google Sheets status:', error);
+        }
+      }
+
+      // Enhanced audit logging
+      await logEventRequestAudit(
+        'EVENT_REQUEST_UPDATED',
+        id.toString(),
+        originalEvent,
+        updatedEventRequest,
+        req,
+        {
+          action: 'Event Request Updated',
+          organizationName: originalEvent.organizationName,
+          contactName: `${originalEvent.firstName} ${originalEvent.lastName}`,
+          updatedBy: req.user?.email || req.user?.displayName || 'Unknown User',
+          updatedFields: Object.keys(processedUpdates),
+          statusChange: processedUpdates.status ? `${originalEvent.status} → ${processedUpdates.status}` : null
+        }
+      );
+
+      await logActivity(
+        req,
+        res,
+        "EVENT_REQUESTS_EDIT",
+        `Updated event request: ${Object.keys(processedUpdates).join(', ')}`,
+      );
+      
+      res.json(updatedEventRequest);
+    } catch (error) {
+      console.error("Error updating event request:", error);
+      res.status(500).json({ message: "Failed to update event request" });
+    }
+  },
+);
+
 // Update event request (PUT)
 router.put(
   "/:id",
