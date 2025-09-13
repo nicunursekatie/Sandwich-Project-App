@@ -42,7 +42,7 @@ export function ChatMessageLikeButton({ messageId, className = "" }: ChatMessage
   });
 
   const hasUserLiked = (likes || []).some((like: ChatMessageLike) => like.userId === user.id);
-  const likeCount = likes.length;
+  const likeCount = likes?.length || 0;
 
   // Like/unlike mutation for chat messages
   const likeMutation = useMutation({
@@ -72,11 +72,11 @@ export function ChatMessageLikeButton({ messageId, className = "" }: ChatMessage
     if (likeCount === 0) {
       return "Be the first to like this message";
     } else if (likeCount === 1) {
-      return `Liked by ${likes[0].userName}`;
+      return `Liked by ${likes?.[0]?.userName || 'Someone'}`;
     } else if (likeCount === 2) {
-      return `Liked by ${likes[0].userName} and ${likes[1].userName}`;
+      return `Liked by ${likes?.[0]?.userName || 'Someone'} and ${likes?.[1]?.userName || 'Someone'}`;
     } else {
-      const firstTwo = likes.slice(0, 2).map((like: ChatMessageLike) => like.userName).join(", ");
+      const firstTwo = (likes || []).slice(0, 2).map((like: ChatMessageLike) => like.userName).join(", ");
       const remaining = likeCount - 2;
       return `Liked by ${firstTwo} and ${remaining} other${remaining > 1 ? 's' : ''}`;
     }
