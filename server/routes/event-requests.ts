@@ -666,6 +666,11 @@ router.post(
         console.log("🔧 Converted date:", updates.desiredEventDate);
       }
 
+      // CRITICAL FIX: Explicitly set status to 'scheduled' when completing event details
+      updates.status = 'scheduled';
+      updates.scheduledAt = new Date(); // Add audit trail timestamp
+      console.log("🎯 Status transition: Setting status to 'scheduled' for completed event details");
+
       const updatedEventRequest = await storage.updateEventRequest(id, {
         ...updates,
         updatedAt: new Date(),
@@ -893,6 +898,25 @@ router.patch(
       console.log("Request ID:", id);
       console.log("Updates received:", JSON.stringify(updates, null, 2));
 
+      // Validate scheduledCallDate if present using z.coerce.date()
+      if (updates.scheduledCallDate !== undefined) {
+        const scheduleCallSchema = z.object({
+          scheduledCallDate: z.union([z.coerce.date(), z.literal('').transform(() => null)]).nullable()
+        });
+        
+        try {
+          const validated = scheduleCallSchema.parse({ scheduledCallDate: updates.scheduledCallDate });
+          updates.scheduledCallDate = validated.scheduledCallDate;
+          console.log("✅ Validated scheduledCallDate:", updates.scheduledCallDate);
+        } catch (error) {
+          console.error("❌ Invalid scheduledCallDate:", error);
+          return res.status(400).json({ 
+            message: "Invalid scheduledCallDate format", 
+            error: error instanceof z.ZodError ? error.errors : error.message 
+          });
+        }
+      }
+
       // Get original data for audit logging
       const originalEvent = await storage.getEventRequestById(id);
       if (!originalEvent) {
@@ -906,7 +930,7 @@ router.patch(
       const timestampFields = [
         'toolkitSentDate', 'contactedAt', 'desiredEventDate', 'duplicateCheckDate',
         'markedUnresponsiveAt', 'lastContactAttempt', 'nextFollowUpDate',
-        'contactCompletedAt', 'callScheduledAt', 'callCompletedAt'
+        'contactCompletedAt', 'callScheduledAt', 'callCompletedAt', 'scheduledCallDate'
       ];
       timestampFields.forEach(field => {
         if (processedUpdates[field] && typeof processedUpdates[field] === 'string') {
