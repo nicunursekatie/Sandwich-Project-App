@@ -113,9 +113,9 @@ export function useMessaging() {
         const contextCounts = await apiRequest('GET', '/api/messaging/unread?groupByContext=true');
         return {
           ...response,
-          suggestion: contextCounts.suggestion || 0,
-          project: contextCounts.project || 0,
-          task: contextCounts.task || 0,
+          suggestion: (contextCounts && contextCounts.suggestion) || 0,
+          project: (contextCounts && contextCounts.project) || 0,
+          task: (contextCounts && contextCounts.task) || 0,
         };
       } catch (error) {
         console.warn('Unread counts fetch failed:', error);
