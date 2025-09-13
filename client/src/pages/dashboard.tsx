@@ -74,6 +74,7 @@ import sandwich_20logo from "@assets/LOGOS/sandwich logo.png";
 export default function Dashboard({ initialSection = "dashboard" }: { initialSection?: string }) {
   const [location] = useLocation();
   const [activeSection, setActiveSection] = useState(initialSection);
+  const [selectedHost, setSelectedHost] = useState<string>("");
   
   // Listen to URL changes to update activeSection
   React.useEffect(() => {
@@ -315,7 +316,10 @@ export default function Dashboard({ initialSection = "dashboard" }: { initialSec
                 <AnalyticsDashboard />
               </TabsContent>
               <TabsContent value="hosts" className="mt-6">
-                <HostAnalytics />
+                <HostAnalytics 
+                  selectedHost={selectedHost} 
+                  onHostChange={setSelectedHost} 
+                />
               </TabsContent>
               <TabsContent value="impact" className="mt-6">
                 <ImpactDashboard />
