@@ -244,6 +244,9 @@ export class EventRequestsGoogleSheetsService extends GoogleSheetsService {
       for (const row of sheetRows) {
         if (!row.organizationName) continue; // Skip empty rows
         
+        // Convert row to event request data first to access parsed submission date
+        const eventRequestData = this.sheetRowToEventRequest(row);
+        
         // Try to find existing event request by organization name and contact name (case-insensitive)
         const existingRequests = await this.storage.getAllEventRequests();
         const nameParts = row.contactName.split(' ');
@@ -252,20 +255,30 @@ export class EventRequestsGoogleSheetsService extends GoogleSheetsService {
         
         const existingRequest = existingRequests.find(r => {
           // Match by organization name and contact name (case-insensitive)
-          const orgMatch = r.organizationName?.toLowerCase() === row.organizationName?.toLowerCase();
-          const nameMatch = (
-            r.firstName?.toLowerCase() === firstName.toLowerCase() && 
-            r.lastName?.toLowerCase() === lastName.toLowerCase()
+          const orgMatch = r.organizationName?.toLowerCase().trim() === row.organizationName?.toLowerCase().trim();
+          
+          // Require both first AND last name to match (not just one)
+          const fullNameMatch = (
+            r.firstName?.toLowerCase().trim() === firstName.toLowerCase().trim() && 
+            r.lastName?.toLowerCase().trim() === lastName.toLowerCase().trim() &&
+            firstName.trim() && lastName.trim() // Both names must exist
           );
           
-          // Also match by email if both have emails
+          // Email match (both must exist and match)
           const emailMatch = r.email && row.email && 
-            r.email.toLowerCase() === row.email.toLowerCase();
+            r.email.toLowerCase().trim() === row.email.toLowerCase().trim();
           
-          return orgMatch && (nameMatch || emailMatch);
+          // Phone match (both must exist and match)
+          const phoneMatch = r.phone && row.phone &&
+            r.phone.replace(/\D/g, '') === row.phone.replace(/\D/g, ''); // Compare digits only
+          
+          // Time-based matching: only consider it duplicate if submitted within same day
+          const submissionTimeMatch = r.createdAt && eventRequestData.createdAt &&
+            Math.abs(new Date(r.createdAt).getTime() - new Date(eventRequestData.createdAt).getTime()) < 24 * 60 * 60 * 1000; // Within 24 hours
+          
+          // Require stronger matching: org + (email OR phone OR full name) + same time period
+          return orgMatch && (emailMatch || phoneMatch || fullNameMatch) && submissionTimeMatch;
         });
-        
-        const eventRequestData = this.sheetRowToEventRequest(row);
         
         if (existingRequest) {
           // SKIP updating existing requests - let the app be the authoritative source
