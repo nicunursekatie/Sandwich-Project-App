@@ -3417,19 +3417,21 @@ export default function EventRequestsManagement() {
               </h4>
               <div className="space-y-4">
                 
-                {/* Driver Status */}
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700">Drivers</span>
-                  <span className={`px-2 py-1 rounded text-xs font-medium ${getDriverStatus().color}`}>
-                    {getDriverStatus().badge}
-                  </span>
-                </div>
+                {/* Driver Status - Only show if drivers are needed */}
+                {((request as any).driversNeeded || 0) > 0 && (
+                  <>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-gray-700">Drivers</span>
+                      <span className={`px-2 py-1 rounded text-xs font-medium ${getDriverStatus().color}`}>
+                        {getDriverStatus().badge}
+                      </span>
+                    </div>
 
-                {/* Driver Assignment Details */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <span className="text-sm font-medium text-gray-700">Driver Details</span>
+                    {/* Driver Assignment Details */}
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <span className="text-sm font-medium text-gray-700">Driver Details</span>
                       {((request as any).driversNeeded > 0 && ((request as any).assignedDriverIds?.length || 0) < (request as any).driversNeeded) && (
                         <span className="text-xs bg-amber-100 text-amber-800 px-2 py-1 rounded font-medium border border-amber-200">
                           NEEDED
@@ -3620,8 +3622,10 @@ export default function EventRequestsManagement() {
                         </button>
                       </div>
                     ))}
-                  </div>
-                </div>
+                      </div>
+                    </div>
+                  </>
+                )}
 
                 {/* Van Driver Assignment Section */}
                 <div className="space-y-2">
