@@ -35,7 +35,7 @@ export function MentionInput({ value, onChange, onSend, placeholder, disabled }:
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Fetch all users for mentions
-  const { data: users = [], error } = useQuery<User[]>({
+  const { data: users = [], error, isLoading } = useQuery<User[]>({
     queryKey: ["/api/users"],
     queryFn: async () => {
       const response = await fetch("/api/users", {
@@ -46,13 +46,17 @@ export function MentionInput({ value, onChange, onSend, placeholder, disabled }:
       console.log("Fetched users for mentions:", data?.length || 0, "users");
       return Array.isArray(data) ? data : [];
     },
+    staleTime: 300000, // 5 minutes
+    gcTime: 600000, // 10 minutes
   });
 
   // Debug logging
   useEffect(() => {
-    console.log("Available users for mentions:", users.length);
+    if (!isLoading) {
+      console.log("Available users for mentions:", (users || []).length);
+    }
     if (error) console.error("Error fetching users for mentions:", error);
-  }, [users, error]);
+  }, [users, error, isLoading]);
 
   // Parse mentions from text and highlight them
   const renderMessageWithMentions = (text: string) => {
