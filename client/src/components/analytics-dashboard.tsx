@@ -11,7 +11,7 @@ export default function AnalyticsDashboard() {
   const { data: collections, isLoading: collectionsLoading } = useQuery<SandwichCollection[]>({
     queryKey: ['/api/sandwich-collections/all'],
     queryFn: async () => {
-      const response = await fetch('/api/sandwich-collections?limit=2000');
+      const response = await fetch('/api/sandwich-collections?limit=10000');
       if (!response.ok) throw new Error('Failed to fetch collections');
       const data = await response.json();
       return data.collections || [];
