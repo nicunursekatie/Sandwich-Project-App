@@ -4927,6 +4927,114 @@ export default function EventRequestsManagement() {
                 </Button>
               )}
 
+              {/* Display scheduled call date with inline editing for in_process events with scheduled call date */}
+              {request.status === "in_process" && request.scheduledCallDate && (
+                <div className="flex-shrink-0">
+                  {editingField === "scheduledCallDate" && editingEventId === request.id ? (
+                    // Edit mode: Date and time pickers with save/cancel
+                    <div className="flex items-center space-x-2 bg-white border rounded-lg p-2 min-w-0">
+                      <div className="flex items-center space-x-2 min-w-0">
+                        <Input
+                          type="date"
+                          value={tempValues.scheduledCallDate || ""}
+                          onChange={(e) => setTempValues({ ...tempValues, scheduledCallDate: e.target.value })}
+                          className="h-8 text-xs border-gray-300 min-w-[120px]"
+                          data-testid={`input-scheduled-call-date-${request.id}`}
+                        />
+                        <Input
+                          type="time"
+                          value={tempValues.scheduledCallTime || ""}
+                          onChange={(e) => setTempValues({ ...tempValues, scheduledCallTime: e.target.value })}
+                          className="h-8 text-xs border-gray-300 min-w-[80px]"
+                          data-testid={`input-scheduled-call-time-${request.id}`}
+                        />
+                      </div>
+                      <div className="flex space-x-1">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-8 w-8 p-0 text-green-600 hover:bg-green-50 flex-shrink-0"
+                          onClick={() => {
+                            const { scheduledCallDate: editDate, scheduledCallTime: editTime } = tempValues;
+                            if (editDate && editTime) {
+                              const combinedDateTime = new Date(`${editDate}T${editTime}`).toISOString();
+                              scheduleCallMutation.mutate({
+                                eventId: request.id,
+                                scheduledCallDate: combinedDateTime
+                              });
+                            }
+                            setEditingField(null);
+                            setEditingEventId(null);
+                            setTempValues({});
+                          }}
+                          disabled={!tempValues.scheduledCallDate || !tempValues.scheduledCallTime || scheduleCallMutation.isPending}
+                          data-testid={`button-save-scheduled-call-${request.id}`}
+                        >
+                          <Save className="w-3 h-3" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-8 w-8 p-0 text-red-600 hover:bg-red-50 flex-shrink-0"
+                          onClick={() => {
+                            setEditingField(null);
+                            setEditingEventId(null);
+                            setTempValues({});
+                          }}
+                          data-testid={`button-cancel-scheduled-call-${request.id}`}
+                        >
+                          <X className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    // Display mode: Clickable formatted date/time
+                    <button
+                      className="flex items-center space-x-2 text-teal-700 hover:text-teal-900 bg-gradient-to-r from-teal-50 to-cyan-100 hover:from-teal-100 hover:to-cyan-200 border border-teal-200 rounded-lg px-3 py-2 transition-colors group"
+                      onClick={() => {
+                        const callDate = new Date(request.scheduledCallDate);
+                        const dateStr = callDate.toISOString().split('T')[0];
+                        const timeStr = callDate.toTimeString().slice(0, 5);
+                        setEditingField("scheduledCallDate");
+                        setEditingEventId(request.id);
+                        setTempValues({
+                          scheduledCallDate: dateStr,
+                          scheduledCallTime: timeStr
+                        });
+                      }}
+                      data-testid={`button-edit-scheduled-call-${request.id}`}
+                    >
+                      <Phone className="w-4 h-4 flex-shrink-0" />
+                      <div className="text-left min-w-0">
+                        <div className="text-xs font-medium">Call scheduled:</div>
+                        <div className="text-xs">
+                          {(() => {
+                            try {
+                              const callDate = new Date(request.scheduledCallDate);
+                              const dateFormatted = callDate.toLocaleDateString("en-US", {
+                                weekday: "short",
+                                month: "short",
+                                day: "numeric",
+                                year: "numeric",
+                              });
+                              const timeFormatted = callDate.toLocaleTimeString("en-US", {
+                                hour: "numeric",
+                                minute: "2-digit",
+                                hour12: true,
+                              });
+                              return `${dateFormatted} at ${timeFormatted}`;
+                            } catch (error) {
+                              return "Invalid date";
+                            }
+                          })()}
+                        </div>
+                      </div>
+                      <Edit className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+                    </button>
+                  )}
+                </div>
+              )}
+
               {/* Show "Mark Scheduled" only for in_process events */}
               {request.status === "in_process" && (
                 <Button
