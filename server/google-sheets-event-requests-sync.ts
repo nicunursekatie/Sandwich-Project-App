@@ -272,12 +272,26 @@ export class EventRequestsGoogleSheetsService extends GoogleSheetsService {
           const phoneMatch = r.phone && row.phone &&
             r.phone.replace(/\D/g, '') === row.phone.replace(/\D/g, ''); // Compare digits only
           
-          // Time-based matching: only consider it duplicate if submitted within same day
-          const submissionTimeMatch = r.createdAt && eventRequestData.createdAt &&
-            Math.abs(new Date(r.createdAt).getTime() - new Date(eventRequestData.createdAt).getTime()) < 24 * 60 * 60 * 1000; // Within 24 hours
+          // Since submission timestamp is not available in this spreadsheet,
+          // use more precise matching without time dependency
+          const hasStrongIdentifier = emailMatch || phoneMatch;
+          const hasFullNameAndOrg = fullNameMatch && orgMatch;
           
-          // Require stronger matching: org + (email OR phone OR full name) + same time period
-          return orgMatch && (emailMatch || phoneMatch || fullNameMatch) && submissionTimeMatch;
+          // Only consider duplicate if we have either:
+          // 1. Strong identifier match (email or phone) + org match, OR
+          // 2. Full name + org match AND neither email nor phone exists in either record
+          if (hasStrongIdentifier && orgMatch) {
+            return true; // Strong match via email/phone + org
+          }
+          
+          if (hasFullNameAndOrg) {
+            // Only match on name if both records lack email/phone (to avoid false positives)
+            const bothLackEmail = !r.email && !row.email;
+            const bothLackPhone = !r.phone && !row.phone;
+            return bothLackEmail && bothLackPhone;
+          }
+          
+          return false;
         });
         
         if (existingRequest) {
