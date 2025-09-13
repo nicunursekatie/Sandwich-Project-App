@@ -1374,6 +1374,14 @@ class StorageWrapper implements IStorage {
     );
   }
 
+  async getEventRemindersCount(userId?: string) {
+    return this.executeWithFallback(
+      () => this.primaryStorage.getEventRemindersCount(userId),
+      () => this.fallbackStorage.getEventRemindersCount(userId)
+    );
+  }
+  }
+
   async getEventRequestsByOrganization(organizationName: string) {
     return this.executeWithFallback(
       () => this.primaryStorage.getEventRequestsByOrganization(organizationName),

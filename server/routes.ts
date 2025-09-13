@@ -8,11 +8,22 @@ import { createActivityLogger } from "./middleware/activity-logger";
 import createMainRoutes from "./routes/index";
 import { requirePermission } from "./middleware/auth";
 
-// Function to create event reminders routes (minimal implementation)
+// Function to create event reminders routes
 function createEventRemindersRoutes(isAuthenticated: any, activityLogger: any) {
   const router = express.Router();
-  // Event reminders routes implementation would go here
-  // This is a placeholder to maintain functionality
+  
+  // Get event reminders count
+  router.get("/count", isAuthenticated, async (req: any, res: any) => {
+    try {
+      // Get count of pending event reminders for the current user
+      const count = await storage.getEventRemindersCount(req.user?.id);
+      res.json({ count });
+    } catch (error) {
+      console.error("Error getting event reminders count:", error);
+      res.status(500).json({ error: "Failed to get event reminders count", count: 0 });
+    }
+  });
+  
   return router;
 }
 
@@ -153,6 +164,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Add missing hosts endpoints that were lost during refactoring
   const { hostsRoutes } = await import("./routes/hosts");
   app.use("/api", hostsRoutes);
+
+  // Mount email routes that were lost during refactoring
+  const emailRoutes = await import("./routes/email-routes");
+  app.use("/api/emails", emailRoutes.default);
 
   // Import and register recipient TSP contacts routes
   const recipientTspContactRoutes = await import("./routes/recipient-tsp-contacts");

@@ -357,6 +357,9 @@ export interface IStorage {
   createEventVolunteer(volunteer: InsertEventVolunteer): Promise<EventVolunteer>;
   updateEventVolunteer(id: number, updates: Partial<EventVolunteer>): Promise<EventVolunteer | undefined>;
   deleteEventVolunteer(id: number): Promise<boolean>;
+
+  // Event reminders
+  getEventRemindersCount(userId?: string): Promise<number>;
 }
 
 export class MemStorage implements IStorage {
