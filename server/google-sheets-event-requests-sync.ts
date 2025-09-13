@@ -29,9 +29,9 @@ export class EventRequestsGoogleSheetsService extends GoogleSheetsService {
     super(config);
   }
 
-  // Override the ensureInitialized method to be accessible
+  // Make ensureInitialized method accessible
   async ensureInitialized() {
-    return super['ensureInitialized']();
+    return (this as any).ensureInitialized();
   }
 
   /**
@@ -132,7 +132,29 @@ export class EventRequestsGoogleSheetsService extends GoogleSheetsService {
           return null;
         }
       })() : null,
-      status: row.status || 'new',
+      status: (() => {
+        // Smart status assignment: preserve existing status or determine based on event date
+        if (row.status && row.status.trim() && row.status.trim().toLowerCase() !== 'new') {
+          return row.status.trim();
+        }
+        
+        // For events without status, check if it's a past event
+        if (row.desiredEventDate && row.desiredEventDate.trim()) {
+          try {
+            const eventDate = new Date(row.desiredEventDate.trim());
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            if (!isNaN(eventDate.getTime()) && eventDate < today) {
+              return 'completed'; // Past events are marked as completed
+            }
+          } catch (error) {
+            console.warn('Error parsing event date for status determination:', row.desiredEventDate);
+          }
+        }
+        
+        return 'new'; // Default for future events or unclear dates
+      })(),
       message: row.message,
       previouslyHosted: row.previouslyHosted,
       organizationExists: row.duplicateCheck === 'Yes',
@@ -251,12 +273,37 @@ export class EventRequestsGoogleSheetsService extends GoogleSheetsService {
           // Do not update existing requests to preserve user changes
         } else {
           // Create new
-          console.log(`✨ Creating new event request: ${row.organizationName} - ${row.contactName}`);
-          await this.storage.createEventRequest({
+          console.log(`✨ Creating new event request: ${eventRequestData.phone} - ${eventRequestData.firstName} ${eventRequestData.lastName} ${eventRequestData.email}`);
+          
+          // Ensure dates are valid before saving to database
+          const sanitizedData = {
             ...eventRequestData,
-            createdBy: 'google_sheets_sync'
-          } as any);
-          createdCount++;
+            createdBy: 'google_sheets_sync',
+            // Ensure all date fields are either valid Date objects or null
+            desiredEventDate: eventRequestData.desiredEventDate && !isNaN(new Date(eventRequestData.desiredEventDate).getTime()) ? eventRequestData.desiredEventDate : null,
+            createdAt: eventRequestData.createdAt && !isNaN(new Date(eventRequestData.createdAt).getTime()) ? eventRequestData.createdAt : new Date(),
+            updatedAt: new Date()
+          };
+          
+          try {
+            await this.storage.createEventRequest(sanitizedData as any);
+            createdCount++;
+          } catch (error) {
+            console.error('Primary storage operation failed, using fallback:', error);
+            // Fallback: try with minimal required fields only
+            await this.storage.createEventRequest({
+              organizationName: eventRequestData.organizationName || 'Unknown Organization',
+              firstName: eventRequestData.firstName || '',
+              lastName: eventRequestData.lastName || '',
+              email: eventRequestData.email || '',
+              phone: eventRequestData.phone || '',
+              status: eventRequestData.status || 'new',
+              createdBy: 'google_sheets_sync',
+              createdAt: new Date(),
+              updatedAt: new Date()
+            } as any);
+            createdCount++;
+          }
         }
       }
       
