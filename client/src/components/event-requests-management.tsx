@@ -1933,7 +1933,7 @@ export default function EventRequestsManagement() {
   const today = new Date();
   today.setHours(0, 0, 0, 0); // Start of today for accurate comparison
 
-  const requestsEvents = eventRequests.filter((req: EventRequest) => {
+  const requestsEvents = (eventRequests || []).filter((req: EventRequest) => {
     // Only include new requests - clean separation
     if (!req.desiredEventDate) {
       return req.status === "new" || !req.status;
@@ -1965,7 +1965,7 @@ export default function EventRequestsManagement() {
     return req.status === "new" || !req.status;
   });
 
-  const scheduledEvents = eventRequests.filter((req: EventRequest) => {
+  const scheduledEvents = (eventRequests || []).filter((req: EventRequest) => {
     if (!req.desiredEventDate) return req.status === "scheduled";
     // Use the same timezone-safe parsing as formatEventDate function
     let eventDate: Date;
@@ -1991,7 +1991,7 @@ export default function EventRequestsManagement() {
     return eventDate >= today && req.status === "scheduled";
   });
 
-  const pastEvents = eventRequests.filter((req: EventRequest) => {
+  const pastEvents = (eventRequests || []).filter((req: EventRequest) => {
     // DATE is the primary filter - only show events with past dates
     if (!req.desiredEventDate) {
       // No date specified - only include if status suggests it's truly done
@@ -2031,21 +2031,21 @@ export default function EventRequestsManagement() {
     );
   });
 
-  const inProcessEvents = eventRequests.filter((req: EventRequest) => {
+  const inProcessEvents = (eventRequests || []).filter((req: EventRequest) => {
     // Only include events that are truly "in process" - actively being worked on
     return req.status === "in_process";
   });
 
   // New filtering arrays for separate tabs
-  const declinedEvents = eventRequests.filter((req: EventRequest) => {
+  const declinedEvents = (eventRequests || []).filter((req: EventRequest) => {
     return req.status === "declined";
   });
 
-  const unresponsiveEvents = eventRequests.filter((req: EventRequest) => {
+  const unresponsiveEvents = (eventRequests || []).filter((req: EventRequest) => {
     return req.status === "unresponsive" || req.isUnresponsive;
   });
 
-  const otherEvents = eventRequests.filter((req: EventRequest) => {
+  const otherEvents = (eventRequests || []).filter((req: EventRequest) => {
     const standardStatuses = [
       "new",
       "in_process",
