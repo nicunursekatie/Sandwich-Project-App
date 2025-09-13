@@ -6742,7 +6742,7 @@ export default function EventRequestsManagement() {
               ) : (
                 <div className="space-y-4">
                   {filteredRequests.map((request: EventRequest) =>
-                    renderScheduledEventCard(request),
+                    renderStandardEventCard(request),
                   )}
                 </div>
               )}
