@@ -87,6 +87,20 @@ export default function GroupCatalog({ onNavigateToEventPlanning }: GroupCatalog
     }
   };
 
+  // Helper function to get status badge color
+  const getStatusBadgeColor = (status: string) => {
+    switch (status) {
+      case 'new': return 'bg-teal-100 text-teal-800 border-teal-200';
+      case 'contacted': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'in_process': return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'scheduled': return 'bg-purple-100 text-purple-800 border-purple-200';
+      case 'completed': return 'bg-orange-100 text-orange-800 border-orange-200';
+      case 'past': return 'bg-gray-100 text-gray-800 border-gray-200';
+      case 'declined': return 'bg-red-100 text-red-800 border-red-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
   
   // Extract and flatten groups from response
   const rawGroups = groupsResponse?.groups || [];
@@ -493,36 +507,7 @@ export default function GroupCatalog({ onNavigateToEventPlanning }: GroupCatalog
                             {org.eventDate ? (
                               <div className="flex items-center mt-2 text-lg font-semibold" style={{ color: '#FBAD3F' }}>
                                 <Calendar className="w-5 h-5 mr-2" />
-                                <span>{(() => {
-                                  try {
-                                    let date: Date;
-                                    if (org.eventDate.match(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/)) {
-                                      const dateOnly = org.eventDate.split(' ')[0];
-                                      date = new Date(dateOnly + 'T12:00:00');
-                                    } else if (org.eventDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
-                                      date = new Date(org.eventDate + 'T12:00:00');
-                                    } else {
-                                      date = new Date(org.eventDate);
-                                    }
-                                    if (isNaN(date.getTime())) return 'Invalid date';
-                                    if (typeof org.eventDate === 'string' && org.eventDate.match(/^\d{4}-\d{2}-\d{2}T00:00:00(\.\d{3})?Z?$/)) {
-                                      const datePart = org.eventDate.split('T')[0];
-                                      const safeDate = new Date(datePart + 'T12:00:00');
-                                      return safeDate.toLocaleDateString('en-US', {
-                                        year: 'numeric',
-                                        month: 'long',
-                                        day: 'numeric'
-                                      });
-                                    }
-                                    return date.toLocaleDateString('en-US', {
-                                      year: 'numeric',
-                                      month: 'long',
-                                      day: 'numeric'
-                                    });
-                                  } catch {
-                                    return 'Invalid date';
-                                  }
-                                })()}</span>
+<span>{formatDateForDisplay(org.eventDate)}</span>
                               </div>
                             ) : (
                               <div className="flex items-center mt-2 text-base text-gray-500">
@@ -533,11 +518,11 @@ export default function GroupCatalog({ onNavigateToEventPlanning }: GroupCatalog
                           </div>
                         </div>
                         
-                        {/* Contact Info - Secondary visual weight */}
+                        {/* Contact Info - Enhanced with more details */}
                         <div className="space-y-1">
                           <div className="flex items-center space-x-2 text-sm text-gray-600">
                             <User className="w-4 h-4" />
-                            <span>{org.contactName}</span>
+                            <span className="font-medium">{org.contactName}</span>
                           </div>
                           {org.email && (
                             <div className="flex items-center space-x-2 text-sm text-gray-500">
@@ -545,18 +530,41 @@ export default function GroupCatalog({ onNavigateToEventPlanning }: GroupCatalog
                               <span>{org.email}</span>
                             </div>
                           )}
+                          {org.department && (
+                            <div className="flex items-center space-x-2 text-sm text-gray-500">
+                              <Building className="w-4 h-4" />
+                              <span>Department: {org.department}</span>
+                            </div>
+                          )}
                         </div>
                         
-                        {/* Key Metrics Bar */}
+                        {/* Enhanced Key Metrics Bar */}
                         <div className="bg-gradient-to-r from-orange-50 to-yellow-50 p-3 border border-orange-200 rounded-md">
-                          <div className="text-sm text-gray-700 flex items-center justify-between">
-                            <div className="flex items-center space-x-3">
-                              <span>Status: <span className="font-semibold text-orange-700">{getStatusText(org.status)}</span></span>
-                              <span className="text-gray-400">•</span>
-                              <span>🥪 <span className="font-semibold text-orange-700">{org.totalSandwiches || 0} sandwiches</span></span>
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-2">
+                                <span className="text-sm text-gray-700">Status:</span>
+                                <Badge className={getStatusBadgeColor(org.status)} variant="outline">
+                                  {getStatusText(org.status)}
+                                </Badge>
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                {org.totalRequests} request{org.totalRequests !== 1 ? 's' : ''}
+                              </div>
                             </div>
-                            <div className="text-xs text-gray-500">
-                              {org.totalRequests} request{org.totalRequests !== 1 ? 's' : ''}
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="flex items-center space-x-1">
+                                <span>🥪</span>
+                                <span className="font-semibold text-orange-700">
+                                  {org.totalSandwiches || 0} sandwiches
+                                </span>
+                              </span>
+                              {org.hasHostedEvent && (
+                                <span className="flex items-center space-x-1 text-green-600">
+                                  <CheckCircle className="w-3 h-3" />
+                                  <span className="text-xs">Event Hosted</span>
+                                </span>
+                              )}
                             </div>
                           </div>
                         </div>
