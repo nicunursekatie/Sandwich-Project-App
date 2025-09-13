@@ -21,6 +21,7 @@ import {
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, AreaChart, Area, BarChart, Bar, PieChart as RechartsPieChart, Cell, Pie } from "recharts";
 import { apiRequest } from "@/lib/queryClient";
 import { useState } from "react";
+import MonthlyComparisonAnalytics from "@/components/monthly-comparison-analytics";
 
 export default function ImpactDashboard() {
   const [chartView, setChartView] = useState<'daily' | 'weekly' | 'monthly'>('monthly');
@@ -334,10 +335,14 @@ export default function ImpactDashboard() {
 
         {/* Charts and Visualizations */}
         <Tabs defaultValue="trends" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="trends" className="flex items-center gap-2">
               <TrendingUp className="w-4 h-4" />
               Collection Trends
+            </TabsTrigger>
+            <TabsTrigger value="analysis" className="flex items-center gap-2">
+              <BarChart3 className="w-4 h-4" />
+              Monthly Analysis
             </TabsTrigger>
             <TabsTrigger value="impact" className="flex items-center gap-2">
               <Activity className="w-4 h-4" />
@@ -454,6 +459,11 @@ export default function ImpactDashboard() {
 
 
 
+
+          {/* Monthly Comparison Analytics Tab */}
+          <TabsContent value="analysis">
+            <MonthlyComparisonAnalytics />
+          </TabsContent>
 
           {/* Impact Analysis Tab */}
           <TabsContent value="impact">
