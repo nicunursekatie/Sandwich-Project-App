@@ -5,7 +5,7 @@ import createGroupsCatalogRoutes from "./groups-catalog";
 
 // Import organized feature routers
 import usersRouter from "./users";
-import projectsRouter from "./projects";
+import createProjectRoutes from "./projects";
 import tasksRouter from "./tasks";
 import collectionsRouter from "./collections";
 import meetingsRouter from "./meetings";
@@ -20,11 +20,13 @@ import coreRouter from "./core";
 
 // Import centralized middleware
 import { createStandardMiddleware, createErrorHandler } from "../middleware";
+import type { IStorage } from "../storage";
 
 interface RouterDependencies {
   isAuthenticated: any;
   requirePermission: any;
   sessionStore: any;
+  storage: IStorage;
 }
 
 export function createMainRoutes(deps: RouterDependencies) {
@@ -56,6 +58,12 @@ export function createMainRoutes(deps: RouterDependencies) {
   router.use("/api/users", deps.isAuthenticated, ...createStandardMiddleware(), usersRouter);
   router.use("/api/users", createErrorHandler("users"));
 
+  // Instantiate projects router with required dependencies
+  const projectsRouter = createProjectRoutes({
+    storage: deps.storage,
+    isAuthenticated: deps.isAuthenticated,
+    requirePermission: deps.requirePermission
+  });
   router.use("/api/projects", deps.isAuthenticated, ...createStandardMiddleware(), projectsRouter);
   router.use("/api/projects", createErrorHandler("projects"));
 

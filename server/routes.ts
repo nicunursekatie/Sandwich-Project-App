@@ -18,7 +18,6 @@ function createEventRemindersRoutes(isAuthenticated: any, activityLogger: any) {
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Use database-backed session store for deployment persistence
-  console.log("Using database-backed session store for deployment persistence");
   const PgSession = connectPg(session);
   const sessionStore = new PgSession({
     conString: process.env.DATABASE_URL,
@@ -117,7 +116,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const mainRoutes = createMainRoutes({
     isAuthenticated,
     requirePermission,
-    sessionStore
+    sessionStore,
+    storage
   });
   app.use(mainRoutes);
 
@@ -139,8 +139,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Register event reminders routes  
   const activityLogger = (req: any, action: string, description: string, metadata?: any) => {
-    // Simple activity logging for event reminders
-    console.log(`[Activity] ${req.user?.id || 'unknown'}: ${action} - ${description}`, metadata);
+    // Simple activity logging for event reminders - using logger middleware instead of console
   };
   app.use("/api/event-reminders", createEventRemindersRoutes(isAuthenticated, activityLogger));
   
@@ -148,9 +147,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const importEventsRoutes = await import("./routes/import-events");
   app.use("/api/import", importEventsRoutes.default);
   
-  // Import and register user management routes
-  const usersRoutes = await import("./routes/users");
-  app.use("/api/users", isAuthenticated, usersRoutes.default);
+  // User routes are now handled by the modular system in server/routes/index.ts
 
   // Register performance optimization routes
   const { registerPerformanceRoutes } = await import("./routes/performance");

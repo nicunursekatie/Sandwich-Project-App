@@ -18,6 +18,33 @@ Desktop Chat UX: Desktop users require proper scrolling behavior without nested 
 - **Frontend**: React 18 (TypeScript), Vite, TanStack Query, Tailwind CSS (with shadcn/ui), React Hook Form (with Zod).
 - **Backend**: Express.js (TypeScript), Drizzle ORM, PostgreSQL (Neon serverless), Session-based authentication (connect-pg-simple), Replit Auth.
 
+### Backend Router Architecture (Modular Refactoring - 2025)
+The application underwent a major architectural refactoring in September 2025, transforming from a monolithic 9,000+ line routes.ts file into a clean, modular structure:
+
+**Router Structure:**
+- **server/routes/index.ts**: Central router that orchestrates all feature modules with consistent middleware application
+- **server/middleware/index.ts**: Centralized middleware configuration providing standardized middleware stacks
+
+**Feature Modules (server/routes/):**
+- **core/**: Health checks, system monitoring, and core application routes
+- **users/**: User management, role assignment, and authentication
+- **projects/**: Project management, assignments, and task coordination
+- **tasks/**: Task management, completion tracking, and notifications  
+- **collections/**: Sandwich collection data entry and management
+- **meetings/**: Meeting management, agendas, and minutes
+- **messaging/**: Internal messaging system and notifications
+- **reports/**: Analytics and report generation
+- **search/**: Search functionality across the application
+- **storage/**: File uploads and document management
+- **notifications/**: System notifications and alerts
+- **versioning/**: Data versioning and change tracking
+
+**Middleware Architecture:**
+- **createStandardMiddleware()**: Provides consistent middleware ordering (authentication, logging, sanitization, permissions)
+- **createErrorHandler()**: Standardized error handling with module-specific logging
+- **createPublicMiddleware()**: For routes that don't require authentication
+- Centralized import point for all middleware components
+
 ### UI/UX Decisions
 The application features a consistent brand identity using The Sandwich Project's official color palette:
 - **Teal Primary**: #236383
