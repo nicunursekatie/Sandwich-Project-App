@@ -9166,8 +9166,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Task assignment notification broadcasting function
+  const broadcastTaskAssignment = (userId: string, notificationData: any) => {
+    try {
+      console.log(
+        `Broadcasting task assignment notification to user: ${userId}`,
+      );
+      const userClients = connectedClients.get(userId);
+
+      if (userClients) {
+        let sentCount = 0;
+        userClients.forEach((client) => {
+          if (client.readyState === WebSocket.OPEN) {
+            console.log(
+              "Sending task assignment notification to client:",
+              notificationData,
+            );
+            client.send(
+              JSON.stringify({
+                type: "notification",
+                data: notificationData,
+              }),
+            );
+            sentCount++;
+          }
+        });
+        console.log(
+          `Sent task assignment notification to ${sentCount} clients for user ${userId}`,
+        );
+      } else {
+        console.log(`No connected clients found for user ${userId}`);
+      }
+    } catch (error) {
+      console.error("Error broadcasting task assignment notification:", error);
+    }
+  };
+
   // Make broadcast functions available globally for use in other routes
   (global as any).broadcastNewMessage = broadcastNewMessage;
+  (global as any).broadcastTaskAssignment = broadcastTaskAssignment;
 
   return httpServer;
 }

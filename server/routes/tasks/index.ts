@@ -2,7 +2,7 @@ import { Router, type Request, type Response } from "express";
 import { createStandardMiddleware, createErrorHandler } from "../../middleware";
 import { logger } from "../../middleware/logger";
 import { insertTaskCompletionSchema } from "@shared/schema";
-import type { IStorage } from "../../storage";
+import { storage } from "../../storage-wrapper";
 import { taskService } from "../../services/tasks/index";
 
 // Type definitions for authentication
@@ -27,28 +27,20 @@ interface AuthenticatedRequest extends Request {
   };
 }
 
-// Factory function to create task routes
-export default function createTaskRoutes(options: {
-  storage: IStorage;
-  isAuthenticated: any;
-}): Router {
-  const tasksRouter = Router();
-  const { storage, isAuthenticated } = options;
-  
-  // Apply standard middleware
-  const standardMiddleware = createStandardMiddleware();
-  tasksRouter.use(standardMiddleware);
-  
-  // Apply error handling middleware
-  const errorHandler = createErrorHandler('tasks');
-  
-  // Helper function to get user from request
-  const getUser = (req: AuthenticatedRequest) => {
-    return req.user || req.session?.user;
-  };
+// Create task routes router
+const tasksRouter = Router();
 
-  // PATCH /:id - Update task (extracted from routes.ts)
-  tasksRouter.patch("/:id", isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+// Apply standard middleware and error handling
+const standardMiddleware = createStandardMiddleware();
+const errorHandler = createErrorHandler('tasks');
+
+// Helper function to get user from request
+const getUser = (req: AuthenticatedRequest) => {
+  return req.user || req.session?.user;
+};
+
+// PATCH /:id - Update task
+tasksRouter.patch("/:id", ...standardMiddleware, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const taskId = parseInt(req.params.id);
       const updates = req.body;
@@ -88,8 +80,8 @@ export default function createTaskRoutes(options: {
     }
   });
 
-  // DELETE /:id - Delete task (extracted from routes.ts)
-  tasksRouter.delete("/:id", isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+// DELETE /:id - Delete task
+tasksRouter.delete("/:id", ...standardMiddleware, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const taskId = parseInt(req.params.id);
       const user = getUser(req);
@@ -111,8 +103,8 @@ export default function createTaskRoutes(options: {
     }
   });
 
-  // POST /:taskId/complete - Complete a task
-  tasksRouter.post("/:taskId/complete", async (req: AuthenticatedRequest, res: Response) => {
+// POST /:taskId/complete - Complete a task
+tasksRouter.post("/:taskId/complete", ...standardMiddleware, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const taskId = parseInt(req.params.taskId);
       const user = getUser(req);
@@ -167,8 +159,8 @@ export default function createTaskRoutes(options: {
     }
   });
 
-  // DELETE /:taskId/complete - Remove task completion
-  tasksRouter.delete("/:taskId/complete", async (req: AuthenticatedRequest, res: Response) => {
+// DELETE /:taskId/complete - Remove task completion
+tasksRouter.delete("/:taskId/complete", ...standardMiddleware, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const taskId = parseInt(req.params.taskId);
       const user = getUser(req);
@@ -197,8 +189,8 @@ export default function createTaskRoutes(options: {
     }
   });
 
-  // GET /:taskId/completions - Get task completions
-  tasksRouter.get("/:taskId/completions", async (req: AuthenticatedRequest, res: Response) => {
+// GET /:taskId/completions - Get task completions
+tasksRouter.get("/:taskId/completions", ...standardMiddleware, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const taskId = parseInt(req.params.taskId);
       const completions = await storage.getTaskCompletions(taskId);
@@ -210,18 +202,7 @@ export default function createTaskRoutes(options: {
     }
   });
 
-  // Apply error handling middleware
-  tasksRouter.use(errorHandler);
+// Apply error handling middleware
+tasksRouter.use(errorHandler);
 
-  return tasksRouter;
-}
-
-// Standalone router creation for direct use
-export function createStandaloneTaskRoutes(storage: IStorage, middleware: {
-  isAuthenticated: any;
-}): Router {
-  return createTaskRoutes({
-    storage,
-    isAuthenticated: middleware.isAuthenticated
-  });
-}
+export default tasksRouter;
