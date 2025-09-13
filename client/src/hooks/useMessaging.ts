@@ -118,7 +118,7 @@ export function useMessaging() {
           task: contextCounts.task || 0,
         };
       } catch (error) {
-        console.error('Failed to fetch unread counts:', error);
+        console.warn('Unread counts fetch failed:', error);
         return {
           general: 0,
           committee: 0,

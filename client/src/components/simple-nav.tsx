@@ -58,14 +58,17 @@ export default function SimpleNav({ onSectionChange, activeSection, isCollapsed 
       if (!(user as any)?.id) return 0;
       try {
         const response = await apiRequest('GET', '/api/emails/unread-count');
-        return response.count || 0;
+        // Ensure we return a number
+        return typeof response?.count === 'number' ? response.count : 0;
       } catch (error) {
-        console.error('Failed to fetch Gmail unread count:', error);
+        // Only log actual network/server errors, not auth or permission errors
+        console.warn('Gmail unread count fetch failed:', error);
         return 0;
       }
     },
     enabled: !!(user as any)?.id,
     refetchInterval: 30000, // Refetch every 30 seconds
+    retry: false, // Let TanStack Query handle retries with global config
   });
 
   // Get event reminders pending count
@@ -75,14 +78,17 @@ export default function SimpleNav({ onSectionChange, activeSection, isCollapsed 
       if (!(user as any)?.id) return 0;
       try {
         const response = await apiRequest('GET', '/api/event-reminders/count');
-        return response.count || 0;
+        // Ensure we return a number
+        return typeof response?.count === 'number' ? response.count : 0;
       } catch (error) {
-        console.error('Failed to fetch reminders count:', error);
+        // Only log actual network/server errors, not auth or permission errors
+        console.warn('Event reminders count fetch failed:', error);
         return 0;
       }
     },
     enabled: !!(user as any)?.id && hasPermission(user, PERMISSIONS.EVENT_REQUESTS_VIEW),
     refetchInterval: 60000, // Refetch every minute
+    retry: false, // Let TanStack Query handle retries with global config
   });
 
   // Navigation organized by sections: DASHBOARD (at top), COLLECTIONS LOG, COMMUNICATION, OPERATIONS, PLANNING & COORDINATION, DOCUMENTATION, ADMIN
