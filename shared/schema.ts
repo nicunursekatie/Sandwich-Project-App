@@ -1379,6 +1379,7 @@ export const eventRequests = pgTable(
     followUpMethod: varchar("follow_up_method"), // 'email', 'call'
     updatedEmail: varchar("updated_email"), // Email address collected during follow-up call
     followUpDate: timestamp("follow_up_date"), // When follow-up was completed
+    scheduledCallDate: timestamp("scheduled_call_date"), // When a follow-up call is scheduled
 
     // Timeline tracking
     contactedAt: timestamp("contacted_at"), // When initial contact was completed
@@ -1631,6 +1632,7 @@ export const insertEventRequestSchema = createInsertSchema(eventRequests)
     speakersNeeded: z.boolean().nullable().optional(),
     speakerDetails: z.string().nullable().optional(),
     // Follow-up tracking fields
+    scheduledCallDate: z.date().nullable().optional(),
     followUpOneDayCompleted: z.boolean().nullable().optional(),
     followUpOneDayDate: z.date().nullable().optional(),
     followUpOneMonthCompleted: z.boolean().nullable().optional(),
