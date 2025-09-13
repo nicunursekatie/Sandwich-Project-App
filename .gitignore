@@ -72,3 +72,4 @@ ehthumbs.db
 Desktop.ini*_session.txt
 *_test.txt
 *.txt
+attached_assets/*.json
