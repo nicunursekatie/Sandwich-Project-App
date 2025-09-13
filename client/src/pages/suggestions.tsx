@@ -121,7 +121,7 @@ export default function SuggestionsPortal() {
   // Update selected suggestion when suggestions data changes
   useEffect(() => {
     if (selectedSuggestion && suggestions.length > 0) {
-      const updatedSuggestion = suggestions.find((s: Suggestion) => s.id === selectedSuggestion.id);
+      const updatedSuggestion = (suggestions || []).find((s: Suggestion) => s.id === selectedSuggestion.id);
       if (updatedSuggestion) {
         setSelectedSuggestion(updatedSuggestion);
       }

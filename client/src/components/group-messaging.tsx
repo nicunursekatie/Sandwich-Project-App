@@ -99,7 +99,7 @@ export function GroupMessaging({ currentUser }: GroupMessagesProps) {
       const data = await response.json();
       console.log("🔍 Raw API response:", data);
       
-      const mappedGroups = data.map((conv: any) => ({
+      const mappedGroups = (data || []).map((conv: any) => ({
         id: conv.id,
         name: conv.name,
         description: conv.description || "",
@@ -566,7 +566,7 @@ export function GroupMessaging({ currentUser }: GroupMessagesProps) {
                         <SelectValue placeholder="Select users to add" />
                       </SelectTrigger>
                       <SelectContent>
-                        {allUsers
+                        {(allUsers || [])
                           .filter(user => user.id !== currentUser?.id && !groupForm.memberIds.includes(user.id))
                           .map((user) => (
                             <SelectItem key={user.id} value={user.id}>

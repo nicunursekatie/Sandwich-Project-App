@@ -81,7 +81,8 @@ export default function Dashboard({ initialSection = "dashboard" }: { initialSec
     
     // Extract section from URL path
     if (location.startsWith('/projects/')) {
-      const projectId = location.split('/projects/')[1];
+      const parts = location.split('/projects/');
+      const projectId = parts.length > 1 ? parts[1] : null;
       if (projectId) {
         const newSection = `project-${projectId}`;
         console.log('Setting activeSection to project ID:', newSection);
@@ -178,7 +179,7 @@ export default function Dashboard({ initialSection = "dashboard" }: { initialSec
   const renderContent = () => {
     // Extract project ID from activeSection if it's a project detail page
     const projectIdMatch = activeSection.match(/^project-(\d+)$/);
-    const projectId = projectIdMatch ? parseInt(projectIdMatch[1]) : null;
+    const projectId = projectIdMatch && projectIdMatch[1] ? parseInt(projectIdMatch[1]) : null;
 
     // Handle project detail pages
     if (projectId) {

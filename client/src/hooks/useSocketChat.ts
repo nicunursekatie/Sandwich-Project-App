@@ -63,17 +63,17 @@ export function useSocketChat() {
     });
 
     newSocket.on("rooms", ({ available }) => {
-      setRooms(available);
+      setRooms(available || []);
       console.log("Received rooms:", available);
       
       // Request message history for all rooms to populate "no messages yet" correctly
-      available.forEach((room: ChatRoom) => {
+      (available || []).forEach((room: ChatRoom) => {
         newSocket.emit("get-history", room.id);
       });
       
       // Auto-select first room if none selected
-      if (available.length > 0 && !currentRoom) {
-        setCurrentRoom(available[0].id);
+      if ((available || []).length > 0 && !currentRoom) {
+        setCurrentRoom((available || [])[0]?.id);
       }
     });
 

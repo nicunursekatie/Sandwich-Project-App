@@ -209,7 +209,7 @@ export default function ImpactDashboard() {
             ? JSON.parse(collection.groupCollections) 
             : collection.groupCollections;
           if (Array.isArray(groupData)) {
-            groupCount = groupData.reduce((sum, group) => sum + (group.sandwichCount || 0), 0);
+            groupCount = (groupData || []).reduce((sum, group) => sum + (group.sandwichCount || 0), 0);
           }
         } catch (e) {
           groupCount = 0;
@@ -387,7 +387,8 @@ export default function ImpactDashboard() {
                           if (chartView === 'weekly') {
                             return value.includes('Week of') ? value.replace('Week of ', '') : value;
                           }
-                          return value.split('-')[1] + '/' + value.split('-')[0].slice(2);
+                          const parts = (value || '').split('-');
+                          return parts.length >= 2 ? parts[1] + '/' + parts[0].slice(2) : value;
                         }}
                       />
                       <YAxis tick={{ fontSize: 12 }} />

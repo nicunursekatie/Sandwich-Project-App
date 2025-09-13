@@ -37,7 +37,7 @@ export default function ImportantLinks() {
 
   // Zoom control handlers for Events Sheet
   const handleEventsZoomChange = (newZoom: number[]) => {
-    const zoom = newZoom[0];
+    const zoom = (newZoom || [])[0] || 85;
     setEventsZoomLevel(zoom);
     localStorage.setItem('important-links-events-zoom', zoom.toString());
   };
@@ -58,7 +58,7 @@ export default function ImportantLinks() {
 
   // Zoom control handlers for User Sheet
   const handleUserSheetZoomChange = (newZoom: number[]) => {
-    const zoom = newZoom[0];
+    const zoom = (newZoom || [])[0] || 85;
     setUserSheetZoomLevel(zoom);
     localStorage.setItem('important-links-user-sheet-zoom', zoom.toString());
   };

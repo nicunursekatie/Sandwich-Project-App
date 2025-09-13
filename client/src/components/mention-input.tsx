@@ -114,7 +114,7 @@ export function MentionInput({ value, onChange, onSend, placeholder, disabled }:
         setMentionPosition(lastAtIndex);
         
         // Filter users based on search and sort alphabetically
-        const filteredUsers = users
+        const filteredUsers = (users || [])
           .filter(user => {
             const fullName = user.firstName && user.lastName 
               ? `${user.firstName} ${user.lastName}` 

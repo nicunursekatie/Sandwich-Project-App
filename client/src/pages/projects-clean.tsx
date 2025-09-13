@@ -31,7 +31,7 @@ function AssigneeEmail({ assigneeId }: { assigneeId: string | number }) {
     retry: false,
   });
   
-  const user = users.find((u: any) => u.id === assigneeId.toString());
+  const user = (users || []).find((u: any) => u.id === assigneeId.toString());
   
   if (!user?.email) return null;
   
@@ -396,7 +396,8 @@ export default function ProjectsClean() {
               const dateStr = project.dueDate;
               let date: Date;
               if (dateStr.match(/^\d{4}-\d{2}-\d{2}T00:00:00(\.\d{3})?Z?$/)) {
-                const dateOnly = dateStr.split('T')[0];
+                const parts = dateStr.split('T');
+                const dateOnly = parts.length > 0 ? parts[0] : dateStr;
                 date = new Date(dateOnly + 'T12:00:00');
               } else if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
                 date = new Date(dateStr + 'T12:00:00');
@@ -608,7 +609,7 @@ export default function ProjectsClean() {
 
       {/* Projects List */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {projects.length === 0 ? (
+        {(projects || []).length === 0 ? (
           <div className="col-span-full text-center py-12">
             <div className="text-[#236383]/30 mb-4">
               {activeTab === "available" && <Circle className="w-12 h-12 mx-auto" />}
