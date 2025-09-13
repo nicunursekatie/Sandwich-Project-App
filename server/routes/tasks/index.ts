@@ -3,6 +3,7 @@ import { createStandardMiddleware, createErrorHandler } from "../../middleware";
 import { logger } from "../../middleware/logger";
 import { insertTaskCompletionSchema } from "@shared/schema";
 import type { IStorage } from "../../storage";
+import { taskService } from "../../services/tasks/index";
 
 // Type definitions for authentication
 interface AuthenticatedRequest extends Request {
@@ -45,6 +46,70 @@ export default function createTaskRoutes(options: {
   const getUser = (req: AuthenticatedRequest) => {
     return req.user || req.session?.user;
   };
+
+  // PATCH /:id - Update task (extracted from routes.ts)
+  tasksRouter.patch("/:id", isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const taskId = parseInt(req.params.id);
+      const updates = req.body;
+      const user = getUser(req);
+      
+      console.log(`Task PATCH request - Task ID: ${taskId}`);
+      console.log("Updates payload:", updates);
+      
+      if (!user) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      // Get original task to compare assignees
+      const originalTask = await storage.getProjectTask(taskId);
+      
+      // Update task using service layer
+      const task = await taskService.updateTaskWithSync(taskId, updates, storage);
+      
+      // Handle new assignee notifications using service layer
+      if (updates.assigneeIds && Array.isArray(updates.assigneeIds)) {
+        const originalAssigneeIds = originalTask?.assigneeIds || [];
+        await taskService.handleTaskAssignment(
+          taskId,
+          updates.assigneeIds,
+          originalAssigneeIds,
+          task.title,
+          storage
+        );
+      }
+      
+      console.log(`Task ${taskId} updated successfully`);
+      res.json(task);
+    } catch (error) {
+      console.error("Error updating project task:", error);
+      logger.error("Failed to update task", error);
+      res.status(500).json({ error: "Failed to update task" });
+    }
+  });
+
+  // DELETE /:id - Delete task (extracted from routes.ts)
+  tasksRouter.delete("/:id", isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const taskId = parseInt(req.params.id);
+      const user = getUser(req);
+
+      if (!user) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const success = await storage.deleteProjectTask(taskId);
+      if (!success) {
+        return res.status(404).json({ error: "Task not found" });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting project task:", error);
+      logger.error("Failed to delete task", error);
+      res.status(500).json({ error: "Failed to delete task" });
+    }
+  });
 
   // POST /:taskId/complete - Complete a task
   tasksRouter.post("/:taskId/complete", async (req: AuthenticatedRequest, res: Response) => {

@@ -4274,105 +4274,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Direct task update routes (for frontend compatibility)
-  app.patch("/api/tasks/:id", sanitizeMiddleware, async (req, res) => {
-    try {
-      const taskId = parseInt(req.params.id);
-      const updates = req.body;
-      
-      console.log(`Direct PATCH request - Task ID: ${taskId}`);
-      console.log("Updates payload:", updates);
-      
-      // Get original task to compare assignees
-      const originalTask = await storage.getProjectTask(taskId);
-      
-      const task = await storage.updateProjectTask(taskId, updates);
-      if (!task) {
-        console.log(`Task ${taskId} not found in database`);
-        return res.status(404).json({ error: "Task not found" });
-      }
-      
-      // Check if assignees were added (new assigneeIds that weren't in original)
-      if (updates.assigneeIds && Array.isArray(updates.assigneeIds)) {
-        const originalAssigneeIds = originalTask?.assigneeIds || [];
-        const newAssigneeIds = updates.assigneeIds.filter(id => 
-          id && id.trim() && !originalAssigneeIds.includes(id)
-        );
-        
-        // Create notifications for newly assigned users
-        if (newAssigneeIds.length > 0) {
-          const user = (req as any).user; // Standardized authentication
-          
-          for (const assigneeId of newAssigneeIds) {
-            try {
-              // Create notification in database
-              const notification = await storage.createNotification({
-                userId: assigneeId,
-                type: 'task_assignment',
-                title: 'New Task Assignment',
-                content: `You have been assigned to task: ${task.title}`,
-                relatedType: 'task',
-                relatedId: task.id
-              });
-
-              // Emit WebSocket notification if available
-              if (typeof (global as any).broadcastTaskAssignment === 'function') {
-                (global as any).broadcastTaskAssignment(assigneeId, {
-                  type: 'task_assignment',
-                  message: 'You have been assigned a new task',
-                  taskId: task.id,
-                  taskTitle: task.title,
-                  notificationId: notification.id
-                });
-              }
-            } catch (notificationError) {
-              console.error(`Error creating notification for user ${assigneeId}:`, notificationError);
-              // Don't fail task update if notification fails
-            }
-          }
-        }
-      }
-      
-      console.log(`Task ${taskId} updated successfully`);
-      
-      // Trigger Google Sheets sync after task status change
-      try {
-        const { triggerGoogleSheetsSync } = await import('./google-sheets-sync');
-        console.log('Triggering Google Sheets sync after task status update...');
-        setImmediate(() => {
-          triggerGoogleSheetsSync().catch(error => {
-            console.error('Google Sheets sync failed after task update:', error);
-          });
-        });
-      } catch (syncError) {
-        console.error('Error triggering Google Sheets sync:', syncError);
-        // Don't fail the task update if sync fails
-      }
-      
-      res.json(task);
-    } catch (error) {
-      console.error("Error updating project task:", error);
-      res.status(500).json({ error: "Failed to update task" });
-    }
-  });
-
-  app.delete("/api/tasks/:id", async (req, res) => {
-    try {
-      const taskId = parseInt(req.params.id);
-      const success = await storage.deleteProjectTask(taskId);
-      if (!success) {
-        return res.status(404).json({ error: "Task not found" });
-      }
-      res.status(204).send();
-    } catch (error) {
-      console.error("Error deleting project task:", error);
-      res.status(500).json({ error: "Failed to delete task" });
-    }
-  });
 
   // Register project routes
   const { projectsRoutes } = await import("./routes/projects");
   app.use("/api", projectsRoutes);
+
+  // Register task routes
+  const createTaskRoutes = (await import("./routes/tasks")).default;
+  const taskRoutes = createTaskRoutes({ storage, isAuthenticated });
+  app.use("/api/tasks", taskRoutes);
 
   // Register work logs routes
   const workLogsModule = await import("./routes/work-logs");
@@ -6966,41 +6876,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   };
 
-  // Task assignment notification broadcasting function
-  const broadcastTaskAssignment = (userId: string, notificationData: any) => {
-    try {
-      console.log(
-        `Broadcasting task assignment notification to user: ${userId}`,
-      );
-      const userClients = connectedClients.get(userId);
-
-      if (userClients) {
-        let sentCount = 0;
-        userClients.forEach((client) => {
-          if (client.readyState === WebSocket.OPEN) {
-            console.log(
-              "Sending task assignment notification to client:",
-              notificationData,
-            );
-            client.send(
-              JSON.stringify({
-                type: "notification",
-                data: notificationData,
-              }),
-            );
-            sentCount++;
-          }
-        });
-        console.log(
-          `Sent task assignment notification to ${sentCount} clients for user ${userId}`,
-        );
-      } else {
-        console.log(`No connected clients found for user ${userId}`);
-      }
-    } catch (error) {
-      console.error("Error broadcasting task assignment notification:", error);
-    }
-  };
 
   // Notification API endpoints
   app.get("/api/notifications", isAuthenticated, async (req: any, res) => {
@@ -9293,7 +9168,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Make broadcast functions available globally for use in other routes
   (global as any).broadcastNewMessage = broadcastNewMessage;
-  (global as any).broadcastTaskAssignment = broadcastTaskAssignment;
 
   return httpServer;
 }
