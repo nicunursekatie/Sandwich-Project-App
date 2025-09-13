@@ -58,7 +58,7 @@ export function GroupMessaging({ currentUser }: GroupMessagesProps) {
 
   // Helper functions for user display
   const getUserDisplayName = (userId: string) => {
-    const userFound = allUsers.find((u: any) => u.id === userId);
+    const userFound = (allUsers || []).find((u: any) => u.id === userId);
     if (userFound) {
       if (userFound.displayName) return userFound.displayName;
       if (userFound.firstName) return userFound.firstName;
@@ -68,7 +68,7 @@ export function GroupMessaging({ currentUser }: GroupMessagesProps) {
   };
 
   const getUserInitials = (userId: string) => {
-    const userFound = allUsers.find((u: any) => u.id === userId);
+    const userFound = (allUsers || []).find((u: any) => u.id === userId);
     if (userFound) {
       if (userFound.firstName && userFound.lastName) {
         return (userFound.firstName[0] + userFound.lastName[0]).toUpperCase();
@@ -578,7 +578,7 @@ export function GroupMessaging({ currentUser }: GroupMessagesProps) {
                     {groupForm.memberIds.length > 0 && (
                       <div className="flex flex-wrap gap-1 mt-2">
                         {groupForm.memberIds.map((userId) => {
-                          const user = allUsers.find(u => u.id === userId);
+                          const user = (allUsers || []).find(u => u.id === userId);
                           return (
                             <Badge key={userId} variant="secondary" className="text-xs">
                               {user ? formatDisplayName(user) : userId}
@@ -787,7 +787,7 @@ export function GroupMessaging({ currentUser }: GroupMessagesProps) {
                             {addMemberForm.memberIds.length > 0 && (
                               <div className="flex flex-wrap gap-1 mt-2">
                                 {addMemberForm.memberIds.map((userId) => {
-                                  const user = allUsers.find(u => u.id === userId);
+                                  const user = (allUsers || []).find(u => u.id === userId);
                                   return (
                                     <Badge key={userId} variant="secondary" className="text-xs">
                                       {user ? formatDisplayName(user) : userId}
@@ -1070,7 +1070,7 @@ export function GroupMessaging({ currentUser }: GroupMessagesProps) {
                       <SelectValue placeholder="Select users to add..." />
                     </SelectTrigger>
                     <SelectContent>
-                      {allUsers
+                      {(allUsers || [])
                         .filter(user => 
                           !(groupMembers || []).some(member => member.userId === user.id) &&
                           !addMemberForm.memberIds.includes(user.id)
@@ -1089,7 +1089,7 @@ export function GroupMessaging({ currentUser }: GroupMessagesProps) {
                       <p className="text-sm font-medium">Selected to add:</p>
                       <div className="flex flex-wrap gap-2">
                         {addMemberForm.memberIds.map((userId) => {
-                          const user = allUsers.find(u => u.id === userId);
+                          const user = (allUsers || []).find(u => u.id === userId);
                           return (
                             <Badge key={userId} variant="secondary" className="flex items-center gap-1">
                               {user?.firstName} {user?.lastName}
