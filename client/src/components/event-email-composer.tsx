@@ -153,21 +153,18 @@ Website: thesandwichproject.org | Email: info@thesandwichproject.org`;
       isDraft: boolean;
       attachments: string[];
     }) => {
-      return apiRequest('/api/emails/event', {
-        method: 'POST',
-        body: JSON.stringify({
-          eventRequestId: eventRequest.id,
-          recipientId: 'external', // External contact
-          recipientName: `${eventRequest.firstName} ${eventRequest.lastName}`,
-          recipientEmail: emailData.recipientEmail,
-          subject: emailData.subject,
-          content: emailData.content,
-          isDraft: emailData.isDraft,
-          attachments: emailData.attachments,
-          contextType: 'event_request',
-          contextId: eventRequest.id.toString(),
-          contextTitle: `Event: ${eventRequest.organizationName}`
-        })
+      return apiRequest('POST', '/api/emails/event', {
+        eventRequestId: eventRequest.id,
+        recipientId: 'external', // External contact
+        recipientName: `${eventRequest.firstName} ${eventRequest.lastName}`,
+        recipientEmail: emailData.recipientEmail,
+        subject: emailData.subject,
+        content: emailData.content,
+        isDraft: emailData.isDraft,
+        attachments: emailData.attachments,
+        contextType: 'event_request',
+        contextId: eventRequest.id.toString(),
+        contextTitle: `Event: ${eventRequest.organizationName}`
       });
     },
     onSuccess: () => {
