@@ -4850,23 +4850,6 @@ export default function EventRequestsManagement() {
                 Email Contact
               </Button>
 
-              {/* Show "Followed Up" only for new requests in Event Requests tab */}
-              {activeTab === "requests" &&
-                request.status === "new" &&
-                !request.followUpDate && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setFollowUpRequest(request);
-                      setShowFollowUpDialog(true);
-                    }}
-                    className="bg-[#FBAD3F] hover:bg-[#e69d36] text-white border-[#FBAD3F] flex-shrink-0"
-                  >
-                    <CheckCircle className="h-4 w-4 mr-1" />
-                    Followed Up
-                  </Button>
-                )}
 
               {/* Show "Toolkit Sent" for new requests that haven't sent toolkit yet */}
               {activeTab === "requests" &&
