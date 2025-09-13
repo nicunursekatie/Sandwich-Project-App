@@ -8,24 +8,6 @@ import { createActivityLogger } from "./middleware/activity-logger";
 import createMainRoutes from "./routes/index";
 import { requirePermission } from "./middleware/auth";
 
-// Function to create event reminders routes
-function createEventRemindersRoutes(isAuthenticated: any, activityLogger: any) {
-  const router = express.Router();
-  
-  // Get event reminders count
-  router.get("/count", isAuthenticated, async (req: any, res: any) => {
-    try {
-      // Get count of pending event reminders for the current user
-      const count = await storage.getEventRemindersCount(req.user?.id);
-      res.json({ count });
-    } catch (error) {
-      console.error("Error getting event reminders count:", error);
-      res.status(500).json({ error: "Failed to get event reminders count", count: 0 });
-    }
-  });
-  
-  return router;
-}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Use database-backed session store for deployment persistence
@@ -111,19 +93,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Add activity logging middleware after authentication setup
   app.use(createActivityLogger({ storage }));
 
-  // Import and register signup routes
-  const { signupRoutes } = await import("./routes/signup");
-  app.use("/api", signupRoutes);
-
-  // Import and register password reset routes
-  const passwordResetRoutes = await import("./routes/password-reset");
-  app.use("/api", passwordResetRoutes.default);
-  
-  // Register Stream Chat routes with authentication
-  const { streamRoutes } = await import("./routes/stream");
-  app.use("/api/stream", isAuthenticated, streamRoutes);
-
-  // Import and use the new modular routes
+  // === CORE MODULAR ROUTES SYSTEM ===
+  // Main modular routes (handles users, projects, tasks, collections, messaging, etc.)
   const mainRoutes = createMainRoutes({
     isAuthenticated,
     requirePermission,
@@ -132,60 +103,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   app.use(mainRoutes);
 
-  // Import and register sandwich distributions routes
-  const sandwichDistributionsRoutes = await import("./routes/sandwich-distributions");
-  app.use("/api/sandwich-distributions", sandwichDistributionsRoutes.default);
+  // === AUTHENTICATION & USER MANAGEMENT ===
+  const { signupRoutes } = await import("./routes/signup");
+  app.use("/api", signupRoutes);
 
-  // Import and register recipients routes
-  const recipientsRoutes = await import("./routes/recipients");
-  app.use("/api/recipients", recipientsRoutes.default);
+  const passwordResetRoutes = await import("./routes/password-reset");
+  app.use("/api", passwordResetRoutes.default);
 
-  // Add missing drivers and volunteers endpoints that were lost during refactoring
-  app.get("/api/drivers", isAuthenticated, async (req, res) => {
-    try {
-      const drivers = await storage.getAllDrivers();
-      res.json(drivers);
-    } catch (error) {
-      console.error("Failed to get drivers", error);
-      res.status(500).json({ message: "Failed to get drivers" });
-    }
-  });
+  // === ENTITY MANAGEMENT ROUTES ===  
+  const driversRoutes = await import("./routes/drivers");
+  app.use("/api/drivers", driversRoutes.default(isAuthenticated, storage));
 
-  app.get("/api/volunteers", isAuthenticated, async (req, res) => {
-    try {
-      const volunteers = await storage.getAllVolunteers();
-      res.json(volunteers);
-    } catch (error) {
-      console.error("Failed to get volunteers", error);
-      res.status(500).json({ message: "Failed to get volunteers" });
-    }
-  });
+  const volunteersRoutes = await import("./routes/volunteers");
+  app.use("/api/volunteers", volunteersRoutes.default(isAuthenticated, storage));
 
-  // Add missing hosts endpoints that were lost during refactoring
   const { hostsRoutes } = await import("./routes/hosts");
   app.use("/api", hostsRoutes);
 
-  // Mount email routes that were lost during refactoring
-  const emailRoutes = await import("./routes/email-routes");
-  app.use("/api/emails", emailRoutes.default);
+  const recipientsRoutes = await import("./routes/recipients");
+  app.use("/api/recipients", recipientsRoutes.default);
 
-  // Import and register recipient TSP contacts routes
   const recipientTspContactRoutes = await import("./routes/recipient-tsp-contacts");
   app.use("/api/recipient-tsp-contacts", recipientTspContactRoutes.default);
 
-  // Register event request routes
+  // === EVENT & DATA MANAGEMENT ===
   const eventRequestRoutes = await import("./routes/event-requests");
   app.use("/api/event-requests", eventRequestRoutes.default);
-  
-  // Register event reminders routes  
-  const activityLogger = (req: any, action: string, description: string, metadata?: any) => {
-    // Simple activity logging for event reminders - using logger middleware instead of console
-  };
-  app.use("/api/event-reminders", createEventRemindersRoutes(isAuthenticated, activityLogger));
-  
-  // Register import events routes
+
+  const eventRemindersRoutes = await import("./routes/event-reminders");
+  app.use("/api/event-reminders", eventRemindersRoutes.default(isAuthenticated, storage));
+
+  const sandwichDistributionsRoutes = await import("./routes/sandwich-distributions");
+  app.use("/api/sandwich-distributions", sandwichDistributionsRoutes.default);
+
   const importEventsRoutes = await import("./routes/import-events");
   app.use("/api/import", importEventsRoutes.default);
+
+  // === COMMUNICATION & EXTERNAL SERVICES ===
+  const emailRoutes = await import("./routes/email-routes");
+  app.use("/api/emails", emailRoutes.default);
+
+  const { streamRoutes } = await import("./routes/stream");
+  app.use("/api/stream", isAuthenticated, streamRoutes);
   
   // User routes are now handled by the modular system in server/routes/index.ts
 
