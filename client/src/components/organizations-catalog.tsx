@@ -44,7 +44,7 @@ interface GroupCatalogProps {
 
 export default function GroupCatalog({ onNavigateToEventPlanning }: GroupCatalogProps = {}) {
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortBy, setSortBy] = useState("eventDate");
+  const [sortBy, setSortBy] = useState("groupName");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState(1);
