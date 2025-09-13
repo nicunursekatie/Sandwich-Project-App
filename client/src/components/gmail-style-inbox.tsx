@@ -224,10 +224,10 @@ export default function GmailStyleInbox() {
 
   // Fetch kudos with proper permission check
   const { data: kudos = [], refetch: refetchKudos } = useQuery({
-    queryKey: ["/api/emails/kudos"],
+    queryKey: ["/api/messaging/kudos/received"],
     queryFn: async () => {
       try {
-        const response = await apiRequest('GET', '/api/emails/kudos');
+        const response = await apiRequest('GET', '/api/messaging/kudos/received');
         return response || [];
       } catch (error) {
         console.error('Error fetching kudos:', error);
@@ -244,7 +244,7 @@ export default function GmailStyleInbox() {
     },
     onSuccess: () => {
       refetchKudos();
-      queryClient.invalidateQueries({ queryKey: ["/api/emails/kudos"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/messaging/kudos/received"] });
       queryClient.invalidateQueries({ queryKey: ["/api/emails"] });
       queryClient.invalidateQueries({ queryKey: ["/api/emails/unread-count"] });
       queryClient.invalidateQueries({ queryKey: ['/api/message-notifications/unread-counts'] });
