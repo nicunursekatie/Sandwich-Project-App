@@ -100,12 +100,20 @@ export class EventRequestsGoogleSheetsService extends GoogleSheetsService {
 
     // Parse the submission date from Google Sheets
     let submissionDate;
-    if (row.submittedOn) {
+    if (row.submittedOn && row.submittedOn.trim()) {
       try {
-        submissionDate = new Date(row.submittedOn);
-        console.log(`✅ Parsed submission date "${row.submittedOn}" to:`, submissionDate.toISOString());
+        const dateStr = row.submittedOn.trim();
+        submissionDate = new Date(dateStr);
+        
+        // Validate the parsed date
+        if (isNaN(submissionDate.getTime())) {
+          console.warn(`Invalid submission date format in Google Sheets: ${row.submittedOn}`);
+          submissionDate = new Date(); // Fallback to current date
+        } else {
+          console.log(`✅ Parsed submission date "${row.submittedOn}" to:`, submissionDate.toISOString());
+        }
       } catch (error) {
-        console.warn(`Invalid submission date format in Google Sheets: ${row.submittedOn}`);
+        console.warn(`Error parsing submission date format in Google Sheets: ${row.submittedOn}`, error);
         submissionDate = new Date(); // Fallback to current date
       }
     } else {
@@ -122,17 +130,27 @@ export class EventRequestsGoogleSheetsService extends GoogleSheetsService {
       department: row.department,
       desiredEventDate: row.desiredEventDate ? (() => {
         // Timezone-safe date parsing from Google Sheets
-        const dateStr = row.desiredEventDate;
-        if (dateStr.match(/^\d{1,2}\/\d{1,2}\/\d{4}$/)) {
-          // Handle MM/DD/YYYY format from Google Sheets
-          const [month, day, year] = dateStr.split('/');
-          return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-        } else if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
-          // Handle YYYY-MM-DD format
-          return new Date(dateStr + 'T12:00:00');
-        } else {
-          // Fallback with noon time to avoid timezone issues
-          return new Date(dateStr + 'T12:00:00');
+        const dateStr = row.desiredEventDate.trim();
+        if (!dateStr) return null;
+        
+        try {
+          if (dateStr.match(/^\d{1,2}\/\d{1,2}\/\d{4}$/)) {
+            // Handle MM/DD/YYYY format from Google Sheets
+            const [month, day, year] = dateStr.split('/');
+            const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), 12, 0, 0);
+            return isNaN(date.getTime()) ? null : date;
+          } else if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+            // Handle YYYY-MM-DD format
+            const date = new Date(dateStr + 'T12:00:00.000Z');
+            return isNaN(date.getTime()) ? null : date;
+          } else {
+            // Try parsing as-is with noon time to avoid timezone issues
+            const date = new Date(dateStr + 'T12:00:00.000Z');
+            return isNaN(date.getTime()) ? null : date;
+          }
+        } catch (error) {
+          console.warn(`Failed to parse date "${dateStr}":`, error);
+          return null;
         }
       })() : null,
       status: row.status || 'new',
