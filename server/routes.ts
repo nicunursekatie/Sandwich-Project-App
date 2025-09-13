@@ -151,8 +151,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Add missing hosts endpoints that were lost during refactoring
-  const hostsRoutes = await import("./routes/hosts");
-  app.use("/api", hostsRoutes.default);
+  const { hostsRoutes } = await import("./routes/hosts");
+  app.use("/api", hostsRoutes);
 
   // Import and register recipient TSP contacts routes
   const recipientTspContactRoutes = await import("./routes/recipient-tsp-contacts");
