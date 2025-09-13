@@ -1459,20 +1459,14 @@ router.get("/debug/auth", (req, res) => {
 });
 
 // Sync event requests TO Google Sheets
-router.post("/sync/to-sheets", async (req, res) => {
+router.post("/sync/to-sheets", isAuthenticated, requirePermission("EVENT_REQUESTS_MANAGE"), async (req, res) => {
   try {
     const user = req.user;
-    console.log("🔍 Sync to sheets - User debug:", {
-      userExists: !!user,
-      userRole: user?.role,
-      userEmail: user?.email,
-      permissionCount: user?.permissions?.length || 0,
-    });
+    console.log("🔍 Sync to sheets - User:", user?.email);
 
-    // Temporarily disable all auth checks for testing
-    // if (!user) {
-    //   return res.status(403).json({ message: "Authentication required" });
-    // }
+    if (!user) {
+      return res.status(403).json({ message: "Authentication required" });
+    }
 
     const syncService = getEventRequestsGoogleSheetsService(storage as any);
     if (!syncService) {
@@ -1501,13 +1495,12 @@ router.post("/sync/to-sheets", async (req, res) => {
 });
 
 // Sync event requests FROM Google Sheets
-router.post("/sync/from-sheets", async (req, res) => {
+router.post("/sync/from-sheets", isAuthenticated, requirePermission("EVENT_REQUESTS_MANAGE"), async (req, res) => {
   try {
     const user = req.user;
-    // Temporarily disable all auth checks for testing
-    // if (!user) {
-    //   return res.status(403).json({ message: "Authentication required" });
-    // }
+    if (!user) {
+      return res.status(403).json({ message: "Authentication required" });
+    }
 
     const syncService = getEventRequestsGoogleSheetsService(storage as any);
     if (!syncService) {
@@ -1536,13 +1529,12 @@ router.post("/sync/from-sheets", async (req, res) => {
 });
 
 // Analyze Google Sheets structure
-router.get("/sync/analyze", async (req, res) => {
+router.get("/sync/analyze", isAuthenticated, requirePermission("EVENT_REQUESTS_VIEW"), async (req, res) => {
   try {
-    // Temporarily disable all auth checks for testing
-    // const user = req.user;
-    // if (!user || (user.role !== 'super_admin' && !hasPermission(user, "EVENT_REQUESTS_VIEW"))) {
-    //   return res.status(403).json({ message: "Insufficient permissions" });
-    // }
+    const user = req.user;
+    if (!user) {
+      return res.status(403).json({ message: "Authentication required" });
+    }
 
     const syncService = getEventRequestsGoogleSheetsService(storage as any);
     if (!syncService) {
@@ -1701,60 +1693,7 @@ router.patch("/:id/follow-up", isAuthenticated, async (req, res) => {
   }
 });
 
-// Get organization event counts (completed events only)
-router.get("/organization-counts", isAuthenticated, async (req, res) => {
-  try {
-    console.log('🔍 Organization Counts API called by user:', req.user?.email);
-    console.log('🔍 User permissions:', req.user?.permissions);
-    
-    // Super admins can access this data, and it's general event statistics
-    // Remove restrictive permission check for now
-    // if (!hasPermission(req.user!, PERMISSIONS.VIEW_ORGANIZATIONS_CATALOG)) {
-    //   console.log('❌ Insufficient permissions for organization counts');
-    //   return res.status(403).json({ error: "Insufficient permissions" });
-    // }
-
-    const allEventRequests = await storage.getAllEventRequests();
-    console.log('📊 Total event requests retrieved:', allEventRequests.length);
-    
-    // Count completed events by organization
-    const organizationCounts = new Map();
-    
-    allEventRequests.forEach((event: any) => {
-      // Only count completed events
-      if (event.status === 'completed' && event.organizationName) {
-        const orgName = event.organizationName.trim();
-        const currentCount = organizationCounts.get(orgName) || 0;
-        organizationCounts.set(orgName, currentCount + 1);
-        
-        // Debug specific organizations
-        if (orgName === 'Volunteer Emory' || orgName === 'Christ the King School (August)') {
-          console.log('🔍 Counting completed event:', {
-            organization: orgName,
-            status: event.status,
-            newCount: currentCount + 1
-          });
-        }
-      }
-    });
-
-    // Convert to object for easier consumption
-    const countsObject = Object.fromEntries(organizationCounts);
-    console.log('📈 Final organization counts:', countsObject);
-
-    // logActivity(
-    //   req,
-    //   res,
-    //   PERMISSIONS.VIEW_ORGANIZATIONS_CATALOG,
-    //   `Retrieved event counts for ${organizationCounts.size} organizations`,
-    // );
-    
-    res.json(countsObject);
-  } catch (error) {
-    console.error("Error fetching organization event counts:", error);
-    res.status(500).json({ message: "Failed to fetch organization event counts" });
-  }
-});
+// Duplicate route removed - organization-counts already exists at line 376
 
 
 // Update driver assignments for an event
