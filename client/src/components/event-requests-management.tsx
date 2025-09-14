@@ -5031,14 +5031,15 @@ export default function EventRequestsManagement() {
                         today.setHours(0, 0, 0, 0);
                         eventDate.setHours(0, 0, 0, 0);
                         
-                        if (eventDate <= today) {
-                          toast({
-                            title: "Cannot mark as scheduled",
-                            description: "Events with past or current dates cannot be in process. Please update the event date first.",
-                            variant: "destructive",
-                          });
-                          return;
-                        }
+                        // Temporarily allow past dates as we go live with this feature
+                        // if (eventDate <= today) {
+                        //   toast({
+                        //     title: "Cannot mark as scheduled",
+                        //     description: "Events with past or current dates cannot be in process. Please update the event date first.",
+                        //     variant: "destructive",
+                        //   });
+                        //   return;
+                        // }
                       } catch (error) {
                         console.warn("Error parsing event date for validation:", error);
                       }
