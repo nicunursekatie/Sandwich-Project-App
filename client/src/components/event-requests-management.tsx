@@ -5302,16 +5302,11 @@ export default function EventRequestsManagement() {
                   <span className="text-3xl">🥪</span>
                   <div className="text-center">
                     <span className="text-2xl font-bold text-[#FBAD3F]">
-                      {displayCount} Sandwiches
+                      {summary.hasBreakdown ? summary.breakdown : `${displayCount} Sandwiches`}
                     </span>
                     <div className="text-sm text-[#FBAD3F]/80 mt-1">
                       {hasActualCount ? (
                         <span className="font-semibold">✅ Final Count Recorded</span>
-                      ) : summary.hasBreakdown ? (
-                        <div>
-                          <div>{summary.breakdown}</div>
-                          <div className="text-xs text-orange-600 mt-1">(Estimated)</div>
-                        </div>
                       ) : (
                         <div className="text-xs text-orange-600">(Estimated)</div>
                       )}
