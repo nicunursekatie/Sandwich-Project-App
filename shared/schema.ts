@@ -1225,17 +1225,23 @@ export type InsertDriver = z.infer<typeof insertDriverSchema>;
 export type Volunteer = typeof volunteers.$inferSelect;
 export type InsertVolunteer = z.infer<typeof insertVolunteerSchema>;
 
-// Notifications table for celebrations and system notifications
+// Enhanced notifications table for comprehensive in-app notifications
 export const notifications = pgTable('notifications', {
   id: serial('id').primaryKey(),
   userId: varchar('user_id').notNull(), // Who receives the notification
-  type: varchar('type').notNull(), // 'celebration', 'reminder', 'achievement', etc.
+  type: varchar('type').notNull(), // 'system_update', 'announcement', 'reminder', 'achievement', 'alert', 'celebration', etc.
+  priority: varchar('priority').notNull().default('medium'), // 'low', 'medium', 'high', 'urgent'
   title: text('title').notNull(),
   message: text('message').notNull(),
   isRead: boolean('is_read').notNull().default(false),
-  relatedType: varchar('related_type'), // 'task', 'project', 'collection', etc.
+  isArchived: boolean('is_archived').notNull().default(false),
+  category: varchar('category'), // 'updates', 'events', 'tasks', 'system', 'social'
+  relatedType: varchar('related_type'), // 'task', 'project', 'collection', 'announcement', etc.
   relatedId: integer('related_id'), // ID of related record
-  celebrationData: jsonb('celebration_data'), // Extra data for celebrations (emojis, achievements, etc.)
+  actionUrl: text('action_url'), // URL to navigate to when clicked
+  actionText: text('action_text'), // Text for action button (e.g., "View Details", "Take Action")
+  expiresAt: timestamp('expires_at'), // When notification should be auto-archived
+  metadata: jsonb('metadata').default('{}'), // Extra data (icons, colors, celebration data, etc.)
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
