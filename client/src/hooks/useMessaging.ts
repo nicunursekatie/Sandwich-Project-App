@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import { useAuth } from "./useAuth";
-import { useToast } from "./use-toast";
+import { useState, useEffect, useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
+import { useAuth } from './useAuth';
+import { useToast } from './use-toast';
 
 interface UnreadCounts {
   general: number;
@@ -40,7 +40,7 @@ interface Message {
 interface SendMessageParams {
   recipientIds: string[];
   content: string;
-  contextType?: "suggestion" | "project" | "task" | "direct";
+  contextType?: 'suggestion' | 'project' | 'task' | 'direct';
   contextId?: string;
   parentMessageId?: number;
 }
@@ -54,20 +54,20 @@ export function useMessaging() {
 
   // Type guard for user object
   const isValidUser = (u: any): u is { id: string; email: string } => {
-    return u && typeof u === "object" && "id" in u && "email" in u;
+    return u && typeof u === 'object' && 'id' in u && 'email' in u;
   };
 
   // Fix WebSocket URL construction
   const getWebSocketUrl = () => {
-    if (typeof window === "undefined") return "";
+    if (typeof window === 'undefined') return '';
 
-    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const host = window.location.host;
 
     // Handle different deployment scenarios
-    if (host.includes("replit")) {
+    if (host.includes('replit')) {
       return `${protocol}//${host}/notifications`;
-    } else if (host.includes("localhost")) {
+    } else if (host.includes('localhost')) {
       // For localhost development, use the port from current location
       return `${protocol}//localhost:5000/notifications`;
     } else {
@@ -95,7 +95,7 @@ export function useMessaging() {
     refetch: refetchUnreadCounts,
   } = useQuery({
     queryKey: [
-      "/api/message-notifications/unread-counts",
+      '/api/message-notifications/unread-counts',
       isValidUser(user) ? user.id : null,
     ],
     queryFn: async () => {
@@ -116,13 +116,13 @@ export function useMessaging() {
         };
       try {
         const response = await apiRequest(
-          "GET",
-          "/api/message-notifications/unread-counts"
+          'GET',
+          '/api/message-notifications/unread-counts'
         );
         // Add context-specific counts
         const contextCounts = await apiRequest(
-          "GET",
-          "/api/messaging/unread?groupByContext=true"
+          'GET',
+          '/api/messaging/unread?groupByContext=true'
         );
         return {
           ...response,
@@ -131,7 +131,7 @@ export function useMessaging() {
           task: (contextCounts && contextCounts.task) || 0,
         };
       } catch (error) {
-        console.warn("Unread counts fetch failed:", error);
+        console.warn('Unread counts fetch failed:', error);
         return {
           general: 0,
           committee: 0,
@@ -155,33 +155,31 @@ export function useMessaging() {
   });
 
   // Get unread messages
-  const {
-    data: unreadMessages = [],
-    refetch: refetchUnreadMessages,
-  } = useQuery({
-    queryKey: ["/api/messaging/unread", isValidUser(user) ? user.id : null],
-    queryFn: async () => {
-      if (!isValidUser(user)) return [];
-      const response = await apiRequest("GET", "/api/messaging/unread");
-      return response.messages || [];
-    },
-    enabled: isValidUser(user),
-  });
+  const { data: unreadMessages = [], refetch: refetchUnreadMessages } =
+    useQuery({
+      queryKey: ['/api/messaging/unread', isValidUser(user) ? user.id : null],
+      queryFn: async () => {
+        if (!isValidUser(user)) return [];
+        const response = await apiRequest('GET', '/api/messaging/unread');
+        return response.messages || [];
+      },
+      enabled: isValidUser(user),
+    });
 
   // Send message mutation
   const sendMessageMutation = useMutation({
     mutationFn: async (params: SendMessageParams) => {
-      return await apiRequest("POST", "/api/messaging/send", params);
+      return await apiRequest('POST', '/api/messaging/send', params);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/messaging"] });
-      toast({ description: "Message sent successfully" });
+      queryClient.invalidateQueries({ queryKey: ['/api/messaging'] });
+      toast({ description: 'Message sent successfully' });
     },
     onError: (error: any) => {
       toast({
-        title: "Failed to send message",
-        description: error.message || "Please try again",
-        variant: "destructive",
+        title: 'Failed to send message',
+        description: error.message || 'Please try again',
+        variant: 'destructive',
       });
     },
   });
@@ -189,27 +187,27 @@ export function useMessaging() {
   // Mark message as read mutation
   const markAsReadMutation = useMutation({
     mutationFn: async (messageId: number) => {
-      return await apiRequest("POST", `/api/messaging/${messageId}/read`);
+      return await apiRequest('POST', `/api/messaging/${messageId}/read`);
     },
     onSuccess: () => {
       refetchUnreadCounts();
       refetchUnreadMessages();
-      queryClient.invalidateQueries({ queryKey: ["/api/messaging"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/messaging'] });
     },
   });
 
   // Mark all messages as read mutation
   const markAllAsReadMutation = useMutation({
     mutationFn: async (contextType?: string) => {
-      return await apiRequest("POST", "/api/messaging/mark-all-read", {
+      return await apiRequest('POST', '/api/messaging/mark-all-read', {
         contextType,
       });
     },
     onSuccess: () => {
       refetchUnreadCounts();
       refetchUnreadMessages();
-      queryClient.invalidateQueries({ queryKey: ["/api/messaging"] });
-      toast({ description: "All messages marked as read" });
+      queryClient.invalidateQueries({ queryKey: ['/api/messaging'] });
+      toast({ description: 'All messages marked as read' });
     },
   });
 
@@ -217,16 +215,16 @@ export function useMessaging() {
   useEffect(() => {
     const handleNotificationRefresh = () => {
       console.log(
-        "Notification refresh event received in useMessaging hook - refetching counts"
+        'Notification refresh event received in useMessaging hook - refetching counts'
       );
       refetchUnreadCounts();
     };
 
-    window.addEventListener("notificationRefresh", handleNotificationRefresh);
+    window.addEventListener('notificationRefresh', handleNotificationRefresh);
 
     return () => {
       window.removeEventListener(
-        "notificationRefresh",
+        'notificationRefresh',
         handleNotificationRefresh
       );
     };
@@ -236,29 +234,30 @@ export function useMessaging() {
   useEffect(() => {
     if (!isValidUser(user)) return;
 
-    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
 
     // Enhanced WebSocket URL construction with better error handling
     let wsUrl: string;
 
     try {
       if (
-        window.location.hostname.includes(".replit.dev") ||
-        window.location.hostname.includes(".replit.app")
+        window.location.hostname.includes('.replit.dev') ||
+        window.location.hostname.includes('.replit.app')
       ) {
         // Replit environment - use the full hostname without port
         wsUrl = `${protocol}//${window.location.hostname}/notifications`;
-      } else if (window.location.host && window.location.host !== "undefined") {
+      } else if (window.location.host && window.location.host !== 'undefined') {
         // Local development or other environments - use window.location.host which includes port
         wsUrl = `${protocol}//${window.location.host}/notifications`;
       } else {
         // Fallback for environments where window.location.host is undefined
-        const port = window.location.port || "5000";
-        wsUrl = `${protocol}//${window.location.hostname ||
-          "localhost"}:${port}/notifications`;
+        const port = window.location.port || '5000';
+        wsUrl = `${protocol}//${
+          window.location.hostname || 'localhost'
+        }:${port}/notifications`;
       }
     } catch (error) {
-      console.error("Failed to construct WebSocket URL:", error);
+      console.error('Failed to construct WebSocket URL:', error);
       // Last resort fallback
       wsUrl = `ws://localhost:5000/notifications`;
     }
@@ -268,15 +267,15 @@ export function useMessaging() {
     try {
       ws = new WebSocket(wsUrl);
     } catch (error) {
-      console.error("Failed to create WebSocket connection:", error);
+      console.error('Failed to create WebSocket connection:', error);
       return () => {}; // Return cleanup function even on error
     }
 
     ws.onopen = () => {
-      console.log("Messaging WebSocket connected");
+      console.log('Messaging WebSocket connected');
       // Identify user
       if (isValidUser(user)) {
-        ws.send(JSON.stringify({ type: "identify", userId: user.id }));
+        ws.send(JSON.stringify({ type: 'identify', userId: user.id }));
       }
       setWsConnection(ws);
     };
@@ -285,41 +284,41 @@ export function useMessaging() {
       try {
         const data = JSON.parse(event.data);
 
-        if (data.type === "new_message") {
+        if (data.type === 'new_message') {
           // Refetch unread counts and messages
           refetchUnreadCounts();
           refetchUnreadMessages();
 
           // Show toast notification
           toast({
-            title: "New message",
-            description: data.message.sender || "You have a new message",
+            title: 'New message',
+            description: data.message.sender || 'You have a new message',
           });
         } else if (
-          data.type === "message_edited" ||
-          data.type === "message_deleted"
+          data.type === 'message_edited' ||
+          data.type === 'message_deleted'
         ) {
           // Refresh message lists
-          queryClient.invalidateQueries({ queryKey: ["/api/messaging"] });
+          queryClient.invalidateQueries({ queryKey: ['/api/messaging'] });
         }
       } catch (error) {
-        console.error("Failed to parse WebSocket message:", error);
+        console.error('Failed to parse WebSocket message:', error);
       }
     };
 
     ws.onerror = (error) => {
-      console.error("Messaging WebSocket error:", error);
+      console.error('Messaging WebSocket error:', error);
       setWsConnection(null);
     };
 
     ws.onclose = (event) => {
-      console.log("Messaging WebSocket disconnected");
+      console.log('Messaging WebSocket disconnected');
       setWsConnection(null);
 
       // Prevent logging error for normal closure
       if (event.code !== 1000 && event.code !== 1001) {
         console.warn(
-          "WebSocket closed unexpectedly:",
+          'WebSocket closed unexpectedly:',
           event.code,
           event.reason
         );
@@ -342,9 +341,9 @@ export function useMessaging() {
     async (params: SendMessageParams) => {
       if (!isValidUser(user)) {
         toast({
-          title: "Not authenticated",
-          description: "Please log in to send messages",
-          variant: "destructive",
+          title: 'Not authenticated',
+          description: 'Please log in to send messages',
+          variant: 'destructive',
         });
         return;
       }
@@ -375,12 +374,12 @@ export function useMessaging() {
     async (contextType: string, contextId: string) => {
       try {
         const response = await apiRequest(
-          "GET",
+          'GET',
           `/api/messaging/context/${contextType}/${contextId}`
         );
         return response.messages || [];
       } catch (error) {
-        console.error("Failed to fetch context messages:", error);
+        console.error('Failed to fetch context messages:', error);
         return [];
       }
     },

@@ -1,8 +1,14 @@
-import { Search, Filter, Calendar, MapPin } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import type { SandwichCollection } from "@shared/schema";
+import { Search, Filter, Calendar, MapPin } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import type { SandwichCollection } from '@shared/schema';
 
 interface FiltersProps {
   searchTerm: string;
@@ -25,19 +31,22 @@ export function Filters({
   onDateFilterChange,
   sortBy,
   onSortChange,
-  collections
+  collections,
 }: FiltersProps) {
   // Get unique hosts for filter dropdown
-  const uniqueHosts = Array.from(new Set(collections.map(c => c.hostName))).sort();
+  const uniqueHosts = Array.from(
+    new Set(collections.map((c) => c.hostName))
+  ).sort();
 
   const clearFilters = () => {
-    onSearchChange("");
-    onHostFilterChange("all");
-    onDateFilterChange("");
-    onSortChange("date-desc");
+    onSearchChange('');
+    onHostFilterChange('all');
+    onDateFilterChange('');
+    onSortChange('date-desc');
   };
 
-  const hasActiveFilters = searchTerm || hostFilter !== "all" || dateFilter || sortBy !== "date-desc";
+  const hasActiveFilters =
+    searchTerm || hostFilter !== 'all' || dateFilter || sortBy !== 'date-desc';
 
   return (
     <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
@@ -53,7 +62,7 @@ export function Filters({
             />
           </div>
         </div>
-        
+
         <div className="flex flex-col sm:flex-row gap-2">
           <Select value={hostFilter} onValueChange={onHostFilterChange}>
             <SelectTrigger className="w-full sm:w-[180px]">
@@ -63,11 +72,13 @@ export function Filters({
             <SelectContent>
               <SelectItem value="all">All Hosts</SelectItem>
               {uniqueHosts.map((host, index) => (
-                <SelectItem key={`filter-host-${index}-${host}`} value={host}>{host}</SelectItem>
+                <SelectItem key={`filter-host-${index}-${host}`} value={host}>
+                  {host}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          
+
           <Input
             type="date"
             value={dateFilter}
@@ -75,7 +86,7 @@ export function Filters({
             className="w-full sm:w-[150px]"
             title="Filter by date"
           />
-          
+
           <Select value={sortBy} onValueChange={onSortChange}>
             <SelectTrigger className="w-full sm:w-[160px]">
               <Filter className="h-4 w-4 mr-2" />
@@ -90,7 +101,7 @@ export function Filters({
               <SelectItem value="total-asc">Total (Low-High)</SelectItem>
             </SelectContent>
           </Select>
-          
+
           {hasActiveFilters && (
             <Button variant="outline" onClick={clearFilters} size="sm">
               Clear
@@ -98,13 +109,11 @@ export function Filters({
           )}
         </div>
       </div>
-      
-      <div className="flex justify-between items-center text-sm text-gray-600"
+
+      <div className="flex justify-between items-center text-sm text-gray-600">
         <span>Showing {collections.length} collections</span>
         {hasActiveFilters && (
-          <span className="text-blue-600"
-            Filters active
-          </span>
+          <span className="text-blue-600">Filters active</span>
         )}
       </div>
     </div>

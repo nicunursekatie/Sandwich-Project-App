@@ -1,4 +1,4 @@
-import { db } from "./db";
+import { db } from './db';
 import {
   sandwichCollections,
   hosts,
@@ -8,11 +8,11 @@ import {
   messages,
   meetingMinutes,
   hostContacts,
-} from "@shared/schema";
-import { eq, gte, lte, desc, sql } from "drizzle-orm";
+} from '@shared/schema';
+import { eq, gte, lte, desc, sql } from 'drizzle-orm';
 
 export interface ExportOptions {
-  format: "csv" | "json";
+  format: 'csv' | 'json';
   dateRange?: {
     start: string;
     end: string;
@@ -23,7 +23,7 @@ export interface ExportOptions {
 
 export class DataExporter {
   static async exportSandwichCollections(
-    options: ExportOptions = { format: "csv" }
+    options: ExportOptions = { format: 'csv' }
   ) {
     try {
       let query = db.select().from(sandwichCollections);
@@ -39,83 +39,80 @@ export class DataExporter {
         desc(sandwichCollections.collectionDate)
       );
 
-      if (options.format === "csv") {
+      if (options.format === 'csv') {
         return this.convertToCSV(data, [
-          "id",
-          "hostName",
-          "collectionDate",
-          "sandwichCount",
-          "notes",
-          "createdAt",
+          'id',
+          'hostName',
+          'collectionDate',
+          'sandwichCount',
+          'notes',
+          'createdAt',
         ]);
       }
 
-      return { data, format: "json" };
+      return { data, format: 'json' };
     } catch (error) {
-      console.error("Export failed:", error);
-      throw new Error("Failed to export sandwich collections");
+      console.error('Export failed:', error);
+      throw new Error('Failed to export sandwich collections');
     }
   }
 
-  static async exportHosts(options: ExportOptions = { format: "csv" }) {
+  static async exportHosts(options: ExportOptions = { format: 'csv' }) {
     try {
       let query = db.select().from(hosts);
 
       if (!options.includeInactive) {
-        query = query.where(eq(hosts.status, "active"));
+        query = query.where(eq(hosts.status, 'active'));
       }
 
       const data = await query.orderBy(hosts.name);
 
-      if (options.format === "csv") {
+      if (options.format === 'csv') {
         return this.convertToCSV(data, [
-          "id",
-          "name",
-          "address",
-          "status",
-          "capacity",
-          "notes",
-          "createdAt",
+          'id',
+          'name',
+          'address',
+          'status',
+          'capacity',
+          'notes',
+          'createdAt',
         ]);
       }
 
-      return { data, format: "json" };
+      return { data, format: 'json' };
     } catch (error) {
-      console.error("Export failed:", error);
-      throw new Error("Failed to export hosts");
+      console.error('Export failed:', error);
+      throw new Error('Failed to export hosts');
     }
   }
 
-  static async exportProjects(options: ExportOptions = { format: "csv" }) {
+  static async exportProjects(options: ExportOptions = { format: 'csv' }) {
     try {
-      const data = await db
-        .select()
-        .from(projects)
-        .orderBy(desc(projects.id));
+      const data = await db.select().from(projects).orderBy(desc(projects.id));
 
-      if (options.format === "csv") {
+      if (options.format === 'csv') {
         return this.convertToCSV(data, [
-          "id",
-          "title",
-          "description",
-          "status",
-          "priority",
-          "category",
-          "assigneeName",
-          "dueDate",
-          "progressPercentage",
-          "createdAt",
+          'id',
+          'title',
+          'description',
+          'status',
+          'priority',
+          'category',
+          'assigneeName',
+          'dueDate',
+          'progressPercentage',
+          'createdAt',
         ]);
       }
 
-      return { data, format: "json" };
+      return { data, format: 'json' };
     } catch (error) {
-      console.error("Export failed:", error);
-      throw new Error("Failed to export projects");
+      console.error('Export failed:', error);
+      throw new Error('Failed to export projects');
     }
   }
 
-  static async exportAuditLogs(options: ExportOptions = { format: "csv" }) {
+  static async exportAuditLogs(options: ExportOptions = { format: 'csv' }) {
     try {
       let query = db.select().from(auditLogs);
 
@@ -127,26 +124,26 @@ export class DataExporter {
 
       const data = await query.orderBy(desc(auditLogs.timestamp)).limit(10000); // Limit for performance
 
-      if (options.format === "csv") {
+      if (options.format === 'csv') {
         return this.convertToCSV(data, [
-          "id",
-          "action",
-          "tableName",
-          "recordId",
-          "userId",
-          "ipAddress",
-          "timestamp",
+          'id',
+          'action',
+          'tableName',
+          'recordId',
+          'userId',
+          'ipAddress',
+          'timestamp',
         ]);
       }
 
-      return { data, format: "json" };
+      return { data, format: 'json' };
     } catch (error) {
-      console.error("Export failed:", error);
-      throw new Error("Failed to export audit logs");
+      console.error('Export failed:', error);
+      throw new Error('Failed to export audit logs');
     }
   }
 
-  static async exportFullDataset(options: ExportOptions = { format: "json" }) {
+  static async exportFullDataset(options: ExportOptions = { format: 'json' }) {
     try {
       const [
         collectionsData,
@@ -160,22 +157,10 @@ export class DataExporter {
           .select()
           .from(sandwichCollections)
           .orderBy(desc(sandwichCollections.collectionDate)),
-        db
-          .select()
-          .from(hosts)
-          .orderBy(hosts.name),
-        db
-          .select()
-          .from(recipients)
-          .orderBy(recipients.name),
-        db
-          .select()
-          .from(projects)
-          .orderBy(desc(projects.id)),
-        db
-          .select()
-          .from(contacts)
-          .orderBy(contacts.name),
+        db.select().from(hosts).orderBy(hosts.name),
+        db.select().from(recipients).orderBy(recipients.name),
+        db.select().from(projects).orderBy(desc(projects.id)),
+        db.select().from(contacts).orderBy(contacts.name),
         db
           .select()
           .from(messages)
@@ -203,10 +188,10 @@ export class DataExporter {
         },
       };
 
-      return { data: fullDataset, format: "json" };
+      return { data: fullDataset, format: 'json' };
     } catch (error) {
-      console.error("Full export failed:", error);
-      throw new Error("Failed to export full dataset");
+      console.error('Full export failed:', error);
+      throw new Error('Failed to export full dataset');
     }
   }
 
@@ -241,7 +226,7 @@ export class DataExporter {
         totalSandwiches: Number(totalSandwiches[0]?.total || 0),
       };
     } catch (error) {
-      console.error("Summary failed:", error);
+      console.error('Summary failed:', error);
       return {
         collections: 0,
         hosts: 0,
@@ -256,13 +241,13 @@ export class DataExporter {
   private static convertToCSV(
     data: any[],
     fields: string[]
-  ): { data: string; format: "csv" } {
+  ): { data: string; format: 'csv' } {
     if (!data.length) {
-      return { data: "", format: "csv" };
+      return { data: '', format: 'csv' };
     }
 
     // Create headers
-    const headers = fields.join(",");
+    const headers = fields.join(',');
 
     // Create rows
     const rows = data.map((item) => {
@@ -272,11 +257,11 @@ export class DataExporter {
 
           // Handle null/undefined
           if (value === null || value === undefined) {
-            return "";
+            return '';
           }
 
           // Handle objects/arrays
-          if (typeof value === "object") {
+          if (typeof value === 'object') {
             value = JSON.stringify(value);
           }
 
@@ -285,8 +270,8 @@ export class DataExporter {
 
           // Wrap in quotes if contains comma, newline, or quote
           if (
-            value.includes(",") ||
-            value.includes("\n") ||
+            value.includes(',') ||
+            value.includes('\n') ||
             value.includes('"')
           ) {
             value = `"${value}"`;
@@ -294,10 +279,10 @@ export class DataExporter {
 
           return value;
         })
-        .join(",");
+        .join(',');
     });
 
-    const csvData = [headers, ...rows].join("\n");
-    return { data: csvData, format: "csv" };
+    const csvData = [headers, ...rows].join('\n');
+    return { data: csvData, format: 'csv' };
   }
 }

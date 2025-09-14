@@ -1,5 +1,5 @@
-import { Router } from "express";
-import { storage } from "../storage-wrapper";
+import { Router } from 'express';
+import { storage } from '../storage-wrapper';
 
 interface GroupsCatalogDependencies {
   isAuthenticated: any;
@@ -7,21 +7,21 @@ interface GroupsCatalogDependencies {
 
 // Canonicalize organization names for robust matching
 function canonicalizeOrgName(orgName: string): string {
-  if (!orgName || typeof orgName !== "string") return "";
+  if (!orgName || typeof orgName !== 'string') return '';
 
   return orgName
     .trim()
     .toLowerCase()
-    .replace(/\s+/g, " ") // Collapse multiple whitespace to single space
-    .replace(/[&\.,;:!?"'\-_]/g, "") // Remove common punctuation
-    .replace(/\s/g, ""); // Remove all remaining spaces
+    .replace(/\s+/g, ' ') // Collapse multiple whitespace to single space
+    .replace(/[&\.,;:!?"'\-_]/g, '') // Remove common punctuation
+    .replace(/\s/g, ''); // Remove all remaining spaces
 }
 
 export function createGroupsCatalogRoutes(deps: GroupsCatalogDependencies) {
   const router = Router();
 
   // Groups Catalog: Complete directory of all organizations (current requests + historical hosts)
-  router.get("/", deps.isAuthenticated, async (req, res) => {
+  router.get('/', deps.isAuthenticated, async (req, res) => {
     try {
       const user = req.user;
 
@@ -36,11 +36,11 @@ export function createGroupsCatalogRoutes(deps: GroupsCatalogDependencies) {
 
       allEventRequests.forEach((request) => {
         const orgName = request.organizationName;
-        const department = request.department || "";
+        const department = request.department || '';
         const contactName =
           request.firstName && request.lastName
             ? `${request.firstName} ${request.lastName}`.trim()
-            : request.firstName || request.lastName || "";
+            : request.firstName || request.lastName || '';
         const contactEmail = request.email;
 
         if (!orgName || !contactName) return;
@@ -57,7 +57,7 @@ export function createGroupsCatalogRoutes(deps: GroupsCatalogDependencies) {
             department: department,
             contacts: [],
             totalRequests: 0,
-            latestStatus: "new",
+            latestStatus: 'new',
             latestRequestDate: request.createdAt || new Date(),
             hasHostedEvent: false,
             totalSandwiches: 0,
@@ -88,8 +88,8 @@ export function createGroupsCatalogRoutes(deps: GroupsCatalogDependencies) {
 
           // Determine status: check if scheduled (future event) or completed/past
           if (
-            request.status === "completed" ||
-            request.status === "contact_completed"
+            request.status === 'completed' ||
+            request.status === 'contact_completed'
           ) {
             dept.latestStatus = request.status;
             dept.hasHostedEvent = true;
@@ -97,35 +97,35 @@ export function createGroupsCatalogRoutes(deps: GroupsCatalogDependencies) {
             if (request.estimatedSandwichCount) {
               dept.totalSandwiches += request.estimatedSandwichCount;
             }
-          } else if (request.status === "scheduled") {
+          } else if (request.status === 'scheduled') {
             // Check if the scheduled event is in the future or past
             const eventDate = request.desiredEventDate
               ? new Date(request.desiredEventDate)
               : null;
             const now = new Date();
             if (eventDate && eventDate > now) {
-              dept.latestStatus = "scheduled"; // Upcoming event
+              dept.latestStatus = 'scheduled'; // Upcoming event
               dept.eventDate = request.desiredEventDate;
             } else if (eventDate && eventDate <= now) {
-              dept.latestStatus = "past"; // Past scheduled event
+              dept.latestStatus = 'past'; // Past scheduled event
               dept.hasHostedEvent = true;
               dept.eventDate = request.desiredEventDate;
             } else {
-              dept.latestStatus = "scheduled"; // Scheduled but no date specified
+              dept.latestStatus = 'scheduled'; // Scheduled but no date specified
             }
-          } else if (request.status === "contacted") {
+          } else if (request.status === 'contacted') {
             // For contacted events with a future date, consider them "in process"
             const eventDate = request.desiredEventDate
               ? new Date(request.desiredEventDate)
               : null;
             const now = new Date();
             if (eventDate && eventDate > now) {
-              dept.latestStatus = "in_process"; // Event being planned
+              dept.latestStatus = 'in_process'; // Event being planned
             } else {
-              dept.latestStatus = "contacted";
+              dept.latestStatus = 'contacted';
             }
           } else {
-            dept.latestStatus = request.status || "new";
+            dept.latestStatus = request.status || 'new';
           }
 
           // Update event date from most recent request (normalize to ISO format)
@@ -135,7 +135,7 @@ export function createGroupsCatalogRoutes(deps: GroupsCatalogDependencies) {
               const dateObj = new Date(request.desiredEventDate);
               if (!isNaN(dateObj.getTime())) {
                 // Format as YYYY-MM-DD for date-only or full ISO string
-                dept.eventDate = dateObj.toISOString().split("T")[0];
+                dept.eventDate = dateObj.toISOString().split('T')[0];
               } else {
                 dept.eventDate = null;
               }
@@ -159,9 +159,9 @@ export function createGroupsCatalogRoutes(deps: GroupsCatalogDependencies) {
         ) => {
           if (
             !orgName ||
-            orgName === "Group" ||
-            orgName === "Groups" ||
-            orgName === "Unnamed Groups" ||
+            orgName === 'Group' ||
+            orgName === 'Groups' ||
+            orgName === 'Unnamed Groups' ||
             !orgName.trim()
           ) {
             return;
@@ -213,7 +213,7 @@ export function createGroupsCatalogRoutes(deps: GroupsCatalogDependencies) {
 
       // Helper function to calculate event frequency
       const calculateEventFrequency = (eventDates: Set<string>) => {
-        if (eventDates.size === 1) return "1 event";
+        if (eventDates.size === 1) return '1 event';
         if (eventDates.size === 0) return null;
 
         const dates = Array.from(eventDates)
@@ -262,7 +262,7 @@ export function createGroupsCatalogRoutes(deps: GroupsCatalogDependencies) {
             );
             dept.latestCollectionDate = new Date(latestCollectionDate)
               .toISOString()
-              .split("T")[0];
+              .split('T')[0];
 
             // Calculate latest activity date for proper sorting
             const requestTime = new Date(dept.latestRequestDate).getTime();
@@ -283,10 +283,10 @@ export function createGroupsCatalogRoutes(deps: GroupsCatalogDependencies) {
           departmentsMap.set(departmentKey, {
             organizationName: orgData.originalName,
             canonicalName: canonicalOrgName,
-            department: "",
+            department: '',
             contacts: [],
             totalRequests: 0,
-            latestStatus: "past",
+            latestStatus: 'past',
             latestRequestDate: new Date(latestCollectionDate),
             latestActivityDate: new Date(latestCollectionDate),
             hasHostedEvent: true,
@@ -297,7 +297,7 @@ export function createGroupsCatalogRoutes(deps: GroupsCatalogDependencies) {
             eventDate: null,
             latestCollectionDate: new Date(latestCollectionDate)
               .toISOString()
-              .split("T")[0],
+              .split('T')[0],
           });
         }
       });
@@ -337,9 +337,9 @@ export function createGroupsCatalogRoutes(deps: GroupsCatalogDependencies) {
         org.departments.push({
           organizationName: org.displayName, // Use unified display name
           department: dept.department,
-          contactName: dept.contacts[0]?.name || "Historical Organization",
-          email: dept.contacts[0]?.email || "",
-          phone: dept.contacts[0]?.phone || "",
+          contactName: dept.contacts[0]?.name || 'Historical Organization',
+          email: dept.contacts[0]?.email || '',
+          phone: dept.contacts[0]?.phone || '',
           allContacts: dept.contacts,
           status: dept.latestStatus,
           totalRequests: dept.totalRequests,
@@ -382,16 +382,16 @@ export function createGroupsCatalogRoutes(deps: GroupsCatalogDependencies) {
 
       res.json({ groups: organizations });
     } catch (error) {
-      console.error("Error fetching organizations catalog:", error);
+      console.error('Error fetching organizations catalog:', error);
       res
         .status(500)
-        .json({ message: "Failed to fetch organizations catalog" });
+        .json({ message: 'Failed to fetch organizations catalog' });
     }
   });
 
   // Get detailed event history for a specific organization
   router.get(
-    "/details/:organizationName",
+    '/details/:organizationName',
     deps.isAuthenticated,
     async (req, res) => {
       try {
@@ -436,20 +436,20 @@ export function createGroupsCatalogRoutes(deps: GroupsCatalogDependencies) {
 
         // Process event requests into unified format
         const eventRequestHistory = orgEventRequests.map((request) => ({
-          type: "event_request",
+          type: 'event_request',
           id: request.id,
           date: request.desiredEventDate || request.createdAt,
           status: request.status,
-          department: request.department || "",
+          department: request.department || '',
           contactName:
             request.firstName && request.lastName
               ? `${request.firstName} ${request.lastName}`.trim()
-              : request.firstName || request.lastName || "",
+              : request.firstName || request.lastName || '',
           email: request.email,
           phone: request.phone,
           estimatedSandwiches: request.estimatedSandwichCount || 0,
           actualSandwiches: 0,
-          notes: request.description || "",
+          notes: request.description || '',
           createdAt: request.createdAt,
           lastUpdated: request.updatedAt || request.createdAt,
         }));
@@ -489,15 +489,15 @@ export function createGroupsCatalogRoutes(deps: GroupsCatalogDependencies) {
           }
 
           return {
-            type: "sandwich_collection",
+            type: 'sandwich_collection',
             id: collection.id,
             date: collection.collectionDate,
-            status: "completed",
+            status: 'completed',
             hostName: collection.hostName,
-            department: "",
-            contactName: collection.createdByName || "Unknown",
-            email: "",
-            phone: "",
+            department: '',
+            contactName: collection.createdByName || 'Unknown',
+            email: '',
+            phone: '',
             estimatedSandwiches: 0,
             actualSandwiches: sandwichCount,
             notes: `Collection hosted by ${collection.hostName}`,
@@ -519,9 +519,9 @@ export function createGroupsCatalogRoutes(deps: GroupsCatalogDependencies) {
         const totalEvents = allEvents.length;
         const completedEvents = allEvents.filter(
           (event) =>
-            event.status === "completed" ||
-            event.status === "contact_completed" ||
-            event.type === "sandwich_collection"
+            event.status === 'completed' ||
+            event.status === 'contact_completed' ||
+            event.type === 'sandwich_collection'
         ).length;
         const totalActualSandwiches = allEvents.reduce(
           (sum, event) => sum + event.actualSandwiches,
@@ -552,7 +552,7 @@ export function createGroupsCatalogRoutes(deps: GroupsCatalogDependencies) {
         // Calculate event frequency
         let eventFrequency = null;
         if (allEvents.length === 1) {
-          eventFrequency = "1 event";
+          eventFrequency = '1 event';
         } else if (allEvents.length > 1) {
           const dates = allEvents
             .map((event) => new Date(event.date || event.createdAt))
@@ -571,8 +571,9 @@ export function createGroupsCatalogRoutes(deps: GroupsCatalogDependencies) {
           } else {
             const eventsPerYear = allEvents.length / yearsDiff;
             if (eventsPerYear >= 1) {
-              eventFrequency = `${Math.round(eventsPerYear * 10) /
-                10} events per year`;
+              eventFrequency = `${
+                Math.round(eventsPerYear * 10) / 10
+              } events per year`;
             } else {
               eventFrequency = `${allEvents.length} events in ${Math.round(
                 yearsDiff
@@ -600,7 +601,7 @@ export function createGroupsCatalogRoutes(deps: GroupsCatalogDependencies) {
         );
         res
           .status(500)
-          .json({ message: "Failed to fetch organization details" });
+          .json({ message: 'Failed to fetch organization details' });
       }
     }
   );

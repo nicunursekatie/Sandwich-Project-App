@@ -1,17 +1,17 @@
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { useAuth } from "@/hooks/useAuth";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import { useEffect, useState } from "react";
-import { Trophy, X, Eye } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { useAuth } from '@/hooks/useAuth';
+import { apiRequest, queryClient } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
+import { useEffect, useState } from 'react';
+import { Trophy, X, Eye } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
 
 interface UnnotifiedKudos {
   id: number;
   content: string;
   senderName: string;
   entityName: string;
-  contextType: "task" | "project";
+  contextType: 'task' | 'project';
   createdAt: string;
 }
 
@@ -20,7 +20,7 @@ interface KudosToast {
   message: string;
   senderName: string;
   entityName: string;
-  contextType: "task" | "project";
+  contextType: 'task' | 'project';
   createdAt: string;
 }
 
@@ -32,7 +32,7 @@ export function KudosLoginNotifier() {
 
   const { data: unnotifiedKudos = [], isLoading } = useQuery<UnnotifiedKudos[]>(
     {
-      queryKey: ["/api/messaging/kudos/unnotified"],
+      queryKey: ['/api/messaging/kudos/unnotified'],
       enabled: !!user && !hasShownNotifications,
       staleTime: 0, // Always fetch fresh data
       cacheTime: 0, // Don't cache the results
@@ -42,18 +42,18 @@ export function KudosLoginNotifier() {
   // Mutation to mark kudos as initially notified
   const markInitiallyNotifiedMutation = useMutation({
     mutationFn: async (kudosIds: number[]) => {
-      return apiRequest("POST", "/api/messaging/kudos/mark-initial-notified", {
+      return apiRequest('POST', '/api/messaging/kudos/mark-initial-notified', {
         kudosIds,
       });
     },
     onSuccess: () => {
       // Invalidate notification count queries to update the bell icon
       queryClient.invalidateQueries({
-        queryKey: ["/api/message-notifications/unread-counts"],
+        queryKey: ['/api/message-notifications/unread-counts'],
       });
     },
     onError: (error) => {
-      console.error("Failed to mark kudos as initially notified:", error);
+      console.error('Failed to mark kudos as initially notified:', error);
     },
   });
 
@@ -193,7 +193,7 @@ export function KudosLoginNotifier() {
 
   const handleViewInInbox = () => {
     // Navigate to dashboard with messaging section and kudos tab
-    window.location.hash = "#/dashboard?section=messaging&tab=kudos";
+    window.location.hash = '#/dashboard?section=messaging&tab=kudos';
   };
 
   const handleDismissToast = (kudosId: number) => {

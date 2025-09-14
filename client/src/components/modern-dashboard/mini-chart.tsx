@@ -1,15 +1,15 @@
 interface MiniChartProps {
   data: number[];
   color?: string;
-  type?: "line" | "bar" | "area";
+  type?: 'line' | 'bar' | 'area';
   className?: string;
 }
 
 export function MiniChart({
   data,
-  color = "var(--tsp-primary)",
-  type = "line",
-  className = "",
+  color = 'var(--tsp-primary)',
+  type = 'line',
+  className = '',
 }: MiniChartProps) {
   if (!data || data.length === 0) return null;
 
@@ -30,9 +30,9 @@ export function MiniChart({
       .map((value, index) => {
         const x = padding + index * stepX;
         const y = height - padding - (value * (height - padding * 2)) / 100;
-        return `${index === 0 ? "M" : "L"} ${x} ${y}`;
+        return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
       })
-      .join(" ");
+      .join(' ');
   };
 
   const generateBars = () => {
@@ -65,12 +65,13 @@ export function MiniChart({
       .map((value, index) => {
         const x = padding + index * stepX;
         const y = height - padding - (value * (height - padding * 2)) / 100;
-        return `${index === 0 ? "M" : "L"} ${x} ${y}`;
+        return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
       })
-      .join(" ");
+      .join(' ');
 
-    const bottomPath = `L ${width - padding} ${height -
-      padding} L ${padding} ${height - padding} Z`;
+    const bottomPath = `L ${width - padding} ${
+      height - padding
+    } L ${padding} ${height - padding} Z`;
 
     return topPath + bottomPath;
   };
@@ -94,7 +95,7 @@ export function MiniChart({
           </linearGradient>
         </defs>
 
-        {type === "line" && (
+        {type === 'line' && (
           <path
             d={generatePath()}
             stroke={color}
@@ -105,9 +106,9 @@ export function MiniChart({
           />
         )}
 
-        {type === "bar" && generateBars()}
+        {type === 'bar' && generateBars()}
 
-        {type === "area" && (
+        {type === 'area' && (
           <path
             d={generateArea()}
             fill={`url(#gradient-${type})`}

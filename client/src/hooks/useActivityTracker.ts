@@ -1,5 +1,5 @@
-import { useCallback } from "react";
-import { apiRequest } from "@/lib/queryClient";
+import { useCallback } from 'react';
+import { apiRequest } from '@/lib/queryClient';
 
 interface ActivityData {
   action: string;
@@ -13,8 +13,8 @@ interface ActivityData {
 export function useActivityTracker() {
   const trackActivity = useCallback(async (data: ActivityData) => {
     try {
-      await fetch("/api/activity-log", {
-        method: "POST",
+      await fetch('/api/activity-log', {
+        method: 'POST',
         body: JSON.stringify({
           action: data.action,
           section: data.section,
@@ -24,12 +24,12 @@ export function useActivityTracker() {
           metadata: data.metadata,
         }),
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
       });
     } catch (error) {
       // Silently fail to avoid disrupting user experience
-      console.debug("Activity tracking failed:", error);
+      console.debug('Activity tracking failed:', error);
     }
   }, []);
 
@@ -37,7 +37,7 @@ export function useActivityTracker() {
   const trackClick = useCallback(
     (element: string, section: string, feature: string, details?: string) => {
       trackActivity({
-        action: "Click",
+        action: 'Click',
         section,
         feature,
         details: details || `Clicked ${element}`,
@@ -55,11 +55,11 @@ export function useActivityTracker() {
       success: boolean = true
     ) => {
       trackActivity({
-        action: success ? "Submit" : "Submit Failed",
+        action: success ? 'Submit' : 'Submit Failed',
         section,
         feature,
         details: `${
-          success ? "Successfully submitted" : "Failed to submit"
+          success ? 'Successfully submitted' : 'Failed to submit'
         } ${formName}`,
         metadata: { formName, success, timestamp: new Date().toISOString() },
       });
@@ -75,7 +75,7 @@ export function useActivityTracker() {
       details?: string
     ) => {
       trackActivity({
-        action: "View",
+        action: 'View',
         section,
         feature,
         details: details || `Viewed ${contentType}`,
@@ -93,11 +93,11 @@ export function useActivityTracker() {
       resultsCount?: number
     ) => {
       trackActivity({
-        action: "Search",
+        action: 'Search',
         section,
         feature,
         details: `Searched for "${query}"${
-          resultsCount !== undefined ? ` (${resultsCount} results)` : ""
+          resultsCount !== undefined ? ` (${resultsCount} results)` : ''
         }`,
         metadata: { query, resultsCount, timestamp: new Date().toISOString() },
       });
@@ -113,7 +113,7 @@ export function useActivityTracker() {
       feature: string
     ) => {
       trackActivity({
-        action: "Filter",
+        action: 'Filter',
         section,
         feature,
         details: `Applied ${filterType} filter: ${filterValue}`,
@@ -135,11 +135,11 @@ export function useActivityTracker() {
       recordCount?: number
     ) => {
       trackActivity({
-        action: "Export",
+        action: 'Export',
         section,
         feature,
         details: `Exported ${exportType}${
-          recordCount ? ` (${recordCount} records)` : ""
+          recordCount ? ` (${recordCount} records)` : ''
         }`,
         metadata: {
           exportType,
@@ -154,10 +154,10 @@ export function useActivityTracker() {
   const trackCreate = useCallback(
     (itemType: string, section: string, feature: string, itemId?: string) => {
       trackActivity({
-        action: "Create",
+        action: 'Create',
         section,
         feature,
-        details: `Created new ${itemType}${itemId ? ` (ID: ${itemId})` : ""}`,
+        details: `Created new ${itemType}${itemId ? ` (ID: ${itemId})` : ''}`,
         metadata: { itemType, itemId, timestamp: new Date().toISOString() },
       });
     },
@@ -167,10 +167,10 @@ export function useActivityTracker() {
   const trackUpdate = useCallback(
     (itemType: string, section: string, feature: string, itemId?: string) => {
       trackActivity({
-        action: "Update",
+        action: 'Update',
         section,
         feature,
-        details: `Updated ${itemType}${itemId ? ` (ID: ${itemId})` : ""}`,
+        details: `Updated ${itemType}${itemId ? ` (ID: ${itemId})` : ''}`,
         metadata: { itemType, itemId, timestamp: new Date().toISOString() },
       });
     },
@@ -180,10 +180,10 @@ export function useActivityTracker() {
   const trackDelete = useCallback(
     (itemType: string, section: string, feature: string, itemId?: string) => {
       trackActivity({
-        action: "Delete",
+        action: 'Delete',
         section,
         feature,
-        details: `Deleted ${itemType}${itemId ? ` (ID: ${itemId})` : ""}`,
+        details: `Deleted ${itemType}${itemId ? ` (ID: ${itemId})` : ''}`,
         metadata: { itemType, itemId, timestamp: new Date().toISOString() },
       });
     },

@@ -1,14 +1,14 @@
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { X, Calendar, Users, AlertCircle } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { X, Calendar, Users, AlertCircle } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 
 interface Announcement {
   id: number;
   title: string;
   message: string;
-  type: "event" | "position" | "alert" | "general";
-  priority: "low" | "medium" | "high" | "urgent";
+  type: 'event' | 'position' | 'alert' | 'general';
+  priority: 'low' | 'medium' | 'high' | 'urgent';
   startDate: string;
   endDate: string;
   isActive: boolean;
@@ -18,13 +18,13 @@ interface Announcement {
 
 export default function AnnouncementBanner() {
   const [dismissedBanners, setDismissedBanners] = useState<number[]>(() => {
-    const saved = localStorage.getItem("dismissedBanners");
+    const saved = localStorage.getItem('dismissedBanners');
     return saved ? JSON.parse(saved) : [];
   });
 
   // Fetch active announcements
   const { data: announcements = [] } = useQuery<Announcement[]>({
-    queryKey: ["/api/announcements"],
+    queryKey: ['/api/announcements'],
     refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes
   });
 
@@ -51,18 +51,18 @@ export default function AnnouncementBanner() {
   const dismissBanner = (id: number) => {
     const updated = [...dismissedBanners, id];
     setDismissedBanners(updated);
-    localStorage.setItem("dismissedBanners", JSON.stringify(updated));
+    localStorage.setItem('dismissedBanners', JSON.stringify(updated));
   };
 
   // Clear dismissed banners daily
   useEffect(() => {
-    const lastClear = localStorage.getItem("lastBannerClear");
+    const lastClear = localStorage.getItem('lastBannerClear');
     const today = new Date().toDateString();
 
     if (lastClear !== today) {
       setDismissedBanners([]);
-      localStorage.setItem("dismissedBanners", JSON.stringify([]));
-      localStorage.setItem("lastBannerClear", today);
+      localStorage.setItem('dismissedBanners', JSON.stringify([]));
+      localStorage.setItem('lastBannerClear', today);
     }
   }, []);
 
@@ -70,11 +70,11 @@ export default function AnnouncementBanner() {
 
   const getIcon = (type: string) => {
     switch (type) {
-      case "event":
+      case 'event':
         return <Calendar className="w-5 h-5" />;
-      case "position":
+      case 'position':
         return <Users className="w-5 h-5" />;
-      case "alert":
+      case 'alert':
         return <AlertCircle className="w-5 h-5" />;
       default:
         return <AlertCircle className="w-5 h-5" />;
@@ -82,22 +82,22 @@ export default function AnnouncementBanner() {
   };
 
   const getBannerStyles = (priority: string, type: string) => {
-    const baseStyles = "border-l-4 shadow-sm";
+    const baseStyles = 'border-l-4 shadow-sm';
 
     // Use brand colors: #236383 (teal), #FBAD3F (orange), #A31C41 (burgundy)
-    if (priority === "urgent") {
+    if (priority === 'urgent') {
       return `${baseStyles} bg-red-50 dark:bg-red-950/20 border-[#A31C41] text-[#A31C41] dark:text-red-200`;
     }
-    if (priority === "high") {
+    if (priority === 'high') {
       return `${baseStyles} bg-orange-50 dark:bg-orange-950/20 border-[#FBAD3F] text-orange-900 dark:text-orange-200`;
     }
-    if (type === "event") {
+    if (type === 'event') {
       return `${baseStyles} bg-teal-50 dark:bg-teal-950/20 border-[#236383] text-[#236383] dark:text-teal-200`;
     }
-    if (type === "position") {
+    if (type === 'position') {
       return `${baseStyles} bg-teal-50 dark:bg-teal-950/20 border-[#007E8C] text-[#007E8C] dark:text-teal-200`;
     }
-    if (type === "alert") {
+    if (type === 'alert') {
       return `${baseStyles} bg-orange-50 dark:bg-orange-950/20 border-[#FBAD3F] text-orange-900 dark:text-orange-200`;
     }
     return `${baseStyles} bg-blue-50 dark:bg-blue-950/20 border-[#236383] text-[#236383] dark:text-blue-200`;
@@ -123,8 +123,8 @@ export default function AnnouncementBanner() {
               <h3 className="font-bold text-base">
                 {currentAnnouncement.title}
               </h3>
-              {(currentAnnouncement.priority === "urgent" ||
-                currentAnnouncement.priority === "high") && (
+              {(currentAnnouncement.priority === 'urgent' ||
+                currentAnnouncement.priority === 'high') && (
                 <span className="text-xs px-2 py-1 bg-white/30 dark:bg-white/10 rounded-full font-semibold uppercase tracking-wide">
                   {currentAnnouncement.priority}
                 </span>
@@ -140,7 +140,7 @@ export default function AnnouncementBanner() {
                 rel="noopener noreferrer"
                 className="inline-block mt-2 text-sm font-bold underline hover:no-underline bg-white/20 px-2 py-1 rounded"
               >
-                {currentAnnouncement.linkText || "Learn More"}
+                {currentAnnouncement.linkText || 'Learn More'}
               </a>
             )}
           </div>

@@ -1,8 +1,8 @@
-import React, { useState, useRef, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Send } from "lucide-react";
+import React, { useState, useRef, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Send } from 'lucide-react';
 
 interface User {
   id: string;
@@ -36,20 +36,24 @@ export function MentionInput({
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [suggestions, setSuggestions] = useState<MentionSuggestion[]>([]);
   const [selectedSuggestion, setSelectedSuggestion] = useState(0);
-  const [mentionSearch, setMentionSearch] = useState("");
+  const [mentionSearch, setMentionSearch] = useState('');
   const [mentionPosition, setMentionPosition] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Fetch all users for mentions
-  const { data: users = [], error, isLoading } = useQuery<User[]>({
-    queryKey: ["/api/users"],
+  const {
+    data: users = [],
+    error,
+    isLoading,
+  } = useQuery<User[]>({
+    queryKey: ['/api/users'],
     queryFn: async () => {
-      const response = await fetch("/api/users", {
-        credentials: "include",
+      const response = await fetch('/api/users', {
+        credentials: 'include',
       });
-      if (!response.ok) throw new Error("Failed to fetch users");
+      if (!response.ok) throw new Error('Failed to fetch users');
       const data = await response.json();
-      console.log("Fetched users for mentions:", data?.length || 0, "users");
+      console.log('Fetched users for mentions:', data?.length || 0, 'users');
       return Array.isArray(data) ? data : [];
     },
     staleTime: 300000, // 5 minutes
@@ -59,9 +63,9 @@ export function MentionInput({
   // Debug logging
   useEffect(() => {
     if (!isLoading) {
-      console.log("Available users for mentions:", (users || []).length);
+      console.log('Available users for mentions:', (users || []).length);
     }
-    if (error) console.error("Error fetching users for mentions:", error);
+    if (error) console.error('Error fetching users for mentions:', error);
   }, [users, error, isLoading]);
 
   // Parse mentions from text and highlight them
@@ -109,13 +113,13 @@ export function MentionInput({
 
     // Check if we're typing a mention
     const textBeforeCursor = newValue.slice(0, cursorPosition);
-    const lastAtIndex = textBeforeCursor.lastIndexOf("@");
+    const lastAtIndex = textBeforeCursor.lastIndexOf('@');
 
     if (lastAtIndex !== -1) {
       const textAfterAt = textBeforeCursor.slice(lastAtIndex + 1);
 
       // Check if it's a valid mention context (no spaces after @)
-      if (!textAfterAt.includes(" ") && textAfterAt.length >= 0) {
+      if (!textAfterAt.includes(' ') && textAfterAt.length >= 0) {
         setMentionSearch(textAfterAt.toLowerCase());
         setMentionPosition(lastAtIndex);
 
@@ -127,7 +131,7 @@ export function MentionInput({
                 ? `${user.firstName} ${user.lastName}`
                 : user.displayName ||
                   user.firstName ||
-                  user.email.split("@")[0];
+                  user.email.split('@')[0];
             const email = user.email;
             const searchTerm = textAfterAt.toLowerCase();
 
@@ -141,13 +145,15 @@ export function MentionInput({
             );
           })
           .sort((a, b) => {
-            const nameA = (a.firstName && a.lastName
-              ? `${a.firstName} ${a.lastName}`
-              : a.displayName || a.firstName || a.email.split("@")[0]
+            const nameA = (
+              a.firstName && a.lastName
+                ? `${a.firstName} ${a.lastName}`
+                : a.displayName || a.firstName || a.email.split('@')[0]
             ).toLowerCase();
-            const nameB = (b.firstName && b.lastName
-              ? `${b.firstName} ${b.lastName}`
-              : b.displayName || b.firstName || b.email.split("@")[0]
+            const nameB = (
+              b.firstName && b.lastName
+                ? `${b.firstName} ${b.lastName}`
+                : b.displayName || b.firstName || b.email.split('@')[0]
             ).toLowerCase();
             return nameA.localeCompare(nameB);
           })
@@ -159,14 +165,14 @@ export function MentionInput({
                 ? `${user.firstName} ${user.lastName}`
                 : user.displayName ||
                   user.firstName ||
-                  user.email.split("@")[0],
+                  user.email.split('@')[0],
             email: user.email,
           }));
 
         console.log(
           `Found ${filteredUsers.length} matching users for "@${textAfterAt}"`
         );
-        console.log("Filtered users:", filteredUsers);
+        console.log('Filtered users:', filteredUsers);
 
         setSuggestions(filteredUsers);
         setShowSuggestions(filteredUsers.length > 0);
@@ -182,27 +188,27 @@ export function MentionInput({
   // Handle keyboard navigation in mention suggestions
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (showSuggestions) {
-      if (e.key === "ArrowDown") {
+      if (e.key === 'ArrowDown') {
         e.preventDefault();
         setSelectedSuggestion((prev) =>
           prev < suggestions.length - 1 ? prev + 1 : 0
         );
-      } else if (e.key === "ArrowUp") {
+      } else if (e.key === 'ArrowUp') {
         e.preventDefault();
         setSelectedSuggestion((prev) =>
           prev > 0 ? prev - 1 : suggestions.length - 1
         );
-      } else if (e.key === "Tab" || e.key === "Enter") {
-        if (e.key === "Tab" || (e.key === "Enter" && suggestions.length > 0)) {
+      } else if (e.key === 'Tab' || e.key === 'Enter') {
+        if (e.key === 'Tab' || (e.key === 'Enter' && suggestions.length > 0)) {
           e.preventDefault();
           insertMention(suggestions[selectedSuggestion]);
-        } else if (e.key === "Enter" && suggestions.length === 0) {
+        } else if (e.key === 'Enter' && suggestions.length === 0) {
           onSend();
         }
-      } else if (e.key === "Escape") {
+      } else if (e.key === 'Escape') {
         setShowSuggestions(false);
       }
-    } else if (e.key === "Enter" && !e.shiftKey) {
+    } else if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       onSend();
     }
@@ -214,7 +220,7 @@ export function MentionInput({
     const afterCursor = value.slice(inputRef.current?.selectionStart || 0);
 
     // Use quotes if name contains spaces
-    const mentionText = suggestion.name.includes(" ")
+    const mentionText = suggestion.name.includes(' ')
       ? `"${suggestion.name}"`
       : suggestion.name;
 
@@ -249,7 +255,7 @@ export function MentionInput({
             value={value}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            placeholder={placeholder || "Type @ to mention someone..."}
+            placeholder={placeholder || 'Type @ to mention someone...'}
             disabled={disabled}
             className="pr-12"
           />
@@ -262,8 +268,8 @@ export function MentionInput({
                   key={suggestion.id}
                   className={`px-3 py-2 cursor-pointer hover:bg-gray-100 ${
                     index === selectedSuggestion
-                      ? "bg-blue-50 border-l-2 border-blue-500"
-                      : ""
+                      ? 'bg-blue-50 border-l-2 border-blue-500'
+                      : ''
                   }`}
                   onClick={() => handleSuggestionClick(suggestion)}
                 >

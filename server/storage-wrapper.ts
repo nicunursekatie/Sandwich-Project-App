@@ -11,31 +11,33 @@ class StorageWrapper implements IStorage {
 
   constructor() {
     this.fallbackStorage = new MemStorage();
-    
+
     try {
       // Use database storage as primary for persistence across deployments
       this.primaryStorage = new DatabaseStorage();
       console.log('Database storage initialized');
     } catch (error) {
-      console.log('Failed to initialize database storage, using memory storage');
+      console.log(
+        'Failed to initialize database storage, using memory storage'
+      );
       this.primaryStorage = this.fallbackStorage;
     }
   }
 
   private async syncDataFromGoogleSheets() {
     if (!this.useGoogleSheets) return;
-    
+
     try {
       // Sync sandwich collections to memory storage
       const collections = await this.primaryStorage.getAllSandwichCollections();
       let syncedCount = 0;
-      
+
       for (const collection of collections) {
         // Skip items that have been deleted
         if (this.deletedIds.has(collection.id)) {
           continue;
         }
-        
+
         try {
           await this.fallbackStorage.createSandwichCollection(collection);
           syncedCount++;
@@ -43,7 +45,9 @@ class StorageWrapper implements IStorage {
           // Ignore duplicates or other sync errors
         }
       }
-      console.log(`Synchronized ${syncedCount} sandwich collections to memory storage`);
+      console.log(
+        `Synchronized ${syncedCount} sandwich collections to memory storage`
+      );
     } catch (error) {
       console.warn('Failed to sync data from Google Sheets:', error);
     }
@@ -65,12 +69,16 @@ class StorageWrapper implements IStorage {
       const result = await operation();
       // For delete operations that return false, use fallback
       if (typeof result === 'boolean' && result === false) {
-        console.log('Primary storage operation returned false, using fallback storage');
+        console.log(
+          'Primary storage operation returned false, using fallback storage'
+        );
         return fallbackOperation();
       }
       // For update operations that return undefined, use fallback
       if (result === undefined) {
-        console.log('Primary storage operation returned undefined, using fallback storage');
+        console.log(
+          'Primary storage operation returned undefined, using fallback storage'
+        );
         return fallbackOperation();
       }
       return result;
@@ -94,11 +102,14 @@ class StorageWrapper implements IStorage {
 
   async getUserById(id: string) {
     try {
-      // For user lookups, null/undefined is a valid result (user not found)  
+      // For user lookups, null/undefined is a valid result (user not found)
       const result = await this.primaryStorage.getUserById(id);
       return result; // Return null/undefined as-is, don't fall back
     } catch (error) {
-      console.warn('Primary storage getUserById failed, using fallback:', error);
+      console.warn(
+        'Primary storage getUserById failed, using fallback:',
+        error
+      );
       return this.fallbackStorage.getUserById(id);
     }
   }
@@ -109,7 +120,10 @@ class StorageWrapper implements IStorage {
       const result = await this.primaryStorage.getUserByEmail(email);
       return result; // Return null/undefined as-is, don't fall back
     } catch (error) {
-      console.warn('Primary storage getUserByEmail failed, using fallback:', error);
+      console.warn(
+        'Primary storage getUserByEmail failed, using fallback:',
+        error
+      );
       return this.fallbackStorage.getUserByEmail(email);
     }
   }
@@ -365,7 +379,6 @@ class StorageWrapper implements IStorage {
     );
   }
 
-
   async createReply(message: any, parentId: number) {
     return this.executeWithFallback(
       () => this.primaryStorage.createReply(message, parentId),
@@ -443,18 +456,36 @@ class StorageWrapper implements IStorage {
       () => this.primaryStorage.getAllSandwichCollections(),
       () => this.fallbackStorage.getAllSandwichCollections()
     );
-    
+
     // Filter out deleted items
-    return collections.filter(collection => !this.deletedIds.has(collection.id));
+    return collections.filter(
+      (collection) => !this.deletedIds.has(collection.id)
+    );
   }
 
-  async getSandwichCollections(limit: number, offset: number, sortField?: string, sortOrder?: string) {
+  async getSandwichCollections(
+    limit: number,
+    offset: number,
+    sortField?: string,
+    sortOrder?: string
+  ) {
     return await this.executeWithFallback(
-      () => this.primaryStorage.getSandwichCollections(limit, offset, sortField, sortOrder),
+      () =>
+        this.primaryStorage.getSandwichCollections(
+          limit,
+          offset,
+          sortField,
+          sortOrder
+        ),
       async () => {
         // Fallback: get all and slice manually with sorting
         const all = await this.fallbackStorage.getAllSandwichCollections();
-        return this.fallbackStorage.getSandwichCollections(limit, offset, sortField, sortOrder);
+        return this.fallbackStorage.getSandwichCollections(
+          limit,
+          offset,
+          sortField,
+          sortOrder
+        );
       }
     );
   }
@@ -492,7 +523,7 @@ class StorageWrapper implements IStorage {
         }, 0);
         return {
           totalEntries: all.length,
-          totalSandwiches
+          totalSandwiches,
         };
       }
     );
@@ -501,10 +532,14 @@ class StorageWrapper implements IStorage {
   async createSandwichCollection(collection: any) {
     return this.executeWithFallback(
       async () => {
-        const result = await this.primaryStorage.createSandwichCollection(collection);
+        const result =
+          await this.primaryStorage.createSandwichCollection(collection);
         // Also create in fallback storage to keep them synchronized
         try {
-          await this.fallbackStorage.createSandwichCollection({...collection, id: result.id});
+          await this.fallbackStorage.createSandwichCollection({
+            ...collection,
+            id: result.id,
+          });
         } catch (error) {
           console.warn('Failed to sync collection to fallback storage:', error);
         }
@@ -524,16 +559,16 @@ class StorageWrapper implements IStorage {
   async deleteSandwichCollection(id: number) {
     // Track the deleted ID to prevent re-sync
     this.deletedIds.add(id);
-    
+
     try {
       // Use only database storage for faster deletes
       const result = await this.primaryStorage.deleteSandwichCollection(id);
-      
+
       // If deletion fails, remove from tracking
       if (!result) {
         this.deletedIds.delete(id);
       }
-      
+
       return result;
     } catch (error) {
       // If database fails, remove from tracking and fallback
@@ -759,8 +794,10 @@ class StorageWrapper implements IStorage {
 
   async updateCollectionHostNames(oldHostName: string, newHostName: string) {
     return this.executeWithFallback(
-      () => this.primaryStorage.updateCollectionHostNames(oldHostName, newHostName),
-      () => this.fallbackStorage.updateCollectionHostNames(oldHostName, newHostName)
+      () =>
+        this.primaryStorage.updateCollectionHostNames(oldHostName, newHostName),
+      () =>
+        this.fallbackStorage.updateCollectionHostNames(oldHostName, newHostName)
     );
   }
 
@@ -816,8 +853,10 @@ class StorageWrapper implements IStorage {
 
   async getSandwichDistributionsByRecipient(recipientId: number) {
     return this.executeWithFallback(
-      () => this.primaryStorage.getSandwichDistributionsByRecipient(recipientId),
-      () => this.fallbackStorage.getSandwichDistributionsByRecipient(recipientId)
+      () =>
+        this.primaryStorage.getSandwichDistributionsByRecipient(recipientId),
+      () =>
+        this.fallbackStorage.getSandwichDistributionsByRecipient(recipientId)
     );
   }
 
@@ -948,7 +987,7 @@ class StorageWrapper implements IStorage {
     return this.executeWithFallback(
       () => this.primaryStorage.updateDriver(id, updates),
       () => {
-        throw new Error("Driver operations not available in fallback storage");
+        throw new Error('Driver operations not available in fallback storage');
       }
     );
   }
@@ -1075,7 +1114,11 @@ class StorageWrapper implements IStorage {
     );
   }
 
-  async addProjectAssignment(assignment: { projectId: number; userId: string; role: string }) {
+  async addProjectAssignment(assignment: {
+    projectId: number;
+    userId: string;
+    role: string;
+  }) {
     return this.executeWithFallback(
       () => this.primaryStorage.addProjectAssignment(assignment),
       () => this.fallbackStorage.addProjectAssignment(assignment)
@@ -1089,10 +1132,16 @@ class StorageWrapper implements IStorage {
     );
   }
 
-  async updateProjectAssignment(projectId: number, userId: string, updates: { role: string }) {
+  async updateProjectAssignment(
+    projectId: number,
+    userId: string,
+    updates: { role: string }
+  ) {
     return this.executeWithFallback(
-      () => this.primaryStorage.updateProjectAssignment(projectId, userId, updates),
-      () => this.fallbackStorage.updateProjectAssignment(projectId, userId, updates)
+      () =>
+        this.primaryStorage.updateProjectAssignment(projectId, userId, updates),
+      () =>
+        this.fallbackStorage.updateProjectAssignment(projectId, userId, updates)
     );
   }
 
@@ -1135,8 +1184,10 @@ class StorageWrapper implements IStorage {
   // Conversation methods
   async createConversation(conversationData: any, participants: string[]) {
     return this.executeWithFallback(
-      () => this.primaryStorage.createConversation(conversationData, participants),
-      () => this.fallbackStorage.createConversation(conversationData, participants)
+      () =>
+        this.primaryStorage.createConversation(conversationData, participants),
+      () =>
+        this.fallbackStorage.createConversation(conversationData, participants)
     );
   }
 
@@ -1154,10 +1205,24 @@ class StorageWrapper implements IStorage {
     );
   }
 
-  async updateConversationMessage(messageId: number, userId: string, updates: any) {
+  async updateConversationMessage(
+    messageId: number,
+    userId: string,
+    updates: any
+  ) {
     return this.executeWithFallback(
-      () => this.primaryStorage.updateConversationMessage(messageId, userId, updates),
-      () => this.fallbackStorage.updateConversationMessage(messageId, userId, updates)
+      () =>
+        this.primaryStorage.updateConversationMessage(
+          messageId,
+          userId,
+          updates
+        ),
+      () =>
+        this.fallbackStorage.updateConversationMessage(
+          messageId,
+          userId,
+          updates
+        )
     );
   }
 
@@ -1176,7 +1241,12 @@ class StorageWrapper implements IStorage {
   }
 
   // Chat message methods for Socket.IO
-  async createChatMessage(data: { channel: string; userId: string; userName: string; content: string }) {
+  async createChatMessage(data: {
+    channel: string;
+    userId: string;
+    userName: string;
+    content: string;
+  }) {
     return this.executeWithFallback(
       () => this.primaryStorage.createChatMessage(data),
       () => this.fallbackStorage.createChatMessage(data)
@@ -1411,8 +1481,10 @@ class StorageWrapper implements IStorage {
 
   async getEventRequestsByOrganization(organizationName: string) {
     return this.executeWithFallback(
-      () => this.primaryStorage.getEventRequestsByOrganization(organizationName),
-      () => this.fallbackStorage.getEventRequestsByOrganization(organizationName)
+      () =>
+        this.primaryStorage.getEventRequestsByOrganization(organizationName),
+      () =>
+        this.fallbackStorage.getEventRequestsByOrganization(organizationName)
     );
   }
 
@@ -1552,10 +1624,24 @@ class StorageWrapper implements IStorage {
     );
   }
 
-  async checkUserDocumentAccess(documentId: number, userId: string, permission: string) {
+  async checkUserDocumentAccess(
+    documentId: number,
+    userId: string,
+    permission: string
+  ) {
     return this.executeWithFallback(
-      () => this.primaryStorage.checkUserDocumentAccess(documentId, userId, permission),
-      () => this.fallbackStorage.checkUserDocumentAccess(documentId, userId, permission)
+      () =>
+        this.primaryStorage.checkUserDocumentAccess(
+          documentId,
+          userId,
+          permission
+        ),
+      () =>
+        this.fallbackStorage.checkUserDocumentAccess(
+          documentId,
+          userId,
+          permission
+        )
     );
   }
 
@@ -1573,10 +1659,24 @@ class StorageWrapper implements IStorage {
     );
   }
 
-  async revokeDocumentPermission(documentId: number, userId: string, permissionType: string) {
+  async revokeDocumentPermission(
+    documentId: number,
+    userId: string,
+    permissionType: string
+  ) {
     return this.executeWithFallback(
-      () => this.primaryStorage.revokeDocumentPermission(documentId, userId, permissionType),
-      () => this.fallbackStorage.revokeDocumentPermission(documentId, userId, permissionType)
+      () =>
+        this.primaryStorage.revokeDocumentPermission(
+          documentId,
+          userId,
+          permissionType
+        ),
+      () =>
+        this.fallbackStorage.revokeDocumentPermission(
+          documentId,
+          userId,
+          permissionType
+        )
     );
   }
 

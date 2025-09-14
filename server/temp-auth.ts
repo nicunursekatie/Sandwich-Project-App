@@ -1,6 +1,6 @@
-import type { Express, RequestHandler } from "express";
-import { storage } from "./storage-wrapper";
-import { getDefaultPermissionsForRole as getSharedPermissions } from "../shared/auth-utils";
+import type { Express, RequestHandler } from 'express';
+import { storage } from './storage-wrapper';
+import { getDefaultPermissionsForRole as getSharedPermissions } from '../shared/auth-utils';
 
 // Using shared permissions from auth-utils
 
@@ -9,29 +9,42 @@ function getDefaultPermissionsForRole(role: string): string[] {
 }
 
 // Committee-specific permission checking
-export const requireCommitteeAccess = (committeeId?: string): RequestHandler => {
+export const requireCommitteeAccess = (
+  committeeId?: string
+): RequestHandler => {
   return async (req, res, next) => {
     if (!req.user) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({ message: 'Unauthorized' });
     }
 
     const user = req.user;
 
     // Admins have access to all committees
-    if (user.role === 'admin' || user.role === 'admin_coordinator' || user.role === 'admin_viewer') {
+    if (
+      user.role === 'admin' ||
+      user.role === 'admin_coordinator' ||
+      user.role === 'admin_viewer'
+    ) {
       return next();
     }
 
     // For committee members, check specific committee access
     if (user.role === 'committee_member' && committeeId) {
       try {
-        const isMember = await storage.isUserCommitteeMember(user.id, committeeId);
+        const isMember = await storage.isUserCommitteeMember(
+          user.id,
+          committeeId
+        );
         if (!isMember) {
-          return res.status(403).json({ message: "Access denied: Not a member of this committee" });
+          return res
+            .status(403)
+            .json({ message: 'Access denied: Not a member of this committee' });
         }
       } catch (error) {
-        console.error("Error checking committee membership:", error);
-        return res.status(500).json({ message: "Error verifying committee access" });
+        console.error('Error checking committee membership:', error);
+        return res
+          .status(500)
+          .json({ message: 'Error verifying committee access' });
       }
     }
 
@@ -75,7 +88,7 @@ declare global {
 // Temporary simple authentication for testing
 export function setupTempAuth(app: Express) {
   // GET route for login page with registration capability
-  app.get("/api/login", (req, res) => {
+  app.get('/api/login', (req, res) => {
     const loginHtml = `
     <!DOCTYPE html>
     <html lang="en">
@@ -467,29 +480,30 @@ export function setupTempAuth(app: Express) {
   });
 
   // User registration endpoint
-  app.post("/api/auth/register", async (req: any, res) => {
+  app.post('/api/auth/register', async (req: any, res) => {
     try {
       const { email, password, firstName, lastName, role } = req.body;
 
       if (!email || !password || !firstName || !lastName) {
-        return res.status(400).json({ 
-          success: false, 
-          message: "All fields are required" 
+        return res.status(400).json({
+          success: false,
+          message: 'All fields are required',
         });
       }
 
       // Check if user already exists
       const existingUser = await storage.getUserByEmail(email);
       if (existingUser) {
-        return res.status(400).json({ 
-          success: false, 
-          message: "User with this email already exists" 
+        return res.status(400).json({
+          success: false,
+          message: 'User with this email already exists',
         });
       }
 
       // Create new user with unique ID
-      const userId = "user_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9);
-      const userRole = role || "volunteer"; // Use provided role or default to volunteer
+      const userId =
+        'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      const userRole = role || 'volunteer'; // Use provided role or default to volunteer
       const newUser = await storage.createUser({
         id: userId,
         email,
@@ -499,18 +513,18 @@ export function setupTempAuth(app: Express) {
         permissions: getDefaultPermissionsForRole(userRole),
         isActive: true,
         profileImageUrl: null,
-        metadata: { password } // Store password in metadata for now
+        metadata: { password }, // Store password in metadata for now
       });
 
-      res.json({ success: true, message: "Registration successful" });
+      res.json({ success: true, message: 'Registration successful' });
     } catch (error) {
-      console.error("Registration error:", error);
-      res.status(500).json({ success: false, message: "Registration failed" });
+      console.error('Registration error:', error);
+      res.status(500).json({ success: false, message: 'Registration failed' });
     }
   });
 
   // Debug endpoint to check user permissions
-  app.get("/api/debug/user/:email", async (req: any, res) => {
+  app.get('/api/debug/user/:email', async (req: any, res) => {
     try {
       const email = req.params.email;
       const user = await storage.getUserByEmail(email);
@@ -519,38 +533,42 @@ export function setupTempAuth(app: Express) {
           email: user.email,
           role: user.role,
           permissions: user.permissions,
-          isActive: user.isActive
+          isActive: user.isActive,
         });
       } else {
-        res.status(404).json({ message: "User not found" });
+        res.status(404).json({ message: 'User not found' });
       }
     } catch (error) {
-      console.error("Debug user error:", error);
-      res.status(500).json({ error: "Failed to get user" });
+      console.error('Debug user error:', error);
+      res.status(500).json({ error: 'Failed to get user' });
     }
   });
 
   // Debug endpoint to check specific user
-  app.get("/api/auth/debug-user/:email", async (req: any, res) => {
+  app.get('/api/auth/debug-user/:email', async (req: any, res) => {
     try {
       const { email } = req.params;
       const user = await storage.getUserByEmail(email);
-      res.json(user ? { 
-        email: user.email, 
-        role: user.role, 
-        permissions: user.permissions,
-        exists: true 
-      } : { exists: false });
+      res.json(
+        user
+          ? {
+              email: user.email,
+              role: user.role,
+              permissions: user.permissions,
+              exists: true,
+            }
+          : { exists: false }
+      );
     } catch (error) {
-      console.error("Debug user error:", error);
-      res.status(500).json({ error: "Failed to get user" });
+      console.error('Debug user error:', error);
+      res.status(500).json({ error: 'Failed to get user' });
     }
   });
 
   // Fix existing users with empty permissions endpoint
-  app.post("/api/auth/fix-permissions", async (req: any, res) => {
+  app.post('/api/auth/fix-permissions', async (req: any, res) => {
     try {
-      console.log("Fixing permissions for existing users...");
+      console.log('Fixing permissions for existing users...');
 
       // Get all users and update their permissions to match the shared auth system
       const allUsers = await storage.getAllUsers();
@@ -559,64 +577,70 @@ export function setupTempAuth(app: Express) {
         let correctPermissions = getDefaultPermissionsForRole(user.role);
 
         // Special case: Give Katie projects access if requested by admin
-        if (user.email === "katielong2316@gmail.com") {
-          if (!correctPermissions.includes("view_projects")) {
-            correctPermissions = [...correctPermissions, "view_projects"];
-            console.log("Adding VIEW_PROJECTS permission to Katie");
+        if (user.email === 'katielong2316@gmail.com') {
+          if (!correctPermissions.includes('view_projects')) {
+            correctPermissions = [...correctPermissions, 'view_projects'];
+            console.log('Adding VIEW_PROJECTS permission to Katie');
           }
           // Force update Katie regardless to ensure she gets projects access
-          console.log(`Forcing Katie's permission update. Current: [${Array.isArray(user.permissions) ? user.permissions.join(', ') : 'none'}]`);
+          console.log(
+            `Forcing Katie's permission update. Current: [${Array.isArray(user.permissions) ? user.permissions.join(', ') : 'none'}]`
+          );
           console.log(`New: [${correctPermissions.join(', ')}]`);
         }
 
         // Update user with correct permissions if they differ, or force update for Katie
-        const shouldUpdate = JSON.stringify(user.permissions) !== JSON.stringify(correctPermissions) || 
-                           user.email === "katielong2316@gmail.com";
+        const shouldUpdate =
+          JSON.stringify(user.permissions) !==
+            JSON.stringify(correctPermissions) ||
+          user.email === 'katielong2316@gmail.com';
 
         if (shouldUpdate) {
           console.log(`Updating permissions for ${user.email} (${user.role})`);
           await storage.updateUser(user.id, {
             ...user,
-            permissions: correctPermissions
+            permissions: correctPermissions,
           });
           console.log(`Updated ${user.email} permissions:`, correctPermissions);
         }
       }
 
-      res.json({ success: true, message: "All user permissions fixed" });
+      res.json({ success: true, message: 'All user permissions fixed' });
     } catch (error) {
-      console.error("Fix permissions error:", error);
-      res.status(500).json({ success: false, message: "Failed to fix permissions" });
+      console.error('Fix permissions error:', error);
+      res
+        .status(500)
+        .json({ success: false, message: 'Failed to fix permissions' });
     }
   });
 
   // User login endpoint
-  app.post("/api/auth/login", async (req: any, res) => {
+  app.post('/api/auth/login', async (req: any, res) => {
     try {
       const { email, password } = req.body;
 
       if (!email || !password) {
-        return res.status(400).json({ 
-          success: false, 
-          message: "Email and password are required" 
+        return res.status(400).json({
+          success: false,
+          message: 'Email and password are required',
         });
       }
 
       // Find user by email
       const user = await storage.getUserByEmail(email);
       if (!user || !user.isActive) {
-        return res.status(401).json({ 
-          success: false, 
-          message: "Invalid email or password" 
+        return res.status(401).json({
+          success: false,
+          message: 'Invalid email or password',
         });
       }
 
       // Check password (stored in metadata for now)
       const storedPassword = (user.metadata as any)?.password;
       if (storedPassword !== password) {
-        return res.status(401).json({ 
-          success: false, 
-          message: "Invalid email or password" 
+        return res.status(401).json({
+          success: false,
+          message: 'Invalid email or password',
         });
       }
 
@@ -629,7 +653,7 @@ export function setupTempAuth(app: Express) {
         profileImageUrl: user.profileImageUrl,
         role: user.role,
         permissions: user.permissions,
-        isActive: user.isActive
+        isActive: user.isActive,
       };
 
       // Update last login time
@@ -642,27 +666,29 @@ export function setupTempAuth(app: Express) {
       // Force session save to ensure persistence
       req.session.save((err: any) => {
         if (err) {
-          console.error("Session save error:", err);
-          return res.status(500).json({ success: false, message: "Session save failed" });
+          console.error('Session save error:', err);
+          return res
+            .status(500)
+            .json({ success: false, message: 'Session save failed' });
         }
-        console.log("Session saved successfully for user:", sessionUser.email);
-        console.log("Session ID:", req.sessionID);
-        console.log("Session data:", req.session);
+        console.log('Session saved successfully for user:', sessionUser.email);
+        console.log('Session ID:', req.sessionID);
+        console.log('Session data:', req.session);
         res.json({ success: true, user: sessionUser });
       });
     } catch (error) {
-      console.error("Login error:", error);
-      res.status(500).json({ success: false, message: "Login failed" });
+      console.error('Login error:', error);
+      res.status(500).json({ success: false, message: 'Login failed' });
     }
   });
 
   // Legacy temp login endpoint (for backwards compatibility)
-  app.post("/api/temp-login", async (req: any, res) => {
+  app.post('/api/temp-login', async (req: any, res) => {
     try {
       // Get Katie's actual user data for testing
-      const katieUser = await storage.getUserByEmail("katielong2316@gmail.com");
+      const katieUser = await storage.getUserByEmail('katielong2316@gmail.com');
       if (!katieUser) {
-        return res.status(404).json({ error: "Test user not found" });
+        return res.status(404).json({ error: 'Test user not found' });
       }
 
       // Create session user object with Katie's real data
@@ -674,7 +700,7 @@ export function setupTempAuth(app: Express) {
         profileImageUrl: katieUser.profileImageUrl,
         role: katieUser.role,
         permissions: katieUser.permissions,
-        isActive: katieUser.isActive
+        isActive: katieUser.isActive,
       };
 
       // Store user in session
@@ -683,19 +709,21 @@ export function setupTempAuth(app: Express) {
 
       res.json({ success: true, user: sessionUser });
     } catch (error) {
-      console.error("Temp login error:", error);
-      res.status(500).json({ error: "Login failed" });
+      console.error('Temp login error:', error);
+      res.status(500).json({ error: 'Login failed' });
     }
   });
 
   // Get current user endpoint - TEMP AUTH VERSION
-  app.get("/api/temp-auth/current-user", async (req: any, res) => {
+  app.get('/api/temp-auth/current-user', async (req: any, res) => {
     if (req.session.user) {
       try {
         // Get fresh user data from database to ensure permissions are current
         const dbUser = await storage.getUserByEmail(req.session.user.email);
         if (!dbUser || !dbUser.isActive) {
-          return res.status(401).json({ message: "User account not found or inactive" });
+          return res
+            .status(401)
+            .json({ message: 'User account not found or inactive' });
         }
 
         // Standardize authentication - Always use (req as any).user and attach dbUser to request
@@ -711,25 +739,27 @@ export function setupTempAuth(app: Express) {
           profileImageUrl: dbUser.profileImageUrl,
           role: dbUser.role,
           permissions: dbUser.permissions,
-          isActive: dbUser.isActive
+          isActive: dbUser.isActive,
         });
       } catch (error) {
-        console.error("Error fetching user data:", error);
-        res.status(500).json({ message: "Error fetching user data" });
+        console.error('Error fetching user data:', error);
+        res.status(500).json({ message: 'Error fetching user data' });
       }
     } else {
-      res.status(401).json({ message: "Unauthorized" });
+      res.status(401).json({ message: 'Unauthorized' });
     }
   });
 
   // FIXED: Add the missing /api/auth/user endpoint that frontend expects
-  app.get("/api/auth/user", async (req: any, res) => {
+  app.get('/api/auth/user', async (req: any, res) => {
     if (req.session.user) {
       try {
         // Get fresh user data from database to ensure permissions are current
         const dbUser = await storage.getUserByEmail(req.session.user.email);
         if (!dbUser || !dbUser.isActive) {
-          return res.status(401).json({ message: "User account not found or inactive" });
+          return res
+            .status(401)
+            .json({ message: 'User account not found or inactive' });
         }
 
         // Standardize authentication - Always use (req as any).user and attach dbUser to request
@@ -745,23 +775,25 @@ export function setupTempAuth(app: Express) {
           profileImageUrl: dbUser.profileImageUrl,
           role: dbUser.role,
           permissions: dbUser.permissions,
-          isActive: dbUser.isActive
+          isActive: dbUser.isActive,
         });
       } catch (error) {
-        console.error("Error fetching user data:", error);
-        res.status(500).json({ message: "Error fetching user data" });
+        console.error('Error fetching user data:', error);
+        res.status(500).json({ message: 'Error fetching user data' });
       }
     } else {
-      res.status(401).json({ message: "Unauthorized" });
+      res.status(401).json({ message: 'Unauthorized' });
     }
   });
 
   // Logout endpoint
-  app.post("/api/logout", (req: any, res) => {
+  app.post('/api/logout', (req: any, res) => {
     req.session.destroy((err: any) => {
       if (err) {
         console.error('Session destroy error:', err);
-        return res.status(500).json({ success: false, message: 'Logout failed' });
+        return res
+          .status(500)
+          .json({ success: false, message: 'Logout failed' });
       }
       res.clearCookie('connect.sid');
       res.json({ success: true, message: 'Logged out successfully' });
@@ -769,7 +801,7 @@ export function setupTempAuth(app: Express) {
   });
 
   // Profile management endpoints
-  app.get("/api/auth/profile", isAuthenticated, async (req: any, res) => {
+  app.get('/api/auth/profile', isAuthenticated, async (req: any, res) => {
     try {
       const user = req.session.user;
       const userData = await storage.getUserByEmail(user.email);
@@ -780,25 +812,25 @@ export function setupTempAuth(app: Express) {
           firstName: userData.firstName,
           lastName: userData.lastName,
           displayName: userData.displayName,
-          profileImageUrl: userData.profileImageUrl
+          profileImageUrl: userData.profileImageUrl,
         });
       } else {
-        res.status(404).json({ message: "User not found" });
+        res.status(404).json({ message: 'User not found' });
       }
     } catch (error) {
-      console.error("Profile fetch error:", error);
-      res.status(500).json({ message: "Failed to fetch profile" });
+      console.error('Profile fetch error:', error);
+      res.status(500).json({ message: 'Failed to fetch profile' });
     }
   });
 
-  app.put("/api/auth/profile", isAuthenticated, async (req: any, res) => {
+  app.put('/api/auth/profile', isAuthenticated, async (req: any, res) => {
     try {
       const user = req.session.user;
       const { firstName, lastName, displayName, email } = req.body;
 
       const userData = await storage.getUserByEmail(user.email);
       if (!userData) {
-        return res.status(404).json({ message: "User not found" });
+        return res.status(404).json({ message: 'User not found' });
       }
 
       const updatedUser = await storage.updateUser(userData.id, {
@@ -806,7 +838,7 @@ export function setupTempAuth(app: Express) {
         lastName,
         displayName,
         email,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       });
 
       // Update session with new email if changed
@@ -820,79 +852,93 @@ export function setupTempAuth(app: Express) {
         firstName: updatedUser?.firstName,
         lastName: updatedUser?.lastName,
         displayName: updatedUser?.displayName,
-        profileImageUrl: updatedUser?.profileImageUrl
+        profileImageUrl: updatedUser?.profileImageUrl,
       });
     } catch (error) {
-      console.error("Profile update error:", error);
-      res.status(500).json({ message: "Failed to update profile" });
+      console.error('Profile update error:', error);
+      res.status(500).json({ message: 'Failed to update profile' });
     }
   });
 
-  app.put("/api/auth/change-password", isAuthenticated, async (req: any, res) => {
-    try {
-      const user = req.session.user;
-      const { currentPassword, newPassword } = req.body;
+  app.put(
+    '/api/auth/change-password',
+    isAuthenticated,
+    async (req: any, res) => {
+      try {
+        const user = req.session.user;
+        const { currentPassword, newPassword } = req.body;
 
-      const userData = await storage.getUserByEmail(user.email);
-      if (!userData) {
-        return res.status(404).json({ message: "User not found" });
+        const userData = await storage.getUserByEmail(user.email);
+        if (!userData) {
+          return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Check current password
+        const storedPassword = (userData.metadata as any)?.password;
+        if (!storedPassword || storedPassword !== currentPassword) {
+          return res
+            .status(400)
+            .json({ message: 'Current password is incorrect' });
+        }
+
+        // Update password
+        await storage.updateUser(userData.id, {
+          metadata: { ...(userData.metadata as any), password: newPassword },
+          updatedAt: new Date(),
+        });
+
+        res.json({ message: 'Password changed successfully' });
+      } catch (error) {
+        console.error('Password change error:', error);
+        res.status(500).json({ message: 'Failed to change password' });
       }
-
-      // Check current password
-      const storedPassword = (userData.metadata as any)?.password;
-      if (!storedPassword || storedPassword !== currentPassword) {
-        return res.status(400).json({ message: "Current password is incorrect" });
-      }
-
-      // Update password
-      await storage.updateUser(userData.id, {
-        metadata: { ...(userData.metadata as any), password: newPassword },
-        updatedAt: new Date()
-      });
-
-      res.json({ message: "Password changed successfully" });
-    } catch (error) {
-      console.error("Password change error:", error);
-      res.status(500).json({ message: "Failed to change password" });
     }
-  });
+  );
 
   // Admin endpoint to reset any user's password
-  app.put("/api/auth/admin/reset-password", isAuthenticated, async (req: any, res) => {
-    try {
-      const user = req.session.user;
+  app.put(
+    '/api/auth/admin/reset-password',
+    isAuthenticated,
+    async (req: any, res) => {
+      try {
+        const user = req.session.user;
 
-      // Only admins can reset passwords
-      if (user.role !== "admin") {
-        return res.status(403).json({ message: "Only administrators can reset passwords" });
+        // Only admins can reset passwords
+        if (user.role !== 'admin') {
+          return res
+            .status(403)
+            .json({ message: 'Only administrators can reset passwords' });
+        }
+
+        const { userEmail, newPassword } = req.body;
+
+        if (!userEmail || !newPassword) {
+          return res
+            .status(400)
+            .json({ message: 'User email and new password are required' });
+        }
+
+        const targetUser = await storage.getUserByEmail(userEmail);
+        if (!targetUser) {
+          return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Update password
+        await storage.updateUser(targetUser.id, {
+          metadata: { ...targetUser.metadata, password: newPassword },
+          updatedAt: new Date(),
+        });
+
+        res.json({
+          message: `Password reset successfully for ${userEmail}`,
+          newPassword: newPassword, // Include for admin convenience
+        });
+      } catch (error) {
+        console.error('Admin password reset error:', error);
+        res.status(500).json({ message: 'Failed to reset password' });
       }
-
-      const { userEmail, newPassword } = req.body;
-
-      if (!userEmail || !newPassword) {
-        return res.status(400).json({ message: "User email and new password are required" });
-      }
-
-      const targetUser = await storage.getUserByEmail(userEmail);
-      if (!targetUser) {
-        return res.status(404).json({ message: "User not found" });
-      }
-
-      // Update password
-      await storage.updateUser(targetUser.id, {
-        metadata: { ...targetUser.metadata, password: newPassword },
-        updatedAt: new Date()
-      });
-
-      res.json({ 
-        message: `Password reset successfully for ${userEmail}`,
-        newPassword: newPassword // Include for admin convenience
-      });
-    } catch (error) {
-      console.error("Admin password reset error:", error);
-      res.status(500).json({ message: "Failed to reset password" });
     }
-  });
+  );
 }
 
 // Middleware to check if user is authenticated
@@ -907,7 +953,7 @@ export const isAuthenticated: RequestHandler = async (req: any, res, next) => {
   // AUTHENTICATION REQUIRED - no auto-login
   if (!req.session || !req.session.user) {
     console.log('❌ No session user found - authentication required');
-    return res.status(401).json({ message: "Authentication required" });
+    return res.status(401).json({ message: 'Authentication required' });
   }
 
   // Always fetch fresh user data from database to ensure permissions are current
@@ -915,9 +961,15 @@ export const isAuthenticated: RequestHandler = async (req: any, res, next) => {
     const freshUser = await storage.getUserByEmail(req.session.user.email);
     if (freshUser && freshUser.isActive) {
       // Update session with fresh user data if permissions are missing or changed
-      if (!req.session.user.permissions || req.session.user.permissions.length === 0 || 
-          JSON.stringify(req.session.user.permissions) !== JSON.stringify(freshUser.permissions)) {
-        console.log(`🔄 Updating session for ${freshUser.email} with fresh permissions`);
+      if (
+        !req.session.user.permissions ||
+        req.session.user.permissions.length === 0 ||
+        JSON.stringify(req.session.user.permissions) !==
+          JSON.stringify(freshUser.permissions)
+      ) {
+        console.log(
+          `🔄 Updating session for ${freshUser.email} with fresh permissions`
+        );
         req.session.user = {
           id: freshUser.id,
           email: freshUser.email,
@@ -926,15 +978,15 @@ export const isAuthenticated: RequestHandler = async (req: any, res, next) => {
           profileImageUrl: freshUser.profileImageUrl,
           role: freshUser.role,
           permissions: freshUser.permissions,
-          isActive: freshUser.isActive
+          isActive: freshUser.isActive,
         };
-        
+
         // Force session save to ensure persistence
         req.session.save((err) => {
           if (err) console.error('Session save error:', err);
         });
       }
-      
+
       // CRITICAL: Always set req.user to the fresh database user data
       req.user = {
         id: freshUser.id,
@@ -944,58 +996,75 @@ export const isAuthenticated: RequestHandler = async (req: any, res, next) => {
         profileImageUrl: freshUser.profileImageUrl,
         role: freshUser.role,
         permissions: freshUser.permissions,
-        isActive: freshUser.isActive
+        isActive: freshUser.isActive,
       };
-      
-      console.log(`✅ Authentication successful for ${freshUser.email} (${freshUser.role})`);
-      console.log(`✅ req.user set with ${freshUser.permissions?.length || 0} permissions`);
+
+      console.log(
+        `✅ Authentication successful for ${freshUser.email} (${freshUser.role})`
+      );
+      console.log(
+        `✅ req.user set with ${freshUser.permissions?.length || 0} permissions`
+      );
     } else {
       console.log(`❌ User not found or inactive: ${req.session.user.email}`);
       // User not found in database or inactive, clear invalid session
       req.session.destroy((err) => {
         if (err) console.error('Session destroy error:', err);
       });
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({ message: 'Unauthorized' });
     }
   } catch (error) {
-    console.error("❌ Error fetching fresh user data in isAuthenticated:", error);
+    console.error(
+      '❌ Error fetching fresh user data in isAuthenticated:',
+      error
+    );
     // Fallback to session user if database fetch fails but still set req.user
     req.user = req.session.user;
-    console.log(`⚠️ Fallback: Using session user for ${req.session.user.email}`);
+    console.log(
+      `⚠️ Fallback: Using session user for ${req.session.user.email}`
+    );
   }
-  
+
   next();
 };
 
-
 // Initialize temporary auth system with default admin user and committees
 export async function initializeTempAuth() {
-  console.log("Temporary authentication system initialized");
+  console.log('Temporary authentication system initialized');
 
   // Create default admin user if it doesn't exist
   try {
-    const adminEmail = "admin@sandwich.project";
+    const adminEmail = 'admin@sandwich.project';
     const existingAdmin = await storage.getUserByEmail(adminEmail);
 
     if (!existingAdmin) {
-      const adminId = "admin_" + Date.now();
+      const adminId = 'admin_' + Date.now();
       await storage.createUser({
         id: adminId,
         email: adminEmail,
-        firstName: "Admin",
-        lastName: "User",
-        role: "admin",
-        permissions: getDefaultPermissionsForRole("admin"),
+        firstName: 'Admin',
+        lastName: 'User',
+        role: 'admin',
+        permissions: getDefaultPermissionsForRole('admin'),
         isActive: true,
         profileImageUrl: null,
-        metadata: { password: process.env.DEFAULT_ADMIN_PASSWORD || "admin123" } // Use env var or fallback
+        metadata: {
+          password: process.env.DEFAULT_ADMIN_PASSWORD || 'admin123',
+        }, // Use env var or fallback
       });
-      console.log("✅ Default admin user created: admin@sandwich.project / [password set from env or default]");
+      console.log(
+        '✅ Default admin user created: admin@sandwich.project / [password set from env or default]'
+      );
     } else {
-      console.log("✅ Default admin user already exists: admin@sandwich.project");
+      console.log(
+        '✅ Default admin user already exists: admin@sandwich.project'
+      );
     }
   } catch (error) {
-    console.log("❌ Could not create default admin user (using fallback):", error.message);
+    console.log(
+      '❌ Could not create default admin user (using fallback):',
+      error.message
+    );
   }
 
   // Setup default committees and committee member user
@@ -1004,73 +1073,95 @@ export async function initializeTempAuth() {
     try {
       const committees = await storage.getAllCommittees();
       if (committees.length === 0) {
-        await storage.createCommittee({ name: "Finance", description: "Financial oversight and budgeting" });
-        await storage.createCommittee({ name: "Operations", description: "Day-to-day operations management" });
-        await storage.createCommittee({ name: "Outreach", description: "Community outreach and partnerships" });
-        console.log("✅ Default committees created");
+        await storage.createCommittee({
+          name: 'Finance',
+          description: 'Financial oversight and budgeting',
+        });
+        await storage.createCommittee({
+          name: 'Operations',
+          description: 'Day-to-day operations management',
+        });
+        await storage.createCommittee({
+          name: 'Outreach',
+          description: 'Community outreach and partnerships',
+        });
+        console.log('✅ Default committees created');
       }
     } catch (error) {
-      console.warn("Committee creation failed:", error.message);
+      console.warn('Committee creation failed:', error.message);
     }
 
     // Create committee member user and assign to specific committee
-    const committeeEmail = "katielong2316@gmail.com";
-    const existingCommitteeMember = await storage.getUserByEmail(committeeEmail);
+    const committeeEmail = 'katielong2316@gmail.com';
+    const existingCommitteeMember =
+      await storage.getUserByEmail(committeeEmail);
 
     let committeeMemberId;
     if (!existingCommitteeMember) {
-      committeeMemberId = "committee_" + Date.now();
+      committeeMemberId = 'committee_' + Date.now();
       await storage.createUser({
         id: committeeMemberId,
         email: committeeEmail,
-        firstName: "Katie",
-        lastName: "Long",
-        role: "committee_member",
-        permissions: getDefaultPermissionsForRole("committee_member"),
+        firstName: 'Katie',
+        lastName: 'Long',
+        role: 'committee_member',
+        permissions: getDefaultPermissionsForRole('committee_member'),
         isActive: true,
         profileImageUrl: null,
-        metadata: { password: process.env.DEFAULT_COMMITTEE_PASSWORD || "committee123" }
+        metadata: {
+          password: process.env.DEFAULT_COMMITTEE_PASSWORD || 'committee123',
+        },
       });
-      console.log("✅ Committee member user created: katielong2316@gmail.com / [password set from env or default]");
+      console.log(
+        '✅ Committee member user created: katielong2316@gmail.com / [password set from env or default]'
+      );
     } else {
       // Use existing user without updating role (preserve current role and permissions)
       committeeMemberId = existingCommitteeMember.id;
-      console.log("✅ Found existing user: katielong2316@gmail.com (preserving current role and permissions)");
+      console.log(
+        '✅ Found existing user: katielong2316@gmail.com (preserving current role and permissions)'
+      );
     }
 
     // Assign committee member to finance committee only
     try {
-      const katie = await storage.getUserByEmail("katielong2316@gmail.com");
+      const katie = await storage.getUserByEmail('katielong2316@gmail.com');
 
       if (katie) {
         // Get Finance committee ID
         const committees = await storage.getAllCommittees();
-        const financeCommittee = committees.find(c => c.name.toLowerCase() === "finance");
+        const financeCommittee = committees.find(
+          (c) => c.name.toLowerCase() === 'finance'
+        );
 
         if (financeCommittee) {
           // Check if Katie is already in Finance committee
-          const isFinanceMember = await storage.isUserCommitteeMember(katie.id, financeCommittee.id);
+          const isFinanceMember = await storage.isUserCommitteeMember(
+            katie.id,
+            financeCommittee.id
+          );
           if (!isFinanceMember) {
             await storage.addUserToCommittee({
               userId: katie.id,
               committeeId: financeCommittee.id,
-              role: "member"
+              role: 'member',
             });
           }
-          console.log("✅ Assigned katielong2316@gmail.com to Finance Committee only");
+          console.log(
+            '✅ Assigned katielong2316@gmail.com to Finance Committee only'
+          );
         }
       }
     } catch (error) {
-      console.warn("Assigning committee member failed:", error.message);
+      console.warn('Assigning committee member failed:', error.message);
     }
-
   } catch (error) {
-    console.log("❌ Could not setup committees:", error.message);
+    console.log('❌ Could not setup committees:', error.message);
   }
 
   // Setup driver user - kenig.ka@gmail.com with restricted permissions
   try {
-    const driverEmail = "kenig.ka@gmail.com";
+    const driverEmail = 'kenig.ka@gmail.com';
     const existingDriver = await storage.getUserByEmail(driverEmail);
 
     if (!existingDriver) {
@@ -1078,20 +1169,26 @@ export async function initializeTempAuth() {
       await storage.createUser({
         id: driverId,
         email: driverEmail,
-        firstName: "Ken",
-        lastName: "Ig",
-        role: "driver",
-        permissions: getDefaultPermissionsForRole("driver"),
+        firstName: 'Ken',
+        lastName: 'Ig',
+        role: 'driver',
+        permissions: getDefaultPermissionsForRole('driver'),
         isActive: true,
         profileImageUrl: null,
-        metadata: { password: process.env.DEFAULT_DRIVER_PASSWORD || "driver123" }
+        metadata: {
+          password: process.env.DEFAULT_DRIVER_PASSWORD || 'driver123',
+        },
       });
-      console.log("✅ Driver user created: kenig.ka@gmail.com / [password set from env or default]");
+      console.log(
+        '✅ Driver user created: kenig.ka@gmail.com / [password set from env or default]'
+      );
     } else {
       // Preserve existing user permissions - do not reset them
-      console.log("✅ Found existing user: kenig.ka@gmail.com (preserving current role and permissions)");
+      console.log(
+        '✅ Found existing user: kenig.ka@gmail.com (preserving current role and permissions)'
+      );
     }
   } catch (error) {
-    console.log("❌ Could not setup driver user:", error.message);
+    console.log('❌ Could not setup driver user:', error.message);
   }
 }

@@ -34,7 +34,10 @@ export class MeetingAgendaCompiler {
    * Compile a comprehensive agenda for a meeting
    * Includes: agenda items + projects marked for review + deferred items
    */
-  async compileAgenda(meetingId: number, compiledBy: string): Promise<CompiledAgenda> {
+  async compileAgenda(
+    meetingId: number,
+    compiledBy: string
+  ): Promise<CompiledAgenda> {
     const meeting = await this.storage.getMeeting(meetingId);
     if (!meeting) {
       throw new Error('Meeting not found');
@@ -42,35 +45,37 @@ export class MeetingAgendaCompiler {
 
     // Get all agenda items for this meeting
     const agendaItems = await this.storage.getAgendaItemsByMeeting(meetingId);
-    
+
     // Get projects marked for review in next meeting
     const projectsForReview = await this.storage.getProjectsForReview();
-    
+
     // Get deferred items from previous meeting
-    const deferredItems = await this.getDeferredItemsFromPreviousMeeting(meeting.type);
+    const deferredItems = await this.getDeferredItemsFromPreviousMeeting(
+      meeting.type
+    );
 
     // Create the four required sections
     const sections: CompiledAgendaSection[] = [
       {
-        title: "Old Business",
+        title: 'Old Business',
         orderIndex: 1,
-        items: this.buildOldBusinessItems(deferredItems, agendaItems)
+        items: this.buildOldBusinessItems(deferredItems, agendaItems),
       },
       {
-        title: "Urgent Items", 
+        title: 'Urgent Items',
         orderIndex: 2,
-        items: this.buildUrgentItems(agendaItems, projectsForReview)
+        items: this.buildUrgentItems(agendaItems, projectsForReview),
       },
       {
-        title: "Housekeeping",
+        title: 'Housekeeping',
         orderIndex: 3,
-        items: this.buildHousekeepingItems(agendaItems)
+        items: this.buildHousekeepingItems(agendaItems),
       },
       {
-        title: "New Business",
+        title: 'New Business',
         orderIndex: 4,
-        items: this.buildNewBusinessItems(agendaItems, projectsForReview)
-      }
+        items: this.buildNewBusinessItems(agendaItems, projectsForReview),
+      },
     ];
 
     // Calculate total estimated time
@@ -82,7 +87,7 @@ export class MeetingAgendaCompiler {
       date: meeting.date,
       sections,
       deferredItems: [], // Items that weren't addressed
-      totalEstimatedTime
+      totalEstimatedTime,
     };
   }
 
@@ -100,13 +105,14 @@ export class MeetingAgendaCompiler {
 
     // Add agenda items specifically marked as "old business" or "follow-up"
     const oldBusinessItems = agendaItems
-      .filter(item => 
-        item.status === 'approved' && 
-        (item.title.toLowerCase().includes('follow-up') ||
-         item.title.toLowerCase().includes('old business') ||
-         item.description?.toLowerCase().includes('follow-up'))
+      .filter(
+        (item) =>
+          item.status === 'approved' &&
+          (item.title.toLowerCase().includes('follow-up') ||
+            item.title.toLowerCase().includes('old business') ||
+            item.description?.toLowerCase().includes('follow-up'))
       )
-      .map(item => this.convertAgendaItemToDetails(item));
+      .map((item) => this.convertAgendaItemToDetails(item));
 
     items.push(...oldBusinessItems);
     return items;
@@ -123,20 +129,23 @@ export class MeetingAgendaCompiler {
 
     // Add urgent agenda items
     const urgentAgendaItems = agendaItems
-      .filter(item => 
-        item.status === 'approved' && 
-        (item.title.toLowerCase().includes('urgent') ||
-         item.title.toLowerCase().includes('critical') ||
-         item.description?.toLowerCase().includes('urgent'))
+      .filter(
+        (item) =>
+          item.status === 'approved' &&
+          (item.title.toLowerCase().includes('urgent') ||
+            item.title.toLowerCase().includes('critical') ||
+            item.description?.toLowerCase().includes('urgent'))
       )
-      .map(item => this.convertAgendaItemToDetails(item, '5 min'));
+      .map((item) => this.convertAgendaItemToDetails(item, '5 min'));
 
     items.push(...urgentAgendaItems);
 
     // Add high priority projects for review
     const urgentProjects = projectsForReview
-      .filter(project => project.priority === 'high' || project.priority === 'P0')
-      .map(project => this.convertProjectToAgendaItem(project, '10 min'));
+      .filter(
+        (project) => project.priority === 'high' || project.priority === 'P0'
+      )
+      .map((project) => this.convertProjectToAgendaItem(project, '10 min'));
 
     items.push(...urgentProjects);
     return items;
@@ -145,20 +154,29 @@ export class MeetingAgendaCompiler {
   /**
    * Build Housekeeping section - administrative and routine items
    */
-  private buildHousekeepingItems(agendaItems: AgendaItem[]): AgendaItemWithDetails[] {
+  private buildHousekeepingItems(
+    agendaItems: AgendaItem[]
+  ): AgendaItemWithDetails[] {
     const housekeepingKeywords = [
-      'housekeeping', 'admin', 'administrative', 'routine', 'schedule',
-      'logistics', 'reminder', 'announcement', 'update'
+      'housekeeping',
+      'admin',
+      'administrative',
+      'routine',
+      'schedule',
+      'logistics',
+      'reminder',
+      'announcement',
+      'update',
     ];
 
     return agendaItems
-      .filter(item => {
+      .filter((item) => {
         if (item.status !== 'approved') return false;
-        
+
         const text = `${item.title} ${item.description}`.toLowerCase();
-        return housekeepingKeywords.some(keyword => text.includes(keyword));
+        return housekeepingKeywords.some((keyword) => text.includes(keyword));
       })
-      .map(item => this.convertAgendaItemToDetails(item, '3 min'));
+      .map((item) => this.convertAgendaItemToDetails(item, '3 min'));
   }
 
   /**
@@ -172,24 +190,30 @@ export class MeetingAgendaCompiler {
 
     // Add regular approved agenda items (not already categorized)
     const newBusinessItems = agendaItems
-      .filter(item => {
+      .filter((item) => {
         if (item.status !== 'approved') return false;
-        
+
         const text = `${item.title} ${item.description}`.toLowerCase();
-        const isOldBusiness = text.includes('follow-up') || text.includes('old business');
+        const isOldBusiness =
+          text.includes('follow-up') || text.includes('old business');
         const isUrgent = text.includes('urgent') || text.includes('critical');
-        const isHousekeeping = ['housekeeping', 'admin', 'routine', 'schedule'].some(k => text.includes(k));
-        
+        const isHousekeeping = [
+          'housekeeping',
+          'admin',
+          'routine',
+          'schedule',
+        ].some((k) => text.includes(k));
+
         return !isOldBusiness && !isUrgent && !isHousekeeping;
       })
-      .map(item => this.convertAgendaItemToDetails(item, '8 min'));
+      .map((item) => this.convertAgendaItemToDetails(item, '8 min'));
 
     items.push(...newBusinessItems);
 
     // Add medium/low priority projects for review
     const newBusinessProjects = projectsForReview
-      .filter(project => !['high', 'P0'].includes(project.priority || ''))
-      .map(project => this.convertProjectToAgendaItem(project, '15 min'));
+      .filter((project) => !['high', 'P0'].includes(project.priority || ''))
+      .map((project) => this.convertProjectToAgendaItem(project, '15 min'));
 
     items.push(...newBusinessProjects);
     return items;
@@ -199,7 +223,7 @@ export class MeetingAgendaCompiler {
    * Convert AgendaItem to AgendaItemWithDetails
    */
   private convertAgendaItemToDetails(
-    item: AgendaItem, 
+    item: AgendaItem,
     estimatedTime: string = '5 min'
   ): AgendaItemWithDetails {
     return {
@@ -209,7 +233,7 @@ export class MeetingAgendaCompiler {
       submittedBy: item.submittedBy,
       type: 'agenda_item',
       status: item.status,
-      estimatedTime
+      estimatedTime,
     };
   }
 
@@ -226,7 +250,7 @@ export class MeetingAgendaCompiler {
       submittedBy: project.createdByName || project.createdBy || 'System',
       type: 'project_review',
       projectId: project.id,
-      estimatedTime
+      estimatedTime,
     };
   }
 
@@ -246,9 +270,9 @@ export class MeetingAgendaCompiler {
    */
   private calculateTotalTime(sections: CompiledAgendaSection[]): string {
     let totalMinutes = 0;
-    
-    sections.forEach(section => {
-      section.items.forEach(item => {
+
+    sections.forEach((section) => {
+      section.items.forEach((item) => {
         if (item.estimatedTime) {
           const minutes = parseInt(item.estimatedTime.replace(/\D/g, '')) || 5;
           totalMinutes += minutes;
@@ -258,7 +282,7 @@ export class MeetingAgendaCompiler {
 
     const hours = Math.floor(totalMinutes / 60);
     const minutes = totalMinutes % 60;
-    
+
     if (hours > 0) {
       return `${hours}h ${minutes}m`;
     }
@@ -279,7 +303,7 @@ export class MeetingAgendaCompiler {
       status: 'draft',
       sections: agenda.sections,
       deferredItems: agenda.deferredItems,
-      compiledBy
+      compiledBy,
     });
 
     // Save individual sections
@@ -288,7 +312,7 @@ export class MeetingAgendaCompiler {
         compiledAgendaId,
         title: section.title,
         orderIndex: section.orderIndex,
-        items: section.items
+        items: section.items,
       });
     }
 
@@ -305,26 +329,26 @@ export class MeetingAgendaCompiler {
     }
 
     const sheetData: any[] = [];
-    
+
     // Header
     sheetData.push([agenda.title]);
     sheetData.push([`Date: ${agenda.date}`]);
     sheetData.push(['']); // Empty row
 
     // Sections
-    agenda.sections.forEach(section => {
+    agenda.sections.forEach((section) => {
       sheetData.push([section.title]);
       sheetData.push(['Item', 'Description', 'Presenter', 'Time']);
-      
-      section.items.forEach(item => {
+
+      section.items.forEach((item) => {
         sheetData.push([
           item.title,
           item.description || '',
           item.submittedBy,
-          item.estimatedTime || '5 min'
+          item.estimatedTime || '5 min',
         ]);
       });
-      
+
       sheetData.push(['']); // Empty row between sections
     });
 

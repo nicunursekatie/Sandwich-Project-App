@@ -25,108 +25,108 @@ import {
   Clock,
   Truck,
   FileImage,
-} from "lucide-react";
-import { useLocation } from "wouter";
+} from 'lucide-react';
+import { useLocation } from 'wouter';
 // Using optimized SVG for faster loading
-const sandwichLogo = "/sandwich-icon-optimized.svg";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import ProjectList from "@/components/project-list";
-import WeeklySandwichForm from "@/components/weekly-sandwich-form";
+const sandwichLogo = '/sandwich-icon-optimized.svg';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import ProjectList from '@/components/project-list';
+import WeeklySandwichForm from '@/components/weekly-sandwich-form';
 
-import CommitteeChat from "@/components/committee-chat";
-import GoogleDriveLinks from "@/components/google-drive-links";
-import DashboardOverview from "@/components/dashboard-overview";
-import SandwichCollectionLog from "@/components/sandwich-collection-log";
-import RecipientsManagement from "@/components/recipients-management";
-import DriversManagement from "@/components/drivers-management-simple";
-import VolunteerManagement from "@/components/volunteer-management";
-import HostsManagement from "@/components/hosts-management-consolidated";
-import { DocumentsBrowser } from "@/components/documents-browser";
-import DocumentManagement from "@/components/document-management";
-import ImportantDocuments from "@/pages/important-documents";
+import CommitteeChat from '@/components/committee-chat';
+import GoogleDriveLinks from '@/components/google-drive-links';
+import DashboardOverview from '@/components/dashboard-overview';
+import SandwichCollectionLog from '@/components/sandwich-collection-log';
+import RecipientsManagement from '@/components/recipients-management';
+import DriversManagement from '@/components/drivers-management-simple';
+import VolunteerManagement from '@/components/volunteer-management';
+import HostsManagement from '@/components/hosts-management-consolidated';
+import { DocumentsBrowser } from '@/components/documents-browser';
+import DocumentManagement from '@/components/document-management';
+import ImportantDocuments from '@/pages/important-documents';
 
-import BulkDataManager from "@/components/bulk-data-manager";
-import AnalyticsDashboard from "@/components/analytics-dashboard";
-import HostAnalytics from "@/components/host-analytics";
-import Development from "@/pages/development";
-import EnhancedMeetingDashboard from "@/components/enhanced-meeting-dashboard";
-import RoleDemo from "@/pages/role-demo";
-import ProjectsClean from "@/pages/projects-clean";
-import ProjectDetailClean from "@/pages/project-detail-clean";
-import Analytics from "@/pages/analytics";
-import ImpactDashboard from "@/pages/impact-dashboard";
-import DataManagement from "@/pages/data-management";
-import PerformanceDashboard from "@/pages/performance-dashboard";
+import BulkDataManager from '@/components/bulk-data-manager';
+import AnalyticsDashboard from '@/components/analytics-dashboard';
+import HostAnalytics from '@/components/host-analytics';
+import Development from '@/pages/development';
+import EnhancedMeetingDashboard from '@/components/enhanced-meeting-dashboard';
+import RoleDemo from '@/pages/role-demo';
+import ProjectsClean from '@/pages/projects-clean';
+import ProjectDetailClean from '@/pages/project-detail-clean';
+import Analytics from '@/pages/analytics';
+import ImpactDashboard from '@/pages/impact-dashboard';
+import DataManagement from '@/pages/data-management';
+import PerformanceDashboard from '@/pages/performance-dashboard';
 
-import UserManagementRedesigned from "@/components/user-management-redesigned";
-import UserProfile from "@/components/user-profile";
-import { useState } from "react";
-import * as React from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { hasPermission, PERMISSIONS } from "@shared/auth-utils";
-import { queryClient } from "@/lib/queryClient";
-import SimpleNav from "@/components/simple-nav";
-import AnnouncementBanner from "@/components/announcement-banner";
-import MessageNotifications from "@/components/message-notifications";
-import WorkLogPage from "@/pages/work-log";
-import SuggestionsPortal from "@/pages/suggestions";
-import GoogleSheetsPage from "@/pages/google-sheets";
+import UserManagementRedesigned from '@/components/user-management-redesigned';
+import UserProfile from '@/components/user-profile';
+import { useState } from 'react';
+import * as React from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import { hasPermission, PERMISSIONS } from '@shared/auth-utils';
+import { queryClient } from '@/lib/queryClient';
+import SimpleNav from '@/components/simple-nav';
+import AnnouncementBanner from '@/components/announcement-banner';
+import MessageNotifications from '@/components/message-notifications';
+import WorkLogPage from '@/pages/work-log';
+import SuggestionsPortal from '@/pages/suggestions';
+import GoogleSheetsPage from '@/pages/google-sheets';
 
-import MessagingSystem from "@/components/messaging-system";
-import RealTimeMessages from "@/pages/real-time-messages";
-import Governance from "@/pages/governance";
+import MessagingSystem from '@/components/messaging-system';
+import RealTimeMessages from '@/pages/real-time-messages';
+import Governance from '@/pages/governance';
 
-import GmailStyleInbox from "@/components/gmail-style-inbox";
-import { ToolkitTabs } from "@/components/toolkit-tabs";
-import { KudosInbox } from "@/components/kudos-inbox";
-import { KudosLoginNotifier } from "@/components/kudos-login-notifier";
-import SocketChatHub from "@/components/socket-chat-hub";
-import EventsViewer from "@/components/events-viewer";
-import SignUpGeniusViewer from "@/components/signup-genius-viewer";
-import DonationTracking from "@/components/donation-tracking";
-import WeeklyMonitoringDashboard from "@/components/weekly-monitoring-dashboard";
-import WishlistPage from "@/pages/wishlist";
-import EventRequestsManagement from "@/components/event-requests-management";
-import EventRemindersManagement from "@/components/event-reminders-management";
-import GroupCatalog from "@/components/organizations-catalog";
-import ActionTracking from "@/components/action-tracking-enhanced";
-import LogosPage from "@/pages/logos";
-import ImportantLinks from "@/pages/important-links";
+import GmailStyleInbox from '@/components/gmail-style-inbox';
+import { ToolkitTabs } from '@/components/toolkit-tabs';
+import { KudosInbox } from '@/components/kudos-inbox';
+import { KudosLoginNotifier } from '@/components/kudos-login-notifier';
+import SocketChatHub from '@/components/socket-chat-hub';
+import EventsViewer from '@/components/events-viewer';
+import SignUpGeniusViewer from '@/components/signup-genius-viewer';
+import DonationTracking from '@/components/donation-tracking';
+import WeeklyMonitoringDashboard from '@/components/weekly-monitoring-dashboard';
+import WishlistPage from '@/pages/wishlist';
+import EventRequestsManagement from '@/components/event-requests-management';
+import EventRemindersManagement from '@/components/event-reminders-management';
+import GroupCatalog from '@/components/organizations-catalog';
+import ActionTracking from '@/components/action-tracking-enhanced';
+import LogosPage from '@/pages/logos';
+import ImportantLinks from '@/pages/important-links';
 
-import sandwich_logo from "@assets/CMYK_PRINT_TSP-01_1749585167435.png";
+import sandwich_logo from '@assets/CMYK_PRINT_TSP-01_1749585167435.png';
 
-import sandwich_20logo from "@assets/LOGOS/sandwich logo.png";
+import sandwich_20logo from '@assets/LOGOS/sandwich logo.png';
 
 export default function Dashboard({
-  initialSection = "dashboard",
+  initialSection = 'dashboard',
 }: {
   initialSection?: string;
 }) {
   const [location] = useLocation();
   const [activeSection, setActiveSection] = useState(initialSection);
-  const [selectedHost, setSelectedHost] = useState<string>("");
+  const [selectedHost, setSelectedHost] = useState<string>('');
 
   // Listen to URL changes to update activeSection
   React.useEffect(() => {
-    console.log("Current URL location:", location);
+    console.log('Current URL location:', location);
 
     // Extract section from URL path
-    if (location.startsWith("/projects/")) {
-      const parts = location.split("/projects/");
+    if (location.startsWith('/projects/')) {
+      const parts = location.split('/projects/');
       const projectId = parts.length > 1 ? parts[1] : null;
       if (projectId) {
         const newSection = `project-${projectId}`;
-        console.log("Setting activeSection to project ID:", newSection);
+        console.log('Setting activeSection to project ID:', newSection);
         setActiveSection(newSection);
       }
     } else {
       // Handle other sections if needed
-      const pathSection = location.substring(1) || "dashboard";
+      const pathSection = location.substring(1) || 'dashboard';
       if (
         pathSection !== activeSection &&
         pathSection !== location.substring(1)
       ) {
-        console.log("Setting activeSection to:", pathSection);
+        console.log('Setting activeSection to:', pathSection);
         setActiveSection(pathSection);
       }
     }
@@ -134,12 +134,12 @@ export default function Dashboard({
 
   // Debug logging
   React.useEffect(() => {
-    console.log("Dashboard activeSection changed to:", activeSection);
+    console.log('Dashboard activeSection changed to:', activeSection);
   }, [activeSection]);
 
   // Enhanced setActiveSection with debugging
   const enhancedSetActiveSection = (section: string) => {
-    console.log("📍 Dashboard setActiveSection called with:", section);
+    console.log('📍 Dashboard setActiveSection called with:', section);
     setActiveSection(section);
   };
   const [expandedSections, setExpandedSections] = useState<string[]>([]);
@@ -167,36 +167,36 @@ export default function Dashboard({
   // Simplified navigation structure
   const navigationItems = [
     // Core section
-    { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { id: "collections", label: "Collections", icon: Sandwich },
+    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'collections', label: 'Collections', icon: Sandwich },
     ...(hasPermission(user, PERMISSIONS.EVENT_REQUESTS_VIEW)
-      ? [{ id: "events", label: "Events", icon: Calendar }]
+      ? [{ id: 'events', label: 'Events', icon: Calendar }]
       : []),
     {
-      id: "inventory-calculator",
-      label: "Inventory Calculator",
+      id: 'inventory-calculator',
+      label: 'Inventory Calculator',
       icon: Calculator,
     },
-    { id: "important-documents", label: "Important Documents", icon: FileText },
+    { id: 'important-documents', label: 'Important Documents', icon: FileText },
 
     // Data section (filtered by permissions)
     ...(hasPermission(user, PERMISSIONS.HOSTS_VIEW)
-      ? [{ id: "hosts", label: "Host Location", icon: Building2 }]
+      ? [{ id: 'hosts', label: 'Host Location', icon: Building2 }]
       : []),
     ...(hasPermission(user, PERMISSIONS.DRIVERS_VIEW)
-      ? [{ id: "drivers", label: "Drivers", icon: Car }]
+      ? [{ id: 'drivers', label: 'Drivers', icon: Car }]
       : []),
     ...(hasPermission(user, PERMISSIONS.RECIPIENTS_VIEW)
-      ? [{ id: "recipients", label: "Recipients", icon: Users }]
+      ? [{ id: 'recipients', label: 'Recipients', icon: Users }]
       : []),
     ...(hasPermission(user, PERMISSIONS.VIEW_VOLUNTEERS)
-      ? [{ id: "volunteers", label: "Volunteers", icon: Users }]
+      ? [{ id: 'volunteers', label: 'Volunteers', icon: Users }]
       : []),
     ...(hasPermission(user, PERMISSIONS.VIEW_DONATION_TRACKING)
       ? [
           {
-            id: "donation-tracking",
-            label: "Distribution Tracking",
+            id: 'donation-tracking',
+            label: 'Distribution Tracking',
             icon: Truck,
           },
         ]
@@ -204,54 +204,54 @@ export default function Dashboard({
 
     // Event Planning section
     ...(hasPermission(user, PERMISSIONS.EVENT_REQUESTS_VIEW)
-      ? [{ id: "event-requests", label: "Event Planning", icon: Calendar }]
+      ? [{ id: 'event-requests', label: 'Event Planning', icon: Calendar }]
       : []),
     ...(hasPermission(user, PERMISSIONS.EVENT_REQUESTS_VIEW)
-      ? [{ id: "event-reminders", label: "Event Reminders", icon: Clock }]
+      ? [{ id: 'event-reminders', label: 'Event Reminders', icon: Clock }]
       : []),
     ...(hasPermission(user, PERMISSIONS.ORGANIZATIONS_VIEW)
-      ? [{ id: "groups-catalog", label: "Groups Catalog", icon: Building2 }]
+      ? [{ id: 'groups-catalog', label: 'Groups Catalog', icon: Building2 }]
       : []),
 
     // Operations section
     ...(hasPermission(user, PERMISSIONS.MEETINGS_VIEW)
-      ? [{ id: "meetings", label: "Meetings", icon: ClipboardList }]
+      ? [{ id: 'meetings', label: 'Meetings', icon: ClipboardList }]
       : []),
     ...(hasPermission(user, PERMISSIONS.ANALYTICS_VIEW)
-      ? [{ id: "analytics", label: "Analytics", icon: BarChart3 }]
+      ? [{ id: 'analytics', label: 'Analytics', icon: BarChart3 }]
       : []),
     ...(hasPermission(user, PERMISSIONS.ACCESS_WEEKLY_MONITORING)
-      ? [{ id: "weekly-monitoring", label: "Weekly Monitoring", icon: Clock }]
+      ? [{ id: 'weekly-monitoring', label: 'Weekly Monitoring', icon: Clock }]
       : []),
 
     ...(hasPermission(user, PERMISSIONS.PROJECTS_VIEW)
-      ? [{ id: "projects", label: "Projects", icon: ListTodo }]
+      ? [{ id: 'projects', label: 'Projects', icon: ListTodo }]
       : []),
 
     // Communication section
-    { id: "chat", label: "Chat", icon: MessageCircle },
+    { id: 'chat', label: 'Chat', icon: MessageCircle },
     ...(hasPermission(user, PERMISSIONS.CHAT_GENERAL)
-      ? [{ id: "committee", label: "Committee", icon: MessageCircle }]
+      ? [{ id: 'committee', label: 'Committee', icon: MessageCircle }]
       : []),
 
     ...(hasPermission(user, PERMISSIONS.SUGGESTIONS_VIEW)
-      ? [{ id: "suggestions", label: "Suggestions", icon: Lightbulb }]
+      ? [{ id: 'suggestions', label: 'Suggestions', icon: Lightbulb }]
       : []),
 
     // Resources section
     ...(hasPermission(user, PERMISSIONS.ACCESS_TOOLKIT)
-      ? [{ id: "toolkit", label: "Toolkit", icon: FolderOpen }]
+      ? [{ id: 'toolkit', label: 'Toolkit', icon: FolderOpen }]
       : []),
     ...(hasPermission(user, PERMISSIONS.ADMIN_ACCESS)
-      ? [{ id: "development", label: "Development", icon: FileText }]
+      ? [{ id: 'development', label: 'Development', icon: FileText }]
       : []),
     ...(hasPermission(user, PERMISSIONS.ACCESS_WORK_LOGS)
-      ? [{ id: "work-log", label: "Work Log", icon: ClipboardList }]
+      ? [{ id: 'work-log', label: 'Work Log', icon: ClipboardList }]
       : []),
 
     // Admin section
     ...(hasPermission(user, PERMISSIONS.MANAGE_USERS)
-      ? [{ id: "user-management", label: "Admin", icon: UserCog }]
+      ? [{ id: 'user-management', label: 'Admin', icon: UserCog }]
       : []),
   ];
 
@@ -269,17 +269,17 @@ export default function Dashboard({
     }
 
     switch (activeSection) {
-      case "dashboard":
+      case 'dashboard':
         return <DashboardOverview onSectionChange={setActiveSection} />;
-      case "collections":
+      case 'collections':
         return <SandwichCollectionLog />;
-      case "events":
+      case 'events':
         return <EventsViewer />;
-      case "signup-genius":
+      case 'signup-genius':
         return <SignUpGeniusViewer />;
-      case "donation-tracking":
+      case 'donation-tracking':
         return <DonationTracking />;
-      case "weekly-monitoring":
+      case 'weekly-monitoring':
         return (
           <div className="space-y-6 p-6">
             <div className="flex items-center gap-4 mb-6">
@@ -299,30 +299,30 @@ export default function Dashboard({
             <WeeklyMonitoringDashboard />
           </div>
         );
-      case "inventory-calculator":
+      case 'inventory-calculator':
         // Open the inventory calculator in a new tab and return to dashboard
         window.open(
-          "https://nicunursekatie.github.io/sandwichinventory/inventorycalculator.html",
-          "_blank"
+          'https://nicunursekatie.github.io/sandwichinventory/inventorycalculator.html',
+          '_blank'
         );
-        setActiveSection("dashboard");
+        setActiveSection('dashboard');
         return <DashboardOverview onSectionChange={setActiveSection} />;
-      case "important-documents":
+      case 'important-documents':
         return <ImportantDocuments />;
-      case "projects":
-        console.log("Rendering ProjectsClean component");
+      case 'projects':
+        console.log('Rendering ProjectsClean component');
         return <ProjectsClean />;
-      case "real-time-messages":
+      case 'real-time-messages':
         return <RealTimeMessages />;
-      case "messages":
+      case 'messages':
         return <GmailStyleInbox />;
-      case "gmail-inbox":
+      case 'gmail-inbox':
         return <GmailStyleInbox />;
-      case "inbox":
+      case 'inbox':
         return <GmailStyleInbox />;
-      case "stream-messages":
+      case 'stream-messages':
         return <RealTimeMessages />;
-      case "chat":
+      case 'chat':
         return (
           <div className="h-full flex flex-col">
             <div className="flex-shrink-0 flex items-center gap-4 p-6 pb-2 border-b border-gray-200">
@@ -342,7 +342,7 @@ export default function Dashboard({
             </div>
           </div>
         );
-      case "kudos":
+      case 'kudos':
         return (
           <div className="space-y-6 p-6">
             <div className="flex items-center gap-4 mb-6">
@@ -359,44 +359,44 @@ export default function Dashboard({
             <KudosInbox />
           </div>
         );
-      case "profile":
+      case 'profile':
         return <UserProfile />;
-      case "meetings":
+      case 'meetings':
         return <EnhancedMeetingDashboard />;
 
-      case "toolkit":
+      case 'toolkit':
         return <ToolkitTabs />;
 
-      case "documents":
-      case "document-management":
+      case 'documents':
+      case 'document-management':
         return <DocumentManagement />;
 
-      case "hosts":
+      case 'hosts':
         return <HostsManagement />;
-      case "recipients":
+      case 'recipients':
         return <RecipientsManagement />;
-      case "drivers":
+      case 'drivers':
         return <DriversManagement />;
-      case "volunteers":
+      case 'volunteers':
         return <VolunteerManagement />;
-      case "event-requests":
+      case 'event-requests':
         return <EventRequestsManagement />;
-      case "event-reminders":
+      case 'event-reminders':
         return <EventRemindersManagement />;
-      case "groups-catalog":
+      case 'groups-catalog':
         return (
           <GroupCatalog
-            onNavigateToEventPlanning={() => setActiveSection("event-requests")}
+            onNavigateToEventPlanning={() => setActiveSection('event-requests')}
           />
         );
-      case "action-tracking":
+      case 'action-tracking':
         return <ActionTracking />;
 
-      case "wishlist":
+      case 'wishlist':
         return <WishlistPage />;
-      case "important-links":
+      case 'important-links':
         return <ImportantLinks />;
-      case "analytics":
+      case 'analytics':
         return (
           <div className="p-6">
             <div className="mb-6">
@@ -443,28 +443,28 @@ export default function Dashboard({
             </Tabs>
           </div>
         );
-      case "role-demo":
+      case 'role-demo':
         return <RoleDemo />;
-      case "work-log":
+      case 'work-log':
         return <WorkLogPage />;
-      case "suggestions":
+      case 'suggestions':
         return <SuggestionsPortal />;
-      case "google-sheets":
+      case 'google-sheets':
         return <GoogleSheetsPage />;
-      case "governance":
+      case 'governance':
         return <Governance />;
-      case "committee":
-      case "committee-chat":
+      case 'committee':
+      case 'committee-chat':
         return (
           <div className="space-y-6">
             <div className="flex items-center gap-4 mb-6">
               <div
                 className="flex items-center justify-center w-12 h-12 rounded-xl"
-                style={{ backgroundColor: "var(--tsp-teal-light)" }}
+                style={{ backgroundColor: 'var(--tsp-teal-light)' }}
               >
                 <MessageCircle
                   className="w-6 h-6"
-                  style={{ color: "var(--tsp-teal)" }}
+                  style={{ color: 'var(--tsp-teal)' }}
                 />
               </div>
               <div>
@@ -479,11 +479,11 @@ export default function Dashboard({
             <CommitteeChat />
           </div>
         );
-      case "user-management":
+      case 'user-management':
         return <UserManagementRedesigned />;
-      case "development":
+      case 'development':
         return <Development />;
-      case "admin":
+      case 'admin':
         return <ImportantDocuments />;
       default:
         // Handle project detail pages
@@ -491,9 +491,9 @@ export default function Dashboard({
           return <ProjectDetailClean projectId={projectId} />;
         }
         // Handle legacy project routes
-        if (activeSection.startsWith("project-")) {
+        if (activeSection.startsWith('project-')) {
           const legacyProjectId = parseInt(
-            activeSection.replace("project-", "")
+            activeSection.replace('project-', '')
           );
           if (!isNaN(legacyProjectId)) {
             return <ProjectDetailClean projectId={legacyProjectId} />;
@@ -517,7 +517,7 @@ export default function Dashboard({
 
   // If not authenticated after loading, redirect or show error
   if (!user) {
-    window.location.href = "/";
+    window.location.href = '/';
     return null;
   }
 
@@ -571,14 +571,15 @@ export default function Dashboard({
                   <span className="text-xs font-medium text-teal-800">
                     {(user as any)?.firstName?.charAt(0) ||
                       (user as any)?.email?.charAt(0) ||
-                      "U"}
+                      'U'}
                   </span>
                 </div>
                 <div className="hidden lg:flex flex-col min-w-0">
                   <span className="text-xs font-medium text-teal-800 truncate">
                     {(user as any)?.firstName
-                      ? `${(user as any).firstName} ${(user as any)?.lastName ||
-                          ""}`.trim()
+                      ? `${(user as any).firstName} ${
+                          (user as any)?.lastName || ''
+                        }`.trim()
                       : (user as any)?.email}
                   </span>
                   <span className="text-xs text-amber-600 truncate">
@@ -589,7 +590,7 @@ export default function Dashboard({
                   <span className="text-xs font-medium text-teal-800 truncate block">
                     {(user as any)?.firstName
                       ? `${(user as any).firstName}`
-                      : (user as any)?.email?.split("@")[0] || "User"}
+                      : (user as any)?.email?.split('@')[0] || 'User'}
                   </span>
                 </div>
               </div>
@@ -599,14 +600,14 @@ export default function Dashboard({
             <div className="flex items-center gap-0.5 xs:gap-1 relative z-50 flex-shrink-0">
               <button
                 onClick={() => {
-                  console.log("Messages button clicked");
-                  setActiveSection("messages");
+                  console.log('Messages button clicked');
+                  setActiveSection('messages');
                   setIsMobileMenuOpen(false);
                 }}
                 className={`p-2 rounded-lg transition-colors relative z-50 pointer-events-auto touch-manipulation min-w-[44px] ${
-                  activeSection === "messages"
-                    ? "bg-[#236383] hover:bg-[#1d5470] text-white border border-[#236383] shadow-sm"
-                    : "text-teal-600 hover:bg-teal-50 hover:text-teal-800"
+                  activeSection === 'messages'
+                    ? 'bg-[#236383] hover:bg-[#1d5470] text-white border border-[#236383] shadow-sm'
+                    : 'text-teal-600 hover:bg-teal-50 hover:text-teal-800'
                 }`}
                 title="Messages"
                 aria-label="Messages"
@@ -615,7 +616,7 @@ export default function Dashboard({
               </button>
 
               {/* MessageNotifications component */}
-              {typeof window !== "undefined" && (
+              {typeof window !== 'undefined' && (
                 <MessageNotifications user={user} />
               )}
 
@@ -624,21 +625,21 @@ export default function Dashboard({
                   e.preventDefault();
                   e.stopPropagation();
                   console.log(
-                    "Profile button clicked, current section:",
+                    'Profile button clicked, current section:',
                     activeSection
                   );
-                  setActiveSection("profile");
+                  setActiveSection('profile');
                   window.history.pushState(
                     {},
-                    "",
-                    "/dashboard?section=profile"
+                    '',
+                    '/dashboard?section=profile'
                   );
                   setIsMobileMenuOpen(false);
                 }}
                 className={`p-2 rounded-lg transition-colors relative z-50 pointer-events-auto touch-manipulation min-w-[44px] ${
-                  activeSection === "profile"
-                    ? "bg-[#236383] hover:bg-[#1d5470] text-white border border-[#236383] shadow-sm"
-                    : "text-teal-600 hover:bg-teal-50 hover:text-teal-800"
+                  activeSection === 'profile'
+                    ? 'bg-[#236383] hover:bg-[#1d5470] text-white border border-[#236383] shadow-sm'
+                    : 'text-teal-600 hover:bg-teal-50 hover:text-teal-800'
                 }`}
                 title="Account Settings"
                 aria-label="Account Settings"
@@ -650,26 +651,26 @@ export default function Dashboard({
               <button
                 onClick={async () => {
                   try {
-                    await fetch("/api/logout", {
-                      method: "POST",
-                      credentials: "include",
+                    await fetch('/api/logout', {
+                      method: 'POST',
+                      credentials: 'include',
                     });
                     // Clear all cached data and force auth state refresh
                     queryClient.clear();
                     queryClient.invalidateQueries({
-                      queryKey: ["/api/auth/user"],
+                      queryKey: ['/api/auth/user'],
                     });
-                    queryClient.removeQueries({ queryKey: ["/api/auth/user"] });
+                    queryClient.removeQueries({ queryKey: ['/api/auth/user'] });
                     // Force immediate redirect to login
-                    window.location.href = "/api/login";
+                    window.location.href = '/api/login';
                   } catch (error) {
-                    console.error("Logout error:", error);
+                    console.error('Logout error:', error);
                     queryClient.clear();
                     queryClient.invalidateQueries({
-                      queryKey: ["/api/auth/user"],
+                      queryKey: ['/api/auth/user'],
                     });
-                    queryClient.removeQueries({ queryKey: ["/api/auth/user"] });
-                    window.location.href = "/api/login";
+                    queryClient.removeQueries({ queryKey: ['/api/auth/user'] });
+                    window.location.href = '/api/login';
                   }
                 }}
                 className="flex items-center gap-1 px-2 py-2 text-amber-700 hover:text-amber-900 rounded-lg hover:bg-amber-50 transition-colors touch-manipulation border border-amber-200 hover:border-amber-300 flex-shrink-0 min-w-[44px]"
@@ -696,9 +697,9 @@ export default function Dashboard({
           {/* Sidebar */}
           <div
             className={`${
-              isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+              isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
             } md:translate-x-0 fixed md:relative z-50 ${
-              isSidebarCollapsed ? "w-16" : "w-56 xs:w-64 sm:w-72"
+              isSidebarCollapsed ? 'w-16' : 'w-56 xs:w-64 sm:w-72'
             } bg-gradient-to-b from-white to-orange-50/30 border-r-2 border-amber-200 shadow-lg flex flex-col transition-all duration-300 ease-in-out h-full`}
           >
             {/* Collapse Toggle Button */}
@@ -707,7 +708,7 @@ export default function Dashboard({
                 onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
                 className="p-1.5 rounded-lg hover:bg-amber-100 transition-colors"
                 aria-label={
-                  isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"
+                  isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'
                 }
               >
                 {isSidebarCollapsed ? (
@@ -724,7 +725,7 @@ export default function Dashboard({
                 activeSection={activeSection}
                 onSectionChange={(section) => {
                   console.log(
-                    "Dashboard setActiveSection called with:",
+                    'Dashboard setActiveSection called with:',
                     section
                   );
                   setActiveSection(section);
@@ -732,10 +733,10 @@ export default function Dashboard({
                   setIsMobileMenuOpen(false);
                   // Also update URL for back button support
                   const newUrl =
-                    section === "dashboard"
-                      ? "/dashboard"
+                    section === 'dashboard'
+                      ? '/dashboard'
                       : `/dashboard?section=${section}`;
-                  window.history.pushState({}, "", newUrl);
+                  window.history.pushState({}, '', newUrl);
                 }}
                 isCollapsed={isSidebarCollapsed}
               />
@@ -758,7 +759,7 @@ export default function Dashboard({
 
           {/* Main Content */}
           <div className="flex-1 overflow-hidden w-full md:w-auto relative z-10 bg-amber-50/30 min-w-0">
-            {activeSection === "gmail-inbox" || activeSection === "chat" ? (
+            {activeSection === 'gmail-inbox' || activeSection === 'chat' ? (
               // Special full-height layout for inbox and chat
               <div className="h-full">{renderContent()}</div>
             ) : (

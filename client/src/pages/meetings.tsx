@@ -1,4 +1,4 @@
-import EnhancedMeetingDashboard from "@/components/enhanced-meeting-dashboard";
+import EnhancedMeetingDashboard from '@/components/enhanced-meeting-dashboard';
 
 interface MeetingsPageProps {
   onNavigate?: (section: string) => void;

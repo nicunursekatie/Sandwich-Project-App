@@ -1,13 +1,13 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Users, FormInput, HelpCircle } from "lucide-react";
-import CompactCollectionForm from "./compact-collection-form";
-import CollectionWalkthrough from "./collection-walkthrough";
-import { useAuth } from "@/hooks/useAuth";
-import { PERMISSIONS, hasPermission } from "@shared/auth-utils";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
+import { ArrowRight, Users, FormInput, HelpCircle } from 'lucide-react';
+import CompactCollectionForm from './compact-collection-form';
+import CollectionWalkthrough from './collection-walkthrough';
+import { useAuth } from '@/hooks/useAuth';
+import { PERMISSIONS, hasPermission } from '@shared/auth-utils';
 
 interface CollectionFormSelectorProps {
   onSuccess?: () => void;
@@ -19,7 +19,7 @@ export default function CollectionFormSelector({
   onCancel,
 }: CollectionFormSelectorProps) {
   const [selectedMethod, setSelectedMethod] = useState<
-    "standard" | "walkthrough" | null
+    'standard' | 'walkthrough' | null
   >(null);
   const { user } = useAuth();
 
@@ -45,7 +45,7 @@ export default function CollectionFormSelector({
     );
   }
 
-  if (selectedMethod === "standard") {
+  if (selectedMethod === 'standard') {
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
@@ -67,7 +67,7 @@ export default function CollectionFormSelector({
     );
   }
 
-  if (selectedMethod === "walkthrough") {
+  if (selectedMethod === 'walkthrough') {
     return (
       <CollectionWalkthrough
         onComplete={onSuccess}
@@ -122,7 +122,7 @@ export default function CollectionFormSelector({
           {/* Standard Form Option */}
           <Card
             className="cursor-pointer border-2 hover:border-[#236383] transition-colors touch-manipulation"
-            onClick={() => setSelectedMethod("standard")}
+            onClick={() => setSelectedMethod('standard')}
           >
             <CardHeader className="text-center p-4 sm:p-6">
               <FormInput className="w-8 h-8 sm:w-12 sm:h-12 mx-auto text-[#236383] mb-2 sm:mb-3" />
@@ -145,7 +145,7 @@ export default function CollectionFormSelector({
               </div>
               <Button
                 className="w-full bg-[#236383] hover:bg-[#1a4d66] h-10 sm:h-auto text-sm sm:text-base touch-manipulation"
-                onClick={() => setSelectedMethod("standard")}
+                onClick={() => setSelectedMethod('standard')}
               >
                 Use Standard Form
                 <ArrowRight className="w-4 h-4 ml-2" />
@@ -156,7 +156,7 @@ export default function CollectionFormSelector({
           {/* Walkthrough Option */}
           <Card
             className="cursor-pointer border-2 hover:border-[#007E8C] transition-colors touch-manipulation"
-            onClick={() => setSelectedMethod("walkthrough")}
+            onClick={() => setSelectedMethod('walkthrough')}
           >
             <CardHeader className="text-center p-4 sm:p-6">
               <Users className="w-8 h-8 sm:w-12 sm:h-12 mx-auto text-[#007E8C] mb-2 sm:mb-3" />
@@ -182,7 +182,7 @@ export default function CollectionFormSelector({
               </div>
               <Button
                 className="w-full bg-[#007E8C] hover:bg-[#006B75] h-10 sm:h-auto text-sm sm:text-base touch-manipulation"
-                onClick={() => setSelectedMethod("walkthrough")}
+                onClick={() => setSelectedMethod('walkthrough')}
               >
                 Start Walkthrough
                 <ArrowRight className="w-4 h-4 ml-2" />
@@ -195,7 +195,7 @@ export default function CollectionFormSelector({
           <div className="flex items-start gap-2 sm:gap-3">
             <HelpCircle className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 mt-0.5 flex-shrink-0" />
             <div className="text-xs sm:text-sm text-blue-800">
-              <strong>Important:</strong> Both methods will ask you for the{" "}
+              <strong>Important:</strong> Both methods will ask you for the{' '}
               <em>actual date you collected the sandwiches</em>, not today's
               date. We automatically track when you submit the form for our
               records.

@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from '@/components/ui/tooltip';
 import {
   HelpCircle,
   Info,
@@ -13,16 +13,16 @@ import {
   Target,
   CheckCircle,
   AlertTriangle,
-} from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+} from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 export interface TooltipContent {
   id: string;
   title: string;
   description: string;
-  type: "info" | "tip" | "warning" | "feature" | "shortcut";
-  priority: "low" | "medium" | "high";
+  type: 'info' | 'tip' | 'warning' | 'feature' | 'shortcut';
+  priority: 'low' | 'medium' | 'high';
   showOnHover?: boolean;
   showOnFocus?: boolean;
   dismissible?: boolean;
@@ -30,15 +30,15 @@ export interface TooltipContent {
   actions?: Array<{
     label: string;
     action: () => void;
-    variant?: "default" | "outline" | "ghost";
+    variant?: 'default' | 'outline' | 'ghost';
   }>;
 }
 
 interface ContextualTooltipProps {
   content: TooltipContent;
   children: React.ReactNode;
-  trigger?: "hover" | "click" | "focus" | "manual";
-  placement?: "top" | "bottom" | "left" | "right";
+  trigger?: 'hover' | 'click' | 'focus' | 'manual';
+  placement?: 'top' | 'bottom' | 'left' | 'right';
   className?: string;
   disabled?: boolean;
   onShow?: () => void;
@@ -49,53 +49,53 @@ interface ContextualTooltipProps {
 const typeConfig = {
   info: {
     icon: <Info className="w-4 h-4" />,
-    bgColor: "bg-blue-50",
-    borderColor: "border-blue-200",
-    textColor: "text-blue-900",
-    iconColor: "text-blue-600",
+    bgColor: 'bg-blue-50',
+    borderColor: 'border-blue-200',
+    textColor: 'text-blue-900',
+    iconColor: 'text-blue-600',
   },
   tip: {
     icon: <Lightbulb className="w-4 h-4" />,
-    bgColor: "bg-yellow-50",
-    borderColor: "border-yellow-200",
-    textColor: "text-yellow-900",
-    iconColor: "text-yellow-600",
+    bgColor: 'bg-yellow-50',
+    borderColor: 'border-yellow-200',
+    textColor: 'text-yellow-900',
+    iconColor: 'text-yellow-600',
   },
   warning: {
     icon: <AlertTriangle className="w-4 h-4" />,
-    bgColor: "bg-orange-50",
-    borderColor: "border-orange-200",
-    textColor: "text-orange-900",
-    iconColor: "text-orange-600",
+    bgColor: 'bg-orange-50',
+    borderColor: 'border-orange-200',
+    textColor: 'text-orange-900',
+    iconColor: 'text-orange-600',
   },
   feature: {
     icon: <Target className="w-4 h-4" />,
-    bgColor: "bg-purple-50",
-    borderColor: "border-purple-200",
-    textColor: "text-purple-900",
-    iconColor: "text-purple-600",
+    bgColor: 'bg-purple-50',
+    borderColor: 'border-purple-200',
+    textColor: 'text-purple-900',
+    iconColor: 'text-purple-600',
   },
   shortcut: {
     icon: <Zap className="w-4 h-4" />,
-    bgColor: "bg-green-50",
-    borderColor: "border-green-200",
-    textColor: "text-green-900",
-    iconColor: "text-green-600",
+    bgColor: 'bg-green-50',
+    borderColor: 'border-green-200',
+    textColor: 'text-green-900',
+    iconColor: 'text-green-600',
   },
 };
 
 const priorityStyles = {
-  low: "opacity-75",
-  medium: "opacity-90",
-  high: "opacity-100 shadow-md",
+  low: 'opacity-75',
+  medium: 'opacity-90',
+  high: 'opacity-100 shadow-md',
 };
 
 export function ContextualTooltip({
   content,
   children,
-  trigger = "hover",
-  placement = "top",
-  className = "",
+  trigger = 'hover',
+  placement = 'top',
+  className = '',
   disabled = false,
   onShow,
   onHide,
@@ -111,7 +111,7 @@ export function ContextualTooltip({
   useEffect(() => {
     if (content.dismissible) {
       const dismissed = localStorage.getItem(`tooltip-dismissed-${content.id}`);
-      if (dismissed === "true") {
+      if (dismissed === 'true') {
         setIsDismissed(true);
       }
     }
@@ -120,7 +120,7 @@ export function ContextualTooltip({
   const handleShow = () => {
     // Check if help system is disabled
     const isHelpDisabled =
-      localStorage.getItem("help-system-disabled") === "true";
+      localStorage.getItem('help-system-disabled') === 'true';
     if (disabled || isDismissed || isHelpDisabled) return;
     setIsVisible(true);
     onShow?.();
@@ -135,26 +135,26 @@ export function ContextualTooltip({
     setIsDismissed(true);
     setIsVisible(false);
     if (content.dismissible) {
-      localStorage.setItem(`tooltip-dismissed-${content.id}`, "true");
+      localStorage.setItem(`tooltip-dismissed-${content.id}`, 'true');
     }
     onDismiss?.();
   };
 
   const handleMouseEnter = () => {
-    if (trigger === "hover") {
+    if (trigger === 'hover') {
       clearTimeout(timeoutRef.current);
       handleShow();
     }
   };
 
   const handleMouseLeave = () => {
-    if (trigger === "hover") {
+    if (trigger === 'hover') {
       timeoutRef.current = setTimeout(handleHide, 200);
     }
   };
 
   const handleClick = () => {
-    if (trigger === "click") {
+    if (trigger === 'click') {
       if (isVisible) {
         handleHide();
       } else {
@@ -164,13 +164,13 @@ export function ContextualTooltip({
   };
 
   const handleFocus = () => {
-    if (trigger === "focus") {
+    if (trigger === 'focus') {
       handleShow();
     }
   };
 
   const handleBlur = () => {
-    if (trigger === "focus") {
+    if (trigger === 'focus') {
       timeoutRef.current = setTimeout(handleHide, 100);
     }
   };
@@ -238,7 +238,7 @@ export function ContextualTooltip({
                 {content.actions?.map((action, index) => (
                   <Button
                     key={index}
-                    variant={action.variant || "outline"}
+                    variant={action.variant || 'outline'}
                     size="sm"
                     className="text-xs h-7"
                     onClick={action.action}
@@ -252,7 +252,7 @@ export function ContextualTooltip({
                     variant="outline"
                     size="sm"
                     className="text-xs h-7"
-                    onClick={() => window.open(content.learnMoreUrl, "_blank")}
+                    onClick={() => window.open(content.learnMoreUrl, '_blank')}
                   >
                     Learn More
                   </Button>
@@ -289,11 +289,11 @@ export function InfoTooltip({
   children: React.ReactNode;
 } & Partial<ContextualTooltipProps>) {
   const content: TooltipContent = {
-    id: `info-${title.toLowerCase().replace(/\s+/g, "-")}`,
+    id: `info-${title.toLowerCase().replace(/\s+/g, '-')}`,
     title,
     description,
-    type: "info",
-    priority: "medium",
+    type: 'info',
+    priority: 'medium',
   };
 
   return (
@@ -314,11 +314,11 @@ export function FeatureTooltip({
   children: React.ReactNode;
 } & Partial<ContextualTooltipProps>) {
   const content: TooltipContent = {
-    id: `feature-${title.toLowerCase().replace(/\s+/g, "-")}`,
+    id: `feature-${title.toLowerCase().replace(/\s+/g, '-')}`,
     title,
     description,
-    type: "feature",
-    priority: "high",
+    type: 'feature',
+    priority: 'high',
     dismissible: true,
   };
 
@@ -340,11 +340,11 @@ export function TipTooltip({
   children: React.ReactNode;
 } & Partial<ContextualTooltipProps>) {
   const content: TooltipContent = {
-    id: `tip-${title.toLowerCase().replace(/\s+/g, "-")}`,
+    id: `tip-${title.toLowerCase().replace(/\s+/g, '-')}`,
     title,
     description,
-    type: "tip",
-    priority: "medium",
+    type: 'tip',
+    priority: 'medium',
     dismissible: true,
   };
 

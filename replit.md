@@ -17,6 +17,7 @@ Desktop Chat UX: Desktop users require proper scrolling behavior without nested 
 ### Core Technologies
 - **Frontend**: React 18 (TypeScript), Vite, TanStack Query, Tailwind CSS (with shadcn/ui), React Hook Form (with Zod).
 - **Backend**: Express.js (TypeScript), Drizzle ORM, PostgreSQL (Neon serverless), Session-based authentication (connect-pg-simple), Replit Auth.
+- **Logging**: Winston-based structured logging with service-specific loggers, log rotation, and environment-based configuration.
 
 ### Backend Router Architecture (Modular Refactoring - 2025)
 The application underwent a major architectural refactoring in September 2025, transforming from a monolithic 9,000+ line routes.ts file into a clean, modular structure:
@@ -54,6 +55,7 @@ The application features a consistent brand identity using The Sandwich Project'
 Typography uses Roboto font family. UI elements prioritize clarity, responsiveness, and visual hierarchy with card-based dashboards and clear sectioning.
 
 ### Technical Implementations
+- **Structured Logging (September 2025)**: Implemented winston-based logging system replacing scattered console.log statements. Features service-specific loggers, structured metadata, log levels (error/warn/info/http/debug), helper functions for common patterns, console output for development, and file rotation for production.
 - **Data Management**: Comprehensive management of Sandwich Collections, Hosts, Recipients, Projects, Users (with role-based access), and Audit Logs. Includes Zod validation and timezone-safe date handling.
 - **Authentication & Authorization**: Granular permissions system with custom role management, 30-day session management, detailed audit logging, and SendGrid-powered password reset.
 - **Search & Filtering**: Comprehensive search and filter functionality across management interfaces with real-time filtering and dynamic search bars.

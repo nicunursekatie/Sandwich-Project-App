@@ -1,15 +1,15 @@
-import { Upload, Download, AlertCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Upload, Download, AlertCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Progress } from "@/components/ui/progress";
-import { useState, useRef } from "react";
-import { useToast } from "@/hooks/use-toast";
+} from '@/components/ui/dialog';
+import { Progress } from '@/components/ui/progress';
+import { useState, useRef } from 'react';
+import { useToast } from '@/hooks/use-toast';
 
 interface ImportResult {
   totalRecords: number;
@@ -42,11 +42,11 @@ export function ImportExportDialog({
     const file = event.target.files?.[0];
     if (!file) return;
 
-    if (!file.name.endsWith(".csv")) {
+    if (!file.name.endsWith('.csv')) {
       toast({
-        title: "Invalid file type",
-        description: "Please select a CSV file.",
-        variant: "destructive",
+        title: 'Invalid file type',
+        description: 'Please select a CSV file.',
+        variant: 'destructive',
       });
       return;
     }
@@ -60,16 +60,16 @@ export function ImportExportDialog({
         setImportProgress(0);
         setImportDialogOpen(false);
         if (fileInputRef.current) {
-          fileInputRef.current.value = "";
+          fileInputRef.current.value = '';
         }
       }, 1000);
     } catch (error) {
       setImportProgress(0);
       toast({
-        title: "Import failed",
+        title: 'Import failed',
         description:
-          "Failed to import collections. Please check the file format.",
-        variant: "destructive",
+          'Failed to import collections. Please check the file format.',
+        variant: 'destructive',
       });
     }
   };
@@ -78,30 +78,30 @@ export function ImportExportDialog({
     try {
       // Convert collections to CSV format
       const headers = [
-        "Date",
-        "Host Name",
-        "Individual Sandwiches",
-        "Group Collections",
+        'Date',
+        'Host Name',
+        'Individual Sandwiches',
+        'Group Collections',
       ];
       const csvContent = [
-        headers.join(","),
+        headers.join(','),
         ...collections.map((collection) =>
           [
             collection.collectionDate,
             `"${collection.hostName}"`,
             collection.individualSandwiches,
             `"${collection.groupCollections}"`,
-          ].join(",")
+          ].join(',')
         ),
-      ].join("\n");
+      ].join('\n');
 
       // Create and download file
-      const blob = new Blob([csvContent], { type: "text/csv" });
+      const blob = new Blob([csvContent], { type: 'text/csv' });
       const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
+      const link = document.createElement('a');
       link.href = url;
       link.download = `sandwich-collections-${
-        new Date().toISOString().split("T")[0]
+        new Date().toISOString().split('T')[0]
       }.csv`;
       document.body.appendChild(link);
       link.click();
@@ -109,14 +109,14 @@ export function ImportExportDialog({
       URL.revokeObjectURL(url);
 
       toast({
-        title: "Export completed",
+        title: 'Export completed',
         description: `Exported ${collections.length} collections to CSV.`,
       });
     } catch (error) {
       toast({
-        title: "Export failed",
-        description: "Failed to export collections.",
-        variant: "destructive",
+        title: 'Export failed',
+        description: 'Failed to export collections.',
+        variant: 'destructive',
       });
     }
   };
@@ -167,8 +167,8 @@ export function ImportExportDialog({
                     <Upload className="h-8 w-8 text-gray-400" />
                     <span className="text-sm font-medium">
                       {isImporting
-                        ? "Importing..."
-                        : "Click to select CSV file"}
+                        ? 'Importing...'
+                        : 'Click to select CSV file'}
                     </span>
                     <span className="text-xs text-gray-500">
                       Supports .csv files up to 10MB

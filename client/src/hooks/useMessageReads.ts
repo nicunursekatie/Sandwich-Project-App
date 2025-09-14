@@ -1,7 +1,7 @@
-import { useEffect } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useAuth } from "./useAuth";
+import { useEffect } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import { apiRequest, queryClient } from '@/lib/queryClient';
+import { useAuth } from './useAuth';
 
 interface Message {
   id: number;
@@ -26,7 +26,7 @@ export function useMessageReads() {
       committee: string;
       messageIds?: number[];
     }) => {
-      return apiRequest("POST", "/api/message-notifications/mark-chat-read", {
+      return apiRequest('POST', '/api/message-notifications/mark-chat-read', {
         channel: committee,
         messageIds,
       });
@@ -34,11 +34,11 @@ export function useMessageReads() {
     onSuccess: () => {
       // Invalidate notification counts to update the bell icon
       queryClient.invalidateQueries({
-        queryKey: ["/api/message-notifications/unread-counts"],
+        queryKey: ['/api/message-notifications/unread-counts'],
       });
     },
     onError: (error) => {
-      console.error("Failed to mark messages as read:", error);
+      console.error('Failed to mark messages as read:', error);
     },
   });
 
@@ -90,12 +90,12 @@ export function useMessageReads() {
         }
       };
 
-      document.addEventListener("visibilitychange", handleVisibilityChange);
+      document.addEventListener('visibilitychange', handleVisibilityChange);
 
       return () => {
         clearTimeout(timeoutId);
         document.removeEventListener(
-          "visibilitychange",
+          'visibilitychange',
           handleVisibilityChange
         );
       };

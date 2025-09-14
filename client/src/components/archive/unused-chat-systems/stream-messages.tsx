@@ -737,7 +737,7 @@ export default function StreamMessagesPage() {
       {/* Header */}
       <div className="flex items-center gap-4 p-6 border-b">
         <div className="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-lg">
-          <MessageCircle className="w-5 h-5 text-blue-600 />"
+          <MessageCircle className="w-5 h-5 text-blue-600"/"
         </div>
         <div>
           <h1 className="text-2xl font-main-heading text-primary Messages</h1>"

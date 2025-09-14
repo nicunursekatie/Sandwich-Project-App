@@ -1,6 +1,6 @@
-import { GoogleSheetsViewer } from "@/components/google-sheets-viewer";
-import { useAuth } from "@/hooks/useAuth";
-import { hasPermission, PERMISSIONS } from "@shared/auth-utils";
+import { GoogleSheetsViewer } from '@/components/google-sheets-viewer';
+import { useAuth } from '@/hooks/useAuth';
+import { hasPermission, PERMISSIONS } from '@shared/auth-utils';
 
 export default function GoogleSheetsPage() {
   const { user } = useAuth();

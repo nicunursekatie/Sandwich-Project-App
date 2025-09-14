@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useState } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import {
   Clock,
   Plus,
@@ -10,26 +10,26 @@ import {
   Filter,
   Search,
   ChevronDown,
-} from "lucide-react";
-import { format, isToday, isTomorrow, isThisWeek, isPast } from "date-fns";
+} from 'lucide-react';
+import { format, isToday, isTomorrow, isThisWeek, isPast } from 'date-fns';
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
+} from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
@@ -37,7 +37,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Form,
   FormControl,
@@ -45,17 +45,17 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Label } from "@/components/ui/label";
-import { LoadingState } from "@/components/ui/loading";
-import { useToast } from "@/hooks/use-toast";
+} from '@/components/ui/form';
+import { Textarea } from '@/components/ui/textarea';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Label } from '@/components/ui/label';
+import { LoadingState } from '@/components/ui/loading';
+import { useToast } from '@/hooks/use-toast';
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { queryClient, apiRequest } from "@/lib/queryClient";
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { queryClient, apiRequest } from '@/lib/queryClient';
 
 // Event Reminder types
 type EventReminder = {
@@ -63,12 +63,12 @@ type EventReminder = {
   eventRequestId: number | null;
   title: string;
   description: string | null;
-  reminderType: "follow_up" | "deadline" | "check_in" | "postponed" | "custom";
+  reminderType: 'follow_up' | 'deadline' | 'check_in' | 'postponed' | 'custom';
   dueDate: string;
   assignedToUserId: string | null;
   assignedToName: string | null;
-  status: "pending" | "completed" | "cancelled";
-  priority: "low" | "medium" | "high";
+  status: 'pending' | 'completed' | 'cancelled';
+  priority: 'low' | 'medium' | 'high';
   completedAt: string | null;
   completedBy: string | null;
   completionNotes: string | null;
@@ -82,20 +82,20 @@ const createReminderSchema = z.object({
   eventRequestId: z.number().optional(),
   title: z
     .string()
-    .min(1, "Title is required")
-    .max(100, "Title must be under 100 characters"),
+    .min(1, 'Title is required')
+    .max(100, 'Title must be under 100 characters'),
   description: z.string().optional(),
   reminderType: z.enum([
-    "follow_up",
-    "deadline",
-    "check_in",
-    "postponed",
-    "custom",
+    'follow_up',
+    'deadline',
+    'check_in',
+    'postponed',
+    'custom',
   ]),
-  dueDate: z.string().min(1, "Due date is required"),
+  dueDate: z.string().min(1, 'Due date is required'),
   assignedToUserId: z.string().optional(),
   assignedToName: z.string().optional(),
-  priority: z.enum(["low", "medium", "high"]).default("medium"),
+  priority: z.enum(['low', 'medium', 'high']).default('medium'),
 });
 
 type CreateReminderInput = z.infer<typeof createReminderSchema>;
@@ -107,24 +107,26 @@ const completeReminderSchema = z.object({
 type CompleteReminderInput = z.infer<typeof completeReminderSchema>;
 
 export default function EventRemindersManagement() {
-  const [selectedStatus, setSelectedStatus] = useState<string>("all");
-  const [selectedPriority, setSelectedPriority] = useState<string>("all");
-  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState<string>('all');
+  const [selectedPriority, setSelectedPriority] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState('');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [
-    selectedReminder,
-    setSelectedReminder,
-  ] = useState<EventReminder | null>(null);
+  const [selectedReminder, setSelectedReminder] =
+    useState<EventReminder | null>(null);
   const [isCompleteDialogOpen, setIsCompleteDialogOpen] = useState(false);
 
   const { toast } = useToast();
 
   // Fetch reminders
-  const { data: reminders = [], isLoading, error } = useQuery({
-    queryKey: ["/api/event-reminders"],
+  const {
+    data: reminders = [],
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ['/api/event-reminders'],
     queryFn: async () => {
-      const response = await fetch("/api/event-reminders");
-      if (!response.ok) throw new Error("Failed to fetch reminders");
+      const response = await fetch('/api/event-reminders');
+      if (!response.ok) throw new Error('Failed to fetch reminders');
       return response.json() as Promise<EventReminder[]>;
     },
   });
@@ -132,24 +134,24 @@ export default function EventRemindersManagement() {
   // Create reminder mutation
   const createReminderMutation = useMutation({
     mutationFn: async (data: CreateReminderInput) => {
-      return apiRequest("/api/event-reminders", {
-        method: "POST",
+      return apiRequest('/api/event-reminders', {
+        method: 'POST',
         body: JSON.stringify(data),
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/event-reminders"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/event-reminders'] });
       queryClient.invalidateQueries({
-        queryKey: ["/api/event-reminders/count"],
+        queryKey: ['/api/event-reminders/count'],
       });
-      toast({ title: "Reminder created successfully" });
+      toast({ title: 'Reminder created successfully' });
       setIsCreateDialogOpen(false);
     },
     onError: (error: any) => {
       toast({
-        title: "Failed to create reminder",
-        description: error.message || "An error occurred",
-        variant: "destructive",
+        title: 'Failed to create reminder',
+        description: error.message || 'An error occurred',
+        variant: 'destructive',
       });
     },
   });
@@ -164,28 +166,28 @@ export default function EventRemindersManagement() {
       data: CompleteReminderInput;
     }) => {
       return apiRequest(`/api/event-reminders/${id}`, {
-        method: "PUT",
+        method: 'PUT',
         body: JSON.stringify({
-          status: "completed",
+          status: 'completed',
           completedAt: new Date().toISOString(),
           completionNotes: data.completionNotes,
         }),
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/event-reminders"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/event-reminders'] });
       queryClient.invalidateQueries({
-        queryKey: ["/api/event-reminders/count"],
+        queryKey: ['/api/event-reminders/count'],
       });
-      toast({ title: "Reminder marked as completed" });
+      toast({ title: 'Reminder marked as completed' });
       setIsCompleteDialogOpen(false);
       setSelectedReminder(null);
     },
     onError: (error: any) => {
       toast({
-        title: "Failed to complete reminder",
-        description: error.message || "An error occurred",
-        variant: "destructive",
+        title: 'Failed to complete reminder',
+        description: error.message || 'An error occurred',
+        variant: 'destructive',
       });
     },
   });
@@ -194,13 +196,13 @@ export default function EventRemindersManagement() {
   const createForm = useForm<CreateReminderInput>({
     resolver: zodResolver(createReminderSchema),
     defaultValues: {
-      title: "",
-      description: "",
-      reminderType: "follow_up",
-      dueDate: "",
-      assignedToUserId: "",
-      assignedToName: "",
-      priority: "medium",
+      title: '',
+      description: '',
+      reminderType: 'follow_up',
+      dueDate: '',
+      assignedToUserId: '',
+      assignedToName: '',
+      priority: 'medium',
     },
   });
 
@@ -208,7 +210,7 @@ export default function EventRemindersManagement() {
   const completeForm = useForm<CompleteReminderInput>({
     resolver: zodResolver(completeReminderSchema),
     defaultValues: {
-      completionNotes: "",
+      completionNotes: '',
     },
   });
 
@@ -219,48 +221,48 @@ export default function EventRemindersManagement() {
       (reminder.description &&
         reminder.description.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesStatus =
-      selectedStatus === "all" || reminder.status === selectedStatus;
+      selectedStatus === 'all' || reminder.status === selectedStatus;
     const matchesPriority =
-      selectedPriority === "all" || reminder.priority === selectedPriority;
+      selectedPriority === 'all' || reminder.priority === selectedPriority;
 
     return matchesSearch && matchesStatus && matchesPriority;
   });
 
   // Group reminders by status
   const pendingReminders = filteredReminders.filter(
-    (r) => r.status === "pending"
+    (r) => r.status === 'pending'
   );
   const completedReminders = filteredReminders.filter(
-    (r) => r.status === "completed"
+    (r) => r.status === 'completed'
   );
 
   // Get priority color
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case "high":
-        return "bg-red-100 text-red-800 border-red-200";
-      case "medium":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
-      case "low":
-        return "bg-green-100 text-green-800 border-green-200";
+      case 'high':
+        return 'bg-red-100 text-red-800 border-red-200';
+      case 'medium':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'low':
+        return 'bg-green-100 text-green-800 border-green-200';
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
+        return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
 
   // Get reminder type label
   const getReminderTypeLabel = (type: string) => {
     switch (type) {
-      case "follow_up":
-        return "Follow Up";
-      case "deadline":
-        return "Deadline";
-      case "check_in":
-        return "Check In";
-      case "postponed":
-        return "Postponed";
-      case "custom":
-        return "Custom";
+      case 'follow_up':
+        return 'Follow Up';
+      case 'deadline':
+        return 'Deadline';
+      case 'check_in':
+        return 'Check In';
+      case 'postponed':
+        return 'Postponed';
+      case 'custom':
+        return 'Custom';
       default:
         return type;
     }
@@ -269,11 +271,11 @@ export default function EventRemindersManagement() {
   // Get due date status
   const getDueDateStatus = (dueDate: string) => {
     const date = new Date(dueDate);
-    if (isPast(date)) return "overdue";
-    if (isToday(date)) return "today";
-    if (isTomorrow(date)) return "tomorrow";
-    if (isThisWeek(date)) return "this-week";
-    return "upcoming";
+    if (isPast(date)) return 'overdue';
+    if (isToday(date)) return 'today';
+    if (isTomorrow(date)) return 'tomorrow';
+    if (isThisWeek(date)) return 'this-week';
+    return 'upcoming';
   };
 
   const getDueDateBadge = (dueDate: string) => {
@@ -281,26 +283,26 @@ export default function EventRemindersManagement() {
     const date = new Date(dueDate);
 
     switch (status) {
-      case "overdue":
+      case 'overdue':
         return (
-          <Badge variant="destructive">Overdue ({format(date, "MMM d")})</Badge>
+          <Badge variant="destructive">Overdue ({format(date, 'MMM d')})</Badge>
         );
-      case "today":
+      case 'today':
         return (
           <Badge className="bg-orange-100 text-orange-800 border-orange-200">
             Today
           </Badge>
         );
-      case "tomorrow":
+      case 'tomorrow':
         return (
           <Badge className="bg-blue-100 text-blue-800 border-blue-200">
             Tomorrow
           </Badge>
         );
-      case "this-week":
-        return <Badge variant="secondary">{format(date, "EEE, MMM d")}</Badge>;
+      case 'this-week':
+        return <Badge variant="secondary">{format(date, 'EEE, MMM d')}</Badge>;
       default:
-        return <Badge variant="outline">{format(date, "MMM d, yyyy")}</Badge>;
+        return <Badge variant="outline">{format(date, 'MMM d, yyyy')}</Badge>;
     }
   };
 
@@ -510,8 +512,8 @@ export default function EventRemindersManagement() {
                     className="bg-[#236383] hover:bg-[#1e5a75]"
                   >
                     {createReminderMutation.isPending
-                      ? "Creating..."
-                      : "Create Reminder"}
+                      ? 'Creating...'
+                      : 'Create Reminder'}
                   </Button>
                 </div>
               </form>
@@ -589,7 +591,7 @@ export default function EventRemindersManagement() {
                 <p className="text-2xl font-bold text-gray-900">
                   {
                     pendingReminders.filter(
-                      (r) => getDueDateStatus(r.dueDate) === "overdue"
+                      (r) => getDueDateStatus(r.dueDate) === 'overdue'
                     ).length
                   }
                 </p>
@@ -756,7 +758,7 @@ export default function EventRemindersManagement() {
                         {reminder.completionNotes && (
                           <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-3">
                             <p className="text-sm text-green-800">
-                              <strong>Completion Notes:</strong>{" "}
+                              <strong>Completion Notes:</strong>{' '}
                               {reminder.completionNotes}
                             </p>
                           </div>
@@ -766,10 +768,10 @@ export default function EventRemindersManagement() {
                           <div className="flex items-center gap-1">
                             <Calendar className="h-4 w-4" />
                             <span>
-                              Due:{" "}
+                              Due:{' '}
                               {format(
                                 new Date(reminder.dueDate),
-                                "MMM d, yyyy"
+                                'MMM d, yyyy'
                               )}
                             </span>
                           </div>
@@ -778,10 +780,10 @@ export default function EventRemindersManagement() {
                             <div className="flex items-center gap-1">
                               <CheckCircle className="h-4 w-4" />
                               <span>
-                                Completed:{" "}
+                                Completed:{' '}
                                 {format(
                                   new Date(reminder.completedAt),
-                                  "MMM d, yyyy"
+                                  'MMM d, yyyy'
                                 )}
                               </span>
                             </div>
@@ -868,8 +870,8 @@ export default function EventRemindersManagement() {
                   className="bg-green-600 hover:bg-green-700"
                 >
                   {completeReminderMutation.isPending
-                    ? "Completing..."
-                    : "Mark Complete"}
+                    ? 'Completing...'
+                    : 'Mark Complete'}
                 </Button>
               </div>
             </form>

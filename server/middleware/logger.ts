@@ -1,8 +1,8 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction } from 'express';
 
 export interface LogEntry {
   timestamp: string;
-  level: "info" | "warn" | "error";
+  level: 'info' | 'warn' | 'error';
   message: string;
   method?: string;
   url?: string;
@@ -19,7 +19,7 @@ class Logger {
   private maxLogs = 1000; // Keep last 1000 logs in memory
 
   private createLogEntry(
-    level: LogEntry["level"],
+    level: LogEntry['level'],
     message: string,
     extra?: Partial<LogEntry>
   ): LogEntry {
@@ -45,10 +45,10 @@ class Logger {
     }`;
 
     switch (entry.level) {
-      case "error":
-        console.error(logMessage, entry.error || "");
+      case 'error':
+        console.error(logMessage, entry.error || '');
         break;
-      case "warn":
+      case 'warn':
         console.warn(logMessage);
         break;
       default:
@@ -57,18 +57,18 @@ class Logger {
   }
 
   info(message: string, extra?: Partial<LogEntry>) {
-    this.addLog(this.createLogEntry("info", message, extra));
+    this.addLog(this.createLogEntry('info', message, extra));
   }
 
   warn(message: string, extra?: Partial<LogEntry>) {
-    this.addLog(this.createLogEntry("warn", message, extra));
+    this.addLog(this.createLogEntry('warn', message, extra));
   }
 
   error(message: string, error?: any, extra?: Partial<LogEntry>) {
-    this.addLog(this.createLogEntry("error", message, { ...extra, error }));
+    this.addLog(this.createLogEntry('error', message, { ...extra, error }));
   }
 
-  getLogs(level?: LogEntry["level"], limit = 100): LogEntry[] {
+  getLogs(level?: LogEntry['level'], limit = 100): LogEntry[] {
     let filteredLogs = level
       ? this.logs.filter((log) => log.level === level)
       : this.logs;
@@ -86,16 +86,16 @@ export const logger = new Logger();
 export function requestLogger(req: Request, res: Response, next: NextFunction) {
   const start = Date.now();
 
-  res.on("finish", () => {
+  res.on('finish', () => {
     const responseTime = Date.now() - start;
     const logLevel =
-      res.statusCode >= 400 ? "error" : res.statusCode >= 300 ? "warn" : "info";
+      res.statusCode >= 400 ? 'error' : res.statusCode >= 300 ? 'warn' : 'info';
 
     logger[logLevel](`${req.method} ${req.url}`, {
       method: req.method,
       url: req.url,
       ip: req.ip,
-      userAgent: req.get("User-Agent"),
+      userAgent: req.get('User-Agent'),
       statusCode: res.statusCode,
       responseTime,
     });
@@ -115,15 +115,15 @@ export function errorLogger(
     method: req.method,
     url: req.url,
     ip: req.ip,
-    userAgent: req.get("User-Agent"),
+    userAgent: req.get('User-Agent'),
   });
 
   // Don't expose internal errors in production
-  const isDevelopment = process.env.NODE_ENV === "development";
+  const isDevelopment = process.env.NODE_ENV === 'development';
 
   res.status(500).json({
-    error: "Internal server error",
-    message: isDevelopment ? err.message : "Something went wrong",
+    error: 'Internal server error',
+    message: isDevelopment ? err.message : 'Something went wrong',
     ...(isDevelopment && { stack: err.stack }),
   });
 }

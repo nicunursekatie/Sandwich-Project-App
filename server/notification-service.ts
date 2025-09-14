@@ -1,11 +1,18 @@
 import { MailService } from '@sendgrid/mail';
-import { NotificationTypes, type NotificationType, type ProjectNotificationData, type EmailNotificationTemplate } from '@shared/notification-types';
+import {
+  NotificationTypes,
+  type NotificationType,
+  type ProjectNotificationData,
+  type EmailNotificationTemplate,
+} from '@shared/notification-types';
 import { db } from './database-storage';
 import { users } from '@shared/schema';
 import { eq } from 'drizzle-orm';
 
 if (!process.env.SENDGRID_API_KEY) {
-  console.warn("SENDGRID_API_KEY environment variable not set. Email notifications will be disabled.");
+  console.warn(
+    'SENDGRID_API_KEY environment variable not set. Email notifications will be disabled.'
+  );
 }
 
 const mailService = new MailService();
@@ -15,7 +22,7 @@ if (process.env.SENDGRID_API_KEY) {
 
 export class NotificationService {
   private static readonly FROM_EMAIL = 'noreply@thesandwichproject.org';
-  
+
   /**
    * Send email notification for direct messages
    */
@@ -26,7 +33,9 @@ export class NotificationService {
     contextType?: string
   ): Promise<boolean> {
     if (!process.env.SENDGRID_API_KEY) {
-      console.log('Direct message email notification skipped - no SendGrid API key configured');
+      console.log(
+        'Direct message email notification skipped - no SendGrid API key configured'
+      );
       return false;
     }
 
@@ -55,11 +64,13 @@ export class NotificationService {
         from: this.FROM_EMAIL,
         subject,
         html: htmlContent,
-        text: `New message from ${senderName}: ${messageContent}\n\nView the message at: ${process.env.REPL_URL || 'https://your-platform-url.com'}/messages`
+        text: `New message from ${senderName}: ${messageContent}\n\nView the message at: ${process.env.REPL_URL || 'https://your-platform-url.com'}/messages`,
       };
 
       await mailService.send(emailData);
-      console.log(`Direct message email notification sent to ${recipientEmail}`);
+      console.log(
+        `Direct message email notification sent to ${recipientEmail}`
+      );
       return true;
     } catch (error) {
       console.error('Failed to send direct message email notification:', error);
@@ -77,7 +88,9 @@ export class NotificationService {
     assignedBy: string
   ): Promise<boolean> {
     if (!process.env.SENDGRID_API_KEY) {
-      console.log('Project assignment email notification skipped - no SendGrid API key configured');
+      console.log(
+        'Project assignment email notification skipped - no SendGrid API key configured'
+      );
       return false;
     }
 
@@ -110,41 +123,50 @@ export class NotificationService {
         from: this.FROM_EMAIL,
         subject,
         html: htmlContent,
-        text: `You've been assigned to project: ${projectTitle}\n\n${assignedBy ? `Assigned by: ${assignedBy}\n\n` : ''}Please log into the platform to view project details.\n\nView project at: ${process.env.REPL_URL || 'https://your-platform-url.com'}/projects/${projectId}`
+        text: `You've been assigned to project: ${projectTitle}\n\n${assignedBy ? `Assigned by: ${assignedBy}\n\n` : ''}Please log into the platform to view project details.\n\nView project at: ${process.env.REPL_URL || 'https://your-platform-url.com'}/projects/${projectId}`,
       };
 
       await mailService.send(emailData);
-      console.log(`Project assignment email notification sent to ${assigneeEmails.length} recipients`);
+      console.log(
+        `Project assignment email notification sent to ${assigneeEmails.length} recipients`
+      );
       return true;
     } catch (error) {
-      console.error('Failed to send project assignment email notification:', error);
+      console.error(
+        'Failed to send project assignment email notification:',
+        error
+      );
       return false;
     }
   }
-  
+
   static async sendProjectNotification(
     type: NotificationType,
     data: ProjectNotificationData,
     recipientEmails: string[]
   ): Promise<boolean> {
     if (!process.env.SENDGRID_API_KEY) {
-      console.log('Email notification skipped - no SendGrid API key configured');
+      console.log(
+        'Email notification skipped - no SendGrid API key configured'
+      );
       return false;
     }
 
     try {
       const template = this.getEmailTemplate(type, data);
-      
+
       const emailData = {
         to: recipientEmails,
         from: this.FROM_EMAIL,
         subject: template.subject,
         html: template.body,
-        text: template.body.replace(/<[^>]*>/g, '') // Strip HTML for text version
+        text: template.body.replace(/<[^>]*>/g, ''), // Strip HTML for text version
       };
 
       await mailService.send(emailData);
-      console.log(`Email notification sent: ${type} to ${recipientEmails.length} recipients`);
+      console.log(
+        `Email notification sent: ${type} to ${recipientEmails.length} recipients`
+      );
       return true;
     } catch (error) {
       console.error('Failed to send email notification:', error);
@@ -152,7 +174,10 @@ export class NotificationService {
     }
   }
 
-  private static getEmailTemplate(type: NotificationType, data: ProjectNotificationData): EmailNotificationTemplate {
+  private static getEmailTemplate(
+    type: NotificationType,
+    data: ProjectNotificationData
+  ): EmailNotificationTemplate {
     switch (type) {
       case NotificationTypes.PROJECT_ASSIGNED:
         return {
@@ -164,7 +189,7 @@ export class NotificationService {
             <p>Please log into the Sandwich Project platform to view project details and get started.</p>
             <p><a href="${process.env.REPL_URL || 'https://your-platform-url.com'}/projects/${data.projectId}">View Project</a></p>
           `,
-          recipients: data.assignedTo || []
+          recipients: data.assignedTo || [],
         };
 
       case NotificationTypes.PROJECT_UPDATED:
@@ -176,7 +201,7 @@ export class NotificationService {
             <p>Please check the project page for the latest information.</p>
             <p><a href="${process.env.REPL_URL || 'https://your-platform-url.com'}/projects/${data.projectId}">View Project</a></p>
           `,
-          recipients: data.assignedTo || []
+          recipients: data.assignedTo || [],
         };
 
       case NotificationTypes.TASK_ADDED:
@@ -188,7 +213,7 @@ export class NotificationService {
             <p>Please check the project page to view task details.</p>
             <p><a href="${process.env.REPL_URL || 'https://your-platform-url.com'}/projects/${data.projectId}">View Project</a></p>
           `,
-          recipients: data.assignedTo || []
+          recipients: data.assignedTo || [],
         };
 
       case NotificationTypes.TASK_ASSIGNED:
@@ -200,7 +225,7 @@ export class NotificationService {
             ${data.assignedBy ? `<p>Assigned by: ${data.assignedBy}</p>` : ''}
             <p><a href="${process.env.REPL_URL || 'https://your-platform-url.com'}/projects/${data.projectId}">View Project</a></p>
           `,
-          recipients: data.assignedTo || []
+          recipients: data.assignedTo || [],
         };
 
       case NotificationTypes.PROJECT_STATUS_CHANGED:
@@ -211,7 +236,7 @@ export class NotificationService {
             <p>The status of project <strong>${data.projectTitle}</strong> has changed from <strong>${data.oldStatus}</strong> to <strong>${data.newStatus}</strong>.</p>
             <p><a href="${process.env.REPL_URL || 'https://your-platform-url.com'}/projects/${data.projectId}">View Project</a></p>
           `,
-          recipients: data.assignedTo || []
+          recipients: data.assignedTo || [],
         };
 
       case NotificationTypes.PROJECT_DUE_REMINDER:
@@ -223,7 +248,7 @@ export class NotificationService {
             <p>Please ensure all tasks are completed on time.</p>
             <p><a href="${process.env.REPL_URL || 'https://your-platform-url.com'}/projects/${data.projectId}">View Project</a></p>
           `,
-          recipients: data.assignedTo || []
+          recipients: data.assignedTo || [],
         };
 
       default:
@@ -234,7 +259,7 @@ export class NotificationService {
             <p>There has been an update to project <strong>${data.projectTitle}</strong>.</p>
             <p><a href="${process.env.REPL_URL || 'https://your-platform-url.com'}/projects/${data.projectId}">View Project</a></p>
           `,
-          recipients: data.assignedTo || []
+          recipients: data.assignedTo || [],
         };
     }
   }

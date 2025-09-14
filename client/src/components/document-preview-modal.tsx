@@ -1,12 +1,12 @@
-import { useState } from "react";
-import { X, Download, ExternalLink, FileText } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useState } from 'react';
+import { X, Download, ExternalLink, FileText } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 
 interface DocumentPreviewModalProps {
   isOpen: boolean;
@@ -26,7 +26,7 @@ export function DocumentPreviewModal({
   const [isLoading, setIsLoading] = useState(true);
 
   const handleDownload = () => {
-    const link = document.createElement("a");
+    const link = document.createElement('a');
     link.href = documentPath;
     link.download = documentName;
     document.body.appendChild(link);
@@ -35,22 +35,22 @@ export function DocumentPreviewModal({
   };
 
   const handleOpenInNewTab = () => {
-    window.open(documentPath, "_blank");
+    window.open(documentPath, '_blank');
   };
 
   const renderPreview = () => {
     switch (documentType?.toLowerCase()) {
-      case "pdf":
+      case 'pdf':
         return (
           <iframe
             src={documentPath}
             className="w-full h-full border-0 rounded-lg"
             onLoad={() => setIsLoading(false)}
             title={documentName}
-            style={{ minHeight: "600px" }}
+            style={{ minHeight: '600px' }}
           />
         );
-      case "docx":
+      case 'docx':
         return (
           <div className="flex flex-col items-center justify-center h-96 p-8 text-center">
             <div className="mb-4">
@@ -80,7 +80,7 @@ export function DocumentPreviewModal({
             </div>
           </div>
         );
-      case "xlsx":
+      case 'xlsx':
         return (
           <div className="flex flex-col items-center justify-center h-96 p-8 text-center">
             <div className="mb-4">
@@ -117,7 +117,7 @@ export function DocumentPreviewModal({
             className="w-full h-full border-0 rounded-lg"
             onLoad={() => setIsLoading(false)}
             title={documentName}
-            style={{ minHeight: "600px" }}
+            style={{ minHeight: '600px' }}
           />
         );
     }
@@ -166,9 +166,9 @@ export function DocumentPreviewModal({
         </DialogHeader>
         <div
           className="px-6 py-4 overflow-auto"
-          style={{ maxHeight: "calc(90vh - 100px)" }}
+          style={{ maxHeight: 'calc(90vh - 100px)' }}
         >
-          {isLoading && documentType?.toLowerCase() === "pdf" && (
+          {isLoading && documentType?.toLowerCase() === 'pdf' && (
             <div className="flex items-center justify-center h-96">
               <div className="text-center">
                 <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4 animate-pulse" />

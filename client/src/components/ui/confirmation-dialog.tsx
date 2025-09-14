@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState } from 'react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -9,8 +9,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
 
 interface ConfirmationDialogProps {
   trigger: React.ReactNode;
@@ -19,7 +19,7 @@ interface ConfirmationDialogProps {
   confirmText?: string;
   cancelText?: string;
   onConfirm: () => void | Promise<void>;
-  variant?: "default" | "destructive";
+  variant?: 'default' | 'destructive';
   disabled?: boolean;
 }
 
@@ -27,10 +27,10 @@ export function ConfirmationDialog({
   trigger,
   title,
   description,
-  confirmText = "Confirm",
-  cancelText = "Cancel",
+  confirmText = 'Confirm',
+  cancelText = 'Cancel',
   onConfirm,
-  variant = "default",
+  variant = 'default',
   disabled = false,
 }: ConfirmationDialogProps) {
   const [open, setOpen] = useState(false);
@@ -42,7 +42,7 @@ export function ConfirmationDialog({
       await onConfirm();
       setOpen(false);
     } catch (error) {
-      console.error("Confirmation action failed:", error);
+      console.error('Confirmation action failed:', error);
     } finally {
       setIsLoading(false);
     }
@@ -66,10 +66,10 @@ export function ConfirmationDialog({
             onClick={handleConfirm}
             disabled={isLoading}
             className={
-              variant === "destructive" ? "bg-red-600 hover:bg-red-700" : ""
+              variant === 'destructive' ? 'bg-red-600 hover:bg-red-700' : ''
             }
           >
-            {isLoading ? "Processing..." : confirmText}
+            {isLoading ? 'Processing...' : confirmText}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
@@ -84,14 +84,14 @@ export function useConfirmation() {
     title: string;
     description: string;
     onConfirm: () => void | Promise<void>;
-    variant?: "default" | "destructive";
+    variant?: 'default' | 'destructive';
   } | null>(null);
 
   const confirm = (
     title: string,
     description: string,
     onConfirm: () => void | Promise<void>,
-    variant: "default" | "destructive" = "default"
+    variant: 'default' | 'destructive' = 'default'
   ) => {
     setDialogState({ open: true, title, description, onConfirm, variant });
   };
@@ -118,9 +118,9 @@ export function useConfirmation() {
               setDialogState(null);
             }}
             className={
-              dialogState.variant === "destructive"
-                ? "bg-red-600 hover:bg-red-700"
-                : ""
+              dialogState.variant === 'destructive'
+                ? 'bg-red-600 hover:bg-red-700'
+                : ''
             }
           >
             Confirm

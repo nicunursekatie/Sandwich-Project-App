@@ -1,8 +1,8 @@
-import { Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { Trash2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '@/lib/queryClient';
 
 interface MessageDeletionProps {
   messageId: number;
@@ -19,24 +19,24 @@ export default function MessageDeletion({
   const deleteMutation = useMutation({
     mutationFn: async () => {
       const response = await fetch(`/api/messages/${messageId}`, {
-        method: "DELETE",
+        method: 'DELETE',
       });
-      if (!response.ok) throw new Error("Failed to delete message");
+      if (!response.ok) throw new Error('Failed to delete message');
       return response;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/messages"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/messages'] });
       toast({
-        title: "Message deleted",
-        description: "The message has been successfully removed.",
+        title: 'Message deleted',
+        description: 'The message has been successfully removed.',
       });
       onDelete?.();
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to delete message. Please try again.",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to delete message. Please try again.',
+        variant: 'destructive',
       });
     },
   });

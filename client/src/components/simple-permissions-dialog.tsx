@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -6,32 +6,32 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
-import { ScrollArea } from "@/components/ui/scroll-area";
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card';
 import {
   USER_ROLES,
   PERMISSIONS,
   getDefaultPermissionsForRole,
   getRoleDisplayName,
-} from "@shared/auth-utils";
+} from '@shared/auth-utils';
 import {
   Users,
   Phone,
@@ -58,7 +58,7 @@ import {
   Trophy,
   Heart,
   Send,
-} from "lucide-react";
+} from 'lucide-react';
 
 interface User {
   id: string;
@@ -79,409 +79,409 @@ interface SimplePermissionsDialogProps {
 // Content-focused permission groups organized by user capabilities
 const PERMISSION_GROUPS = [
   {
-    id: "content_management",
-    label: "Content Management",
+    id: 'content_management',
+    label: 'Content Management',
     description:
-      "Control over creating, editing, and managing various content types",
-    type: "content",
+      'Control over creating, editing, and managing various content types',
+    type: 'content',
     permissions: [
       {
         key: PERMISSIONS.ACCESS_COLLECTIONS,
-        label: "View Collections",
+        label: 'View Collections',
         icon: Eye,
-        description: "View all collection records",
+        description: 'View all collection records',
       },
       {
         key: PERMISSIONS.CREATE_COLLECTIONS,
-        label: "Create Collections",
+        label: 'Create Collections',
         icon: Database,
         description:
-          "Create collections + automatically edit/delete own collections",
+          'Create collections + automatically edit/delete own collections',
       },
       {
         key: PERMISSIONS.EDIT_ALL_COLLECTIONS,
-        label: "Edit All Collections",
+        label: 'Edit All Collections',
         icon: Shield,
-        description: "Edit any collection record (admin level)",
+        description: 'Edit any collection record (admin level)',
       },
       {
         key: PERMISSIONS.DELETE_ALL_COLLECTIONS,
-        label: "Delete All Collections",
+        label: 'Delete All Collections',
         icon: Shield,
-        description: "Delete any collection record (admin level)",
+        description: 'Delete any collection record (admin level)',
       },
 
       {
         key: PERMISSIONS.ACCESS_PROJECTS,
-        label: "View Projects",
+        label: 'View Projects',
         icon: Eye,
-        description: "View project information",
+        description: 'View project information',
       },
       {
         key: PERMISSIONS.CREATE_PROJECTS,
-        label: "Create Projects",
+        label: 'Create Projects',
         icon: FolderOpen,
         description:
-          "Create projects + automatically edit/delete own projects + edit assigned projects",
+          'Create projects + automatically edit/delete own projects + edit assigned projects',
       },
       {
         key: PERMISSIONS.EDIT_ALL_PROJECTS,
-        label: "Edit All Projects",
+        label: 'Edit All Projects',
         icon: Shield,
-        description: "Edit any project (admin level)",
+        description: 'Edit any project (admin level)',
       },
       {
         key: PERMISSIONS.DELETE_ALL_PROJECTS,
-        label: "Delete All Projects",
+        label: 'Delete All Projects',
         icon: Shield,
-        description: "Delete any project (admin level)",
+        description: 'Delete any project (admin level)',
       },
 
       {
         key: PERMISSIONS.ACCESS_SUGGESTIONS,
-        label: "View Suggestions",
+        label: 'View Suggestions',
         icon: Eye,
-        description: "View suggestion portal",
+        description: 'View suggestion portal',
       },
       {
         key: PERMISSIONS.CREATE_SUGGESTIONS,
-        label: "Create Suggestions",
+        label: 'Create Suggestions',
         icon: Lightbulb,
         description:
-          "Create suggestions + automatically edit/delete own suggestions",
+          'Create suggestions + automatically edit/delete own suggestions',
       },
       {
         key: PERMISSIONS.MANAGE_SUGGESTIONS,
-        label: "Manage All Suggestions",
+        label: 'Manage All Suggestions',
         icon: Shield,
-        description: "Review and respond to all suggestions (admin level)",
+        description: 'Review and respond to all suggestions (admin level)',
       },
       {
         key: PERMISSIONS.EDIT_ALL_SUGGESTIONS,
-        label: "Edit All Suggestions",
+        label: 'Edit All Suggestions',
         icon: Shield,
-        description: "Edit any suggestion (admin level)",
+        description: 'Edit any suggestion (admin level)',
       },
       {
         key: PERMISSIONS.DELETE_ALL_SUGGESTIONS,
-        label: "Delete All Suggestions",
+        label: 'Delete All Suggestions',
         icon: Shield,
-        description: "Delete any suggestion (admin level)",
+        description: 'Delete any suggestion (admin level)',
       },
 
       {
         key: PERMISSIONS.ACCESS_WORK_LOGS,
-        label: "View Work Logs",
+        label: 'View Work Logs',
         icon: Eye,
-        description: "Access work logs section",
+        description: 'Access work logs section',
       },
       {
         key: PERMISSIONS.CREATE_WORK_LOGS,
-        label: "Create Work Logs",
+        label: 'Create Work Logs',
         icon: Edit,
         description:
-          "Create work logs + automatically edit/delete own work logs",
+          'Create work logs + automatically edit/delete own work logs',
       },
       {
         key: PERMISSIONS.VIEW_ALL_WORK_LOGS,
-        label: "View All Work Logs",
+        label: 'View All Work Logs',
         icon: Eye,
         description: "View everyone's work logs (admin/supervisor)",
       },
       {
         key: PERMISSIONS.EDIT_ALL_WORK_LOGS,
-        label: "Edit All Work Logs",
+        label: 'Edit All Work Logs',
         icon: Shield,
-        description: "Edit any work log entry (admin level)",
+        description: 'Edit any work log entry (admin level)',
       },
       {
         key: PERMISSIONS.DELETE_ALL_WORK_LOGS,
-        label: "Delete All Work Logs",
+        label: 'Delete All Work Logs',
         icon: Shield,
-        description: "Delete any work log entry (admin level)",
+        description: 'Delete any work log entry (admin level)',
       },
     ],
   },
   {
-    id: "directory_contact",
-    label: "Directory & Contact Data",
-    description: "Access levels to organizational contact information",
-    type: "directory",
+    id: 'directory_contact',
+    label: 'Directory & Contact Data',
+    description: 'Access levels to organizational contact information',
+    type: 'directory',
     permissions: [
       {
         key: PERMISSIONS.HOSTS_VIEW,
-        label: "Basic Directory Access",
+        label: 'Basic Directory Access',
         icon: Phone,
-        description: "View basic contact information",
+        description: 'View basic contact information',
       },
       // Note: Full contact details would need a new permission
 
       {
         key: PERMISSIONS.ACCESS_HOSTS,
-        label: "View Hosts",
+        label: 'View Hosts',
         icon: Eye,
-        description: "View host locations",
+        description: 'View host locations',
       },
       {
         key: PERMISSIONS.MANAGE_HOSTS,
-        label: "Add/Edit Hosts",
+        label: 'Add/Edit Hosts',
         icon: Building,
-        description: "Add and edit host locations",
+        description: 'Add and edit host locations',
       },
       // Note: "Manage All Hosts" would be separate from basic edit
 
       {
         key: PERMISSIONS.ACCESS_DRIVERS,
-        label: "View Drivers",
+        label: 'View Drivers',
         icon: Eye,
-        description: "View driver information",
+        description: 'View driver information',
       },
       {
         key: PERMISSIONS.MANAGE_DRIVERS,
-        label: "Add/Edit Drivers",
+        label: 'Add/Edit Drivers',
         icon: Truck,
-        description: "Add and edit driver records",
+        description: 'Add and edit driver records',
       },
 
       {
         key: PERMISSIONS.ACCESS_RECIPIENTS,
-        label: "View Recipients",
+        label: 'View Recipients',
         icon: Eye,
-        description: "View recipient organizations",
+        description: 'View recipient organizations',
       },
       {
         key: PERMISSIONS.MANAGE_RECIPIENTS,
-        label: "Add/Edit Recipients",
+        label: 'Add/Edit Recipients',
         icon: UserCheck,
-        description: "Add and edit recipient organizations",
+        description: 'Add and edit recipient organizations',
       },
     ],
   },
   {
-    id: "communication_access",
-    label: "Communication",
-    description: "Chat room access and messaging capabilities",
-    type: "communication",
+    id: 'communication_access',
+    label: 'Communication',
+    description: 'Chat room access and messaging capabilities',
+    type: 'communication',
     permissions: [
       {
         key: PERMISSIONS.GENERAL_CHAT,
-        label: "General Chat",
+        label: 'General Chat',
         icon: MessageCircle,
-        description: "Access general team chat",
+        description: 'Access general team chat',
       },
       {
         key: PERMISSIONS.HOST_CHAT,
-        label: "Host Chat",
+        label: 'Host Chat',
         icon: Building,
-        description: "Access host-specific chat room",
+        description: 'Access host-specific chat room',
       },
       {
         key: PERMISSIONS.DRIVER_CHAT,
-        label: "Driver Chat",
+        label: 'Driver Chat',
         icon: Truck,
-        description: "Access driver-specific chat room",
+        description: 'Access driver-specific chat room',
       },
       {
         key: PERMISSIONS.RECIPIENT_CHAT,
-        label: "Recipient Chat",
+        label: 'Recipient Chat',
         icon: UserCheck,
-        description: "Access recipient-specific chat room",
+        description: 'Access recipient-specific chat room',
       },
       {
         key: PERMISSIONS.CHAT_GRANTS_COMMITTEE,
-        label: "Grants Committee Chat",
+        label: 'Grants Committee Chat',
         icon: Users,
-        description: "Access grants committee chat",
+        description: 'Access grants committee chat',
       },
       {
         key: PERMISSIONS.CHAT_EVENTS_COMMITTEE,
-        label: "Events Committee Chat",
+        label: 'Events Committee Chat',
         icon: Users,
-        description: "Access events committee chat",
+        description: 'Access events committee chat',
       },
       {
         key: PERMISSIONS.CHAT_BOARD,
-        label: "Board Chat",
+        label: 'Board Chat',
         icon: Users,
-        description: "Access board chat",
+        description: 'Access board chat',
       },
       {
         key: PERMISSIONS.CHAT_WEB_COMMITTEE,
-        label: "Web Committee Chat",
+        label: 'Web Committee Chat',
         icon: Users,
-        description: "Access web committee chat",
+        description: 'Access web committee chat',
       },
       {
         key: PERMISSIONS.CHAT_VOLUNTEER_MANAGEMENT,
-        label: "Volunteer Management Chat",
+        label: 'Volunteer Management Chat',
         icon: Users,
-        description: "Access volunteer management chat",
+        description: 'Access volunteer management chat',
       },
       {
         key: PERMISSIONS.CORE_TEAM_CHAT,
-        label: "Core Team Chat",
+        label: 'Core Team Chat',
         icon: Shield,
-        description: "Access leadership chat room",
+        description: 'Access leadership chat room',
       },
 
       {
         key: PERMISSIONS.DIRECT_MESSAGES,
-        label: "Direct Messaging",
+        label: 'Direct Messaging',
         icon: Mail,
-        description: "Send/receive private messages",
+        description: 'Send/receive private messages',
       },
       {
         key: PERMISSIONS.MODERATE_MESSAGES,
-        label: "Message Moderation",
+        label: 'Message Moderation',
         icon: Eye,
         description: "Edit/delete others' messages across all channels",
       },
     ],
   },
   {
-    id: "kudos_system",
-    label: "Kudos & Recognition",
+    id: 'kudos_system',
+    label: 'Kudos & Recognition',
     description:
-      "Controls access to the kudos system for recognizing achievements and contributions",
-    type: "kudos",
+      'Controls access to the kudos system for recognizing achievements and contributions',
+    type: 'kudos',
     permissions: [
       {
         key: PERMISSIONS.SEND_KUDOS,
-        label: "Send Kudos",
+        label: 'Send Kudos',
         icon: Send,
         description: "Can send kudos messages to recognize other users' work",
       },
       {
         key: PERMISSIONS.RECEIVE_KUDOS,
-        label: "Receive Kudos",
+        label: 'Receive Kudos',
         icon: Heart,
-        description: "Can receive kudos messages from other users",
+        description: 'Can receive kudos messages from other users',
       },
       {
         key: PERMISSIONS.VIEW_KUDOS,
-        label: "View Kudos",
+        label: 'View Kudos',
         icon: Trophy,
-        description: "Can view kudos messages in the inbox",
+        description: 'Can view kudos messages in the inbox',
       },
       {
         key: PERMISSIONS.MANAGE_ALL_KUDOS,
-        label: "Manage All Kudos",
+        label: 'Manage All Kudos',
         icon: Shield,
-        description: "Admin ability to manage all kudos (view, delete)",
+        description: 'Admin ability to manage all kudos (view, delete)',
       },
     ],
   },
   {
-    id: "navigation_control",
-    label: "Navigation Control",
+    id: 'navigation_control',
+    label: 'Navigation Control',
     description: "Which tabs and features appear in user's interface",
-    type: "navigation",
+    type: 'navigation',
     permissions: [
       {
         key: PERMISSIONS.ACCESS_CHAT,
-        label: "Chat Tab",
+        label: 'Chat Tab',
         icon: MessageCircle,
-        description: "Show Chat tab in navigation",
+        description: 'Show Chat tab in navigation',
       },
       {
         key: PERMISSIONS.ACCESS_MESSAGES,
-        label: "Messages Tab",
+        label: 'Messages Tab',
         icon: Mail,
-        description: "Show Messages tab in navigation",
+        description: 'Show Messages tab in navigation',
       },
       {
         key: PERMISSIONS.ACCESS_TOOLKIT,
-        label: "Toolkit Tab",
+        label: 'Toolkit Tab',
         icon: Wrench,
-        description: "Show Toolkit/Documents tab",
+        description: 'Show Toolkit/Documents tab',
       },
       {
         key: PERMISSIONS.ACCESS_MEETINGS,
-        label: "Meetings Section",
+        label: 'Meetings Section',
         icon: Calendar,
-        description: "Show Meetings in Operations",
+        description: 'Show Meetings in Operations',
       },
       {
         key: PERMISSIONS.ACCESS_ANALYTICS,
-        label: "Analytics Section",
+        label: 'Analytics Section',
         icon: TrendingUp,
-        description: "Show Analytics in Operations",
+        description: 'Show Analytics in Operations',
       },
       {
         key: PERMISSIONS.ANALYTICS_VIEW,
-        label: "Reports Section",
+        label: 'Reports Section',
         icon: FileText,
-        description: "Show Reports in Operations",
+        description: 'Show Reports in Operations',
       },
       {
         key: PERMISSIONS.COLLECTIONS_VIEW,
-        label: "Sandwich Data",
+        label: 'Sandwich Data',
         icon: PieChart,
-        description: "Access to sandwich totals data sheet",
+        description: 'Access to sandwich totals data sheet',
       },
       {
         key: PERMISSIONS.ACCESS_WORK_LOGS,
-        label: "Work Logs Section",
+        label: 'Work Logs Section',
         icon: Calendar,
-        description: "Show Work Logs in navigation",
+        description: 'Show Work Logs in navigation',
       },
     ],
   },
   {
-    id: "system_access",
-    label: "System Access",
-    description: "Administrative functions and system-level capabilities",
-    type: "system",
+    id: 'system_access',
+    label: 'System Access',
+    description: 'Administrative functions and system-level capabilities',
+    type: 'system',
     permissions: [
       {
         key: PERMISSIONS.ADMIN_ACCESS,
-        label: "Admin Panel",
+        label: 'Admin Panel',
         icon: Shield,
-        description: "Access to admin interface",
+        description: 'Access to admin interface',
       },
       {
         key: PERMISSIONS.MANAGE_USERS,
-        label: "User Management",
+        label: 'User Management',
         icon: Users,
-        description: "Manage users and permissions",
+        description: 'Manage users and permissions',
       },
       {
         key: PERMISSIONS.MANAGE_ANNOUNCEMENTS,
-        label: "System Announcements",
+        label: 'System Announcements',
         icon: FileText,
-        description: "Create/edit system announcements",
+        description: 'Create/edit system announcements',
       },
       {
         key: PERMISSIONS.MANAGE_MEETINGS,
-        label: "Meeting Management",
+        label: 'Meeting Management',
         icon: Calendar,
-        description: "Schedule and manage meetings",
+        description: 'Schedule and manage meetings',
       },
     ],
   },
   {
-    id: "data_operations",
-    label: "Data Operations",
-    description: "Bulk operations and cross-content editing capabilities",
-    type: "operations",
+    id: 'data_operations',
+    label: 'Data Operations',
+    description: 'Bulk operations and cross-content editing capabilities',
+    type: 'operations',
     permissions: [
       {
         key: PERMISSIONS.EXPORT_DATA,
-        label: "Export Data",
+        label: 'Export Data',
         icon: FileText,
-        description: "Download data as files",
+        description: 'Download data as files',
       },
       {
         key: PERMISSIONS.IMPORT_DATA,
-        label: "Import Data",
+        label: 'Import Data',
         icon: Database,
-        description: "Upload bulk data from files",
+        description: 'Upload bulk data from files',
       },
       {
         key: PERMISSIONS.DATA_EXPORT,
-        label: "Schedule Reports",
+        label: 'Schedule Reports',
         icon: Calendar,
-        description: "Set up automated reporting",
+        description: 'Set up automated reporting',
       },
       // Note: Cross-content editing and permanent deletions would need new granular permissions
     ],
@@ -491,40 +491,40 @@ const PERMISSION_GROUPS = [
 // Helper functions for visual organization
 function getCardColorForType(type: string) {
   switch (type) {
-    case "content":
-      return "border-blue-200 bg-blue-50/50";
-    case "directory":
-      return "border-green-200 bg-green-50/50";
-    case "communication":
-      return "border-purple-200 bg-purple-50/50";
-    case "navigation":
-      return "border-orange-200 bg-orange-50/50";
-    case "system":
-      return "border-red-200 bg-red-50/50";
-    case "operations":
-      return "border-indigo-200 bg-indigo-50/50";
-    case "kudos":
-      return "border-yellow-200 bg-yellow-50/50";
+    case 'content':
+      return 'border-blue-200 bg-blue-50/50';
+    case 'directory':
+      return 'border-green-200 bg-green-50/50';
+    case 'communication':
+      return 'border-purple-200 bg-purple-50/50';
+    case 'navigation':
+      return 'border-orange-200 bg-orange-50/50';
+    case 'system':
+      return 'border-red-200 bg-red-50/50';
+    case 'operations':
+      return 'border-indigo-200 bg-indigo-50/50';
+    case 'kudos':
+      return 'border-yellow-200 bg-yellow-50/50';
     default:
-      return "border-gray-200 bg-gray-50/50";
+      return 'border-gray-200 bg-gray-50/50';
   }
 }
 
 function getIconForType(type: string) {
   switch (type) {
-    case "content":
+    case 'content':
       return <Database className="h-4 w-4 text-blue-600" />;
-    case "directory":
+    case 'directory':
       return <Phone className="h-4 w-4 text-green-600" />;
-    case "communication":
+    case 'communication':
       return <MessageCircle className="h-4 w-4 text-purple-600" />;
-    case "navigation":
+    case 'navigation':
       return <Eye className="h-4 w-4 text-orange-600" />;
-    case "system":
+    case 'system':
       return <Shield className="h-4 w-4 text-red-600" />;
-    case "operations":
+    case 'operations':
       return <Settings className="h-4 w-4 text-indigo-600" />;
-    case "kudos":
+    case 'kudos':
       return <Trophy className="h-4 w-4 text-yellow-600" />;
     default:
       return <Settings className="h-4 w-4 text-gray-600" />;
@@ -537,7 +537,7 @@ export function SimplePermissionsDialog({
   onOpenChange,
   onSave,
 }: SimplePermissionsDialogProps) {
-  const [selectedRole, setSelectedRole] = useState<string>("");
+  const [selectedRole, setSelectedRole] = useState<string>('');
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
 
   useEffect(() => {
@@ -581,16 +581,16 @@ export function SimplePermissionsDialog({
       selectedPermissions.includes(p)
     ).length;
 
-    if (checkedCount === 0) return "none";
-    if (checkedCount === categoryPermissions.length) return "all";
-    return "partial";
+    if (checkedCount === 0) return 'none';
+    if (checkedCount === categoryPermissions.length) return 'all';
+    return 'partial';
   };
 
   const handleBulkCategoryToggle = (category: any) => {
     const categoryPermissions = category.permissions.map((p: any) => p.key);
     const status = getCategoryStatus(category);
 
-    if (status === "all") {
+    if (status === 'all') {
       // Remove all category permissions
       setSelectedPermissions(
         selectedPermissions.filter((p) => !categoryPermissions.includes(p))
@@ -609,9 +609,9 @@ export function SimplePermissionsDialog({
 
   const getBulkIcon = (status: string) => {
     switch (status) {
-      case "all":
+      case 'all':
         return <CheckSquare className="h-4 w-4" />;
-      case "partial":
+      case 'partial':
         return <Minus className="h-4 w-4" />;
       default:
         return <Square className="h-4 w-4" />;
@@ -704,9 +704,9 @@ export function SimplePermissionsDialog({
                     >
                       {getBulkIcon(getCategoryStatus(category))}
                       <span className="ml-1 hidden sm:inline">
-                        {getCategoryStatus(category) === "all"
-                          ? "Deselect All"
-                          : "Select All"}
+                        {getCategoryStatus(category) === 'all'
+                          ? 'Deselect All'
+                          : 'Select All'}
                       </span>
                     </Button>
                   </div>

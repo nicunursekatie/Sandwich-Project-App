@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { useState, useEffect, useRef } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import {
   ArrowRight,
   ArrowLeft,
@@ -12,10 +12,10 @@ import {
   AlertCircle,
   MapPin,
   Plus,
-} from "lucide-react";
-import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
-import { useToast } from "@/hooks/use-toast";
-import { Badge } from "@/components/ui/badge";
+} from 'lucide-react';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
+import { useToast } from '@/hooks/use-toast';
+import { Badge } from '@/components/ui/badge';
 
 interface CollectionWalkthroughProps {
   onComplete?: () => void;
@@ -32,14 +32,14 @@ export default function CollectionWalkthrough({
   onCancel,
 }: CollectionWalkthroughProps) {
   const [currentStep, setCurrentStep] = useState(1);
-  const [collectionDate, setCollectionDate] = useState("");
-  const [actualCollectionDate, setActualCollectionDate] = useState(""); // The Wednesday closest to their input
+  const [collectionDate, setCollectionDate] = useState('');
+  const [actualCollectionDate, setActualCollectionDate] = useState(''); // The Wednesday closest to their input
   const [useExactDate, setUseExactDate] = useState(false); // Allow override of Wednesday calculation
-  const [hostName, setHostName] = useState("");
+  const [hostName, setHostName] = useState('');
   const [individualCount, setIndividualCount] = useState<number | null>(null);
   const [hasGroups, setHasGroups] = useState<boolean | null>(null);
   const [groupInputs, setGroupInputs] = useState<GroupCollection[]>([
-    { name: "", count: 0 },
+    { name: '', count: 0 },
   ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const walkthroughRef = useRef<HTMLDivElement>(null);
@@ -48,17 +48,17 @@ export default function CollectionWalkthrough({
   const queryClient = useQueryClient();
 
   const { data: allHosts = [] } = useQuery<any[]>({
-    queryKey: ["/api/hosts"],
+    queryKey: ['/api/hosts'],
   });
 
   // Filter to only show active hosts
-  const hosts = allHosts.filter((host: any) => host.status === "active");
+  const hosts = allHosts.filter((host: any) => host.status === 'active');
 
   // Function to find the most recent Wednesday that has already passed
   const findMostRecentWednesday = (inputDate: string): string => {
-    if (!inputDate) return "";
+    if (!inputDate) return '';
 
-    const date = new Date(inputDate + "T12:00:00"); // Add time to avoid timezone issues
+    const date = new Date(inputDate + 'T12:00:00'); // Add time to avoid timezone issues
     const today = new Date();
     const day = date.getDay(); // 0 = Sunday, 1 = Monday, ..., 3 = Wednesday, 6 = Saturday
 
@@ -82,28 +82,28 @@ export default function CollectionWalkthrough({
       wednesday.setDate(wednesday.getDate() - 7);
     }
 
-    return wednesday.toISOString().split("T")[0];
+    return wednesday.toISOString().split('T')[0];
   };
 
   const submitMutation = useMutation({
     mutationFn: async (data: any) => {
-      const response = await fetch("/api/sandwich-collections", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/api/sandwich-collections', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      if (!response.ok) throw new Error("Failed to submit collection");
+      if (!response.ok) throw new Error('Failed to submit collection');
       return response.json();
     },
     onSuccess: () => {
-      toast({ title: "Collection submitted successfully!" });
+      toast({ title: 'Collection submitted successfully!' });
       queryClient.invalidateQueries({
-        queryKey: ["/api/sandwich-collections"],
+        queryKey: ['/api/sandwich-collections'],
       });
       onComplete?.();
     },
     onError: () => {
-      toast({ title: "Failed to submit collection", variant: "destructive" });
+      toast({ title: 'Failed to submit collection', variant: 'destructive' });
       setIsSubmitting(false);
     },
   });
@@ -120,7 +120,7 @@ export default function CollectionWalkthrough({
 
   // Initialize with today's date on component mount
   const initializeDate = () => {
-    const today = new Date().toISOString().split("T")[0];
+    const today = new Date().toISOString().split('T')[0];
     setCollectionDate(today);
     const wednesday = findMostRecentWednesday(today);
     setActualCollectionDate(wednesday);
@@ -132,7 +132,7 @@ export default function CollectionWalkthrough({
   }
 
   const addGroupRow = () => {
-    setGroupInputs([...groupInputs, { name: "", count: 0 }]);
+    setGroupInputs([...groupInputs, { name: '', count: 0 }]);
   };
 
   const removeGroupRow = (index: number) => {
@@ -143,7 +143,7 @@ export default function CollectionWalkthrough({
 
   const updateGroupInput = (
     index: number,
-    field: "name" | "count",
+    field: 'name' | 'count',
     value: string | number
   ) => {
     const updated = [...groupInputs];
@@ -158,7 +158,7 @@ export default function CollectionWalkthrough({
       collectionDate: actualCollectionDate, // The actual Thursday they collected
       hostName,
       individualSandwiches: individualCount || 0,
-      submissionMethod: "walkthrough",
+      submissionMethod: 'walkthrough',
       // submittedAt is automatically set by the database
     };
 
@@ -175,11 +175,11 @@ export default function CollectionWalkthrough({
 
     // BACKWARD COMPATIBILITY: Still populate legacy fields for compatibility
     if (validGroups.length > 0) {
-      submissionData.group1Name = validGroups[0].name.trim() || "";
+      submissionData.group1Name = validGroups[0].name.trim() || '';
       submissionData.group1Count = validGroups[0].count || 0;
 
       if (validGroups.length > 1) {
-        submissionData.group2Name = validGroups[1].name.trim() || "";
+        submissionData.group2Name = validGroups[1].name.trim() || '';
         submissionData.group2Count = validGroups[1].count || 0;
       }
     }
@@ -239,9 +239,9 @@ export default function CollectionWalkthrough({
         // Small delay to let content render first
         setTimeout(() => {
           walkthroughRef.current?.scrollIntoView({
-            behavior: "smooth",
-            block: "center",
-            inline: "nearest",
+            behavior: 'smooth',
+            block: 'center',
+            inline: 'nearest',
           });
         }, 100);
       }
@@ -277,23 +277,23 @@ export default function CollectionWalkthrough({
               {actualCollectionDate && (
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                   <p className="text-sm text-blue-800">
-                    <strong>Collection will be logged for:</strong>{" "}
+                    <strong>Collection will be logged for:</strong>{' '}
                     {useExactDate
                       ? new Date(
-                          actualCollectionDate + "T12:00:00"
-                        ).toLocaleDateString("en-US", {
-                          weekday: "long",
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
+                          actualCollectionDate + 'T12:00:00'
+                        ).toLocaleDateString('en-US', {
+                          weekday: 'long',
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
                         })
                       : new Date(
-                          actualCollectionDate + "T12:00:00"
-                        ).toLocaleDateString("en-US", {
-                          weekday: "long",
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
+                          actualCollectionDate + 'T12:00:00'
+                        ).toLocaleDateString('en-US', {
+                          weekday: 'long',
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
                         })}
                   </p>
                   {!useExactDate && (
@@ -313,9 +313,8 @@ export default function CollectionWalkthrough({
                         if (e.target.checked) {
                           setActualCollectionDate(collectionDate);
                         } else {
-                          const wednesday = findMostRecentWednesday(
-                            collectionDate
-                          );
+                          const wednesday =
+                            findMostRecentWednesday(collectionDate);
                           setActualCollectionDate(wednesday);
                         }
                       }}
@@ -351,11 +350,11 @@ export default function CollectionWalkthrough({
               {hosts.map((host) => (
                 <Button
                   key={host.id}
-                  variant={hostName === host.name ? "default" : "outline"}
+                  variant={hostName === host.name ? 'default' : 'outline'}
                   className={`w-full justify-start h-auto p-3 sm:p-4 touch-manipulation ${
                     hostName === host.name
-                      ? "bg-[#236383] hover:bg-[#1a4d66]"
-                      : "hover:bg-gray-50"
+                      ? 'bg-[#236383] hover:bg-[#1a4d66]'
+                      : 'hover:bg-gray-50'
                   }`}
                   onClick={() => {
                     setHostName(host.name);
@@ -403,7 +402,7 @@ export default function CollectionWalkthrough({
                 type="number"
                 min="0"
                 placeholder="0"
-                value={individualCount !== null ? individualCount : ""}
+                value={individualCount !== null ? individualCount : ''}
                 onChange={(e) =>
                   setIndividualCount(
                     e.target.value ? parseInt(e.target.value) : null
@@ -434,11 +433,11 @@ export default function CollectionWalkthrough({
 
             <div className="flex gap-3 sm:gap-4">
               <Button
-                variant={hasGroups === true ? "default" : "outline"}
+                variant={hasGroups === true ? 'default' : 'outline'}
                 className={`flex-1 h-12 sm:h-16 text-base sm:text-lg touch-manipulation ${
                   hasGroups === true
-                    ? "bg-[#236383] hover:bg-[#1a4d66]"
-                    : "hover:bg-gray-50"
+                    ? 'bg-[#236383] hover:bg-[#1a4d66]'
+                    : 'hover:bg-gray-50'
                 }`}
                 onClick={() => {
                   setHasGroups(true);
@@ -451,11 +450,11 @@ export default function CollectionWalkthrough({
                 Yes
               </Button>
               <Button
-                variant={hasGroups === false ? "default" : "outline"}
+                variant={hasGroups === false ? 'default' : 'outline'}
                 className={`flex-1 h-12 sm:h-16 text-base sm:text-lg touch-manipulation ${
                   hasGroups === false
-                    ? "bg-[#236383] hover:bg-[#1a4d66]"
-                    : "hover:bg-gray-50"
+                    ? 'bg-[#236383] hover:bg-[#1a4d66]'
+                    : 'hover:bg-gray-50'
                 }`}
                 onClick={() => {
                   setHasGroups(false);
@@ -513,7 +512,7 @@ export default function CollectionWalkthrough({
                       placeholder="e.g., The Weber School"
                       value={group.name}
                       onChange={(e) =>
-                        updateGroupInput(index, "name", e.target.value)
+                        updateGroupInput(index, 'name', e.target.value)
                       }
                       className="h-10 sm:h-auto text-sm sm:text-base"
                     />
@@ -521,11 +520,11 @@ export default function CollectionWalkthrough({
                       type="number"
                       min="0"
                       placeholder="Number of sandwiches"
-                      value={group.count || ""}
+                      value={group.count || ''}
                       onChange={(e) =>
                         updateGroupInput(
                           index,
-                          "count",
+                          'count',
                           parseInt(e.target.value) || 0
                         )
                       }
@@ -571,12 +570,12 @@ export default function CollectionWalkthrough({
                 </div>
                 <div className="text-base sm:text-lg font-medium text-gray-900">
                   {new Date(
-                    actualCollectionDate + "T12:00:00"
-                  ).toLocaleDateString("en-US", {
-                    weekday: "long",
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
+                    actualCollectionDate + 'T12:00:00'
+                  ).toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
                   })}
                 </div>
               </div>
@@ -629,7 +628,7 @@ export default function CollectionWalkthrough({
                           >
                             <div className="flex justify-between items-center">
                               <span className="font-medium text-sm sm:text-base text-gray-900 truncate max-w-[60%]">
-                                {group.name.trim() || "Unnamed Group"}
+                                {group.name.trim() || 'Unnamed Group'}
                               </span>
                               <span className="text-sm sm:text-base font-semibold text-[#236383]">
                                 {group.count} sandwiches
@@ -726,10 +725,10 @@ export default function CollectionWalkthrough({
               className="flex items-center gap-2 bg-green-600 hover:bg-green-700 h-10 sm:h-auto text-sm sm:text-base px-3 sm:px-4 touch-manipulation"
             >
               <span className="hidden sm:inline">
-                {isSubmitting ? "Submitting..." : "Submit Collection"}
+                {isSubmitting ? 'Submitting...' : 'Submit Collection'}
               </span>
               <span className="sm:hidden">
-                {isSubmitting ? "Submitting..." : "Submit"}
+                {isSubmitting ? 'Submitting...' : 'Submit'}
               </span>
               <Check className="w-4 h-4" />
             </Button>

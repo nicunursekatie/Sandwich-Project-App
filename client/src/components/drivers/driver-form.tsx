@@ -1,21 +1,21 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Car, Phone, Mail, MapPin } from "lucide-react";
+} from '@/components/ui/select';
+import { Car, Phone, Mail, MapPin } from 'lucide-react';
 
 interface Driver {
   id: number;
@@ -24,7 +24,7 @@ interface Driver {
   email: string;
   vehicleType: string;
   licenseNumber: string;
-  availability: "available" | "busy" | "off-duty";
+  availability: 'available' | 'busy' | 'off-duty';
   zone: string;
   area: string;
 }
@@ -35,7 +35,7 @@ interface DriverFormData {
   email: string;
   vehicleType: string;
   licenseNumber: string;
-  availability: "available" | "busy" | "off-duty";
+  availability: 'available' | 'busy' | 'off-duty';
   zone: string;
   area: string;
 }
@@ -58,14 +58,14 @@ export function DriverForm({
   title,
 }: DriverFormProps) {
   const [formData, setFormData] = useState<DriverFormData>({
-    name: "",
-    phone: "",
-    email: "",
-    vehicleType: "",
-    licenseNumber: "",
-    availability: "available",
-    zone: "",
-    area: "",
+    name: '',
+    phone: '',
+    email: '',
+    vehicleType: '',
+    licenseNumber: '',
+    availability: 'available',
+    zone: '',
+    area: '',
     ...initialData,
   });
 
@@ -94,7 +94,7 @@ export function DriverForm({
             <Input
               id="name"
               value={formData.name}
-              onChange={(e) => handleInputChange("name", e.target.value)}
+              onChange={(e) => handleInputChange('name', e.target.value)}
               required
             />
           </div>
@@ -107,7 +107,7 @@ export function DriverForm({
                 id="phone"
                 type="tel"
                 value={formData.phone}
-                onChange={(e) => handleInputChange("phone", e.target.value)}
+                onChange={(e) => handleInputChange('phone', e.target.value)}
                 className="pl-10"
                 required
               />
@@ -122,7 +122,7 @@ export function DriverForm({
                 id="email"
                 type="email"
                 value={formData.email}
-                onChange={(e) => handleInputChange("email", e.target.value)}
+                onChange={(e) => handleInputChange('email', e.target.value)}
                 className="pl-10"
                 required
               />
@@ -133,7 +133,7 @@ export function DriverForm({
             <Label htmlFor="vehicleType">Vehicle Type</Label>
             <Select
               value={formData.vehicleType}
-              onValueChange={(value) => handleInputChange("vehicleType", value)}
+              onValueChange={(value) => handleInputChange('vehicleType', value)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select vehicle type" />
@@ -154,7 +154,7 @@ export function DriverForm({
               id="licenseNumber"
               value={formData.licenseNumber}
               onChange={(e) =>
-                handleInputChange("licenseNumber", e.target.value)
+                handleInputChange('licenseNumber', e.target.value)
               }
             />
           </div>
@@ -163,8 +163,8 @@ export function DriverForm({
             <Label htmlFor="availability">Availability</Label>
             <Select
               value={formData.availability}
-              onValueChange={(value: "available" | "busy" | "off-duty") =>
-                handleInputChange("availability", value)
+              onValueChange={(value: 'available' | 'busy' | 'off-duty') =>
+                handleInputChange('availability', value)
               }
             >
               <SelectTrigger>
@@ -185,7 +185,7 @@ export function DriverForm({
               <Input
                 id="zone"
                 value={formData.zone}
-                onChange={(e) => handleInputChange("zone", e.target.value)}
+                onChange={(e) => handleInputChange('zone', e.target.value)}
                 className="pl-10"
                 placeholder="e.g., Zone A, Zone B"
               />
@@ -199,7 +199,7 @@ export function DriverForm({
               <Input
                 id="area"
                 value={formData.area}
-                onChange={(e) => handleInputChange("area", e.target.value)}
+                onChange={(e) => handleInputChange('area', e.target.value)}
                 className="pl-10"
                 placeholder="e.g., North Atlanta, Downtown, Midtown"
               />
@@ -219,7 +219,7 @@ export function DriverForm({
                 !formData.email.trim()
               }
             >
-              {isSubmitting ? "Saving..." : "Save Driver"}
+              {isSubmitting ? 'Saving...' : 'Save Driver'}
             </Button>
           </div>
         </form>

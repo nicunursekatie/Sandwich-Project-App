@@ -1,29 +1,57 @@
-import { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts";
-import { Award, TrendingUp, Target, Users2, Calendar, Trophy } from "lucide-react";
-import type { SandwichCollection } from "@shared/schema";
-import { calculateGroupSandwiches, calculateTotalSandwiches, calculateActualWeeklyAverage, getRecordWeek } from "@/lib/analytics-utils";
+import { useState, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+} from 'recharts';
+import {
+  Award,
+  TrendingUp,
+  Target,
+  Users2,
+  Calendar,
+  Trophy,
+} from 'lucide-react';
+import type { SandwichCollection } from '@shared/schema';
+import {
+  calculateGroupSandwiches,
+  calculateTotalSandwiches,
+  calculateActualWeeklyAverage,
+  getRecordWeek,
+} from '@/lib/analytics-utils';
 
 export default function AnalyticsDashboard() {
-  const { data: collections, isLoading: collectionsLoading } = useQuery<SandwichCollection[]>({
+  const { data: collections, isLoading: collectionsLoading } = useQuery<
+    SandwichCollection[]
+  >({
     queryKey: ['/api/sandwich-collections/all', 'v2'], // Force cache refresh
     queryFn: async () => {
       console.log('🔄 Analytics Dashboard: Fetching all collections...');
       const response = await fetch('/api/sandwich-collections?limit=10000');
       if (!response.ok) throw new Error('Failed to fetch collections');
       const data = await response.json();
-      console.log('✅ Analytics Dashboard: Got', data.collections?.length || 0, 'collections');
+      console.log(
+        '✅ Analytics Dashboard: Got',
+        data.collections?.length || 0,
+        'collections'
+      );
       return data.collections || [];
     },
     staleTime: 0, // Force fresh data every time
-    cacheTime: 0   // Don't cache the data
+    cacheTime: 0, // Don't cache the data
   });
 
   const { data: statsData, isLoading: statsLoading } = useQuery({
-    queryKey: ['/api/sandwich-collections/stats']
+    queryKey: ['/api/sandwich-collections/stats'],
   });
 
   const { data: hostsData, isLoading: hostsLoading } = useQuery({
@@ -32,7 +60,7 @@ export default function AnalyticsDashboard() {
       const response = await fetch('/api/hosts');
       if (!response.ok) throw new Error('Failed to fetch hosts');
       return response.json();
-    }
+    },
   });
 
   const isLoading = collectionsLoading || statsLoading || hostsLoading;
@@ -44,62 +72,81 @@ export default function AnalyticsDashboard() {
     const totalHosts = 34; // Fixed count per Marcy's manual verification
     const activeHosts = 34; // Fixed count per Marcy's manual verification
 
-    const hostStats = collections.reduce((acc, c) => {
-      const host = c.hostName || 'Unknown';
-      const sandwiches = calculateTotalSandwiches(c);
-      
-      if (!acc[host]) {
-        acc[host] = { total: 0, collections: 0 };
-      }
-      acc[host].total += sandwiches;
-      acc[host].collections += 1;
-      
-      return acc;
-    }, {} as Record<string, { total: number; collections: number }>);
+    const hostStats = collections.reduce(
+      (acc, c) => {
+        const host = c.hostName || 'Unknown';
+        const sandwiches = calculateTotalSandwiches(c);
 
+        if (!acc[host]) {
+          acc[host] = { total: 0, collections: 0 };
+        }
+        acc[host].total += sandwiches;
+        acc[host].collections += 1;
 
-    const topPerformer = Object.entries(hostStats)
-      .sort(([,a], [,b]) => b.total - a.total)[0];
+        return acc;
+      },
+      {} as Record<string, { total: number; collections: number }>
+    );
+
+    const topPerformer = Object.entries(hostStats).sort(
+      ([, a], [, b]) => b.total - a.total
+    )[0];
 
     // Monthly trends for chart
-    console.log('🔢 Analytics Dashboard: Processing', collections.length, 'collections for monthly trends');
-    const monthlyTrends = collections.reduce((acc, c) => {
-      const date = new Date(c.collectionDate || '');
-      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-      const sandwiches = calculateTotalSandwiches(c);
-      
-      if (!acc[monthKey]) {
-        acc[monthKey] = { month: monthKey, sandwiches: 0 };
-      }
-      acc[monthKey].sandwiches += sandwiches;
-      
-      return acc;
-    }, {} as Record<string, { month: string; sandwiches: number }>);
+    console.log(
+      '🔢 Analytics Dashboard: Processing',
+      collections.length,
+      'collections for monthly trends'
+    );
+    const monthlyTrends = collections.reduce(
+      (acc, c) => {
+        const date = new Date(c.collectionDate || '');
+        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        const sandwiches = calculateTotalSandwiches(c);
 
-    console.log('📊 Analytics Dashboard: Monthly trends calculated:', monthlyTrends);
-    
+        if (!acc[monthKey]) {
+          acc[monthKey] = { month: monthKey, sandwiches: 0 };
+        }
+        acc[monthKey].sandwiches += sandwiches;
+
+        return acc;
+      },
+      {} as Record<string, { month: string; sandwiches: number }>
+    );
+
+    console.log(
+      '📊 Analytics Dashboard: Monthly trends calculated:',
+      monthlyTrends
+    );
+
     const trendData = Object.values(monthlyTrends)
       .sort((a, b) => a.month.localeCompare(b.month))
       .slice(-12) // Last 12 months
-      .map(m => {
+      .map((m) => {
         const date = new Date(m.month + '-01');
-        const monthName = date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+        const monthName = date.toLocaleDateString('en-US', {
+          month: 'short',
+          year: '2-digit',
+        });
         return {
           month: monthName,
-          sandwiches: m.sandwiches
+          sandwiches: m.sandwiches,
         };
       });
-      
-    console.log('📈 Analytics Dashboard: Final trend data for chart:', trendData);
+
+    console.log(
+      '📈 Analytics Dashboard: Final trend data for chart:',
+      trendData
+    );
 
     // Top performing hosts
     const topHosts = Object.entries(hostStats)
-      .sort(([,a], [,b]) => b.total - a.total)
+      .sort(([, a], [, b]) => b.total - a.total)
       .slice(0, 10)
       .map(([name, stats]) => ({
         name: name.length > 20 ? name.substring(0, 20) + '...' : name,
         total: stats.total,
-        collections: stats.collections
+        collections: stats.collections,
       }));
 
     return {
@@ -109,12 +156,13 @@ export default function AnalyticsDashboard() {
       totalHosts,
       activeHosts,
       avgWeekly: calculateActualWeeklyAverage(collections), // Calculate actual weekly average from real weekly buckets
-      topPerformer: topPerformer ? { name: topPerformer[0], total: topPerformer[1].total } : null,
+      topPerformer: topPerformer
+        ? { name: topPerformer[0], total: topPerformer[1].total }
+        : null,
       recordWeek: getRecordWeek(collections), // Get actual best performing week
       trendData,
-      topHosts
+      topHosts,
     };
-
   }, [collections, statsData, hostsData]);
 
   if (isLoading) {
@@ -140,8 +188,12 @@ export default function AnalyticsDashboard() {
     <div className="space-y-8">
       {/* Header */}
       <div className="text-center">
-        <h1 className="text-4xl font-bold text-[#236383] mb-2">ANALYTICS DASHBOARD</h1>
-        <p className="text-lg text-[#646464]">Data insights and impact visualization</p>
+        <h1 className="text-4xl font-bold text-[#236383] mb-2">
+          ANALYTICS DASHBOARD
+        </h1>
+        <p className="text-lg text-[#646464]">
+          Data insights and impact visualization
+        </p>
       </div>
 
       {/* Key Metrics */}
@@ -149,21 +201,23 @@ export default function AnalyticsDashboard() {
         <div className="bg-white rounded-lg p-6 border-2 border-[#236383]/20 hover:shadow-lg transition-all">
           <div className="flex items-center justify-between mb-4">
             <Trophy className="h-8 w-8 text-[#236383]" />
-            <Badge className="bg-[#236383]/10 text-[#236383] text-sm">500K Goal</Badge>
+            <Badge className="bg-[#236383]/10 text-[#236383] text-sm">
+              500K Goal
+            </Badge>
           </div>
           <div className="text-3xl font-bold text-[#236383] mb-2">
             {(analyticsData.totalSandwiches / 1000000).toFixed(2)}M
           </div>
           <p className="text-[#646464] font-medium">Total Impact</p>
-          <p className="text-sm text-[#236383] mt-2">
-            2025 Goal: 15K of 500K
-          </p>
+          <p className="text-sm text-[#236383] mt-2">2025 Goal: 15K of 500K</p>
         </div>
 
         <div className="bg-white rounded-lg p-6 border-2 border-[#236383]/20 hover:shadow-lg transition-all">
           <div className="flex items-center justify-between mb-4">
             <TrendingUp className="h-8 w-8 text-[#236383]" />
-            <Badge className="bg-blue-100 text-blue-700 text-sm">Weekly Avg</Badge>
+            <Badge className="bg-blue-100 text-blue-700 text-sm">
+              Weekly Avg
+            </Badge>
           </div>
           <div className="text-3xl font-bold text-[#236383] mb-2">
             {analyticsData.avgWeekly.toLocaleString()}
@@ -175,7 +229,9 @@ export default function AnalyticsDashboard() {
         <div className="bg-white rounded-lg p-6 border-2 border-[#236383]/20 hover:shadow-lg transition-all">
           <div className="flex items-center justify-between mb-4">
             <Award className="h-8 w-8 text-[#236383]" />
-            <Badge className="bg-[#FBAD3F]/20 text-[#FBAD3F] text-sm">Record</Badge>
+            <Badge className="bg-[#FBAD3F]/20 text-[#FBAD3F] text-sm">
+              Record
+            </Badge>
           </div>
           <div className="text-3xl font-bold text-[#236383] mb-2">
             {analyticsData.recordWeek.total.toLocaleString()}
@@ -205,35 +261,40 @@ export default function AnalyticsDashboard() {
               <Calendar className="h-5 w-5" />
               Growth Trends
             </h3>
-            <p className="text-[#646464] mt-1">Monthly collection performance</p>
+            <p className="text-[#646464] mt-1">
+              Monthly collection performance
+            </p>
           </div>
           <CardContent className="p-6">
             <div className="h-96">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={analyticsData.trendData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#236383" opacity={0.2} />
-                  <XAxis 
-                    dataKey="month" 
+                  <CartesianGrid
+                    strokeDasharray="3 3"
                     stroke="#236383"
-                    fontSize={12}
+                    opacity={0.2}
                   />
-                  <YAxis 
+                  <XAxis dataKey="month" stroke="#236383" fontSize={12} />
+                  <YAxis
                     stroke="#236383"
                     fontSize={12}
                     tickFormatter={(value) => `${(value / 1000).toFixed(0)}K`}
                   />
-                  <Tooltip 
-                    formatter={(value) => [`${Number(value).toLocaleString()} sandwiches`, 'Total']}
+                  <Tooltip
+                    formatter={(value) => [
+                      `${Number(value).toLocaleString()} sandwiches`,
+                      'Total',
+                    ]}
                     labelStyle={{ color: '#236383' }}
-                    contentStyle={{ 
-                      backgroundColor: 'white', 
+                    contentStyle={{
+                      backgroundColor: 'white',
                       border: '1px solid #236383',
-                      borderRadius: '8px'
+                      borderRadius: '8px',
                     }}
                   />
-                  <Line 
-                    type="monotone" 
-                    dataKey="sandwiches" 
+                  <Line
+                    type="monotone"
+                    dataKey="sandwiches"
                     stroke="#236383"
                     strokeWidth={3}
                     dot={{ fill: '#236383', strokeWidth: 2, r: 4 }}
@@ -257,27 +318,42 @@ export default function AnalyticsDashboard() {
           <CardContent className="p-6">
             <div className="space-y-4">
               <div className="bg-[#FBAD3F]/10 p-4 rounded-lg border border-[#FBAD3F]/30">
-                <h4 className="font-semibold text-[#236383] mb-2">Host Expansion</h4>
+                <h4 className="font-semibold text-[#236383] mb-2">
+                  Host Expansion
+                </h4>
                 <p className="text-sm text-[#646464] mb-2">
-                  {analyticsData.totalHosts} total hosts ({analyticsData.activeHosts} active) - Growing network
+                  {analyticsData.totalHosts} total hosts (
+                  {analyticsData.activeHosts} active) - Growing network
                 </p>
-                <Badge className="bg-[#FBAD3F]/20 text-[#FBAD3F]">Special campaign needed</Badge>
+                <Badge className="bg-[#FBAD3F]/20 text-[#FBAD3F]">
+                  Special campaign needed
+                </Badge>
               </div>
 
               <div className="bg-[#236383]/10 p-4 rounded-lg border border-[#236383]/30">
-                <h4 className="font-semibold text-[#236383] mb-2">Capacity Building</h4>
+                <h4 className="font-semibold text-[#236383] mb-2">
+                  Capacity Building
+                </h4>
                 <p className="text-sm text-[#646464] mb-2">
-                  Weekly avg: {analyticsData.avgWeekly.toLocaleString()} - Support volunteer recruitment
+                  Weekly avg: {analyticsData.avgWeekly.toLocaleString()} -
+                  Support volunteer recruitment
                 </p>
-                <Badge className="bg-[#236383]/20 text-[#236383]">→ Target 10K/week</Badge>
+                <Badge className="bg-[#236383]/20 text-[#236383]">
+                  → Target 10K/week
+                </Badge>
               </div>
 
               <div className="bg-green-100 p-4 rounded-lg border border-green-300">
-                <h4 className="font-semibold text-green-800 mb-2">🎉 Milestone Achieved!</h4>
+                <h4 className="font-semibold text-green-800 mb-2">
+                  🎉 Milestone Achieved!
+                </h4>
                 <p className="text-sm text-green-700 mb-2">
-                  {(analyticsData.totalSandwiches - 2000000).toLocaleString()} sandwiches BEYOND 2M goal!
+                  {(analyticsData.totalSandwiches - 2000000).toLocaleString()}{' '}
+                  sandwiches BEYOND 2M goal!
                 </p>
-                <Badge className="bg-green-200 text-green-800">2M+ Goal Exceeded!</Badge>
+                <Badge className="bg-green-200 text-green-800">
+                  2M+ Goal Exceeded!
+                </Badge>
               </div>
             </div>
           </CardContent>

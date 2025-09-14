@@ -10,7 +10,7 @@ describe('Route Health Regression Tests', () => {
     const loginResponse = await request(API_BASE)
       .post('/api/auth/login')
       .send({ email: 'admin@sandwich.project', password: 'password123' });
-    
+
     adminCookie = loginResponse.headers['set-cookie'][0];
   });
 
@@ -20,24 +20,28 @@ describe('Route Health Regression Tests', () => {
     { path: '/api/meetings', method: 'GET', name: 'Meetings List' },
     { path: '/api/users', method: 'GET', name: 'Users List' },
     { path: '/api/auth/user', method: 'GET', name: 'Current User' },
-    { path: '/api/projects/for-review', method: 'GET', name: 'Projects for Review' },
+    {
+      path: '/api/projects/for-review',
+      method: 'GET',
+      name: 'Projects for Review',
+    },
     { path: '/api/hosts', method: 'GET', name: 'Hosts List' },
     { path: '/api/recipients', method: 'GET', name: 'Recipients List' },
-    { path: '/api/drivers', method: 'GET', name: 'Drivers List' }
+    { path: '/api/drivers', method: 'GET', name: 'Drivers List' },
   ];
 
-  CRITICAL_ROUTES.forEach(route => {
+  CRITICAL_ROUTES.forEach((route) => {
     test(`${route.method} ${route.path} - ${route.name} should not return 500`, async () => {
       let req = request(API_BASE);
-      
+
       if (route.method === 'GET') req = req.get(route.path);
       else if (route.method === 'POST') req = req.post(route.path);
-      
+
       const response = await req.set('Cookie', adminCookie);
-      
+
       // Should not be a server error (500)
       expect(response.status).not.toBe(500);
-      
+
       // Should be either success (200-299) or permission denied (403) or not found (404)
       expect([200, 201, 204, 304, 401, 403, 404]).toContain(response.status);
     });

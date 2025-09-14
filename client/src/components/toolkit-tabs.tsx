@@ -1,14 +1,14 @@
-import { useState } from "react";
+import { useState } from 'react';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Download,
   FileText,
@@ -18,133 +18,125 @@ import {
   Tag,
   Sandwich,
   Calculator,
-} from "lucide-react";
-import { DocumentPreview } from "./document-preview";
+} from 'lucide-react';
+import { DocumentPreview } from './document-preview';
 
 interface ToolkitDocument {
   name: string;
   path: string;
-  type: "pdf" | "xlsx" | "docx" | "txt" | "link" | "other";
+  type: 'pdf' | 'xlsx' | 'docx' | 'txt' | 'link' | 'other';
   category: string;
   description?: string;
 }
 
 const safetyDocuments: ToolkitDocument[] = [
   {
-    name: "Summer Food Safety Guidelines",
-    path: "/attached_assets/Summer Food Safety Guidelines_1751569876472.pdf",
-    type: "pdf",
-    category: "Safety Guidelines",
+    name: 'Summer Food Safety Guidelines',
+    path: '/attached_assets/Summer Food Safety Guidelines_1751569876472.pdf',
+    type: 'pdf',
+    category: 'Safety Guidelines',
     description:
-      "Updated guidelines for no cooler collections, proper refrigeration temperatures (33-36°F), and summer heat safety protocols for home hosts",
+      'Updated guidelines for no cooler collections, proper refrigeration temperatures (33-36°F), and summer heat safety protocols for home hosts',
   },
   {
-    name: "Food Safety Volunteers Guide",
-    path:
-      "/attached_assets/20230525-TSP-Food Safety Volunteers_1749341933308.pdf",
-    type: "pdf",
-    category: "Safety Guidelines",
+    name: 'Food Safety Volunteers Guide',
+    path: '/attached_assets/20230525-TSP-Food Safety Volunteers_1749341933308.pdf',
+    type: 'pdf',
+    category: 'Safety Guidelines',
     description:
-      "Comprehensive safety protocols for volunteers preparing and delivering sandwiches",
+      'Comprehensive safety protocols for volunteers preparing and delivering sandwiches',
   },
   {
-    name: "Food Safety Hosts Guide",
-    path:
-      "/attached_assets/20230525-TSP-Food Safety Hosts (1)_1753670644140.pdf",
-    type: "pdf",
-    category: "Safety Guidelines",
+    name: 'Food Safety Hosts Guide',
+    path: '/attached_assets/20230525-TSP-Food Safety Hosts (1)_1753670644140.pdf',
+    type: 'pdf',
+    category: 'Safety Guidelines',
     description:
-      "Safety standards and procedures for hosts collecting and storing sandwiches",
+      'Safety standards and procedures for hosts collecting and storing sandwiches',
   },
 
   {
-    name: "Food Safety Recipients Guide",
-    path:
-      "/attached_assets/20250205-TSP-Food Safety Recipients_1753670644140.pdf",
-    type: "pdf",
-    category: "Safety Guidelines",
+    name: 'Food Safety Recipients Guide',
+    path: '/attached_assets/20250205-TSP-Food Safety Recipients_1753670644140.pdf',
+    type: 'pdf',
+    category: 'Safety Guidelines',
     description:
-      "Safety standards for recipient organizations handling perishable food donations",
+      'Safety standards for recipient organizations handling perishable food donations',
   },
   {
-    name: "Food Safety Recipients (Alternate)",
-    path:
-      "/attached_assets/Copy of Copy of Food Safety TSP.RECIPIENTS.04042023_1753670644141.pdf",
-    type: "pdf",
-    category: "Safety Guidelines",
+    name: 'Food Safety Recipients (Alternate)',
+    path: '/attached_assets/Copy of Copy of Food Safety TSP.RECIPIENTS.04042023_1753670644141.pdf',
+    type: 'pdf',
+    category: 'Safety Guidelines',
     description:
-      "Additional safety guidelines for 501(c)(3) recipient organizations",
+      'Additional safety guidelines for 501(c)(3) recipient organizations',
   },
 ];
 
 const labelDocuments: ToolkitDocument[] = [
   {
-    name: "Deli Labels",
-    path: "/attached_assets/Deli labels_1749341916236.pdf",
-    type: "pdf",
-    category: "Labels",
+    name: 'Deli Labels',
+    path: '/attached_assets/Deli labels_1749341916236.pdf',
+    type: 'pdf',
+    category: 'Labels',
     description:
-      "Official TSP labels for deli sandwich identification and tracking",
+      'Official TSP labels for deli sandwich identification and tracking',
   },
   {
-    name: "PBJ Labels",
-    path:
-      "/attached_assets/20250622-TSP-PBJ Sandwich Making 101_1749341916236.pdf",
-    type: "pdf",
-    category: "Labels",
-    description: "Labels and guidelines for peanut butter and jelly sandwiches",
+    name: 'PBJ Labels',
+    path: '/attached_assets/20250622-TSP-PBJ Sandwich Making 101_1749341916236.pdf',
+    type: 'pdf',
+    category: 'Labels',
+    description: 'Labels and guidelines for peanut butter and jelly sandwiches',
   },
 ];
 
 const sandwichMakingDocuments: ToolkitDocument[] = [
   {
-    name: "Deli Sandwich Making 101",
-    path:
-      "/attached_assets/20240622-TSP-Deli Sandwich Making 101_1749341916236.pdf",
-    type: "pdf",
-    category: "Sandwich Making",
+    name: 'Deli Sandwich Making 101',
+    path: '/attached_assets/20240622-TSP-Deli Sandwich Making 101_1749341916236.pdf',
+    type: 'pdf',
+    category: 'Sandwich Making',
     description:
-      "Complete guide to preparing deli sandwiches according to TSP standards",
+      'Complete guide to preparing deli sandwiches according to TSP standards',
   },
   {
-    name: "PBJ Sandwich Making 101",
-    path:
-      "/attached_assets/20250622-TSP-PBJ Sandwich Making 101_1749341916236.pdf",
-    type: "pdf",
-    category: "Sandwich Making",
+    name: 'PBJ Sandwich Making 101',
+    path: '/attached_assets/20250622-TSP-PBJ Sandwich Making 101_1749341916236.pdf',
+    type: 'pdf',
+    category: 'Sandwich Making',
     description:
-      "Step-by-step instructions for making peanut butter and jelly sandwiches",
+      'Step-by-step instructions for making peanut butter and jelly sandwiches',
   },
   {
-    name: "Sandwich Inventory List",
-    path: "/attached_assets/CLEANED UP Sandwich Totals_1753480177827.pdf",
-    type: "pdf",
-    category: "Sandwich Making",
+    name: 'Sandwich Inventory List',
+    path: '/attached_assets/CLEANED UP Sandwich Totals_1753480177827.pdf',
+    type: 'pdf',
+    category: 'Sandwich Making',
     description:
-      "Comprehensive inventory tracking system for sandwich collections",
+      'Comprehensive inventory tracking system for sandwich collections',
   },
   {
-    name: "Inventory Calculator",
-    path:
-      "https://nicunursekatie.github.io/sandwichinventory/inventorycalculator.html",
-    type: "link",
-    category: "Sandwich Making",
+    name: 'Inventory Calculator',
+    path: 'https://nicunursekatie.github.io/sandwichinventory/inventorycalculator.html',
+    type: 'link',
+    category: 'Sandwich Making',
     description:
-      "Interactive tool for calculating sandwich inventory and planning quantities for collections",
+      'Interactive tool for calculating sandwich inventory and planning quantities for collections',
   },
 ];
 
 const getFileIcon = (type: string) => {
   switch (type) {
-    case "pdf":
+    case 'pdf':
       return <FileText className="h-5 w-5 text-red-500" />;
-    case "xlsx":
+    case 'xlsx':
       return <FileText className="h-5 w-5 text-green-500" />;
-    case "docx":
+    case 'docx':
       return <FileText className="h-5 w-5 text-blue-500" />;
-    case "txt":
+    case 'txt':
       return <FileText className="h-5 w-5 text-gray-500" />;
-    case "link":
+    case 'link':
       return <Calculator className="h-5 w-5 text-blue-600" />;
     default:
       return <FileText className="h-5 w-5 text-gray-500" />;
@@ -153,14 +145,14 @@ const getFileIcon = (type: string) => {
 
 const getCategoryColor = (category: string) => {
   switch (category) {
-    case "Safety Guidelines":
-      return "bg-red-100 text-red-800";
-    case "Labels":
-      return "bg-blue-100 text-blue-800";
-    case "Sandwich Making":
-      return "bg-green-100 text-green-800";
+    case 'Safety Guidelines':
+      return 'bg-red-100 text-red-800';
+    case 'Labels':
+      return 'bg-blue-100 text-blue-800';
+    case 'Sandwich Making':
+      return 'bg-green-100 text-green-800';
     default:
-      return "bg-gray-100 text-gray-800";
+      return 'bg-gray-100 text-gray-800';
   }
 };
 
@@ -172,10 +164,10 @@ function DocumentCard({
   onPreview: (doc: ToolkitDocument) => void;
 }) {
   const handleDownload = (path: string, name: string) => {
-    const link = window.document.createElement("a");
+    const link = window.document.createElement('a');
     link.href = path;
     link.download = name;
-    link.target = "_blank";
+    link.target = '_blank';
     window.document.body.appendChild(link);
     link.click();
     window.document.body.removeChild(link);
@@ -208,11 +200,11 @@ function DocumentCard({
         )}
 
         <div className="flex flex-col gap-2 mt-auto px-2">
-          {doc.type === "link" ? (
+          {doc.type === 'link' ? (
             <Button
               variant="default"
               size="sm"
-              onClick={() => window.open(doc.path, "_blank")}
+              onClick={() => window.open(doc.path, '_blank')}
               className="w-full text-xs h-8 bg-blue-600 hover:bg-blue-700 text-white"
             >
               <Calculator className="h-3 w-3 mr-1" />
@@ -247,10 +239,8 @@ function DocumentCard({
 }
 
 export function ToolkitTabs() {
-  const [
-    previewDocument,
-    setPreviewDocument,
-  ] = useState<ToolkitDocument | null>(null);
+  const [previewDocument, setPreviewDocument] =
+    useState<ToolkitDocument | null>(null);
 
   if (previewDocument) {
     return (
@@ -277,10 +267,10 @@ export function ToolkitTabs() {
               variant="outline"
               size="sm"
               onClick={() => {
-                const link = document.createElement("a");
+                const link = document.createElement('a');
                 link.href = previewDocument.path;
                 link.download = previewDocument.name;
-                link.target = "_blank";
+                link.target = '_blank';
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);

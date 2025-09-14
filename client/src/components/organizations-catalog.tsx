@@ -1,23 +1,23 @@
-import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+} from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Building,
   User,
@@ -33,8 +33,8 @@ import {
   ChevronRight,
   Clock,
   CheckCircle,
-} from "lucide-react";
-import { formatDateForDisplay } from "@/lib/date-utils";
+} from 'lucide-react';
+import { formatDateForDisplay } from '@/lib/date-utils';
 
 interface Group {
   name: string;
@@ -61,14 +61,14 @@ interface OrganizationContact {
   latestActivityDate: string;
   totalRequests: number;
   status:
-    | "new"
-    | "contacted"
-    | "completed"
-    | "scheduled"
-    | "past"
-    | "declined"
-    | "contact_completed"
-    | "in_process";
+    | 'new'
+    | 'contacted'
+    | 'completed'
+    | 'scheduled'
+    | 'past'
+    | 'declined'
+    | 'contact_completed'
+    | 'in_process';
   hasHostedEvent: boolean;
   eventDate?: string | null;
   totalSandwiches?: number;
@@ -85,33 +85,34 @@ interface GroupCatalogProps {
 export default function GroupCatalog({
   onNavigateToEventPlanning,
 }: GroupCatalogProps = {}) {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [sortBy, setSortBy] = useState("groupName");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState('groupName');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(12);
-  const [
-    selectedOrganization,
-    setSelectedOrganization,
-  ] = useState<OrganizationContact | null>(null);
+  const [selectedOrganization, setSelectedOrganization] =
+    useState<OrganizationContact | null>(null);
   const [showEventDetailsDialog, setShowEventDetailsDialog] = useState(false);
   const [eventDetails, setEventDetails] = useState<any>(null);
   const [loadingEventDetails, setLoadingEventDetails] = useState(false);
   const [organizationDetails, setOrganizationDetails] = useState<any>(null);
-  const [loadingOrganizationDetails, setLoadingOrganizationDetails] = useState(
-    false
-  );
+  const [loadingOrganizationDetails, setLoadingOrganizationDetails] =
+    useState(false);
 
   // Fetch groups data
-  const { data: groupsResponse, isLoading, error } = useQuery({
-    queryKey: ["/api/groups-catalog"],
+  const {
+    data: groupsResponse,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ['/api/groups-catalog'],
     queryFn: async () => {
-      console.log("🔄 Groups catalog fetching data from API...");
-      const response = await fetch("/api/groups-catalog");
-      if (!response.ok) throw new Error("Failed to fetch groups");
+      console.log('🔄 Groups catalog fetching data from API...');
+      const response = await fetch('/api/groups-catalog');
+      if (!response.ok) throw new Error('Failed to fetch groups');
       const data = await response.json();
-      console.log("✅ Groups catalog received data:", data);
+      console.log('✅ Groups catalog received data:', data);
       return data;
     },
     staleTime: 0, // Always consider data stale so it refetches when invalidated
@@ -128,12 +129,12 @@ export default function GroupCatalog({
         )}/${encodeURIComponent(organization.contactName)}`
       );
       if (!response.ok) {
-        throw new Error("Failed to fetch event details");
+        throw new Error('Failed to fetch event details');
       }
       const details = await response.json();
       setEventDetails(details);
     } catch (error) {
-      console.error("Error fetching event details:", error);
+      console.error('Error fetching event details:', error);
       setEventDetails(null);
     } finally {
       setLoadingEventDetails(false);
@@ -148,13 +149,13 @@ export default function GroupCatalog({
         `/api/groups-catalog/details/${encodeURIComponent(organizationName)}`
       );
       if (!response.ok) {
-        throw new Error("Failed to fetch organization details");
+        throw new Error('Failed to fetch organization details');
       }
       const details = await response.json();
       setOrganizationDetails(details);
       setShowEventDetailsDialog(true);
     } catch (error) {
-      console.error("Error fetching organization details:", error);
+      console.error('Error fetching organization details:', error);
       setOrganizationDetails(null);
     } finally {
       setLoadingOrganizationDetails(false);
@@ -164,22 +165,22 @@ export default function GroupCatalog({
   // Helper function to get status badge color
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
-      case "new":
-        return "bg-teal-100 text-teal-800 border-teal-200";
-      case "contacted":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
-      case "in_process":
-        return "bg-blue-100 text-blue-800 border-blue-200";
-      case "scheduled":
-        return "bg-purple-100 text-purple-800 border-purple-200";
-      case "completed":
-        return "bg-orange-100 text-orange-800 border-orange-200";
-      case "past":
-        return "bg-gray-100 text-gray-800 border-gray-200";
-      case "declined":
-        return "bg-red-100 text-red-800 border-red-200";
+      case 'new':
+        return 'bg-teal-100 text-teal-800 border-teal-200';
+      case 'contacted':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'in_process':
+        return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'scheduled':
+        return 'bg-purple-100 text-purple-800 border-purple-200';
+      case 'completed':
+        return 'bg-orange-100 text-orange-800 border-orange-200';
+      case 'past':
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+      case 'declined':
+        return 'bg-red-100 text-red-800 border-red-200';
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
+        return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
 
@@ -200,7 +201,7 @@ export default function GroupCatalog({
           contact.latestRequestDate ||
           org.lastRequestDate,
         totalRequests: contact.totalRequests || 1,
-        status: contact.status || "new",
+        status: contact.status || 'new',
         hasHostedEvent: contact.hasHostedEvent || org.hasHostedEvent,
         eventDate: contact.eventDate || null,
         totalSandwiches: contact.totalSandwiches || 0,
@@ -213,11 +214,11 @@ export default function GroupCatalog({
 
   // Separate active organizations (with event requests) from historical ones (sandwich collections only)
   const activeOrganizations = allOrganizations.filter(
-    (org) => org.email && org.contactName !== "Historical Organization"
+    (org) => org.email && org.contactName !== 'Historical Organization'
   );
 
   const historicalOrganizations = allOrganizations.filter(
-    (org) => !org.email || org.contactName === "Historical Organization"
+    (org) => !org.email || org.contactName === 'Historical Organization'
   );
 
   // Filter active organizations
@@ -230,7 +231,7 @@ export default function GroupCatalog({
       (org.department &&
         org.department.toLowerCase().includes(searchTerm.toLowerCase()));
 
-    const matchesStatus = statusFilter === "all" || org.status === statusFilter;
+    const matchesStatus = statusFilter === 'all' || org.status === statusFilter;
 
     return matchesSearch && matchesStatus;
   });
@@ -325,8 +326,8 @@ export default function GroupCatalog({
 
   // Sort active groups by organization name or latest activity date
   const sortedActiveGroups = activeGroupInfo.sort((a, b) => {
-    if (sortBy === "groupName") {
-      return sortOrder === "desc"
+    if (sortBy === 'groupName') {
+      return sortOrder === 'desc'
         ? b.groupName.localeCompare(a.groupName)
         : a.groupName.localeCompare(b.groupName);
     }
@@ -334,7 +335,7 @@ export default function GroupCatalog({
     // Default sort by latest activity date (includes both requests and collections)
     const aDate = new Date(a.latestActivityDate).getTime();
     const bDate = new Date(b.latestActivityDate).getTime();
-    return sortOrder === "desc" ? bDate - aDate : aDate - bDate;
+    return sortOrder === 'desc' ? bDate - aDate : aDate - bDate;
   });
 
   // Sort historical groups by organization name
@@ -345,22 +346,22 @@ export default function GroupCatalog({
   // Sort departments within each active group
   sortedActiveGroups.forEach((group) => {
     group.departments.sort((a, b) => {
-      if (sortBy === "eventDate") {
+      if (sortBy === 'eventDate') {
         const aDate = a.eventDate
           ? new Date(a.eventDate).getTime()
-          : sortOrder === "desc"
-          ? -Infinity
-          : Infinity;
+          : sortOrder === 'desc'
+            ? -Infinity
+            : Infinity;
         const bDate = b.eventDate
           ? new Date(b.eventDate).getTime()
-          : sortOrder === "desc"
-          ? -Infinity
-          : Infinity;
-        return sortOrder === "desc" ? bDate - aDate : aDate - bDate;
+          : sortOrder === 'desc'
+            ? -Infinity
+            : Infinity;
+        return sortOrder === 'desc' ? bDate - aDate : aDate - bDate;
       }
 
-      if (sortBy === "totalRequests") {
-        return sortOrder === "desc"
+      if (sortBy === 'totalRequests') {
+        return sortOrder === 'desc'
           ? b.totalRequests - a.totalRequests
           : a.totalRequests - b.totalRequests;
       }
@@ -368,7 +369,7 @@ export default function GroupCatalog({
       // Sort by contact name or department
       const aValue = a.department || a.contactName;
       const bValue = b.department || b.contactName;
-      return sortOrder === "desc"
+      return sortOrder === 'desc'
         ? bValue.localeCompare(aValue)
         : aValue.localeCompare(bValue);
     });
@@ -396,78 +397,78 @@ export default function GroupCatalog({
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case "new":
-        return "New Request";
-      case "contacted":
-        return "Contacted";
-      case "in_process":
-        return "In Process";
-      case "contact_completed":
-        return "Event Complete";
-      case "scheduled":
-        return "Upcoming Event";
-      case "completed":
-        return "Completed";
-      case "past":
-        return "Past Event";
-      case "declined":
-        return "Event Postponed";
+      case 'new':
+        return 'New Request';
+      case 'contacted':
+        return 'Contacted';
+      case 'in_process':
+        return 'In Process';
+      case 'contact_completed':
+        return 'Event Complete';
+      case 'scheduled':
+        return 'Upcoming Event';
+      case 'completed':
+        return 'Completed';
+      case 'past':
+        return 'Past Event';
+      case 'declined':
+        return 'Event Postponed';
       default:
-        return "Unknown";
+        return 'Unknown';
     }
   };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "new":
+      case 'new':
         return (
           <Badge className="bg-gradient-to-r from-teal-100 to-cyan-200 text-teal-800 border border-teal-300 shadow-sm">
             New Request
           </Badge>
         );
-      case "contacted":
+      case 'contacted':
         return (
           <Badge className="bg-gradient-to-r from-emerald-100 to-teal-200 text-teal-700 border border-teal-300 shadow-sm">
             Contacted
           </Badge>
         );
-      case "in_process":
+      case 'in_process':
         return (
           <Badge className="bg-gradient-to-r from-blue-100 to-indigo-200 text-blue-800 border border-blue-300 shadow-sm">
             In Process
           </Badge>
         );
-      case "contact_completed":
+      case 'contact_completed':
         return (
           <Badge className="bg-gradient-to-r from-orange-100 to-amber-200 text-orange-800 border border-orange-300 shadow-sm">
             Event Complete
           </Badge>
         );
-      case "scheduled":
+      case 'scheduled':
         return (
           <Badge className="bg-gradient-to-r from-yellow-100 to-orange-200 text-yellow-800 border border-yellow-300 shadow-sm">
             Upcoming Event
           </Badge>
         );
-      case "completed":
+      case 'completed':
         return (
           <Badge className="bg-gradient-to-r from-green-100 to-emerald-200 text-green-800 border border-green-300 shadow-sm">
             Completed
           </Badge>
         );
-      case "past":
+      case 'past':
         return (
           <Badge className="bg-gradient-to-r from-gray-100 to-slate-200 text-gray-700 border border-gray-300 shadow-sm">
             Past Event
           </Badge>
         );
-      case "declined":
+      case 'declined':
         return (
           <Badge
             className="text-white border-2 font-bold shadow-lg"
             style={{
-              background: "linear-gradient(135deg, #A31C41 0%, #8B1538 100%)",
-              borderColor: "#A31C41",
+              background: 'linear-gradient(135deg, #A31C41 0%, #8B1538 100%)',
+              borderColor: '#A31C41',
             }}
           >
             🚫 EVENT POSTPONED
@@ -580,10 +581,10 @@ export default function GroupCatalog({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+              onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
               className="px-3"
             >
-              {sortOrder === "asc" ? "↑" : "↓"}
+              {sortOrder === 'asc' ? '↑' : '↓'}
             </Button>
           </div>
         </div>
@@ -592,7 +593,7 @@ export default function GroupCatalog({
         <div className="mt-4 pt-3 border-t flex justify-between items-center">
           <small className="text-gray-600">
             Showing {activeStartIndex + 1}-
-            {Math.min(activeEndIndex, totalActiveItems)} of {totalActiveItems}{" "}
+            {Math.min(activeEndIndex, totalActiveItems)} of {totalActiveItems}{' '}
             active groups • {paginatedHistoricalGroups.length} historical
             organizations
           </small>
@@ -622,9 +623,9 @@ export default function GroupCatalog({
           <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
           <p className="text-gray-600">No organizations found</p>
           <p className="text-sm text-gray-500 mt-2">
-            {searchTerm || statusFilter !== "all"
-              ? "Try adjusting your search or filters"
-              : "Event requests will populate this directory"}
+            {searchTerm || statusFilter !== 'all'
+              ? 'Try adjusting your search or filters'
+              : 'Event requests will populate this directory'}
           </p>
         </div>
       ) : (
@@ -656,7 +657,7 @@ export default function GroupCatalog({
                         <div className="flex items-center space-x-3">
                           <Building
                             className="w-6 h-6"
-                            style={{ color: "#236383" }}
+                            style={{ color: '#236383' }}
                           />
                           <h2 className="text-xl font-bold text-gray-900">
                             {group.groupName}
@@ -666,10 +667,10 @@ export default function GroupCatalog({
                           <span className="flex items-center space-x-1">
                             <Users className="w-4 h-4" />
                             <span>
-                              {group.totalDepartments}{" "}
+                              {group.totalDepartments}{' '}
                               {group.totalDepartments === 1
-                                ? "contact"
-                                : "departments"}
+                                ? 'contact'
+                                : 'departments'}
                             </span>
                           </span>
                           <span className="flex items-center space-x-1">
@@ -686,19 +687,19 @@ export default function GroupCatalog({
                         <Card
                           key={`${org.organizationName}-${org.contactName}-${index}`}
                           className={`hover:shadow-lg transition-all duration-300 border-l-4 ${
-                            org.status === "declined"
-                              ? "border-l-4 border-2 shadow-xl"
-                              : "bg-gradient-to-br from-white to-orange-50 border-l-4"
+                            org.status === 'declined'
+                              ? 'border-l-4 border-2 shadow-xl'
+                              : 'bg-gradient-to-br from-white to-orange-50 border-l-4'
                           }`}
                           style={
-                            org.status === "declined"
+                            org.status === 'declined'
                               ? {
                                   background:
-                                    "linear-gradient(135deg, #fef2f2 0%, #fecaca 100%)",
-                                  borderLeftColor: "#A31C41",
-                                  borderColor: "#A31C41",
+                                    'linear-gradient(135deg, #fef2f2 0%, #fecaca 100%)',
+                                  borderLeftColor: '#A31C41',
+                                  borderColor: '#A31C41',
                                 }
-                              : { borderLeftColor: "#FBAD3F" }
+                              : { borderLeftColor: '#FBAD3F' }
                           }
                         >
                           <CardHeader className="pb-3">
@@ -715,7 +716,7 @@ export default function GroupCatalog({
                                   {org.eventDate ? (
                                     <div
                                       className="flex items-center mt-2 text-lg font-semibold"
-                                      style={{ color: "#FBAD3F" }}
+                                      style={{ color: '#FBAD3F' }}
                                     >
                                       <Calendar className="w-5 h-5 mr-2" />
                                       <span>
@@ -772,7 +773,7 @@ export default function GroupCatalog({
                                     </div>
                                     <div className="text-xs text-gray-500">
                                       {org.totalRequests} request
-                                      {org.totalRequests !== 1 ? "s" : ""}
+                                      {org.totalRequests !== 1 ? 's' : ''}
                                     </div>
                                   </div>
 
@@ -783,7 +784,7 @@ export default function GroupCatalog({
                                       <span className="font-semibold text-orange-700">
                                         {org.actualSandwichTotal ||
                                           org.totalSandwiches ||
-                                          0}{" "}
+                                          0}{' '}
                                         sandwiches
                                       </span>
                                     </div>
@@ -808,8 +809,8 @@ export default function GroupCatalog({
                                       <span className="text-xs">
                                         Hosted {org.actualEventCount || 1} event
                                         {(org.actualEventCount || 1) > 1
-                                          ? "s"
-                                          : ""}
+                                          ? 's'
+                                          : ''}
                                       </span>
                                     </div>
                                   )}
@@ -957,7 +958,7 @@ export default function GroupCatalog({
                 return (
                   <Button
                     key={pageNum}
-                    variant={currentPage === pageNum ? "default" : "outline"}
+                    variant={currentPage === pageNum ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setCurrentPage(pageNum)}
                     className="h-8 w-8 p-0"
@@ -992,7 +993,7 @@ export default function GroupCatalog({
         <DialogContent className="max-w-6xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold text-gray-900 dark:text-gray-100">
-              Organization History:{" "}
+              Organization History:{' '}
               {organizationDetails?.organizationName ||
                 selectedOrganization?.organizationName}
             </DialogTitle>
@@ -1047,7 +1048,7 @@ export default function GroupCatalog({
                     <CardContent className="p-4 text-center">
                       <div className="text-lg font-bold text-purple-600 dark:text-purple-400">
                         {organizationDetails.summary.eventFrequency ||
-                          "First Time"}
+                          'First Time'}
                       </div>
                       <div className="text-sm text-gray-600 dark:text-gray-400">
                         Frequency
@@ -1128,14 +1129,14 @@ export default function GroupCatalog({
                                   </div>
                                   <Badge
                                     className={
-                                      event.type === "sandwich_collection"
-                                        ? "bg-green-100 text-green-800 border-green-200"
-                                        : "bg-blue-100 text-blue-800 border-blue-200"
+                                      event.type === 'sandwich_collection'
+                                        ? 'bg-green-100 text-green-800 border-green-200'
+                                        : 'bg-blue-100 text-blue-800 border-blue-200'
                                     }
                                   >
-                                    {event.type === "sandwich_collection"
-                                      ? "Collection"
-                                      : "Request"}
+                                    {event.type === 'sandwich_collection'
+                                      ? 'Collection'
+                                      : 'Request'}
                                   </Badge>
                                   {getStatusBadge(event.status)}
                                 </div>
@@ -1163,8 +1164,8 @@ export default function GroupCatalog({
                                       {event.actualSandwiches > 0
                                         ? `${event.actualSandwiches.toLocaleString()} made`
                                         : event.estimatedSandwiches > 0
-                                        ? `${event.estimatedSandwiches.toLocaleString()} estimated`
-                                        : "Not specified"}
+                                          ? `${event.estimatedSandwiches.toLocaleString()} estimated`
+                                          : 'Not specified'}
                                     </div>
                                   </div>
 

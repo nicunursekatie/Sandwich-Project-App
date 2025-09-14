@@ -1,33 +1,33 @@
-import { Router } from "express";
-import { z } from "zod";
-import { storage } from "../storage-wrapper";
+import { Router } from 'express';
+import { z } from 'zod';
+import { storage } from '../storage-wrapper';
 import {
   insertEventRequestSchema,
   insertOrganizationSchema,
   insertEventVolunteerSchema,
-} from "@shared/schema";
-import { hasPermission, PERMISSIONS } from "@shared/auth-utils";
-import { requirePermission } from "../middleware/auth";
-import { isAuthenticated } from "../temp-auth";
-import { getEventRequestsGoogleSheetsService } from "../google-sheets-event-requests-sync";
-import { AuditLogger } from "../audit-logger";
+} from '@shared/schema';
+import { hasPermission, PERMISSIONS } from '@shared/auth-utils';
+import { requirePermission } from '../middleware/auth';
+import { isAuthenticated } from '../temp-auth';
+import { getEventRequestsGoogleSheetsService } from '../google-sheets-event-requests-sync';
+import { AuditLogger } from '../audit-logger';
 
 const router = Router();
 
 // Get available drivers for event assignments
-router.get("/drivers/available", isAuthenticated, async (req, res) => {
+router.get('/drivers/available', isAuthenticated, async (req, res) => {
   try {
-    console.log("🔍 Driver lookup permission check:", {
+    console.log('🔍 Driver lookup permission check:', {
       userPermissions: req.user?.permissions,
       requiredPermission: PERMISSIONS.DRIVERS_VIEW,
       hasPermission: hasPermission(req.user, PERMISSIONS.DRIVERS_VIEW),
     });
 
     if (!hasPermission(req.user, PERMISSIONS.DRIVERS_VIEW)) {
-      return res.status(403).json({ error: "Insufficient permissions" });
+      return res.status(403).json({ error: 'Insufficient permissions' });
     }
 
-    console.log("🚗 Fetching all drivers from storage...");
+    console.log('🚗 Fetching all drivers from storage...');
     const drivers = await storage.getAllDrivers();
     console.log(`📊 Total drivers retrieved: ${drivers.length}`);
 
@@ -51,22 +51,22 @@ router.get("/drivers/available", isAuthenticated, async (req, res) => {
       `✅ Active drivers filtered: ${availableDrivers.length} out of ${drivers.length}`
     );
     console.log(
-      "🔍 Sample driver data:",
+      '🔍 Sample driver data:',
       availableDrivers[0]
         ? JSON.stringify(availableDrivers[0], null, 2)
-        : "No drivers found"
+        : 'No drivers found'
     );
 
     res.json(availableDrivers);
   } catch (error) {
-    console.error("❌ Error in /api/event-requests/drivers/available:", error);
-    res.status(500).json({ error: "Failed to fetch available drivers" });
+    console.error('❌ Error in /api/event-requests/drivers/available:', error);
+    res.status(500).json({ error: 'Failed to fetch available drivers' });
   }
 });
 
 // Get complete event details by organization and contact
 router.get(
-  "/details/:organizationName/:contactName",
+  '/details/:organizationName/:contactName',
   isAuthenticated,
   async (req, res) => {
     try {
@@ -77,28 +77,28 @@ router.get(
       const eventRequest = allEventRequests.find(
         (request: any) =>
           request.organizationName === organizationName &&
-          request.firstName + " " + request.lastName === contactName
+          request.firstName + ' ' + request.lastName === contactName
       );
 
       if (!eventRequest) {
-        return res.status(404).json({ error: "Event request not found" });
+        return res.status(404).json({ error: 'Event request not found' });
       }
 
       // Return complete event details
       res.json(eventRequest);
     } catch (error) {
-      console.error("Error fetching event details:", error);
-      res.status(500).json({ error: "Failed to fetch event details" });
+      console.error('Error fetching event details:', error);
+      res.status(500).json({ error: 'Failed to fetch event details' });
     }
   }
 );
 
 // Debug middleware to catch all requests to this router
 router.use((req, res, next) => {
-  if ((req.method === "PATCH" || req.method === "PUT") && req.params.id) {
+  if ((req.method === 'PATCH' || req.method === 'PUT') && req.params.id) {
     console.log(`=== ROUTER DEBUG: ${req.method} ${req.originalUrl} ===`);
-    console.log("Request params:", req.params);
-    console.log("Request body:", JSON.stringify(req.body, null, 2));
+    console.log('Request params:', req.params);
+    console.log('Request body:', JSON.stringify(req.body, null, 2));
   }
   next();
 });
@@ -118,7 +118,7 @@ const logActivity = async (
   // Activity logging will be handled by the global middleware
   console.log(
     `Activity: ${permission} - ${message}`,
-    metadata ? `(with ${Object.keys(metadata).length} metadata fields)` : ""
+    metadata ? `(with ${Object.keys(metadata).length} metadata fields)` : ''
   );
 };
 
@@ -135,7 +135,7 @@ const logEventRequestAudit = async (
     const context = {
       userId: req.user?.id,
       ipAddress: req.ip || req.connection?.remoteAddress,
-      userAgent: req.get("User-Agent"),
+      userAgent: req.get('User-Agent'),
       sessionId: req.session?.id || req.sessionID,
     };
 
@@ -144,12 +144,12 @@ const logEventRequestAudit = async (
       ...newData,
       actionContext: additionalContext || {},
       actionTimestamp: new Date().toISOString(),
-      performedBy: req.user?.email || req.user?.displayName || "Unknown User",
+      performedBy: req.user?.email || req.user?.displayName || 'Unknown User',
     };
 
     await AuditLogger.log(
       action,
-      "event_requests",
+      'event_requests',
       eventId,
       oldData,
       enhancedNewData,
@@ -160,16 +160,16 @@ const logEventRequestAudit = async (
       `🔍 AUDIT LOG: ${action} on Event ${eventId} by ${req.user?.email}`
     );
   } catch (error) {
-    console.error("Failed to log audit entry:", error);
+    console.error('Failed to log audit entry:', error);
   }
 };
 
 // Get event requests assigned to the current user
-router.get("/assigned", isAuthenticated, async (req, res) => {
+router.get('/assigned', isAuthenticated, async (req, res) => {
   try {
     const userId = req.user?.id;
     if (!userId) {
-      return res.status(400).json({ error: "User ID required" });
+      return res.status(400).json({ error: 'User ID required' });
     }
 
     const allEventRequests = await storage.getAllEventRequests();
@@ -189,9 +189,9 @@ router.get("/assigned", isAuthenticated, async (req, res) => {
       if (event.additionalTspContacts && currentUser) {
         const additionalContacts = event.additionalTspContacts.toLowerCase();
         const userEmail = currentUser.email.toLowerCase();
-        const userName = currentUser.displayName?.toLowerCase() || "";
-        const userFirstName = currentUser.firstName?.toLowerCase() || "";
-        const userLastName = currentUser.lastName?.toLowerCase() || "";
+        const userName = currentUser.displayName?.toLowerCase() || '';
+        const userFirstName = currentUser.firstName?.toLowerCase() || '';
+        const userLastName = currentUser.lastName?.toLowerCase() || '';
 
         if (
           additionalContacts.includes(userEmail) ||
@@ -208,14 +208,15 @@ router.get("/assigned", isAuthenticated, async (req, res) => {
       // Method 3: Listed in driver details (check if user's name or email appears in driver details)
       if (event.driverDetails && currentUser) {
         // driverDetails is now JSONB - convert to string for text search
-        const driverText = (typeof event.driverDetails === "string"
-          ? event.driverDetails
-          : JSON.stringify(event.driverDetails)
+        const driverText = (
+          typeof event.driverDetails === 'string'
+            ? event.driverDetails
+            : JSON.stringify(event.driverDetails)
         ).toLowerCase();
         const userEmail = currentUser.email.toLowerCase();
-        const userName = currentUser.displayName?.toLowerCase() || "";
-        const userFirstName = currentUser.firstName?.toLowerCase() || "";
-        const userLastName = currentUser.lastName?.toLowerCase() || "";
+        const userName = currentUser.displayName?.toLowerCase() || '';
+        const userFirstName = currentUser.firstName?.toLowerCase() || '';
+        const userLastName = currentUser.lastName?.toLowerCase() || '';
 
         if (
           driverText.includes(userEmail) ||
@@ -233,9 +234,9 @@ router.get("/assigned", isAuthenticated, async (req, res) => {
       if (event.speakerDetails && currentUser) {
         const speakerText = event.speakerDetails.toLowerCase();
         const userEmail = currentUser.email.toLowerCase();
-        const userName = currentUser.displayName?.toLowerCase() || "";
-        const userFirstName = currentUser.firstName?.toLowerCase() || "";
-        const userLastName = currentUser.lastName?.toLowerCase() || "";
+        const userName = currentUser.displayName?.toLowerCase() || '';
+        const userFirstName = currentUser.firstName?.toLowerCase() || '';
+        const userLastName = currentUser.lastName?.toLowerCase() || '';
 
         if (
           speakerText.includes(userEmail) ||
@@ -256,9 +257,9 @@ router.get("/assigned", isAuthenticated, async (req, res) => {
     const now = new Date();
     const eventsWithFollowUp = assignedEvents.map((event: any) => {
       let followUpNeeded = false;
-      let followUpReason = "";
+      let followUpReason = '';
 
-      if (event.status === "completed" && event.desiredEventDate) {
+      if (event.status === 'completed' && event.desiredEventDate) {
         try {
           const eventDate = new Date(event.desiredEventDate);
           const daysSinceEvent = Math.floor(
@@ -268,7 +269,7 @@ router.get("/assigned", isAuthenticated, async (req, res) => {
           // Follow-up needed 1 day after event (if not already done)
           if (daysSinceEvent === 1 && !event.followUpOneDayCompleted) {
             followUpNeeded = true;
-            followUpReason = "1-day follow-up needed";
+            followUpReason = '1-day follow-up needed';
           }
 
           // Follow-up needed 1 month after event (if not already done)
@@ -278,10 +279,10 @@ router.get("/assigned", isAuthenticated, async (req, res) => {
             !event.followUpOneMonthCompleted
           ) {
             followUpNeeded = true;
-            followUpReason = "1-month follow-up needed";
+            followUpReason = '1-month follow-up needed';
           }
         } catch (error) {
-          console.error("Error parsing event date for follow-up:", error);
+          console.error('Error parsing event date for follow-up:', error);
         }
       }
 
@@ -296,14 +297,14 @@ router.get("/assigned", isAuthenticated, async (req, res) => {
     await logActivity(
       req,
       res,
-      "EVENT_REQUESTS_VIEW",
+      'EVENT_REQUESTS_VIEW',
       `Retrieved ${eventsWithFollowUp.length} assigned event requests`
     );
 
     res.json(eventsWithFollowUp);
   } catch (error) {
-    console.error("Error fetching assigned event requests:", error);
-    res.status(500).json({ error: "Failed to fetch assigned event requests" });
+    console.error('Error fetching assigned event requests:', error);
+    res.status(500).json({ error: 'Failed to fetch assigned event requests' });
   }
 });
 
@@ -315,17 +316,17 @@ function getAssignmentType(
 ): string[] {
   const types: string[] = [];
 
-  if (event.assignedTo === userId) types.push("Direct Assignment");
+  if (event.assignedTo === userId) types.push('Direct Assignment');
   if (event.tspContact === userId || event.tspContactAssigned === userId)
-    types.push("TSP Contact");
+    types.push('TSP Contact');
 
   // Check additional TSP contacts
   if (event.additionalTspContacts && currentUser) {
     const additionalContacts = event.additionalTspContacts.toLowerCase();
     const userEmail = currentUser.email.toLowerCase();
-    const userName = currentUser.displayName?.toLowerCase() || "";
-    const userFirstName = currentUser.firstName?.toLowerCase() || "";
-    const userLastName = currentUser.lastName?.toLowerCase() || "";
+    const userName = currentUser.displayName?.toLowerCase() || '';
+    const userFirstName = currentUser.firstName?.toLowerCase() || '';
+    const userLastName = currentUser.lastName?.toLowerCase() || '';
 
     if (
       additionalContacts.includes(userEmail) ||
@@ -335,20 +336,21 @@ function getAssignmentType(
         (additionalContacts.includes(userFirstName) ||
           additionalContacts.includes(userLastName)))
     ) {
-      types.push("TSP Contact");
+      types.push('TSP Contact');
     }
   }
 
   if (event.driverDetails && currentUser) {
     // driverDetails is now JSONB - convert to string for text search
-    const driverText = (typeof event.driverDetails === "string"
-      ? event.driverDetails
-      : JSON.stringify(event.driverDetails)
+    const driverText = (
+      typeof event.driverDetails === 'string'
+        ? event.driverDetails
+        : JSON.stringify(event.driverDetails)
     ).toLowerCase();
     const userEmail = currentUser.email.toLowerCase();
-    const userName = currentUser.displayName?.toLowerCase() || "";
-    const userFirstName = currentUser.firstName?.toLowerCase() || "";
-    const userLastName = currentUser.lastName?.toLowerCase() || "";
+    const userName = currentUser.displayName?.toLowerCase() || '';
+    const userFirstName = currentUser.firstName?.toLowerCase() || '';
+    const userLastName = currentUser.lastName?.toLowerCase() || '';
 
     if (
       driverText.includes(userEmail) ||
@@ -358,16 +360,16 @@ function getAssignmentType(
         (driverText.includes(userFirstName) ||
           driverText.includes(userLastName)))
     ) {
-      types.push("Driver");
+      types.push('Driver');
     }
   }
 
   if (event.speakerDetails && currentUser) {
     const speakerText = event.speakerDetails.toLowerCase();
     const userEmail = currentUser.email.toLowerCase();
-    const userName = currentUser.displayName?.toLowerCase() || "";
-    const userFirstName = currentUser.firstName?.toLowerCase() || "";
-    const userLastName = currentUser.lastName?.toLowerCase() || "";
+    const userName = currentUser.displayName?.toLowerCase() || '';
+    const userFirstName = currentUser.firstName?.toLowerCase() || '';
+    const userLastName = currentUser.lastName?.toLowerCase() || '';
 
     if (
       speakerText.includes(userEmail) ||
@@ -377,7 +379,7 @@ function getAssignmentType(
         (speakerText.includes(userFirstName) ||
           speakerText.includes(userLastName)))
     ) {
-      types.push("Speaker");
+      types.push('Speaker');
     }
   }
 
@@ -386,64 +388,64 @@ function getAssignmentType(
 
 // Get all event requests
 router.get(
-  "/",
+  '/',
   isAuthenticated,
-  requirePermission("EVENT_REQUESTS_VIEW"),
+  requirePermission('EVENT_REQUESTS_VIEW'),
   async (req, res) => {
     try {
       await logActivity(
         req,
         res,
-        "EVENT_REQUESTS_VIEW",
-        "Retrieved all event requests"
+        'EVENT_REQUESTS_VIEW',
+        'Retrieved all event requests'
       );
       const eventRequests = await storage.getAllEventRequests();
       res.json(eventRequests);
     } catch (error) {
-      console.error("Error fetching event requests:", error);
-      res.status(500).json({ message: "Failed to fetch event requests" });
+      console.error('Error fetching event requests:', error);
+      res.status(500).json({ message: 'Failed to fetch event requests' });
     }
   }
 );
 
 // Get event requests by status
 router.get(
-  "/status/:status",
+  '/status/:status',
   isAuthenticated,
-  requirePermission("EVENT_REQUESTS_VIEW"),
+  requirePermission('EVENT_REQUESTS_VIEW'),
   async (req, res) => {
     try {
       const { status } = req.params;
       await logActivity(
         req,
         res,
-        "EVENT_REQUESTS_VIEW",
+        'EVENT_REQUESTS_VIEW',
         `Retrieved event requests with status: ${status}`
       );
       const eventRequests = await storage.getEventRequestsByStatus(status);
       res.json(eventRequests);
     } catch (error) {
-      console.error("Error fetching event requests by status:", error);
-      res.status(500).json({ message: "Failed to fetch event requests" });
+      console.error('Error fetching event requests by status:', error);
+      res.status(500).json({ message: 'Failed to fetch event requests' });
     }
   }
 );
 
 // Get organization event counts (completed events only) - MUST BE BEFORE /:id route
-router.get("/organization-counts", isAuthenticated, async (req, res) => {
+router.get('/organization-counts', isAuthenticated, async (req, res) => {
   try {
-    console.log("🔍 Organization Counts API called by user:", req.user?.email);
-    console.log("🔍 User permissions:", req.user?.permissions);
+    console.log('🔍 Organization Counts API called by user:', req.user?.email);
+    console.log('🔍 User permissions:', req.user?.permissions);
 
     const allEventRequests = await storage.getAllEventRequests();
-    console.log("📊 Total event requests retrieved:", allEventRequests.length);
+    console.log('📊 Total event requests retrieved:', allEventRequests.length);
 
     // Count completed events by organization
     const organizationCounts = new Map();
 
     allEventRequests.forEach((event: any) => {
       // Only count completed events
-      if (event.status === "completed" && event.organizationName) {
+      if (event.status === 'completed' && event.organizationName) {
         const orgName = event.organizationName.trim();
         if (orgName) {
           organizationCounts.set(
@@ -460,53 +462,53 @@ router.get("/organization-counts", isAuthenticated, async (req, res) => {
       .sort((a, b) => b.eventCount - a.eventCount);
 
     console.log(
-      "📊 Organization counts calculated:",
+      '📊 Organization counts calculated:',
       sortedCounts.length,
-      "organizations"
+      'organizations'
     );
     res.json(sortedCounts);
   } catch (error) {
-    console.error("❌ Error in organization counts API:", error);
-    res.status(500).json({ error: "Failed to fetch organization counts" });
+    console.error('❌ Error in organization counts API:', error);
+    res.status(500).json({ error: 'Failed to fetch organization counts' });
   }
 });
 
 // Get single event request
 router.get(
-  "/:id",
+  '/:id',
   isAuthenticated,
-  requirePermission("EVENT_REQUESTS_VIEW"),
+  requirePermission('EVENT_REQUESTS_VIEW'),
   async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
-        return res.status(400).json({ message: "Invalid event request ID" });
+        return res.status(400).json({ message: 'Invalid event request ID' });
       }
       const eventRequest = await storage.getEventRequest(id);
 
       if (!eventRequest) {
-        return res.status(404).json({ message: "Event request not found" });
+        return res.status(404).json({ message: 'Event request not found' });
       }
 
       await logActivity(
         req,
         res,
-        "EVENT_REQUESTS_VIEW",
+        'EVENT_REQUESTS_VIEW',
         `Retrieved event request: ${id}`
       );
       res.json(eventRequest);
     } catch (error) {
-      console.error("Error fetching event request:", error);
-      res.status(500).json({ message: "Failed to fetch event request" });
+      console.error('Error fetching event request:', error);
+      res.status(500).json({ message: 'Failed to fetch event request' });
     }
   }
 );
 
 // Create new event request
 router.post(
-  "/",
+  '/',
   isAuthenticated,
-  requirePermission("EVENT_REQUESTS_ADD"),
+  requirePermission('EVENT_REQUESTS_ADD'),
   async (req, res) => {
     try {
       const user = req.user;
@@ -522,7 +524,7 @@ router.post(
         duplicateNotes: duplicateCheck.exists
           ? `Potential matches found: ${duplicateCheck.matches
               .map((m: any) => m.name)
-              .join(", ")}`
+              .join(', ')}`
           : null,
         duplicateCheckDate: new Date(),
         createdBy: user?.id || 1,
@@ -530,23 +532,23 @@ router.post(
 
       // Enhanced audit logging for create operation
       await logEventRequestAudit(
-        "CREATE",
-        newEventRequest.id?.toString() || "unknown",
+        'CREATE',
+        newEventRequest.id?.toString() || 'unknown',
         null,
         newEventRequest,
         req,
         {
-          action: "Event Request Created",
+          action: 'Event Request Created',
           organizationName: validatedData.organizationName,
           contactName: `${validatedData.firstName} ${validatedData.lastName}`,
-          createdBy: user?.email || user?.displayName || "Unknown User",
+          createdBy: user?.email || user?.displayName || 'Unknown User',
         }
       );
 
       await logActivity(
         req,
         res,
-        "EVENT_REQUESTS_ADD",
+        'EVENT_REQUESTS_ADD',
         `Created event request: ${newEventRequest.id} for ${validatedData.organizationName}`
       );
       res.status(201).json(newEventRequest);
@@ -554,30 +556,27 @@ router.post(
       if (error instanceof z.ZodError) {
         return res
           .status(400)
-          .json({ message: "Invalid input", errors: error.errors });
+          .json({ message: 'Invalid input', errors: error.errors });
       }
-      console.error("Error creating event request:", error);
-      res.status(500).json({ message: "Failed to create event request" });
+      console.error('Error creating event request:', error);
+      res.status(500).json({ message: 'Failed to create event request' });
     }
   }
 );
 
 // Complete primary contact - comprehensive data collection
 router.patch(
-  "/:id/details",
+  '/:id/details',
   isAuthenticated,
-  requirePermission("EVENT_REQUESTS_EDIT"),
+  requirePermission('EVENT_REQUESTS_EDIT'),
   async (req, res) => {
     try {
       const id = parseInt(req.params.id);
 
       const completionDataSchema = z.object({
-        communicationMethod: z.string().min(1, "Communication method required"),
+        communicationMethod: z.string().min(1, 'Communication method required'),
         eventAddress: z.string().optional(),
-        estimatedSandwichCount: z
-          .number()
-          .min(1)
-          .optional(),
+        estimatedSandwichCount: z.number().min(1).optional(),
         hasRefrigeration: z.boolean().optional(),
         notes: z.string().optional(),
       });
@@ -587,7 +586,7 @@ router.patch(
       // Get original data for audit logging
       const originalEvent = await storage.getEventRequestById(id);
       if (!originalEvent) {
-        return res.status(404).json({ message: "Event request not found" });
+        return res.status(404).json({ message: 'Event request not found' });
       }
 
       const updatedEventRequest = await storage.updateEventRequest(id, {
@@ -598,43 +597,43 @@ router.patch(
         estimatedSandwichCount: validatedData.estimatedSandwichCount,
         hasRefrigeration: validatedData.hasRefrigeration,
         contactCompletionNotes: validatedData.notes,
-        status: "contact_completed",
+        status: 'contact_completed',
       });
 
       // Update Google Sheets with the new status
       try {
-        const googleSheetsService = getEventRequestsGoogleSheetsService(
-          storage
-        );
+        const googleSheetsService =
+          getEventRequestsGoogleSheetsService(storage);
         if (googleSheetsService && updatedEventRequest) {
-          const contactName = `${updatedEventRequest.firstName} ${updatedEventRequest.lastName}`.trim();
+          const contactName =
+            `${updatedEventRequest.firstName} ${updatedEventRequest.lastName}`.trim();
           await googleSheetsService.updateEventRequestStatus(
             updatedEventRequest.organizationName,
             contactName,
-            "contact_completed"
+            'contact_completed'
           );
         }
       } catch (error) {
-        console.warn("Failed to update Google Sheets status:", error);
+        console.warn('Failed to update Google Sheets status:', error);
       }
 
       if (!updatedEventRequest) {
-        return res.status(404).json({ message: "Event request not found" });
+        return res.status(404).json({ message: 'Event request not found' });
       }
 
       // Enhanced audit logging for contact completion
       await logEventRequestAudit(
-        "PRIMARY_CONTACT_COMPLETED",
+        'PRIMARY_CONTACT_COMPLETED',
         id.toString(),
         originalEvent,
         updatedEventRequest,
         req,
         {
-          action: "Primary Contact Completed",
+          action: 'Primary Contact Completed',
           organizationName: originalEvent.organizationName,
           contactName: `${originalEvent.firstName} ${originalEvent.lastName}`,
           completedBy:
-            req.user?.email || req.user?.displayName || "Unknown User",
+            req.user?.email || req.user?.displayName || 'Unknown User',
           communicationMethod: validatedData.communicationMethod,
           estimatedSandwichCount: validatedData.estimatedSandwichCount,
           statusChange: `${originalEvent.status} → contact_completed`,
@@ -644,7 +643,7 @@ router.patch(
       await logActivity(
         req,
         res,
-        "EVENT_REQUESTS_COMPLETE_CONTACT",
+        'EVENT_REQUESTS_COMPLETE_CONTACT',
         `Completed contact for event request: ${id}`
       );
       res.json(updatedEventRequest);
@@ -652,26 +651,26 @@ router.patch(
       if (error instanceof z.ZodError) {
         return res
           .status(400)
-          .json({ message: "Invalid completion data", errors: error.errors });
+          .json({ message: 'Invalid completion data', errors: error.errors });
       }
-      console.error("Error completing contact:", error);
-      res.status(500).json({ message: "Failed to complete contact" });
+      console.error('Error completing contact:', error);
+      res.status(500).json({ message: 'Failed to complete contact' });
     }
   }
 );
 
 // Complete contact with comprehensive event details - single step workflow
 router.post(
-  "/complete-contact",
+  '/complete-contact',
   isAuthenticated,
-  requirePermission("EVENT_REQUESTS_EDIT"),
+  requirePermission('EVENT_REQUESTS_EDIT'),
   async (req, res) => {
     try {
       const { id, ...updates } = req.body;
 
-      console.log("=== COMPLETE CONTACT WITH DETAILS ===");
-      console.log("Event ID:", id);
-      console.log("Updates:", JSON.stringify(updates, null, 2));
+      console.log('=== COMPLETE CONTACT WITH DETAILS ===');
+      console.log('Event ID:', id);
+      console.log('Updates:', JSON.stringify(updates, null, 2));
 
       const updatedEventRequest = await storage.updateEventRequest(id, {
         ...updates,
@@ -682,17 +681,17 @@ router.post(
       });
 
       if (!updatedEventRequest) {
-        return res.status(404).json({ message: "Event request not found" });
+        return res.status(404).json({ message: 'Event request not found' });
       }
 
       // Update Google Sheets with the new status if status was provided
       if (updates.status) {
         try {
-          const googleSheetsService = getEventRequestsGoogleSheetsService(
-            storage
-          );
+          const googleSheetsService =
+            getEventRequestsGoogleSheetsService(storage);
           if (googleSheetsService) {
-            const contactName = `${updatedEventRequest.firstName} ${updatedEventRequest.lastName}`.trim();
+            const contactName =
+              `${updatedEventRequest.firstName} ${updatedEventRequest.lastName}`.trim();
             await googleSheetsService.updateEventRequestStatus(
               updatedEventRequest.organizationName,
               contactName,
@@ -700,53 +699,53 @@ router.post(
             );
           }
         } catch (error) {
-          console.warn("Failed to update Google Sheets status:", error);
+          console.warn('Failed to update Google Sheets status:', error);
         }
       }
 
-      console.log("Successfully completed contact with details for:", id);
+      console.log('Successfully completed contact with details for:', id);
       await logActivity(
         req,
         res,
-        "EVENT_REQUESTS_COMPLETE_CONTACT",
+        'EVENT_REQUESTS_COMPLETE_CONTACT',
         `Completed contact with comprehensive details for event request: ${id}`
       );
       res.json(updatedEventRequest);
     } catch (error) {
-      console.error("Error completing contact:", error);
-      res.status(500).json({ message: "Failed to complete contact" });
+      console.error('Error completing contact:', error);
+      res.status(500).json({ message: 'Failed to complete contact' });
     }
   }
 );
 
 // Complete event details - specific endpoint for comprehensive event planning updates
 router.post(
-  "/complete-event-details",
+  '/complete-event-details',
   isAuthenticated,
-  requirePermission("EVENT_REQUESTS_EDIT"),
+  requirePermission('EVENT_REQUESTS_EDIT'),
   async (req, res) => {
     try {
       // Skip validation entirely and just process the raw data
       const { id, ...updates } = req.body;
 
-      console.log("=== COMPLETE EVENT DETAILS ===");
-      console.log("Event ID:", id);
-      console.log("Updates:", JSON.stringify(updates, null, 2));
+      console.log('=== COMPLETE EVENT DETAILS ===');
+      console.log('Event ID:', id);
+      console.log('Updates:', JSON.stringify(updates, null, 2));
 
       // Handle date conversion properly on server side
       if (
         updates.desiredEventDate &&
-        typeof updates.desiredEventDate === "string"
+        typeof updates.desiredEventDate === 'string'
       ) {
         // Convert string date to proper Date object
         updates.desiredEventDate = new Date(
-          updates.desiredEventDate + "T12:00:00.000Z"
+          updates.desiredEventDate + 'T12:00:00.000Z'
         );
-        console.log("🔧 Converted date:", updates.desiredEventDate);
+        console.log('🔧 Converted date:', updates.desiredEventDate);
       }
 
       // CRITICAL FIX: Explicitly set status to 'scheduled' when completing event details
-      updates.status = "scheduled";
+      updates.status = 'scheduled';
       updates.scheduledAt = new Date(); // Add audit trail timestamp
       console.log(
         "🎯 Status transition: Setting status to 'scheduled' for completed event details"
@@ -758,55 +757,53 @@ router.post(
       });
 
       if (!updatedEventRequest) {
-        return res.status(404).json({ message: "Event request not found" });
+        return res.status(404).json({ message: 'Event request not found' });
       }
 
-      console.log("Successfully updated event details for:", id);
+      console.log('Successfully updated event details for:', id);
       await logActivity(
         req,
         res,
-        "EVENT_REQUESTS_EDIT",
+        'EVENT_REQUESTS_EDIT',
         `Completed event details for: ${id}`
       );
       res.json(updatedEventRequest);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        console.error("Validation error:", error.errors);
-        return res
-          .status(400)
-          .json({
-            message: "Invalid event details data",
-            errors: error.errors,
-          });
+        console.error('Validation error:', error.errors);
+        return res.status(400).json({
+          message: 'Invalid event details data',
+          errors: error.errors,
+        });
       }
-      console.error("Error completing event details:", error);
-      res.status(500).json({ message: "Failed to complete event details" });
+      console.error('Error completing event details:', error);
+      res.status(500).json({ message: 'Failed to complete event details' });
     }
   }
 );
 
 // Record follow-up action (email sent or callback completed)
 router.post(
-  "/follow-up",
+  '/follow-up',
   isAuthenticated,
-  requirePermission("EVENT_REQUESTS_EDIT"),
+  requirePermission('EVENT_REQUESTS_EDIT'),
   async (req, res) => {
     try {
       const { id, method, updatedEmail, notes } = req.body;
 
-      console.log("=== FOLLOW-UP RECORDING ===");
-      console.log("Event ID:", id);
-      console.log("Method:", method);
-      console.log("Updated email:", updatedEmail);
+      console.log('=== FOLLOW-UP RECORDING ===');
+      console.log('Event ID:', id);
+      console.log('Method:', method);
+      console.log('Updated email:', updatedEmail);
 
       // Get original data for audit logging
       const originalEvent = await storage.getEventRequestById(id);
       if (!originalEvent) {
-        return res.status(404).json({ message: "Event request not found" });
+        return res.status(404).json({ message: 'Event request not found' });
       }
 
       console.log(
-        "Original event desiredEventDate:",
+        'Original event desiredEventDate:',
         originalEvent.desiredEventDate
       );
 
@@ -817,18 +814,18 @@ router.post(
       };
 
       // Both email and call follow-ups should move event to in_process
-      updates.status = "in_process";
+      updates.status = 'in_process';
 
       // Explicitly preserve critical fields that must not be lost during status transitions
       if (originalEvent.desiredEventDate) {
         updates.desiredEventDate = originalEvent.desiredEventDate;
         console.log(
-          "Explicitly preserving desiredEventDate:",
+          'Explicitly preserving desiredEventDate:',
           updates.desiredEventDate
         );
       }
 
-      if (method === "call" && updatedEmail) {
+      if (method === 'call' && updatedEmail) {
         // Update the main email field if a corrected email is provided during call follow-up
         updates.email = updatedEmail;
         updates.updatedEmail = updatedEmail; // Keep for audit trail
@@ -836,31 +833,31 @@ router.post(
 
       // Add notes to existing followUpNotes if provided
       if (notes) {
-        const existingNotes = originalEvent?.followUpNotes || "";
+        const existingNotes = originalEvent?.followUpNotes || '';
         updates.followUpNotes = existingNotes
           ? `${existingNotes}\n\n${notes}`
           : notes;
       }
 
       console.log(
-        "Updates object before storage call:",
+        'Updates object before storage call:',
         JSON.stringify(updates, null, 2)
       );
 
       const updatedEventRequest = await storage.updateEventRequest(id, updates);
 
       console.log(
-        "Updated event desiredEventDate after storage call:",
+        'Updated event desiredEventDate after storage call:',
         updatedEventRequest?.desiredEventDate
       );
 
       if (!updatedEventRequest) {
-        return res.status(404).json({ message: "Event request not found" });
+        return res.status(404).json({ message: 'Event request not found' });
       }
 
       // Enhanced audit logging with detailed context
       await logEventRequestAudit(
-        "FOLLOW_UP_RECORDED",
+        'FOLLOW_UP_RECORDED',
         id.toString(),
         originalEvent,
         updatedEventRequest,
@@ -868,9 +865,9 @@ router.post(
         {
           followUpMethod: method,
           followUpAction:
-            method === "email"
-              ? "Email Follow-up Sent"
-              : "Call Follow-up Scheduled",
+            method === 'email'
+              ? 'Email Follow-up Sent'
+              : 'Call Follow-up Scheduled',
           statusChange: `${originalEvent.status} → ${updatedEventRequest.status}`,
           organizationName: originalEvent.organizationName,
           contactName: `${originalEvent.firstName} ${originalEvent.lastName}`,
@@ -879,26 +876,26 @@ router.post(
         }
       );
 
-      console.log("Successfully recorded follow-up for:", id);
+      console.log('Successfully recorded follow-up for:', id);
       await logActivity(
         req,
         res,
-        "EVENT_REQUESTS_FOLLOW_UP",
+        'EVENT_REQUESTS_FOLLOW_UP',
         `Recorded follow-up (${method}) for event request: ${id}`
       );
       res.json(updatedEventRequest);
     } catch (error) {
-      console.error("Error recording follow-up:", error);
-      res.status(500).json({ message: "Failed to record follow-up" });
+      console.error('Error recording follow-up:', error);
+      res.status(500).json({ message: 'Failed to record follow-up' });
     }
   }
 );
 
 // Update event request details - specific endpoint for event details updates
 router.patch(
-  "/:id/event-details",
+  '/:id/event-details',
   isAuthenticated,
-  requirePermission("EVENT_REQUESTS_EDIT"),
+  requirePermission('EVENT_REQUESTS_EDIT'),
   async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -907,7 +904,7 @@ router.patch(
       // Get original data for audit logging
       const originalEvent = await storage.getEventRequestById(id);
       if (!originalEvent) {
-        return res.status(404).json({ message: "Event request not found" });
+        return res.status(404).json({ message: 'Event request not found' });
       }
 
       // Always update the updatedAt timestamp
@@ -917,17 +914,17 @@ router.patch(
       });
 
       if (!updatedEventRequest) {
-        return res.status(404).json({ message: "Event request not found" });
+        return res.status(404).json({ message: 'Event request not found' });
       }
 
       // Update Google Sheets if status was changed
       if (updates.status) {
         try {
-          const googleSheetsService = getEventRequestsGoogleSheetsService(
-            storage
-          );
+          const googleSheetsService =
+            getEventRequestsGoogleSheetsService(storage);
           if (googleSheetsService) {
-            const contactName = `${updatedEventRequest.firstName} ${updatedEventRequest.lastName}`.trim();
+            const contactName =
+              `${updatedEventRequest.firstName} ${updatedEventRequest.lastName}`.trim();
             await googleSheetsService.updateEventRequestStatus(
               updatedEventRequest.organizationName,
               contactName,
@@ -935,22 +932,22 @@ router.patch(
             );
           }
         } catch (error) {
-          console.warn("Failed to update Google Sheets status:", error);
+          console.warn('Failed to update Google Sheets status:', error);
         }
       }
 
       // Enhanced audit logging for event details update
       await logEventRequestAudit(
-        "EVENT_DETAILS_UPDATED",
+        'EVENT_DETAILS_UPDATED',
         id.toString(),
         originalEvent,
         updatedEventRequest,
         req,
         {
-          action: "Event Details Updated",
+          action: 'Event Details Updated',
           organizationName: originalEvent.organizationName,
           contactName: `${originalEvent.firstName} ${originalEvent.lastName}`,
-          updatedBy: req.user?.email || req.user?.displayName || "Unknown User",
+          updatedBy: req.user?.email || req.user?.displayName || 'Unknown User',
           updatedFields: Object.keys(updates),
           statusChange: updates.status
             ? `${originalEvent.status} → ${updates.status}`
@@ -961,7 +958,7 @@ router.patch(
       // Prepare audit details for activity logging
       const auditDetails: any = {};
       for (const [key, newValue] of Object.entries(updates)) {
-        if (key !== "updatedAt") {
+        if (key !== 'updatedAt') {
           // Skip timestamp field
           const oldValue = (originalEvent as any)[key];
           if (oldValue !== newValue && newValue !== undefined) {
@@ -976,41 +973,41 @@ router.patch(
       await logActivity(
         req,
         res,
-        "EVENT_REQUESTS_EDIT",
+        'EVENT_REQUESTS_EDIT',
         `Updated event request details: ${Object.keys(auditDetails).join(
-          ", "
+          ', '
         )}`,
         { auditDetails: auditDetails }
       );
       res.json(updatedEventRequest);
     } catch (error) {
-      console.error("Error updating event request details:", error);
+      console.error('Error updating event request details:', error);
       res
         .status(500)
-        .json({ message: "Failed to update event request details" });
+        .json({ message: 'Failed to update event request details' });
     }
   }
 );
 
 // Update event request (PATCH) - handles basic updates like toolkit sent
 router.patch(
-  "/:id",
+  '/:id',
   isAuthenticated,
-  requirePermission("EVENT_REQUESTS_EDIT"),
+  requirePermission('EVENT_REQUESTS_EDIT'),
   async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const updates = req.body;
 
-      console.log("=== EVENT REQUEST UPDATE (PATCH) ===");
-      console.log("Request ID:", id);
-      console.log("Updates received:", JSON.stringify(updates, null, 2));
+      console.log('=== EVENT REQUEST UPDATE (PATCH) ===');
+      console.log('Request ID:', id);
+      console.log('Updates received:', JSON.stringify(updates, null, 2));
 
       // Validate scheduledCallDate if present using z.coerce.date()
       if (updates.scheduledCallDate !== undefined) {
         const scheduleCallSchema = z.object({
           scheduledCallDate: z
-            .union([z.coerce.date(), z.literal("").transform(() => null)])
+            .union([z.coerce.date(), z.literal('').transform(() => null)])
             .nullable(),
         });
 
@@ -1020,13 +1017,13 @@ router.patch(
           });
           updates.scheduledCallDate = validated.scheduledCallDate;
           console.log(
-            "✅ Validated scheduledCallDate:",
+            '✅ Validated scheduledCallDate:',
             updates.scheduledCallDate
           );
         } catch (error) {
-          console.error("❌ Invalid scheduledCallDate:", error);
+          console.error('❌ Invalid scheduledCallDate:', error);
           return res.status(400).json({
-            message: "Invalid scheduledCallDate format",
+            message: 'Invalid scheduledCallDate format',
             error: error instanceof z.ZodError ? error.errors : error.message,
           });
         }
@@ -1035,7 +1032,7 @@ router.patch(
       // Get original data for audit logging
       const originalEvent = await storage.getEventRequestById(id);
       if (!originalEvent) {
-        return res.status(404).json({ message: "Event request not found" });
+        return res.status(404).json({ message: 'Event request not found' });
       }
 
       // Process timestamp fields to ensure they're proper Date objects
@@ -1043,22 +1040,22 @@ router.patch(
 
       // Convert timestamp fields that might come as strings to Date objects
       const timestampFields = [
-        "toolkitSentDate",
-        "contactedAt",
-        "desiredEventDate",
-        "duplicateCheckDate",
-        "markedUnresponsiveAt",
-        "lastContactAttempt",
-        "nextFollowUpDate",
-        "contactCompletedAt",
-        "callScheduledAt",
-        "callCompletedAt",
-        "scheduledCallDate",
+        'toolkitSentDate',
+        'contactedAt',
+        'desiredEventDate',
+        'duplicateCheckDate',
+        'markedUnresponsiveAt',
+        'lastContactAttempt',
+        'nextFollowUpDate',
+        'contactCompletedAt',
+        'callScheduledAt',
+        'callCompletedAt',
+        'scheduledCallDate',
       ];
       timestampFields.forEach((field) => {
         if (
           processedUpdates[field] &&
-          typeof processedUpdates[field] === "string"
+          typeof processedUpdates[field] === 'string'
         ) {
           try {
             processedUpdates[field] = new Date(processedUpdates[field]);
@@ -1079,17 +1076,17 @@ router.patch(
       });
 
       if (!updatedEventRequest) {
-        return res.status(404).json({ message: "Event request not found" });
+        return res.status(404).json({ message: 'Event request not found' });
       }
 
       // Update Google Sheets if status was changed
       if (processedUpdates.status) {
         try {
-          const googleSheetsService = getEventRequestsGoogleSheetsService(
-            storage
-          );
+          const googleSheetsService =
+            getEventRequestsGoogleSheetsService(storage);
           if (googleSheetsService) {
-            const contactName = `${updatedEventRequest.firstName} ${updatedEventRequest.lastName}`.trim();
+            const contactName =
+              `${updatedEventRequest.firstName} ${updatedEventRequest.lastName}`.trim();
             await googleSheetsService.updateEventRequestStatus(
               updatedEventRequest.organizationName,
               contactName,
@@ -1097,22 +1094,22 @@ router.patch(
             );
           }
         } catch (error) {
-          console.warn("Failed to update Google Sheets status:", error);
+          console.warn('Failed to update Google Sheets status:', error);
         }
       }
 
       // Enhanced audit logging
       await logEventRequestAudit(
-        "EVENT_REQUEST_UPDATED",
+        'EVENT_REQUEST_UPDATED',
         id.toString(),
         originalEvent,
         updatedEventRequest,
         req,
         {
-          action: "Event Request Updated",
+          action: 'Event Request Updated',
           organizationName: originalEvent.organizationName,
           contactName: `${originalEvent.firstName} ${originalEvent.lastName}`,
-          updatedBy: req.user?.email || req.user?.displayName || "Unknown User",
+          updatedBy: req.user?.email || req.user?.displayName || 'Unknown User',
           updatedFields: Object.keys(processedUpdates),
           statusChange: processedUpdates.status
             ? `${originalEvent.status} → ${processedUpdates.status}`
@@ -1123,36 +1120,36 @@ router.patch(
       await logActivity(
         req,
         res,
-        "EVENT_REQUESTS_EDIT",
-        `Updated event request: ${Object.keys(processedUpdates).join(", ")}`
+        'EVENT_REQUESTS_EDIT',
+        `Updated event request: ${Object.keys(processedUpdates).join(', ')}`
       );
 
       res.json(updatedEventRequest);
     } catch (error) {
-      console.error("Error updating event request:", error);
-      res.status(500).json({ message: "Failed to update event request" });
+      console.error('Error updating event request:', error);
+      res.status(500).json({ message: 'Failed to update event request' });
     }
   }
 );
 
 // Update event request (PUT)
 router.put(
-  "/:id",
+  '/:id',
   isAuthenticated,
-  requirePermission("EVENT_REQUESTS_EDIT"),
+  requirePermission('EVENT_REQUESTS_EDIT'),
   async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const updates = req.body;
 
-      console.log("=== EVENT REQUEST UPDATE (PUT) ===");
-      console.log("Request ID:", id);
-      console.log("Updates received:", JSON.stringify(updates, null, 2));
+      console.log('=== EVENT REQUEST UPDATE (PUT) ===');
+      console.log('Request ID:', id);
+      console.log('Updates received:', JSON.stringify(updates, null, 2));
 
       // Get original data for audit logging
       const originalEvent = await storage.getEventRequestById(id);
       if (!originalEvent) {
-        return res.status(404).json({ message: "Event request not found" });
+        return res.status(404).json({ message: 'Event request not found' });
       }
 
       // Process ALL date/timestamp fields to ensure they're proper Date objects
@@ -1160,21 +1157,21 @@ router.put(
 
       // Convert timestamp fields that might come as strings to Date objects
       const timestampFields = [
-        "desiredEventDate",
-        "contactedAt",
-        "toolkitSentDate",
-        "duplicateCheckDate",
-        "markedUnresponsiveAt",
-        "lastContactAttempt",
-        "nextFollowUpDate",
-        "contactCompletedAt",
-        "callScheduledAt",
-        "callCompletedAt",
+        'desiredEventDate',
+        'contactedAt',
+        'toolkitSentDate',
+        'duplicateCheckDate',
+        'markedUnresponsiveAt',
+        'lastContactAttempt',
+        'nextFollowUpDate',
+        'contactCompletedAt',
+        'callScheduledAt',
+        'callCompletedAt',
       ];
       timestampFields.forEach((field) => {
         if (
           processedUpdates[field] &&
-          typeof processedUpdates[field] === "string"
+          typeof processedUpdates[field] === 'string'
         ) {
           try {
             processedUpdates[field] = new Date(processedUpdates[field]);
@@ -1189,7 +1186,7 @@ router.put(
       });
 
       // Validate that in_process status is not set for past/current date events
-      if (processedUpdates.status === "in_process") {
+      if (processedUpdates.status === 'in_process') {
         let eventDate = processedUpdates.desiredEventDate;
 
         // If date wasn't updated, check the existing event's date
@@ -1205,8 +1202,8 @@ router.put(
           if (eventDate <= today) {
             return res.status(400).json({
               message:
-                "Cannot set in_process status for events with past or current dates",
-              error: "Invalid status for event date",
+                'Cannot set in_process status for events with past or current dates',
+              error: 'Invalid status for event date',
             });
           }
         }
@@ -1215,11 +1212,11 @@ router.put(
       // Validate scheduled status transition and required fields
       // Only enforce strict validation when TRANSITIONING TO scheduled status (not when editing existing scheduled events)
       if (
-        processedUpdates.status === "scheduled" &&
-        originalEvent.status !== "scheduled"
+        processedUpdates.status === 'scheduled' &&
+        originalEvent.status !== 'scheduled'
       ) {
         console.log(
-          "🎯 Processing NEW scheduled status transition - validating required fields"
+          '🎯 Processing NEW scheduled status transition - validating required fields'
         );
 
         // Check required fields for NEW scheduled events
@@ -1234,62 +1231,62 @@ router.put(
         };
 
         const missingFields = [];
-        if (!requiredFields.desiredEventDate) missingFields.push("Event Date");
+        if (!requiredFields.desiredEventDate) missingFields.push('Event Date');
         // Make Event Address and Estimated Sandwich Count optional for basic scheduled status
         // They can be filled in later during the workflow
 
         if (missingFields.length > 0) {
           return res.status(400).json({
             message: `Cannot mark event as scheduled. Missing required fields: ${missingFields.join(
-              ", "
+              ', '
             )}`,
-            error: "Missing required scheduling data",
+            error: 'Missing required scheduling data',
             missingFields,
           });
         }
-      } else if (processedUpdates.status === "scheduled") {
+      } else if (processedUpdates.status === 'scheduled') {
         console.log(
-          "🎯 Editing existing scheduled event - allowing flexible updates"
+          '🎯 Editing existing scheduled event - allowing flexible updates'
         );
       }
 
       // Process comprehensive scheduling data if status is scheduled
-      if (processedUpdates.status === "scheduled") {
-        console.log("✅ Processing scheduling data for scheduled status");
+      if (processedUpdates.status === 'scheduled') {
+        console.log('✅ Processing scheduling data for scheduled status');
 
         // Process sandwich types if provided
         if (processedUpdates.sandwichTypes) {
           try {
-            if (typeof processedUpdates.sandwichTypes === "string") {
+            if (typeof processedUpdates.sandwichTypes === 'string') {
               processedUpdates.sandwichTypes = JSON.parse(
                 processedUpdates.sandwichTypes
               );
             }
             console.log(
-              "📋 Processed sandwich types:",
+              '📋 Processed sandwich types:',
               processedUpdates.sandwichTypes
             );
           } catch (error) {
             console.warn(
-              "⚠️ Failed to parse sandwich types, keeping as string:",
+              '⚠️ Failed to parse sandwich types, keeping as string:',
               error
             );
           }
         } else {
-          console.warn("⚠️ No sandwich types provided in scheduling request");
+          console.warn('⚠️ No sandwich types provided in scheduling request');
         }
 
         // Log sandwich count for debugging
         console.log(
-          "📋 Estimated sandwich count:",
+          '📋 Estimated sandwich count:',
           processedUpdates.estimatedSandwichCount
         );
 
         // Ensure numeric fields are properly typed
         const numericFields = [
-          "driversNeeded",
-          "speakersNeeded",
-          "estimatedSandwichCount",
+          'driversNeeded',
+          'speakersNeeded',
+          'estimatedSandwichCount',
         ];
         numericFields.forEach((field) => {
           if (processedUpdates[field] !== undefined) {
@@ -1299,20 +1296,20 @@ router.put(
 
         // Ensure boolean fields are properly typed
         const booleanFields = [
-          "hasRefrigeration",
-          "volunteersNeeded",
-          "vanDriverNeeded",
+          'hasRefrigeration',
+          'volunteersNeeded',
+          'vanDriverNeeded',
         ];
         booleanFields.forEach((field) => {
           if (processedUpdates[field] !== undefined) {
             processedUpdates[field] =
               processedUpdates[field] === true ||
-              processedUpdates[field] === "true";
+              processedUpdates[field] === 'true';
           }
         });
 
         console.log(
-          "✅ Processed comprehensive scheduling data for scheduled status"
+          '✅ Processed comprehensive scheduling data for scheduled status'
         );
       }
 
@@ -1323,11 +1320,11 @@ router.put(
       });
 
       if (!updatedEventRequest) {
-        return res.status(404).json({ message: "Event request not found" });
+        return res.status(404).json({ message: 'Event request not found' });
       }
 
       // Determine action type based on changes
-      let actionType = "EVENT_REQUEST_UPDATED";
+      let actionType = 'EVENT_REQUEST_UPDATED';
       let actionContext: any = {
         organizationName: originalEvent.organizationName,
         contactName: `${originalEvent.firstName} ${originalEvent.lastName}`,
@@ -1336,12 +1333,12 @@ router.put(
 
       // Check for specific status changes with enhanced context
       if (originalEvent.status !== updatedEventRequest.status) {
-        actionType = "STATUS_CHANGED";
+        actionType = 'STATUS_CHANGED';
         actionContext.statusChange = `${originalEvent.status} → ${updatedEventRequest.status}`;
 
         // Add comprehensive context for scheduled status
-        if (updatedEventRequest.status === "scheduled") {
-          actionType = "EVENT_SCHEDULED";
+        if (updatedEventRequest.status === 'scheduled') {
+          actionType = 'EVENT_SCHEDULED';
           actionContext = {
             ...actionContext,
             eventDate: updatedEventRequest.desiredEventDate,
@@ -1361,17 +1358,17 @@ router.put(
             toolkitStatus: updatedEventRequest.toolkitStatus,
             communicationMethod: updatedEventRequest.communicationMethod,
             scheduledBy:
-              req.user?.email || req.user?.displayName || "Unknown User",
+              req.user?.email || req.user?.displayName || 'Unknown User',
             scheduledAt: new Date().toISOString(),
             comprehensiveDataProcessed: true,
           };
-          console.log("🎯 Enhanced audit logging for EVENT_SCHEDULED action");
+          console.log('🎯 Enhanced audit logging for EVENT_SCHEDULED action');
         }
       }
 
       // Check for unresponsive marking
       if (updates.isUnresponsive && !originalEvent.isUnresponsive) {
-        actionType = "MARKED_UNRESPONSIVE";
+        actionType = 'MARKED_UNRESPONSIVE';
         actionContext.unresponsiveReason = updates.unresponsiveReason;
         actionContext.contactMethod = updates.contactMethod;
       }
@@ -1387,27 +1384,27 @@ router.put(
       );
 
       console.log(
-        "Updated event request:",
+        'Updated event request:',
         JSON.stringify(updatedEventRequest, null, 2)
       );
       await logActivity(
         req,
         res,
-        "EVENT_REQUESTS_EDIT",
+        'EVENT_REQUESTS_EDIT',
         `Updated event request: ${id}`
       );
       res.json(updatedEventRequest);
     } catch (error) {
-      console.error("Error updating event request:", error);
-      console.error("Error details:", {
+      console.error('Error updating event request:', error);
+      console.error('Error details:', {
         message: error.message,
         stack: error.stack,
         name: error.name,
       });
       res.status(500).json({
-        message: "Failed to update event request",
+        message: 'Failed to update event request',
         error: error.message,
-        details: "Check server logs for full error details",
+        details: 'Check server logs for full error details',
       });
     }
   }
@@ -1415,9 +1412,9 @@ router.put(
 
 // Delete event request
 router.delete(
-  "/:id",
+  '/:id',
   isAuthenticated,
-  requirePermission("EVENT_REQUESTS_DELETE_CARD"),
+  requirePermission('EVENT_REQUESTS_DELETE_CARD'),
   async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -1425,77 +1422,77 @@ router.delete(
       // Get original data for audit logging before deletion
       const originalEvent = await storage.getEventRequestById(id);
       if (!originalEvent) {
-        return res.status(404).json({ message: "Event request not found" });
+        return res.status(404).json({ message: 'Event request not found' });
       }
 
       const deleted = await storage.deleteEventRequest(id);
 
       if (!deleted) {
-        return res.status(404).json({ message: "Event request not found" });
+        return res.status(404).json({ message: 'Event request not found' });
       }
 
       // Enhanced audit logging for deletion
       await logEventRequestAudit(
-        "DELETE",
+        'DELETE',
         id.toString(),
         originalEvent,
         null,
         req,
         {
-          action: "Event Request Deleted",
+          action: 'Event Request Deleted',
           organizationName: originalEvent.organizationName,
           contactName: `${originalEvent.firstName} ${originalEvent.lastName}`,
-          deletedBy: req.user?.email || req.user?.displayName || "Unknown User",
-          deletionReason: "Manual deletion via UI",
+          deletedBy: req.user?.email || req.user?.displayName || 'Unknown User',
+          deletionReason: 'Manual deletion via UI',
         }
       );
 
       await logActivity(
         req,
         res,
-        "EVENT_REQUESTS_DELETE_CARD",
+        'EVENT_REQUESTS_DELETE_CARD',
         `Deleted event request: ${id}`
       );
-      res.json({ message: "Event request deleted successfully" });
+      res.json({ message: 'Event request deleted successfully' });
     } catch (error) {
-      console.error("Error deleting event request:", error);
-      res.status(500).json({ message: "Failed to delete event request" });
+      console.error('Error deleting event request:', error);
+      res.status(500).json({ message: 'Failed to delete event request' });
     }
   }
 );
 
 // Check organization duplicates
-router.post("/check-duplicates", async (req, res) => {
+router.post('/check-duplicates', async (req, res) => {
   try {
     const user = req.user;
-    if (!user || !hasPermission(user, "EVENT_REQUESTS_VIEW")) {
-      return res.status(403).json({ message: "Insufficient permissions" });
+    if (!user || !hasPermission(user, 'EVENT_REQUESTS_VIEW')) {
+      return res.status(403).json({ message: 'Insufficient permissions' });
     }
 
     const { organizationName } = req.body;
     if (!organizationName) {
-      return res.status(400).json({ message: "Organization name is required" });
+      return res.status(400).json({ message: 'Organization name is required' });
     }
 
     const duplicateCheck = { exists: false, matches: [] };
     await logActivity(
       req,
       res,
-      "EVENT_REQUESTS_VIEW",
+      'EVENT_REQUESTS_VIEW',
       `Checked duplicates for organization: ${organizationName}`
     );
     res.json(duplicateCheck);
   } catch (error) {
-    console.error("Error checking organization duplicates:", error);
-    res.status(500).json({ message: "Failed to check duplicates" });
+    console.error('Error checking organization duplicates:', error);
+    res.status(500).json({ message: 'Failed to check duplicates' });
   }
 });
 
 // Get recent audit logs for event requests - useful for tracking specific actions
 router.get(
-  "/audit-logs",
+  '/audit-logs',
   isAuthenticated,
-  requirePermission("EVENT_REQUESTS_VIEW"),
+  requirePermission('EVENT_REQUESTS_VIEW'),
   async (req, res) => {
     try {
       const {
@@ -1512,7 +1509,7 @@ router.get(
       sinceTime.setHours(sinceTime.getHours() - parseInt(hours as string));
 
       const auditHistory = await AuditLogger.getAuditHistory(
-        "event_requests",
+        'event_requests',
         eventId as string,
         userId as string,
         parseInt(limit as string),
@@ -1540,10 +1537,10 @@ router.get(
             eventId: log.recordId,
             timestamp: log.timestamp,
             userId: log.userId,
-            userEmail: parsedNewData?.performedBy || "Unknown User",
+            userEmail: parsedNewData?.performedBy || 'Unknown User',
             organizationName:
-              parsedNewData?.actionContext?.organizationName || "Unknown",
-            contactName: parsedNewData?.actionContext?.contactName || "Unknown",
+              parsedNewData?.actionContext?.organizationName || 'Unknown',
+            contactName: parsedNewData?.actionContext?.contactName || 'Unknown',
             actionDescription: getActionDescription(
               log.action,
               parsedNewData?.actionContext
@@ -1562,8 +1559,8 @@ router.get(
         filters: { eventId, action, userId },
       });
     } catch (error) {
-      console.error("Error fetching audit logs:", error);
-      res.status(500).json({ message: "Failed to fetch audit logs" });
+      console.error('Error fetching audit logs:', error);
+      res.status(500).json({ message: 'Failed to fetch audit logs' });
     }
   }
 );
@@ -1571,49 +1568,52 @@ router.get(
 // Helper function to generate readable action descriptions
 function getActionDescription(action: string, context: any): string {
   switch (action) {
-    case "FOLLOW_UP_RECORDED":
-      return `${context?.followUpAction ||
-        "Follow-up recorded"} - ${context?.statusChange || ""}`;
-    case "STATUS_CHANGED":
-      return `Status changed: ${context?.statusChange || "Status updated"}`;
-    case "MARKED_UNRESPONSIVE":
-      return `Marked unresponsive: ${context?.unresponsiveReason ||
-        "No reason provided"}`;
-    case "EVENT_REQUEST_UPDATED":
-      return `Updated fields: ${context?.fieldsUpdated?.join(", ") ||
-        "Multiple fields"}`;
+    case 'FOLLOW_UP_RECORDED':
+      return `${
+        context?.followUpAction || 'Follow-up recorded'
+      } - ${context?.statusChange || ''}`;
+    case 'STATUS_CHANGED':
+      return `Status changed: ${context?.statusChange || 'Status updated'}`;
+    case 'MARKED_UNRESPONSIVE':
+      return `Marked unresponsive: ${
+        context?.unresponsiveReason || 'No reason provided'
+      }`;
+    case 'EVENT_REQUEST_UPDATED':
+      return `Updated fields: ${
+        context?.fieldsUpdated?.join(', ') || 'Multiple fields'
+      }`;
     default:
-      return action.replace(/_/g, " ").toLowerCase();
+      return action.replace(/_/g, ' ').toLowerCase();
   }
 }
 
 // Organization management routes
-router.get("/organizations/all", async (req, res) => {
+router.get('/organizations/all', async (req, res) => {
   try {
     const user = req.user;
-    if (!user || !hasPermission(user, "EVENT_REQUESTS_VIEW")) {
-      return res.status(403).json({ message: "Insufficient permissions" });
+    if (!user || !hasPermission(user, 'EVENT_REQUESTS_VIEW')) {
+      return res.status(403).json({ message: 'Insufficient permissions' });
     }
 
     const organizations = await storage.getAllOrganizations();
     await logActivity(
       req,
       res,
-      "EVENT_REQUESTS_VIEW",
-      "Retrieved all organizations"
+      'EVENT_REQUESTS_VIEW',
+      'Retrieved all organizations'
     );
     res.json(organizations);
   } catch (error) {
-    console.error("Error fetching organizations:", error);
-    res.status(500).json({ message: "Failed to fetch organizations" });
+    console.error('Error fetching organizations:', error);
+    res.status(500).json({ message: 'Failed to fetch organizations' });
   }
 });
 
-router.post("/organizations", async (req, res) => {
+router.post('/organizations', async (req, res) => {
   try {
     const user = req.user;
     if (!user || !hasPermission(user, PERMISSIONS.MANAGE_EVENT_REQUESTS)) {
-      return res.status(403).json({ message: "Insufficient permissions" });
+      return res.status(403).json({ message: 'Insufficient permissions' });
     }
 
     const validatedData = insertOrganizationSchema.parse(req.body);
@@ -1630,17 +1630,17 @@ router.post("/organizations", async (req, res) => {
     if (error instanceof z.ZodError) {
       return res
         .status(400)
-        .json({ message: "Invalid input", errors: error.errors });
+        .json({ message: 'Invalid input', errors: error.errors });
     }
-    console.error("Error creating organization:", error);
-    res.status(500).json({ message: "Failed to create organization" });
+    console.error('Error creating organization:', error);
+    res.status(500).json({ message: 'Failed to create organization' });
   }
 });
 
 // Google Sheets Sync Routes
 
 // DEBUG: Test endpoint to check authentication
-router.get("/debug/auth", (req, res) => {
+router.get('/debug/auth', (req, res) => {
   res.json({
     user: req.user
       ? {
@@ -1661,23 +1661,23 @@ router.get("/debug/auth", (req, res) => {
 
 // Sync event requests TO Google Sheets
 router.post(
-  "/sync/to-sheets",
+  '/sync/to-sheets',
   isAuthenticated,
-  requirePermission("EVENT_REQUESTS_MANAGE"),
+  requirePermission('EVENT_REQUESTS_MANAGE'),
   async (req, res) => {
     try {
       const user = req.user;
-      console.log("🔍 Sync to sheets - User:", user?.email);
+      console.log('🔍 Sync to sheets - User:', user?.email);
 
       if (!user) {
-        return res.status(403).json({ message: "Authentication required" });
+        return res.status(403).json({ message: 'Authentication required' });
       }
 
       const syncService = getEventRequestsGoogleSheetsService(storage as any);
       if (!syncService) {
         return res.status(500).json({
           success: false,
-          message: "Google Sheets service not configured",
+          message: 'Google Sheets service not configured',
         });
       }
 
@@ -1686,16 +1686,17 @@ router.post(
         req,
         res,
         PERMISSIONS.MANAGE_EVENT_REQUESTS,
-        `Smart-synced ${result.synced ||
-          0} event requests to Google Sheets (preserving manual columns N+)`
+        `Smart-synced ${
+          result.synced || 0
+        } event requests to Google Sheets (preserving manual columns N+)`
       );
 
       res.json(result);
     } catch (error) {
-      console.error("Error syncing event requests to Google Sheets:", error);
+      console.error('Error syncing event requests to Google Sheets:', error);
       res.status(500).json({
         success: false,
-        message: "Failed to sync to Google Sheets",
+        message: 'Failed to sync to Google Sheets',
       });
     }
   }
@@ -1703,21 +1704,21 @@ router.post(
 
 // Sync event requests FROM Google Sheets
 router.post(
-  "/sync/from-sheets",
+  '/sync/from-sheets',
   isAuthenticated,
-  requirePermission("EVENT_REQUESTS_MANAGE"),
+  requirePermission('EVENT_REQUESTS_MANAGE'),
   async (req, res) => {
     try {
       const user = req.user;
       if (!user) {
-        return res.status(403).json({ message: "Authentication required" });
+        return res.status(403).json({ message: 'Authentication required' });
       }
 
       const syncService = getEventRequestsGoogleSheetsService(storage as any);
       if (!syncService) {
         return res.status(500).json({
           success: false,
-          message: "Google Sheets service not configured",
+          message: 'Google Sheets service not configured',
         });
       }
 
@@ -1726,16 +1727,17 @@ router.post(
         req,
         res,
         PERMISSIONS.MANAGE_EVENT_REQUESTS,
-        `Synced from Google Sheets: ${result.created ||
-          0} created, ${result.updated || 0} updated`
+        `Synced from Google Sheets: ${
+          result.created || 0
+        } created, ${result.updated || 0} updated`
       );
 
       res.json(result);
     } catch (error) {
-      console.error("Error syncing event requests from Google Sheets:", error);
+      console.error('Error syncing event requests from Google Sheets:', error);
       res.status(500).json({
         success: false,
-        message: "Failed to sync from Google Sheets",
+        message: 'Failed to sync from Google Sheets',
       });
     }
   }
@@ -1743,21 +1745,21 @@ router.post(
 
 // Analyze Google Sheets structure
 router.get(
-  "/sync/analyze",
+  '/sync/analyze',
   isAuthenticated,
-  requirePermission("EVENT_REQUESTS_VIEW"),
+  requirePermission('EVENT_REQUESTS_VIEW'),
   async (req, res) => {
     try {
       const user = req.user;
       if (!user) {
-        return res.status(403).json({ message: "Authentication required" });
+        return res.status(403).json({ message: 'Authentication required' });
       }
 
       const syncService = getEventRequestsGoogleSheetsService(storage as any);
       if (!syncService) {
         return res.status(500).json({
           success: false,
-          message: "Google Sheets service not configured",
+          message: 'Google Sheets service not configured',
         });
       }
 
@@ -1765,8 +1767,8 @@ router.get(
       await logActivity(
         req,
         res,
-        "EVENT_REQUESTS_VIEW",
-        "Analyzed Event Requests Google Sheet structure"
+        'EVENT_REQUESTS_VIEW',
+        'Analyzed Event Requests Google Sheet structure'
       );
 
       res.json({
@@ -1776,26 +1778,26 @@ router.get(
         targetSpreadsheetId: process.env.EVENT_REQUESTS_SHEET_ID,
       });
     } catch (error) {
-      console.error("Error analyzing Event Requests Google Sheet:", error);
+      console.error('Error analyzing Event Requests Google Sheet:', error);
       res.status(500).json({
         success: false,
-        message: "Google Sheets analysis failed. Please check API credentials.",
-        error: error instanceof Error ? error.message : "Unknown error",
+        message: 'Google Sheets analysis failed. Please check API credentials.',
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   }
 );
 
 // Get organizations catalog - aggregated data from event requests
-router.get("/orgs-catalog-test", async (req, res) => {
+router.get('/orgs-catalog-test', async (req, res) => {
   try {
     const user = req.user;
-    console.log("🔍 Organizations catalog GET - Full debug:", {
+    console.log('🔍 Organizations catalog GET - Full debug:', {
       userExists: !!user,
       userId: user?.id,
       userEmail: user?.email,
       sessionExists: !!req.session,
-      sessionUser: req.session?.user?.email || "none",
+      sessionUser: req.session?.user?.email || 'none',
       userPermissionsCount: user?.permissions?.length || 0,
       hasViewOrgsPermission: user
         ? hasPermission(user, PERMISSIONS.VIEW_ORGANIZATIONS_CATALOG)
@@ -1804,7 +1806,7 @@ router.get("/orgs-catalog-test", async (req, res) => {
     });
 
     // TEMP: Completely bypass auth for testing
-    console.log("🔧 TEMP: Bypassing all auth checks for testing");
+    console.log('🔧 TEMP: Bypassing all auth checks for testing');
 
     // Get all event requests and aggregate by organization and contact
     const allEventRequests = await storage.getAllEventRequests();
@@ -1828,8 +1830,8 @@ router.get("/orgs-catalog-test", async (req, res) => {
         }
 
         // If any request has been contacted, update status
-        if (request.contactedAt && existing.status === "new") {
-          existing.status = "contacted";
+        if (request.contactedAt && existing.status === 'new') {
+          existing.status = 'contacted';
         }
       } else {
         organizationMap.set(key, {
@@ -1841,7 +1843,7 @@ router.get("/orgs-catalog-test", async (req, res) => {
           department: request.department,
           latestRequestDate: request.createdAt,
           totalRequests: 1,
-          status: request.contactedAt ? "contacted" : request.status,
+          status: request.contactedAt ? 'contacted' : request.status,
         });
       }
     });
@@ -1857,33 +1859,31 @@ router.get("/orgs-catalog-test", async (req, res) => {
     );
     res.json(organizations);
   } catch (error) {
-    console.error("Error fetching organizations catalog:", error);
-    res.status(500).json({ message: "Failed to fetch organizations catalog" });
+    console.error('Error fetching organizations catalog:', error);
+    res.status(500).json({ message: 'Failed to fetch organizations catalog' });
   }
 });
 
 // Mark follow-up as completed for an event
-router.patch("/:id/follow-up", isAuthenticated, async (req, res) => {
+router.patch('/:id/follow-up', isAuthenticated, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const { followUpType, notes } = req.body;
 
-    if (!followUpType || !["one_day", "one_month"].includes(followUpType)) {
-      return res
-        .status(400)
-        .json({
-          error: "Invalid follow-up type. Must be 'one_day' or 'one_month'",
-        });
+    if (!followUpType || !['one_day', 'one_month'].includes(followUpType)) {
+      return res.status(400).json({
+        error: "Invalid follow-up type. Must be 'one_day' or 'one_month'",
+      });
     }
 
     const userId = req.user?.id;
     if (!userId) {
-      return res.status(400).json({ error: "User ID required" });
+      return res.status(400).json({ error: 'User ID required' });
     }
 
     const eventRequest = await storage.getEventRequest(id);
     if (!eventRequest) {
-      return res.status(404).json({ error: "Event request not found" });
+      return res.status(404).json({ error: 'Event request not found' });
     }
 
     // Prepare update data based on follow-up type
@@ -1891,10 +1891,10 @@ router.patch("/:id/follow-up", isAuthenticated, async (req, res) => {
       followUpNotes: notes || eventRequest.followUpNotes,
     };
 
-    if (followUpType === "one_day") {
+    if (followUpType === 'one_day') {
       updateData.followUpOneDayCompleted = true;
       updateData.followUpOneDayDate = new Date();
-    } else if (followUpType === "one_month") {
+    } else if (followUpType === 'one_month') {
       updateData.followUpOneMonthCompleted = true;
       updateData.followUpOneMonthDate = new Date();
     }
@@ -1907,21 +1907,21 @@ router.patch("/:id/follow-up", isAuthenticated, async (req, res) => {
     await logActivity(
       req,
       res,
-      "EVENT_REQUESTS_EDIT",
+      'EVENT_REQUESTS_EDIT',
       `Marked ${followUpType} follow-up as completed for event: ${eventRequest.organizationName}`
     );
 
     res.json(updatedEventRequest);
   } catch (error) {
-    console.error("Error marking follow-up as completed:", error);
-    res.status(500).json({ error: "Failed to mark follow-up as completed" });
+    console.error('Error marking follow-up as completed:', error);
+    res.status(500).json({ error: 'Failed to mark follow-up as completed' });
   }
 });
 
 // Duplicate route removed - organization-counts already exists at line 376
 
 // Update driver assignments for an event
-router.patch("/:id/drivers", isAuthenticated, async (req, res) => {
+router.patch('/:id/drivers', isAuthenticated, async (req, res) => {
   try {
     const eventId = parseInt(req.params.id);
     const {
@@ -1939,7 +1939,7 @@ router.patch("/:id/drivers", isAuthenticated, async (req, res) => {
     // Validate that the event exists first
     const existingEvent = await storage.getEventRequestById(eventId);
     if (!existingEvent) {
-      return res.status(404).json({ error: "Event request not found" });
+      return res.status(404).json({ error: 'Event request not found' });
     }
 
     // Update the event with driver assignments
@@ -1971,26 +1971,26 @@ router.patch("/:id/drivers", isAuthenticated, async (req, res) => {
     await logActivity(
       req,
       res,
-      "update_event_drivers",
+      'update_event_drivers',
       `Updated driver assignments for event: ${existingEvent.organizationName}`
     );
 
     res.json(updatedEvent);
   } catch (error) {
-    console.error("Error updating driver assignments:", error);
-    res.status(500).json({ error: "Failed to update driver assignments" });
+    console.error('Error updating driver assignments:', error);
+    res.status(500).json({ error: 'Failed to update driver assignments' });
   }
 });
 
 // Event Volunteers Routes
 
 // Get all event volunteers for a specific event
-router.get("/:eventId/volunteers", isAuthenticated, async (req, res) => {
+router.get('/:eventId/volunteers', isAuthenticated, async (req, res) => {
   try {
     const eventId = parseInt(req.params.eventId);
 
     if (!eventId || isNaN(eventId)) {
-      return res.status(400).json({ error: "Valid event ID required" });
+      return res.status(400).json({ error: 'Valid event ID required' });
     }
 
     const volunteers = await storage.getEventVolunteersByEventId(eventId);
@@ -2000,23 +2000,23 @@ router.get("/:eventId/volunteers", isAuthenticated, async (req, res) => {
     );
     res.json(volunteers);
   } catch (error) {
-    console.error("Error fetching event volunteers:", error);
-    res.status(500).json({ error: "Failed to fetch event volunteers" });
+    console.error('Error fetching event volunteers:', error);
+    res.status(500).json({ error: 'Failed to fetch event volunteers' });
   }
 });
 
 // Sign up a user as a volunteer for an event
-router.post("/:eventId/volunteers", isAuthenticated, async (req, res) => {
+router.post('/:eventId/volunteers', isAuthenticated, async (req, res) => {
   try {
     const eventId = parseInt(req.params.eventId);
     const userId = req.user?.id;
 
     if (!eventId || isNaN(eventId)) {
-      return res.status(400).json({ error: "Valid event ID required" });
+      return res.status(400).json({ error: 'Valid event ID required' });
     }
 
     if (!userId) {
-      return res.status(400).json({ error: "User authentication required" });
+      return res.status(400).json({ error: 'User authentication required' });
     }
 
     // Validate request body against schema
@@ -2027,9 +2027,8 @@ router.post("/:eventId/volunteers", isAuthenticated, async (req, res) => {
     });
 
     // Check if user is already signed up for this event with the same role
-    const existingVolunteers = await storage.getEventVolunteersByEventId(
-      eventId
-    );
+    const existingVolunteers =
+      await storage.getEventVolunteersByEventId(eventId);
     const alreadySignedUp = existingVolunteers.find(
       (v) => v.volunteerUserId === userId && v.role === volunteerData.role
     );
@@ -2045,29 +2044,29 @@ router.post("/:eventId/volunteers", isAuthenticated, async (req, res) => {
     await logActivity(
       req,
       res,
-      "volunteer_signup",
+      'volunteer_signup',
       `Signed up as ${volunteerData.role} for event: ${eventId}`
     );
 
     res.status(201).json(newVolunteer);
   } catch (error) {
-    console.error("Error creating event volunteer signup:", error);
+    console.error('Error creating event volunteer signup:', error);
     if (error instanceof z.ZodError) {
       return res
         .status(400)
-        .json({ error: "Invalid volunteer data", details: error.errors });
+        .json({ error: 'Invalid volunteer data', details: error.errors });
     }
-    res.status(500).json({ error: "Failed to sign up for event" });
+    res.status(500).json({ error: 'Failed to sign up for event' });
   }
 });
 
 // Update volunteer status or assignment
-router.patch("/volunteers/:volunteerId", isAuthenticated, async (req, res) => {
+router.patch('/volunteers/:volunteerId', isAuthenticated, async (req, res) => {
   try {
     const volunteerId = parseInt(req.params.volunteerId);
 
     if (!volunteerId || isNaN(volunteerId)) {
-      return res.status(400).json({ error: "Valid volunteer ID required" });
+      return res.status(400).json({ error: 'Valid volunteer ID required' });
     }
 
     const updates = req.body;
@@ -2078,59 +2077,59 @@ router.patch("/volunteers/:volunteerId", isAuthenticated, async (req, res) => {
     );
 
     if (!updatedVolunteer) {
-      return res.status(404).json({ error: "Volunteer assignment not found" });
+      return res.status(404).json({ error: 'Volunteer assignment not found' });
     }
 
     await logActivity(
       req,
       res,
-      "volunteer_update",
+      'volunteer_update',
       `Updated volunteer assignment: ${volunteerId}`
     );
 
     res.json(updatedVolunteer);
   } catch (error) {
-    console.error("Error updating event volunteer:", error);
-    res.status(500).json({ error: "Failed to update volunteer assignment" });
+    console.error('Error updating event volunteer:', error);
+    res.status(500).json({ error: 'Failed to update volunteer assignment' });
   }
 });
 
 // Remove volunteer from event
-router.delete("/volunteers/:volunteerId", isAuthenticated, async (req, res) => {
+router.delete('/volunteers/:volunteerId', isAuthenticated, async (req, res) => {
   try {
     const volunteerId = parseInt(req.params.volunteerId);
 
     if (!volunteerId || isNaN(volunteerId)) {
-      return res.status(400).json({ error: "Valid volunteer ID required" });
+      return res.status(400).json({ error: 'Valid volunteer ID required' });
     }
 
     const deleted = await storage.deleteEventVolunteer(volunteerId);
 
     if (!deleted) {
-      return res.status(404).json({ error: "Volunteer assignment not found" });
+      return res.status(404).json({ error: 'Volunteer assignment not found' });
     }
 
     await logActivity(
       req,
       res,
-      "volunteer_removal",
+      'volunteer_removal',
       `Removed volunteer assignment: ${volunteerId}`
     );
 
     res.json({ success: true });
   } catch (error) {
-    console.error("Error removing event volunteer:", error);
-    res.status(500).json({ error: "Failed to remove volunteer assignment" });
+    console.error('Error removing event volunteer:', error);
+    res.status(500).json({ error: 'Failed to remove volunteer assignment' });
   }
 });
 
 // Get all volunteer signups for the current user
-router.get("/my-volunteers", isAuthenticated, async (req, res) => {
+router.get('/my-volunteers', isAuthenticated, async (req, res) => {
   try {
     const userId = req.user?.id;
 
     if (!userId) {
-      return res.status(400).json({ error: "User authentication required" });
+      return res.status(400).json({ error: 'User authentication required' });
     }
 
     const userVolunteers = await storage.getEventVolunteersByUserId(userId);
@@ -2153,27 +2152,24 @@ router.get("/my-volunteers", isAuthenticated, async (req, res) => {
     );
     res.json(enrichedVolunteers);
   } catch (error) {
-    console.error("Error fetching user volunteers:", error);
-    res.status(500).json({ error: "Failed to fetch volunteer signups" });
+    console.error('Error fetching user volunteers:', error);
+    res.status(500).json({ error: 'Failed to fetch volunteer signups' });
   }
 });
 
 // Update social media post tracking for an event
 router.patch(
-  "/:id/social-media",
+  '/:id/social-media',
   isAuthenticated,
-  requirePermission("EVENT_REQUESTS_EDIT"),
+  requirePermission('EVENT_REQUESTS_EDIT'),
   async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const {
-        socialMediaPostRequested,
-        socialMediaPostCompleted,
-        notes,
-      } = req.body;
+      const { socialMediaPostRequested, socialMediaPostCompleted, notes } =
+        req.body;
 
       if (!id || isNaN(id)) {
-        return res.status(400).json({ error: "Valid event ID required" });
+        return res.status(400).json({ error: 'Valid event ID required' });
       }
 
       const updates: any = {};
@@ -2199,40 +2195,40 @@ router.patch(
       const updatedEventRequest = await storage.updateEventRequest(id, updates);
 
       if (!updatedEventRequest) {
-        return res.status(404).json({ error: "Event request not found" });
+        return res.status(404).json({ error: 'Event request not found' });
       }
 
       await logActivity(
         req,
         res,
-        "EVENT_REQUESTS_EDIT",
+        'EVENT_REQUESTS_EDIT',
         `Updated social media tracking for event: ${id}`
       );
 
       res.json(updatedEventRequest);
     } catch (error) {
-      console.error("Error updating social media tracking:", error);
-      res.status(500).json({ error: "Failed to update social media tracking" });
+      console.error('Error updating social media tracking:', error);
+      res.status(500).json({ error: 'Failed to update social media tracking' });
     }
   }
 );
 
 // Record actual sandwich count for a completed event
 router.patch(
-  "/:id/actual-sandwich-count",
+  '/:id/actual-sandwich-count',
   isAuthenticated,
-  requirePermission("EVENT_REQUESTS_EDIT"),
+  requirePermission('EVENT_REQUESTS_EDIT'),
   async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const { actualSandwichCount, actualSandwichTypes } = req.body;
 
       if (!id || isNaN(id)) {
-        return res.status(400).json({ error: "Valid event ID required" });
+        return res.status(400).json({ error: 'Valid event ID required' });
       }
 
       if (!actualSandwichCount || actualSandwichCount <= 0) {
-        return res.status(400).json({ error: "Valid sandwich count required" });
+        return res.status(400).json({ error: 'Valid sandwich count required' });
       }
 
       const updates = {
@@ -2245,36 +2241,36 @@ router.patch(
       const updatedEventRequest = await storage.updateEventRequest(id, updates);
 
       if (!updatedEventRequest) {
-        return res.status(404).json({ error: "Event request not found" });
+        return res.status(404).json({ error: 'Event request not found' });
       }
 
       await logActivity(
         req,
         res,
-        "EVENT_REQUESTS_EDIT",
+        'EVENT_REQUESTS_EDIT',
         `Recorded actual sandwich count (${actualSandwichCount}) for event: ${id}`
       );
 
       res.json(updatedEventRequest);
     } catch (error) {
-      console.error("Error recording actual sandwich count:", error);
-      res.status(500).json({ error: "Failed to record actual sandwich count" });
+      console.error('Error recording actual sandwich count:', error);
+      res.status(500).json({ error: 'Failed to record actual sandwich count' });
     }
   }
 );
 
 // Record sandwich distribution for a completed event
 router.patch(
-  "/:id/distribution",
+  '/:id/distribution',
   isAuthenticated,
-  requirePermission("EVENT_REQUESTS_EDIT"),
+  requirePermission('EVENT_REQUESTS_EDIT'),
   async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const { sandwichDistributions, distributionNotes } = req.body;
 
       if (!id || isNaN(id)) {
-        return res.status(400).json({ error: "Valid event ID required" });
+        return res.status(400).json({ error: 'Valid event ID required' });
       }
 
       if (
@@ -2284,18 +2280,15 @@ router.patch(
       ) {
         return res
           .status(400)
-          .json({ error: "Valid distribution data required" });
+          .json({ error: 'Valid distribution data required' });
       }
 
       // Validate distribution format
       for (const dist of sandwichDistributions) {
         if (!dist.destination || !dist.totalCount || dist.totalCount <= 0) {
-          return res
-            .status(400)
-            .json({
-              error:
-                "Each distribution must have a destination and valid count",
-            });
+          return res.status(400).json({
+            error: 'Each distribution must have a destination and valid count',
+          });
         }
       }
 
@@ -2309,7 +2302,7 @@ router.patch(
       const updatedEventRequest = await storage.updateEventRequest(id, updates);
 
       if (!updatedEventRequest) {
-        return res.status(404).json({ error: "Event request not found" });
+        return res.status(404).json({ error: 'Event request not found' });
       }
 
       const totalDistributed = sandwichDistributions.reduce(
@@ -2320,14 +2313,14 @@ router.patch(
       await logActivity(
         req,
         res,
-        "EVENT_REQUESTS_EDIT",
+        'EVENT_REQUESTS_EDIT',
         `Recorded sandwich distribution (${totalDistributed} sandwiches to ${sandwichDistributions.length} locations) for event: ${id}`
       );
 
       res.json(updatedEventRequest);
     } catch (error) {
-      console.error("Error recording sandwich distribution:", error);
-      res.status(500).json({ error: "Failed to record sandwich distribution" });
+      console.error('Error recording sandwich distribution:', error);
+      res.status(500).json({ error: 'Failed to record sandwich distribution' });
     }
   }
 );

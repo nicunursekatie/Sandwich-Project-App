@@ -1,17 +1,17 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Activity, Calendar, Eye, TrendingUp, User, Users } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
+} from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Activity, Calendar, Eye, TrendingUp, User, Users } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
 
 type ActivityStats = {
   totalActions: number;
@@ -31,9 +31,9 @@ type UserActivitySummary = {
 };
 
 export default function UserActivityAnalytics() {
-  const [selectedPeriod, setSelectedPeriod] = useState("30");
-  const [selectedUser, setSelectedUser] = useState<string>("");
-  const [viewMode, setViewMode] = useState<"summary" | "details">("summary");
+  const [selectedPeriod, setSelectedPeriod] = useState('30');
+  const [selectedUser, setSelectedUser] = useState<string>('');
+  const [viewMode, setViewMode] = useState<'summary' | 'details'>('summary');
 
   // Get all users activity summary
   const {
@@ -41,68 +41,68 @@ export default function UserActivityAnalytics() {
     isLoading: summaryLoading,
     error: summaryError,
   } = useQuery<UserActivitySummary[]>({
-    queryKey: ["/api/user-activity/summary", selectedPeriod],
+    queryKey: ['/api/user-activity/summary', selectedPeriod],
     queryFn: async () => {
       const res = await fetch(
         `/api/user-activity/summary?days=${selectedPeriod}`,
         {
-          credentials: "include", // Include cookies for authentication
+          credentials: 'include', // Include cookies for authentication
         }
       );
       if (!res.ok) {
         if (res.status === 401) {
-          throw new Error("Authentication required - please login");
+          throw new Error('Authentication required - please login');
         }
         if (res.status === 403) {
-          throw new Error("Admin access required to view activity summary");
+          throw new Error('Admin access required to view activity summary');
         }
         throw new Error(`Failed to fetch activity summary: ${res.status}`);
       }
       const data = await res.json();
-      console.log("Activity summary data:", data);
+      console.log('Activity summary data:', data);
       // Ensure we return an array
       return Array.isArray(data) ? data : [];
     },
-    enabled: viewMode === "summary",
+    enabled: viewMode === 'summary',
     retry: false, // Don't retry auth errors
   });
 
   // Get individual user stats
   const { data: userStats, isLoading: statsLoading } = useQuery<ActivityStats>({
-    queryKey: ["/api/user-activity/stats", selectedUser, selectedPeriod],
+    queryKey: ['/api/user-activity/stats', selectedUser, selectedPeriod],
     queryFn: () =>
       fetch(
         `/api/user-activity/stats/${selectedUser}?days=${selectedPeriod}`
       ).then((res) => res.json()),
-    enabled: viewMode === "details" && !!selectedUser,
+    enabled: viewMode === 'details' && !!selectedUser,
   });
 
   const getSectionBadgeColor = (section: string) => {
     const colors: Record<string, string> = {
-      dashboard: "bg-blue-100 text-blue-800",
-      collections: "bg-green-100 text-green-800",
-      messaging: "bg-purple-100 text-purple-800",
-      admin: "bg-red-100 text-red-800",
-      reports: "bg-yellow-100 text-yellow-800",
-      projects: "bg-teal-100 text-teal-800",
-      directory: "bg-orange-100 text-orange-800",
-      none: "bg-gray-100 text-gray-800",
+      dashboard: 'bg-blue-100 text-blue-800',
+      collections: 'bg-green-100 text-green-800',
+      messaging: 'bg-purple-100 text-purple-800',
+      admin: 'bg-red-100 text-red-800',
+      reports: 'bg-yellow-100 text-yellow-800',
+      projects: 'bg-teal-100 text-teal-800',
+      directory: 'bg-orange-100 text-orange-800',
+      none: 'bg-gray-100 text-gray-800',
     };
-    return colors[section] || "bg-gray-100 text-gray-800";
+    return colors[section] || 'bg-gray-100 text-gray-800';
   };
 
   const getActivityLevel = (count: number) => {
-    if (count > 100) return { level: "High", color: "text-green-600" };
-    if (count > 50) return { level: "Medium", color: "text-yellow-600" };
-    if (count > 0) return { level: "Low", color: "text-blue-600" };
-    return { level: "None", color: "text-gray-600" };
+    if (count > 100) return { level: 'High', color: 'text-green-600' };
+    if (count > 50) return { level: 'Medium', color: 'text-yellow-600' };
+    if (count > 0) return { level: 'Low', color: 'text-blue-600' };
+    return { level: 'None', color: 'text-gray-600' };
   };
 
   const formatActionName = (action: string) => {
     return action
-      .split("_")
+      .split('_')
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-      .join(" ");
+      .join(' ');
   };
 
   return (
@@ -116,18 +116,18 @@ export default function UserActivityAnalytics() {
           <div className="flex gap-4 items-center">
             <div className="flex gap-2">
               <Button
-                variant={viewMode === "summary" ? "default" : "outline"}
+                variant={viewMode === 'summary' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setViewMode("summary")}
+                onClick={() => setViewMode('summary')}
                 className="bg-[#236383] hover:bg-[#1e5470] text-white"
               >
                 <Users className="h-4 w-4 mr-2" />
                 All Users Summary
               </Button>
               <Button
-                variant={viewMode === "details" ? "default" : "outline"}
+                variant={viewMode === 'details' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setViewMode("details")}
+                onClick={() => setViewMode('details')}
                 className="bg-[#236383] hover:bg-[#1e5470] text-white"
               >
                 <User className="h-4 w-4 mr-2" />
@@ -149,7 +149,7 @@ export default function UserActivityAnalytics() {
           </div>
         </CardHeader>
         <CardContent>
-          {viewMode === "summary" && (
+          {viewMode === 'summary' && (
             <div>
               {summaryLoading ? (
                 <div className="flex items-center justify-center py-8">
@@ -180,16 +180,16 @@ export default function UserActivityAnalytics() {
                                 {(
                                   user.firstName?.[0] ||
                                   user.email?.[0] ||
-                                  "U"
+                                  'U'
                                 ).toUpperCase()}
                               </div>
                               <div>
                                 <div className="font-medium">
-                                  {user.firstName || "Unknown"}{" "}
-                                  {user.lastName || ""}
+                                  {user.firstName || 'Unknown'}{' '}
+                                  {user.lastName || ''}
                                 </div>
                                 <div className="text-sm text-gray-600">
-                                  {user.email || "No email"}
+                                  {user.email || 'No email'}
                                 </div>
                               </div>
                             </div>
@@ -209,10 +209,10 @@ export default function UserActivityAnalytics() {
                             <div className="flex items-center gap-4">
                               <Badge
                                 className={getSectionBadgeColor(
-                                  user.topSection || "none"
+                                  user.topSection || 'none'
                                 )}
                               >
-                                {user.topSection || "No activity"}
+                                {user.topSection || 'No activity'}
                               </Badge>
                               <span className={activity.color}>
                                 {activity.level} Activity
@@ -223,7 +223,7 @@ export default function UserActivityAnalytics() {
                                 ? `Active ${formatDistanceToNow(
                                     new Date(user.lastActive)
                                   )} ago`
-                                : "No recent activity"}
+                                : 'No recent activity'}
                             </div>
                           </div>
 
@@ -232,7 +232,7 @@ export default function UserActivityAnalytics() {
                             size="sm"
                             onClick={() => {
                               setSelectedUser(user.userId);
-                              setViewMode("details");
+                              setViewMode('details');
                             }}
                             className="w-full"
                           >
@@ -254,7 +254,7 @@ export default function UserActivityAnalytics() {
             </div>
           )}
 
-          {viewMode === "details" && (
+          {viewMode === 'details' && (
             <div className="space-y-6">
               {!selectedUser ? (
                 <div className="text-center py-8">
@@ -262,7 +262,7 @@ export default function UserActivityAnalytics() {
                     Select a user to view detailed activity stats
                   </div>
                   <Button
-                    onClick={() => setViewMode("summary")}
+                    onClick={() => setViewMode('summary')}
                     className="bg-[#236383] hover:bg-[#1e5470] text-white"
                   >
                     <Users className="h-4 w-4 mr-2" />

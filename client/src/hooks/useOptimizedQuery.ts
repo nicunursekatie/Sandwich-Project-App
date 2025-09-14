@@ -1,5 +1,5 @@
-import { useQuery, useQueryClient, QueryKey } from "@tanstack/react-query";
-import { useMemo, useCallback } from "react";
+import { useQuery, useQueryClient, QueryKey } from '@tanstack/react-query';
+import { useMemo, useCallback } from 'react';
 
 interface OptimizedQueryOptions {
   staleTime?: number;
@@ -26,7 +26,7 @@ export function useOptimizedQuery<T>(
       refetchInterval: options.backgroundRefetch ? 30000 : false, // 30 seconds if enabled
       retry: (failureCount: number, error: any) => {
         // Smart retry logic - don't retry on 4xx errors
-        if (error?.message?.includes("4")) return false;
+        if (error?.message?.includes('4')) return false;
         return failureCount < 3;
       },
     }),
@@ -57,7 +57,7 @@ export function useOptimizedQuery<T>(
       patterns.forEach((pattern) => {
         queryClient.invalidateQueries({
           predicate: (query) => {
-            const key = query.queryKey.join(".");
+            const key = query.queryKey.join('.');
             return key.includes(pattern);
           },
         });
@@ -86,7 +86,7 @@ export function useOptimizedPagination<T>(
   const queryClient = useQueryClient();
 
   const query = useOptimizedQuery(
-    [baseKey, "page", initialPage, "limit", pageSize],
+    [baseKey, 'page', initialPage, 'limit', pageSize],
     () => fetchFn(initialPage, pageSize),
     {
       staleTime: 2 * 60 * 1000, // 2 minutes for paginated data
@@ -97,7 +97,7 @@ export function useOptimizedPagination<T>(
   // Prefetch next page when current page loads
   const prefetchNextPage = useCallback(
     async (currentPage: number) => {
-      const nextPageKey = [baseKey, "page", currentPage + 1, "limit", pageSize];
+      const nextPageKey = [baseKey, 'page', currentPage + 1, 'limit', pageSize];
 
       if (!queryClient.getQueryData(nextPageKey)) {
         await queryClient.prefetchQuery({
@@ -116,9 +116,9 @@ export function useOptimizedPagination<T>(
       if (currentPage > 1) {
         const prevPageKey = [
           baseKey,
-          "page",
+          'page',
           currentPage - 1,
-          "limit",
+          'limit',
           pageSize,
         ];
 
@@ -152,7 +152,7 @@ export function useOptimizedSearch<T>(
     async (query: string) => {
       if (!query.trim()) return [];
 
-      const cacheKey = ["search", query.toLowerCase().trim()];
+      const cacheKey = ['search', query.toLowerCase().trim()];
 
       // Check cache first
       const cached = queryClient.getQueryData(cacheKey);

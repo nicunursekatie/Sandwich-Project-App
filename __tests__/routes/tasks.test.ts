@@ -1,13 +1,18 @@
 /**
  * Tasks API Integration Tests
- * 
+ *
  * Tests for task management endpoints including task creation,
  * completion tracking, and multi-user task management.
  * These tests verify endpoint parity during migration.
  */
 
 import request from 'supertest';
-import { createTestSession, cleanupTestData, createAuthenticatedRequest, TEST_CONSTANTS } from '../setup';
+import {
+  createTestSession,
+  cleanupTestData,
+  createAuthenticatedRequest,
+  TEST_CONSTANTS,
+} from '../setup';
 
 // TODO: Import actual Express app when available
 // import { app } from '../../server';
@@ -20,7 +25,7 @@ describe('Tasks API Endpoint Parity Tests', () => {
   beforeAll(async () => {
     // TODO: Initialize test app and database
     // app = await createTestApp();
-    
+
     adminSession = await createTestSession(app, 'admin');
     userSession = await createTestSession(app, 'user');
   }, TEST_CONSTANTS.TIMEOUT);
@@ -129,7 +134,7 @@ describe('Tasks API Endpoint Parity Tests', () => {
         priority: 'medium',
         projectId: 'test-project-id',
         assignedUsers: [userSession.userId],
-        dueDate: '2025-12-31T23:59:59.000Z'
+        dueDate: '2025-12-31T23:59:59.000Z',
       };
 
       // TODO: Implement when app is available
@@ -150,7 +155,7 @@ describe('Tasks API Endpoint Parity Tests', () => {
 
     test('should validate required fields', async () => {
       const invalidTask = {
-        description: 'Task without title'
+        description: 'Task without title',
         // Missing title field
       };
 
@@ -168,7 +173,7 @@ describe('Tasks API Endpoint Parity Tests', () => {
       const invalidTask = {
         title: 'Invalid Task',
         status: 'invalid-status',
-        priority: 'invalid-priority'
+        priority: 'invalid-priority',
       };
 
       // TODO: Implement when app is available
@@ -187,7 +192,7 @@ describe('Tasks API Endpoint Parity Tests', () => {
       const updateData = {
         status: 'in_progress',
         priority: 'high',
-        notes: 'Updated notes'
+        notes: 'Updated notes',
       };
 
       // TODO: Implement when app is available
@@ -205,7 +210,7 @@ describe('Tasks API Endpoint Parity Tests', () => {
 
     test('should deny update for unauthorized user', async () => {
       const updateData = {
-        status: 'completed'
+        status: 'completed',
       };
 
       // TODO: Implement when app is available
@@ -224,7 +229,7 @@ describe('Tasks API Endpoint Parity Tests', () => {
       test('should mark task as completed', async () => {
         const completionData = {
           notes: 'Task completed successfully',
-          timeSpent: 120 // minutes
+          timeSpent: 120, // minutes
         };
 
         // TODO: Implement when app is available
@@ -256,7 +261,7 @@ describe('Tasks API Endpoint Parity Tests', () => {
       test('should reopen completed task', async () => {
         const reopenData = {
           reason: 'Additional work required',
-          newStatus: 'in_progress'
+          newStatus: 'in_progress',
         };
 
         // TODO: Implement when app is available
@@ -278,7 +283,7 @@ describe('Tasks API Endpoint Parity Tests', () => {
     describe('POST /api/tasks/:id/assign', () => {
       test('should assign users to task', async () => {
         const assignmentData = {
-          userIds: ['user1', 'user2']
+          userIds: ['user1', 'user2'],
         };
 
         // TODO: Implement when app is available
@@ -330,7 +335,7 @@ describe('Tasks API Endpoint Parity Tests', () => {
       test('should add collaborator to task', async () => {
         const collaborationData = {
           userId: 'collaborator-id',
-          role: 'reviewer'
+          role: 'reviewer',
         };
 
         // TODO: Implement when app is available

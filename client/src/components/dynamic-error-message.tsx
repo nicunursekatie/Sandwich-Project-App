@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   AlertTriangle,
   RefreshCw,
@@ -6,27 +6,27 @@ import {
   HelpCircle,
   Mail,
   ExternalLink,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card';
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { Badge } from "@/components/ui/badge";
+} from '@/components/ui/collapsible';
+import { Badge } from '@/components/ui/badge';
 import {
   DynamicErrorMessage,
   ErrorRecoveryAction,
   DynamicErrorManager,
-} from "@shared/error-management";
+} from '@shared/error-management';
 
 interface DynamicErrorMessageProps {
   error: DynamicErrorMessage;
@@ -40,7 +40,7 @@ export function DynamicErrorMessageDisplay({
   error,
   onAction,
   onDismiss,
-  className = "",
+  className = '',
   compact = false,
 }: DynamicErrorMessageProps) {
   const [showDetails, setShowDetails] = React.useState(false);
@@ -54,26 +54,26 @@ export function DynamicErrorMessageDisplay({
 
     // Default action handlers
     switch (action.action) {
-      case "retry":
+      case 'retry':
         window.location.reload();
         break;
-      case "refresh":
+      case 'refresh':
         window.location.reload();
         break;
-      case "redirect":
+      case 'redirect':
         if (action.target) {
           window.location.href = action.target;
         }
         break;
-      case "contact":
+      case 'contact':
         // Open email client or contact form
         window.location.href =
-          "mailto:support@sandwichproject.org?subject=Error Report";
+          'mailto:support@sandwichproject.org?subject=Error Report';
         break;
-      case "custom":
+      case 'custom':
         // Custom actions should be handled by the parent component
         console.warn(
-          "Custom action needs to be handled by parent component:",
+          'Custom action needs to be handled by parent component:',
           action.target
         );
         break;
@@ -82,13 +82,13 @@ export function DynamicErrorMessageDisplay({
 
   const getActionIcon = (action: ErrorRecoveryAction) => {
     switch (action.action) {
-      case "retry":
+      case 'retry':
         return <RefreshCw className="w-4 h-4" />;
-      case "refresh":
+      case 'refresh':
         return <RefreshCw className="w-4 h-4" />;
-      case "redirect":
+      case 'redirect':
         return <ExternalLink className="w-4 h-4" />;
-      case "contact":
+      case 'contact':
         return <Mail className="w-4 h-4" />;
       default:
         return <HelpCircle className="w-4 h-4" />;
@@ -139,13 +139,13 @@ export function DynamicErrorMessageDisplay({
       className={`${className} border-l-4`}
       style={{
         borderLeftColor:
-          error.severity === "critical"
-            ? "#dc2626"
-            : error.severity === "high"
-            ? "#ea580c"
-            : error.severity === "medium"
-            ? "#d97706"
-            : "#ca8a04",
+          error.severity === 'critical'
+            ? '#dc2626'
+            : error.severity === 'high'
+              ? '#ea580c'
+              : error.severity === 'medium'
+                ? '#d97706'
+                : '#ca8a04',
       }}
     >
       <CardHeader>
@@ -156,7 +156,7 @@ export function DynamicErrorMessageDisplay({
               <CardTitle className="flex items-center gap-2">
                 {error.title}
                 <Badge variant="outline" className="text-xs">
-                  {error.category.replace("_", " ")}
+                  {error.category.replace('_', ' ')}
                 </Badge>
               </CardTitle>
               <CardDescription className="mt-1">
@@ -181,7 +181,7 @@ export function DynamicErrorMessageDisplay({
               {error.recoveryActions.map((action, index) => (
                 <Button
                   key={index}
-                  variant={action.primary ? "default" : "outline"}
+                  variant={action.primary ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => handleAction(action)}
                   className="flex items-center gap-2"
@@ -252,10 +252,8 @@ export function DynamicErrorMessageDisplay({
 
 // Hook for using dynamic error messages
 export function useDynamicError() {
-  const [
-    currentError,
-    setCurrentError,
-  ] = React.useState<DynamicErrorMessage | null>(null);
+  const [currentError, setCurrentError] =
+    React.useState<DynamicErrorMessage | null>(null);
 
   const showError = React.useCallback(
     (error: Error | string, context: any = {}) => {
@@ -272,23 +270,23 @@ export function useDynamicError() {
   const handleErrorAction = React.useCallback((action: ErrorRecoveryAction) => {
     // Handle common custom actions
     switch (action.target) {
-      case "scrollToErrors":
+      case 'scrollToErrors':
         const firstError = document.querySelector('[aria-invalid="true"]');
         if (firstError) {
-          firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+          firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
         break;
-      case "resetForm":
-        const forms = document.querySelectorAll("form");
+      case 'resetForm':
+        const forms = document.querySelectorAll('form');
         forms.forEach((form) => form.reset());
         break;
-      case "goBack":
+      case 'goBack':
         window.history.back();
         break;
-      case "saveLocal":
+      case 'saveLocal':
         // Save form data to localStorage
         const formData = new FormData();
-        const inputs = document.querySelectorAll("input, textarea, select");
+        const inputs = document.querySelectorAll('input, textarea, select');
         inputs.forEach((input: any) => {
           if (input.value) {
             localStorage.setItem(
@@ -297,16 +295,16 @@ export function useDynamicError() {
             );
           }
         });
-        alert("Your data has been saved locally as a backup.");
+        alert('Your data has been saved locally as a backup.');
         break;
-      case "checkNetworkStatus":
+      case 'checkNetworkStatus':
         // Simple network check
-        fetch("/api/health-check")
-          .then(() => alert("Network connection is working properly."))
-          .catch(() => alert("Network connection appears to be down."));
+        fetch('/api/health-check')
+          .then(() => alert('Network connection is working properly.'))
+          .catch(() => alert('Network connection appears to be down.'));
         break;
       default:
-        console.warn("Unhandled custom action:", action.target);
+        console.warn('Unhandled custom action:', action.target);
     }
   }, []);
 
@@ -340,7 +338,7 @@ export class DynamicErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error("Error caught by boundary:", error, errorInfo);
+    console.error('Error caught by boundary:', error, errorInfo);
   }
 
   render() {
@@ -359,7 +357,7 @@ export class DynamicErrorBoundary extends React.Component<
           <DynamicErrorMessageDisplay
             error={errorMessage}
             onAction={(action) => {
-              if (action.action === "refresh") {
+              if (action.action === 'refresh') {
                 window.location.reload();
               }
             }}

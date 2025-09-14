@@ -1,29 +1,29 @@
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
+} from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 import {
   Truck,
   Plus,
@@ -36,14 +36,14 @@ import {
   Filter,
   Download,
   Search,
-} from "lucide-react";
+} from 'lucide-react';
 import {
   format,
   startOfWeek,
   endOfWeek,
   isWithinInterval,
   parseISO,
-} from "date-fns";
+} from 'date-fns';
 
 interface Distribution {
   id: number;
@@ -85,63 +85,59 @@ export default function DonationTracking() {
   const queryClient = useQueryClient();
 
   // State for filters and search
-  const [selectedWeek, setSelectedWeek] = useState<string>("all");
-  const [selectedHost, setSelectedHost] = useState<string>("all");
-  const [selectedRecipient, setSelectedRecipient] = useState<string>("all");
-  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedWeek, setSelectedWeek] = useState<string>('all');
+  const [selectedHost, setSelectedHost] = useState<string>('all');
+  const [selectedRecipient, setSelectedRecipient] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState('');
 
   // State for the form dialog
   const [showAddDialog, setShowAddDialog] = useState(false);
-  const [
-    editingDistribution,
-    setEditingDistribution,
-  ] = useState<Distribution | null>(null);
+  const [editingDistribution, setEditingDistribution] =
+    useState<Distribution | null>(null);
   const [formData, setFormData] = useState({
-    distributionDate: format(new Date(), "yyyy-MM-dd"),
-    hostId: "",
-    recipientId: "",
-    sandwichCount: "",
-    notes: "",
+    distributionDate: format(new Date(), 'yyyy-MM-dd'),
+    hostId: '',
+    recipientId: '',
+    sandwichCount: '',
+    notes: '',
   });
 
   // Fetch distributions
-  const {
-    data: distributions = [],
-    isLoading: loadingDistributions,
-  } = useQuery<Distribution[]>({
-    queryKey: ["/api/sandwich-distributions"],
-    queryFn: () => apiRequest("GET", "/api/sandwich-distributions"),
-  });
+  const { data: distributions = [], isLoading: loadingDistributions } =
+    useQuery<Distribution[]>({
+      queryKey: ['/api/sandwich-distributions'],
+      queryFn: () => apiRequest('GET', '/api/sandwich-distributions'),
+    });
 
   // Fetch hosts
   const { data: hosts = [] } = useQuery<Host[]>({
-    queryKey: ["/api/hosts"],
-    queryFn: () => apiRequest("GET", "/api/hosts"),
+    queryKey: ['/api/hosts'],
+    queryFn: () => apiRequest('GET', '/api/hosts'),
   });
 
   // Fetch recipients
   const { data: recipients = [] } = useQuery<Recipient[]>({
-    queryKey: ["/api/recipients"],
-    queryFn: () => apiRequest("GET", "/api/recipients"),
+    queryKey: ['/api/recipients'],
+    queryFn: () => apiRequest('GET', '/api/recipients'),
   });
 
   // Create distribution mutation
   const createDistributionMutation = useMutation({
     mutationFn: (distributionData: any) =>
-      apiRequest("POST", "/api/sandwich-distributions", distributionData),
+      apiRequest('POST', '/api/sandwich-distributions', distributionData),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["/api/sandwich-distributions"],
+        queryKey: ['/api/sandwich-distributions'],
       });
-      toast({ description: "Distribution logged successfully" });
+      toast({ description: 'Distribution logged successfully' });
       setShowAddDialog(false);
       setEditingDistribution(null);
       resetForm();
     },
     onError: (error: any) => {
       toast({
-        description: error.message || "Failed to log distribution",
-        variant: "destructive",
+        description: error.message || 'Failed to log distribution',
+        variant: 'destructive',
       });
     },
   });
@@ -149,20 +145,20 @@ export default function DonationTracking() {
   // Update distribution mutation
   const updateDistributionMutation = useMutation({
     mutationFn: ({ id, ...data }: any) =>
-      apiRequest("PUT", `/api/sandwich-distributions/${id}`, data),
+      apiRequest('PUT', `/api/sandwich-distributions/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["/api/sandwich-distributions"],
+        queryKey: ['/api/sandwich-distributions'],
       });
-      toast({ description: "Distribution updated successfully" });
+      toast({ description: 'Distribution updated successfully' });
       setShowAddDialog(false);
       setEditingDistribution(null);
       resetForm();
     },
     onError: (error: any) => {
       toast({
-        description: error.message || "Failed to update distribution",
-        variant: "destructive",
+        description: error.message || 'Failed to update distribution',
+        variant: 'destructive',
       });
     },
   });
@@ -170,36 +166,36 @@ export default function DonationTracking() {
   // Delete distribution mutation
   const deleteDistributionMutation = useMutation({
     mutationFn: (id: number) =>
-      apiRequest("DELETE", `/api/sandwich-distributions/${id}`),
+      apiRequest('DELETE', `/api/sandwich-distributions/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["/api/sandwich-distributions"],
+        queryKey: ['/api/sandwich-distributions'],
       });
-      toast({ description: "Distribution deleted successfully" });
+      toast({ description: 'Distribution deleted successfully' });
     },
     onError: (error: any) => {
       toast({
-        description: error.message || "Failed to delete distribution",
-        variant: "destructive",
+        description: error.message || 'Failed to delete distribution',
+        variant: 'destructive',
       });
     },
   });
 
   const resetForm = () => {
     setFormData({
-      distributionDate: format(new Date(), "yyyy-MM-dd"),
-      hostId: "",
-      recipientId: "",
-      sandwichCount: "",
-      notes: "",
+      distributionDate: format(new Date(), 'yyyy-MM-dd'),
+      hostId: '',
+      recipientId: '',
+      sandwichCount: '',
+      notes: '',
     });
   };
 
   const handleSubmit = () => {
     if (!formData.hostId || !formData.recipientId || !formData.sandwichCount) {
       toast({
-        description: "Please fill in all required fields",
-        variant: "destructive",
+        description: 'Please fill in all required fields',
+        variant: 'destructive',
       });
       return;
     }
@@ -211,8 +207,8 @@ export default function DonationTracking() {
 
     if (!host || !recipient) {
       toast({
-        description: "Invalid host or recipient selection",
-        variant: "destructive",
+        description: 'Invalid host or recipient selection',
+        variant: 'destructive',
       });
       return;
     }
@@ -223,19 +219,19 @@ export default function DonationTracking() {
 
     const distributionData = {
       distributionDate: formData.distributionDate,
-      weekEnding: format(weekEnd, "yyyy-MM-dd"),
+      weekEnding: format(weekEnd, 'yyyy-MM-dd'),
       hostId: parseInt(formData.hostId),
       hostName: host.name,
       recipientId: parseInt(formData.recipientId),
       recipientName: recipient.name,
       sandwichCount: parseInt(formData.sandwichCount),
       notes: formData.notes || null,
-      createdBy: user?.id || "",
+      createdBy: user?.id || '',
       createdByName: user
-        ? `${user.firstName || ""} ${user.lastName || ""}`.trim() ||
+        ? `${user.firstName || ''} ${user.lastName || ''}`.trim() ||
           user.email ||
-          "Unknown User"
-        : "Unknown User",
+          'Unknown User'
+        : 'Unknown User',
     };
 
     if (editingDistribution) {
@@ -255,7 +251,7 @@ export default function DonationTracking() {
       hostId: distribution.hostId.toString(),
       recipientId: distribution.recipientId.toString(),
       sandwichCount: distribution.sandwichCount.toString(),
-      notes: distribution.notes || "",
+      notes: distribution.notes || '',
     });
     setShowAddDialog(true);
   };
@@ -270,15 +266,15 @@ export default function DonationTracking() {
   const filteredDistributions = distributions.filter((dist) => {
     const matchesWeek =
       !selectedWeek ||
-      selectedWeek === "all" ||
+      selectedWeek === 'all' ||
       dist.weekEnding === selectedWeek;
     const matchesHost =
       !selectedHost ||
-      selectedHost === "all" ||
+      selectedHost === 'all' ||
       dist.hostId.toString() === selectedHost;
     const matchesRecipient =
       !selectedRecipient ||
-      selectedRecipient === "all" ||
+      selectedRecipient === 'all' ||
       dist.recipientId.toString() === selectedRecipient;
     const matchesSearch =
       !searchTerm ||
@@ -422,7 +418,7 @@ export default function DonationTracking() {
                   <SelectItem value="all">All weeks</SelectItem>
                   {availableWeeks.map((week) => (
                     <SelectItem key={week} value={week}>
-                      Week ending {format(new Date(week), "MMM d, yyyy")}
+                      Week ending {format(new Date(week), 'MMM d, yyyy')}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -438,7 +434,7 @@ export default function DonationTracking() {
                 <SelectContent>
                   <SelectItem value="all">All hosts</SelectItem>
                   {hosts
-                    .filter((h) => h.status === "active")
+                    .filter((h) => h.status === 'active')
                     .map((host) => (
                       <SelectItem key={host.id} value={host.id.toString()}>
                         {host.name}
@@ -460,7 +456,7 @@ export default function DonationTracking() {
                 <SelectContent>
                   <SelectItem value="all">All recipients</SelectItem>
                   {recipients
-                    .filter((r) => r.status === "active")
+                    .filter((r) => r.status === 'active')
                     .map((recipient) => (
                       <SelectItem
                         key={recipient.id}
@@ -483,10 +479,10 @@ export default function DonationTracking() {
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  setSelectedWeek("all");
-                  setSelectedHost("all");
-                  setSelectedRecipient("all");
-                  setSearchTerm("");
+                  setSelectedWeek('all');
+                  setSelectedHost('all');
+                  setSelectedRecipient('all');
+                  setSearchTerm('');
                 }}
               >
                 Clear All Filters
@@ -515,8 +511,8 @@ export default function DonationTracking() {
               </p>
               <p className="text-gray-600 mb-4">
                 {distributions.length === 0
-                  ? "Start by logging your first distribution"
-                  : "Try adjusting your filters to see more results"}
+                  ? 'Start by logging your first distribution'
+                  : 'Try adjusting your filters to see more results'}
               </p>
               {distributions.length === 0 && (
                 <Button
@@ -545,7 +541,7 @@ export default function DonationTracking() {
                           >
                             {format(
                               new Date(distribution.distributionDate),
-                              "MMM d, yyyy"
+                              'MMM d, yyyy'
                             )}
                           </Badge>
                           <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -565,24 +561,24 @@ export default function DonationTracking() {
                           <div className="flex items-center gap-2">
                             <Package className="h-4 w-4 text-[#236383]" />
                             <span className="font-bold text-lg text-[#236383]">
-                              {distribution.sandwichCount.toLocaleString()}{" "}
+                              {distribution.sandwichCount.toLocaleString()}{' '}
                               sandwiches
                             </span>
                           </div>
 
                           {distribution.notes && (
                             <div className="text-sm text-gray-600 flex-1">
-                              <span className="font-medium">Note:</span>{" "}
+                              <span className="font-medium">Note:</span>{' '}
                               {distribution.notes}
                             </div>
                           )}
                         </div>
 
                         <div className="text-xs text-gray-500">
-                          Logged by {distribution.createdByName} on{" "}
+                          Logged by {distribution.createdByName} on{' '}
                           {format(
                             new Date(distribution.createdAt),
-                            "MMM d, yyyy h:mm a"
+                            'MMM d, yyyy h:mm a'
                           )}
                         </div>
                       </div>
@@ -601,7 +597,7 @@ export default function DonationTracking() {
                           onClick={() => {
                             if (
                               window.confirm(
-                                "Are you sure you want to delete this distribution record?"
+                                'Are you sure you want to delete this distribution record?'
                               )
                             ) {
                               deleteDistributionMutation.mutate(
@@ -629,8 +625,8 @@ export default function DonationTracking() {
           <DialogHeader>
             <DialogTitle>
               {editingDistribution
-                ? "Edit Distribution"
-                : "Log New Distribution"}
+                ? 'Edit Distribution'
+                : 'Log New Distribution'}
             </DialogTitle>
           </DialogHeader>
 
@@ -663,7 +659,7 @@ export default function DonationTracking() {
                 </SelectTrigger>
                 <SelectContent>
                   {hosts
-                    .filter((h) => h.status === "active")
+                    .filter((h) => h.status === 'active')
                     .map((host) => (
                       <SelectItem key={host.id} value={host.id.toString()}>
                         {host.name}
@@ -686,7 +682,7 @@ export default function DonationTracking() {
                 </SelectTrigger>
                 <SelectContent>
                   {recipients
-                    .filter((r) => r.status === "active")
+                    .filter((r) => r.status === 'active')
                     .map((recipient) => (
                       <SelectItem
                         key={recipient.id}
@@ -745,12 +741,12 @@ export default function DonationTracking() {
                 updateDistributionMutation.isPending ? (
                   <div className="flex items-center gap-2">
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    {editingDistribution ? "Updating..." : "Logging..."}
+                    {editingDistribution ? 'Updating...' : 'Logging...'}
                   </div>
                 ) : editingDistribution ? (
-                  "Update Distribution"
+                  'Update Distribution'
                 ) : (
-                  "Log Distribution"
+                  'Log Distribution'
                 )}
               </Button>
             </div>

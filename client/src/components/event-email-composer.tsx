@@ -1,25 +1,25 @@
-import { useState, useEffect } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { useState, useEffect } from 'react';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
+} from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Card, CardContent } from "@/components/ui/card";
+} from '@/components/ui/select';
+import { Card, CardContent } from '@/components/ui/card';
 import {
   Mail,
   Send,
@@ -30,9 +30,9 @@ import {
   Clock,
   X,
   Shield,
-} from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+} from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest, queryClient } from '@/lib/queryClient';
 
 interface EventRequest {
   id: number;
@@ -67,11 +67,11 @@ interface EmailTemplate {
 
 // Quick start options for subject line
 const SUBJECT_SUGGESTIONS = [
-  "Re: {organizationName} Event",
-  "The Sandwich Project - Event Resources",
-  "Event Planning - {organizationName}",
-  "Follow-up: {organizationName}",
-  "custom", // Custom subject
+  'Re: {organizationName} Event',
+  'The Sandwich Project - Event Resources',
+  'Event Planning - {organizationName}',
+  'Follow-up: {organizationName}',
+  'custom', // Custom subject
 ];
 
 interface EventEmailComposerProps {
@@ -87,31 +87,30 @@ export function EventEmailComposer({
   eventRequest,
   onEmailSent,
 }: EventEmailComposerProps) {
-  const [selectedSubjectSuggestion, setSelectedSubjectSuggestion] = useState<
-    string
-  >("");
-  const [subject, setSubject] = useState("");
-  const [content, setContent] = useState("");
+  const [selectedSubjectSuggestion, setSelectedSubjectSuggestion] =
+    useState<string>('');
+  const [subject, setSubject] = useState('');
+  const [content, setContent] = useState('');
   const [selectedAttachments, setSelectedAttachments] = useState<string[]>([]);
   const [isDraft, setIsDraft] = useState(false);
   const { toast } = useToast();
 
   // Fetch available documents
   const { data: documents = [] } = useQuery<Document[]>({
-    queryKey: ["/api/documents"],
+    queryKey: ['/api/documents'],
   });
 
   // Format event details for template insertion
   const formatEventDetails = () => {
     const details = [];
     if (eventRequest.desiredEventDate) {
-      const date = new Date(eventRequest.desiredEventDate + "T12:00:00");
+      const date = new Date(eventRequest.desiredEventDate + 'T12:00:00');
       details.push(
-        `Date: ${date.toLocaleDateString("en-US", {
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric",
+        `Date: ${date.toLocaleDateString('en-US', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
         })}`
       );
     }
@@ -129,14 +128,14 @@ export function EventEmailComposer({
       );
     }
 
-    return details.length > 0 ? `\n${details.join("\n")}\n` : "";
+    return details.length > 0 ? `\n${details.join('\n')}\n` : '';
   };
 
   // Apply subject suggestion when selected
   useEffect(() => {
-    if (selectedSubjectSuggestion && selectedSubjectSuggestion !== "custom") {
+    if (selectedSubjectSuggestion && selectedSubjectSuggestion !== 'custom') {
       const processedSubject = selectedSubjectSuggestion.replace(
-        "{organizationName}",
+        '{organizationName}',
         eventRequest.organizationName
       );
       setSubject(processedSubject);
@@ -197,9 +196,9 @@ info@thesandwichproject.org`;
 
       // Pre-select all toolkit documents (use full URLs)
       setSelectedAttachments([
-        "/toolkit/food-safety-volunteers.pdf",
-        "/toolkit/deli-sandwich-making-101.pdf",
-        "/toolkit/pbj-sandwich-making-101.pdf",
+        '/toolkit/food-safety-volunteers.pdf',
+        '/toolkit/deli-sandwich-making-101.pdf',
+        '/toolkit/pbj-sandwich-making-101.pdf',
       ]);
     }
   }, [isOpen, eventRequest, formatEventDetails]);
@@ -212,37 +211,37 @@ info@thesandwichproject.org`;
       isDraft: boolean;
       attachments: string[];
     }) => {
-      return apiRequest("POST", "/api/emails/event", {
+      return apiRequest('POST', '/api/emails/event', {
         eventRequestId: eventRequest.id,
-        recipientId: "external", // External contact
+        recipientId: 'external', // External contact
         recipientName: `${eventRequest.firstName} ${eventRequest.lastName}`,
         recipientEmail: emailData.recipientEmail,
         subject: emailData.subject,
         content: emailData.content,
         isDraft: emailData.isDraft,
         attachments: emailData.attachments,
-        contextType: "event_request",
+        contextType: 'event_request',
         contextId: eventRequest.id.toString(),
         contextTitle: `Event: ${eventRequest.organizationName}`,
       });
     },
     onSuccess: () => {
       toast({
-        title: isDraft ? "Draft saved successfully" : "Email sent successfully",
+        title: isDraft ? 'Draft saved successfully' : 'Email sent successfully',
         description: isDraft
-          ? "You can find the draft in your email drafts folder"
+          ? 'You can find the draft in your email drafts folder'
           : `Email sent to ${eventRequest.firstName} ${eventRequest.lastName}`,
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/emails"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/emails'] });
       onEmailSent?.();
       onClose();
     },
     onError: (error) => {
       toast({
-        title: "Failed to send email",
+        title: 'Failed to send email',
         description:
-          error instanceof Error ? error.message : "Please try again",
-        variant: "destructive",
+          error instanceof Error ? error.message : 'Please try again',
+        variant: 'destructive',
       });
     },
   });
@@ -250,9 +249,9 @@ info@thesandwichproject.org`;
   const handleSend = (asDraft: boolean = false) => {
     if (!subject.trim() || !content.trim()) {
       toast({
-        title: "Missing information",
-        description: "Please enter both subject and content",
-        variant: "destructive",
+        title: 'Missing information',
+        description: 'Please enter both subject and content',
+        variant: 'destructive',
       });
       return;
     }
@@ -276,25 +275,25 @@ info@thesandwichproject.org`;
   };
 
   const getDocumentIcon = (fileName: string) => {
-    if (fileName.includes("Inventory")) return Calculator;
-    if (fileName.includes("Safety")) return Shield;
-    if (fileName.includes("Making")) return Users;
+    if (fileName.includes('Inventory')) return Calculator;
+    if (fileName.includes('Safety')) return Shield;
+    if (fileName.includes('Making')) return Users;
     return FileText;
   };
 
   // Available toolkit documents (inventory calculator is now online)
   const toolkitDocuments = [
     {
-      name: "Food Safety Guidelines",
-      url: "/toolkit/food-safety-volunteers.pdf",
+      name: 'Food Safety Guidelines',
+      url: '/toolkit/food-safety-volunteers.pdf',
     },
     {
-      name: "Deli Sandwich Instructions",
-      url: "/toolkit/deli-sandwich-making-101.pdf",
+      name: 'Deli Sandwich Instructions',
+      url: '/toolkit/deli-sandwich-making-101.pdf',
     },
     {
-      name: "PB&J Sandwich Instructions",
-      url: "/toolkit/pbj-sandwich-making-101.pdf",
+      name: 'PB&J Sandwich Instructions',
+      url: '/toolkit/pbj-sandwich-making-101.pdf',
     },
   ];
 
@@ -347,10 +346,10 @@ info@thesandwichproject.org`;
               <SelectContent>
                 {SUBJECT_SUGGESTIONS.map((suggestion, index) => (
                   <SelectItem key={index} value={suggestion}>
-                    {suggestion === "custom"
-                      ? "Custom subject"
+                    {suggestion === 'custom'
+                      ? 'Custom subject'
                       : suggestion.replace(
-                          "{organizationName}",
+                          '{organizationName}',
                           eventRequest.organizationName
                         )}
                   </SelectItem>
@@ -408,8 +407,8 @@ info@thesandwichproject.org`;
                     key={doc.url}
                     className={`cursor-pointer transition-all duration-200 ${
                       isSelected
-                        ? "bg-gradient-to-r from-teal-100 to-cyan-200 border-teal-300 shadow-md"
-                        : "bg-gradient-to-r from-gray-50 to-white border-gray-200 hover:border-teal-200"
+                        ? 'bg-gradient-to-r from-teal-100 to-cyan-200 border-teal-300 shadow-md'
+                        : 'bg-gradient-to-r from-gray-50 to-white border-gray-200 hover:border-teal-200'
                     }`}
                     onClick={() => toggleAttachment(doc.url)}
                   >
@@ -422,13 +421,13 @@ info@thesandwichproject.org`;
                         />
                         <IconComponent
                           className={`w-4 h-4 flex-shrink-0 ${
-                            isSelected ? "text-teal-600" : "text-gray-500"
+                            isSelected ? 'text-teal-600' : 'text-gray-500'
                           }`}
                         />
                         <div className="min-w-0 flex-1">
                           <p
                             className={`text-sm font-medium truncate ${
-                              isSelected ? "text-teal-900" : "text-gray-700"
+                              isSelected ? 'text-teal-900' : 'text-gray-700'
                             }`}
                           >
                             {doc.name}
@@ -449,7 +448,7 @@ info@thesandwichproject.org`;
                   className="bg-gradient-to-r from-teal-100 to-cyan-200 text-teal-800 border-teal-300"
                 >
                   {selectedAttachments.length} document
-                  {selectedAttachments.length !== 1 ? "s" : ""} selected
+                  {selectedAttachments.length !== 1 ? 's' : ''} selected
                 </Badge>
               </div>
             )}
@@ -487,7 +486,7 @@ info@thesandwichproject.org`;
                 className="flex items-center gap-2 bg-gradient-to-r from-teal-600 to-cyan-700 hover:from-teal-700 hover:to-cyan-800"
               >
                 <Send className="w-4 h-4" />
-                {sendEmailMutation.isPending ? "Sending..." : "Send Email"}
+                {sendEmailMutation.isPending ? 'Sending...' : 'Send Email'}
               </Button>
             </div>
           </div>

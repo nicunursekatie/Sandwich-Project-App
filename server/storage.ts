@@ -1,39 +1,105 @@
-import { 
-  users, projects, projectTasks, projectComments, taskCompletions, messages, weeklyReports, meetingMinutes, driveLinks, sandwichCollections, sandwichDistributions, agendaItems, meetings, driverAgreements, drivers, volunteers, hosts, hostContacts, recipients, contacts, notifications, committees, committeeMemberships, announcements, suggestions, suggestionResponses, wishlistSuggestions, documents, documentPermissions, documentAccessLogs, eventRequests, organizations, eventVolunteers,
-  type User, type InsertUser, type UpsertUser,
-  type Project, type InsertProject,
-  type ProjectTask, type InsertProjectTask,
-  type ProjectComment, type InsertProjectComment,
-  type TaskCompletion, type InsertTaskCompletion,
-  type Message, type InsertMessage,
-  type WeeklyReport, type InsertWeeklyReport,
-  type SandwichCollection, type InsertSandwichCollection,
-  type MeetingMinutes, type InsertMeetingMinutes,
-  type DriveLink, type InsertDriveLink,
-  type AgendaItem, type InsertAgendaItem,
-  type Meeting, type InsertMeeting,
-  type DriverAgreement, type InsertDriverAgreement,
-  type Driver, type InsertDriver,
-  type Volunteer, type InsertVolunteer,
-  type Host, type InsertHost,
-  type HostContact, type InsertHostContact,
-  type Recipient, type InsertRecipient,
-  type Contact, type InsertContact,
-  type Notification, type InsertNotification,
-  type Committee, type InsertCommittee,
-  type CommitteeMembership, type InsertCommitteeMembership,
-  type Suggestion, type InsertSuggestion,
-  type SuggestionResponse, type InsertSuggestionResponse,
-  type ChatMessageLike, type InsertChatMessageLike,
-  type SandwichDistribution, type InsertSandwichDistribution,
-  type WishlistSuggestion, type InsertWishlistSuggestion,
-  type Document, type InsertDocument,
-  type DocumentPermission, type InsertDocumentPermission,
-  type DocumentAccessLog, type InsertDocumentAccessLog,
-  type EventRequest, type InsertEventRequest,
-  type Organization, type InsertOrganization,
-  type EventVolunteer, type InsertEventVolunteer
-} from "@shared/schema";
+import {
+  users,
+  projects,
+  projectTasks,
+  projectComments,
+  taskCompletions,
+  messages,
+  weeklyReports,
+  meetingMinutes,
+  driveLinks,
+  sandwichCollections,
+  sandwichDistributions,
+  agendaItems,
+  meetings,
+  driverAgreements,
+  drivers,
+  volunteers,
+  hosts,
+  hostContacts,
+  recipients,
+  contacts,
+  notifications,
+  committees,
+  committeeMemberships,
+  announcements,
+  suggestions,
+  suggestionResponses,
+  wishlistSuggestions,
+  documents,
+  documentPermissions,
+  documentAccessLogs,
+  eventRequests,
+  organizations,
+  eventVolunteers,
+  type User,
+  type InsertUser,
+  type UpsertUser,
+  type Project,
+  type InsertProject,
+  type ProjectTask,
+  type InsertProjectTask,
+  type ProjectComment,
+  type InsertProjectComment,
+  type TaskCompletion,
+  type InsertTaskCompletion,
+  type Message,
+  type InsertMessage,
+  type WeeklyReport,
+  type InsertWeeklyReport,
+  type SandwichCollection,
+  type InsertSandwichCollection,
+  type MeetingMinutes,
+  type InsertMeetingMinutes,
+  type DriveLink,
+  type InsertDriveLink,
+  type AgendaItem,
+  type InsertAgendaItem,
+  type Meeting,
+  type InsertMeeting,
+  type DriverAgreement,
+  type InsertDriverAgreement,
+  type Driver,
+  type InsertDriver,
+  type Volunteer,
+  type InsertVolunteer,
+  type Host,
+  type InsertHost,
+  type HostContact,
+  type InsertHostContact,
+  type Recipient,
+  type InsertRecipient,
+  type Contact,
+  type InsertContact,
+  type Notification,
+  type InsertNotification,
+  type Committee,
+  type InsertCommittee,
+  type CommitteeMembership,
+  type InsertCommitteeMembership,
+  type Suggestion,
+  type InsertSuggestion,
+  type SuggestionResponse,
+  type InsertSuggestionResponse,
+  type ChatMessageLike,
+  type InsertChatMessageLike,
+  type SandwichDistribution,
+  type InsertSandwichDistribution,
+  type WishlistSuggestion,
+  type InsertWishlistSuggestion,
+  type Document,
+  type InsertDocument,
+  type DocumentPermission,
+  type InsertDocumentPermission,
+  type DocumentAccessLog,
+  type InsertDocumentAccessLog,
+  type EventRequest,
+  type InsertEventRequest,
+  type Organization,
+  type InsertOrganization,
+  type EventVolunteer,
+  type InsertEventVolunteer,
+} from '@shared/schema';
 
 export interface IStorage {
   // Users (required for authentication)
@@ -44,56 +110,79 @@ export interface IStorage {
   getAllUsers(): Promise<User[]>;
   updateUser(id: string, updates: Partial<User>): Promise<User | undefined>;
   setUserPassword(id: string, password: string): Promise<void>;
-  
+
   // Legacy user methods (for backwards compatibility)
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
-  
+
   // Projects
   getAllProjects(): Promise<Project[]>;
   getProject(id: number): Promise<Project | undefined>;
   createProject(project: InsertProject): Promise<Project>;
-  updateProject(id: number, updates: Partial<Project>): Promise<Project | undefined>;
+  updateProject(
+    id: number,
+    updates: Partial<Project>
+  ): Promise<Project | undefined>;
   deleteProject(id: number): Promise<boolean>;
   getArchivedProjects(): Promise<any[]>;
   archiveProject(id: number, userId?: string, userName?: string): Promise<any>;
   getProjectsForReview(): Promise<Project[]>;
-  
+
   // Project Tasks
   getProjectTasks(projectId: number): Promise<ProjectTask[]>;
   getTaskById(id: number): Promise<ProjectTask | undefined>;
   getProjectTask(taskId: number): Promise<ProjectTask | undefined>;
   createProjectTask(task: InsertProjectTask): Promise<ProjectTask>;
-  updateProjectTask(id: number, updates: Partial<ProjectTask>): Promise<ProjectTask | undefined>;
+  updateProjectTask(
+    id: number,
+    updates: Partial<ProjectTask>
+  ): Promise<ProjectTask | undefined>;
   updateTaskStatus(id: number, status: string): Promise<boolean>;
   deleteProjectTask(id: number): Promise<boolean>;
   getProjectCongratulations(projectId: number): Promise<any[]>;
-  
+
   // Task Completions
-  createTaskCompletion(completion: InsertTaskCompletion): Promise<TaskCompletion>;
+  createTaskCompletion(
+    completion: InsertTaskCompletion
+  ): Promise<TaskCompletion>;
   getTaskCompletions(taskId: number): Promise<TaskCompletion[]>;
   removeTaskCompletion(taskId: number, userId: string): Promise<boolean>;
-  
+
   // Project Comments
   getProjectComments(projectId: number): Promise<ProjectComment[]>;
   createProjectComment(comment: InsertProjectComment): Promise<ProjectComment>;
   deleteProjectComment(id: number): Promise<boolean>;
-  
+
   // Committee management
   getAllCommittees(): Promise<Committee[]>;
   getCommittee(id: string): Promise<Committee | undefined>;
   createCommittee(committee: InsertCommittee): Promise<Committee>;
-  updateCommittee(id: string, updates: Partial<Committee>): Promise<Committee | undefined>;
+  updateCommittee(
+    id: string,
+    updates: Partial<Committee>
+  ): Promise<Committee | undefined>;
   deleteCommittee(id: string): Promise<boolean>;
-  
+
   // Committee membership management
-  getUserCommittees(userId: string): Promise<Array<Committee & { membership: CommitteeMembership }>>;
-  getCommitteeMembers(committeeId: string): Promise<Array<User & { membership: CommitteeMembership }>>;
-  addUserToCommittee(membership: InsertCommitteeMembership): Promise<CommitteeMembership>;
-  updateCommitteeMembership(id: number, updates: Partial<CommitteeMembership>): Promise<CommitteeMembership | undefined>;
-  removeUserFromCommittee(userId: string, committeeId: string): Promise<boolean>;
+  getUserCommittees(
+    userId: string
+  ): Promise<Array<Committee & { membership: CommitteeMembership }>>;
+  getCommitteeMembers(
+    committeeId: string
+  ): Promise<Array<User & { membership: CommitteeMembership }>>;
+  addUserToCommittee(
+    membership: InsertCommitteeMembership
+  ): Promise<CommitteeMembership>;
+  updateCommitteeMembership(
+    id: number,
+    updates: Partial<CommitteeMembership>
+  ): Promise<CommitteeMembership | undefined>;
+  removeUserFromCommittee(
+    userId: string,
+    committeeId: string
+  ): Promise<boolean>;
   isUserCommitteeMember(userId: string, committeeId: string): Promise<boolean>;
-  
+
   // Messages
   getAllMessages(): Promise<Message[]>;
   getRecentMessages(limit: number): Promise<Message[]>;
@@ -108,92 +197,149 @@ export interface IStorage {
   getMessagesBySender(senderId: string): Promise<Message[]>;
   getMessagesBySenderWithReadStatus(senderId: string): Promise<any[]>;
   getMessagesForRecipient(recipientId: string): Promise<Message[]>;
-  
+
   // Group messaging with individual thread management
   getUserMessageGroups(userId: string): Promise<any[]>;
   getMessageGroupMessages(groupId: number, userId: string): Promise<Message[]>;
   createMessageGroup(group: any): Promise<any>;
-  addUserToMessageGroup(groupId: number, userId: string, role?: string): Promise<any>;
-  
+  addUserToMessageGroup(
+    groupId: number,
+    userId: string,
+    role?: string
+  ): Promise<any>;
+
   // Conversation methods
-  createConversation(conversationData: any, participants: string[]): Promise<any>;
-  getConversationMessages(conversationId: number, userId: string): Promise<any[]>;
+  createConversation(
+    conversationData: any,
+    participants: string[]
+  ): Promise<any>;
+  getConversationMessages(
+    conversationId: number,
+    userId: string
+  ): Promise<any[]>;
   addConversationMessage(messageData: any): Promise<any>;
-  updateConversationMessage(messageId: number, userId: string, updates: any): Promise<any>;
-  deleteConversationMessage(messageId: number, userId: string): Promise<boolean>;
+  updateConversationMessage(
+    messageId: number,
+    userId: string,
+    updates: any
+  ): Promise<any>;
+  deleteConversationMessage(
+    messageId: number,
+    userId: string
+  ): Promise<boolean>;
   getConversationParticipants(conversationId: number): Promise<any[]>;
-  
+
   // Message likes methods
-  likeMessage(messageId: number, userId: string, userName: string): Promise<any>;
+  likeMessage(
+    messageId: number,
+    userId: string,
+    userName: string
+  ): Promise<any>;
   unlikeMessage(messageId: number, userId: string): Promise<boolean>;
   getMessageLikes(messageId: number): Promise<any[]>;
   hasUserLikedMessage(messageId: number, userId: string): Promise<boolean>;
-  
+
   // Chat message likes methods (for Socket.IO chat messages)
-  likeChatMessage(messageId: number, userId: string, userName: string): Promise<ChatMessageLike | null>;
+  likeChatMessage(
+    messageId: number,
+    userId: string,
+    userName: string
+  ): Promise<ChatMessageLike | null>;
   unlikeChatMessage(messageId: number, userId: string): Promise<boolean>;
   getChatMessageLikes(messageId: number): Promise<ChatMessageLike[]>;
   hasUserLikedChatMessage(messageId: number, userId: string): Promise<boolean>;
-  
-  
+
   // Weekly Reports
   getAllWeeklyReports(): Promise<WeeklyReport[]>;
   createWeeklyReport(report: InsertWeeklyReport): Promise<WeeklyReport>;
-  
+
   // Sandwich Collections
   getAllSandwichCollections(): Promise<SandwichCollection[]>;
-  getSandwichCollections(limit: number, offset: number, sortField?: string, sortOrder?: string): Promise<SandwichCollection[]>;
+  getSandwichCollections(
+    limit: number,
+    offset: number,
+    sortField?: string,
+    sortOrder?: string
+  ): Promise<SandwichCollection[]>;
   getSandwichCollectionById(id: number): Promise<SandwichCollection | null>;
   getSandwichCollectionsCount(): Promise<number>;
-  getCollectionStats(): Promise<{ totalEntries: number; totalSandwiches: number; }>;
-  createSandwichCollection(collection: InsertSandwichCollection): Promise<SandwichCollection>;
-  updateSandwichCollection(id: number, updates: Partial<SandwichCollection>): Promise<SandwichCollection | undefined>;
+  getCollectionStats(): Promise<{
+    totalEntries: number;
+    totalSandwiches: number;
+  }>;
+  createSandwichCollection(
+    collection: InsertSandwichCollection
+  ): Promise<SandwichCollection>;
+  updateSandwichCollection(
+    id: number,
+    updates: Partial<SandwichCollection>
+  ): Promise<SandwichCollection | undefined>;
   deleteSandwichCollection(id: number): Promise<boolean>;
-  updateCollectionHostNames(oldHostName: string, newHostName: string): Promise<number>;
-  
+  updateCollectionHostNames(
+    oldHostName: string,
+    newHostName: string
+  ): Promise<number>;
+
   // Meeting Minutes
   getAllMeetingMinutes(): Promise<MeetingMinutes[]>;
   getRecentMeetingMinutes(limit: number): Promise<MeetingMinutes[]>;
   createMeetingMinutes(minutes: InsertMeetingMinutes): Promise<MeetingMinutes>;
   deleteMeetingMinutes(id: number): Promise<boolean>;
-  
+
   // Drive Links
   getAllDriveLinks(): Promise<DriveLink[]>;
   createDriveLink(link: InsertDriveLink): Promise<DriveLink>;
-  
+
   // Agenda Items
   getAllAgendaItems(): Promise<AgendaItem[]>;
   createAgendaItem(item: InsertAgendaItem): Promise<AgendaItem>;
-  updateAgendaItemStatus(id: number, status: string): Promise<AgendaItem | undefined>;
-  updateAgendaItem(id: number, updates: Partial<AgendaItem>): Promise<AgendaItem | undefined>;
+  updateAgendaItemStatus(
+    id: number,
+    status: string
+  ): Promise<AgendaItem | undefined>;
+  updateAgendaItem(
+    id: number,
+    updates: Partial<AgendaItem>
+  ): Promise<AgendaItem | undefined>;
   deleteAgendaItem(id: number): Promise<boolean>;
-  
+
   // Meetings
   getCurrentMeeting(): Promise<Meeting | undefined>;
   getAllMeetings(): Promise<Meeting[]>;
   getMeetingsByType(type: string): Promise<Meeting[]>;
   createMeeting(meeting: InsertMeeting): Promise<Meeting>;
   updateMeetingAgenda(id: number, agenda: string): Promise<Meeting | undefined>;
-  updateMeeting(id: number, updates: Partial<Meeting>): Promise<Meeting | undefined>;
+  updateMeeting(
+    id: number,
+    updates: Partial<Meeting>
+  ): Promise<Meeting | undefined>;
   deleteMeeting(id: number): Promise<boolean>;
-  
+
   // Driver Agreements (admin access only)
-  createDriverAgreement(agreement: InsertDriverAgreement): Promise<DriverAgreement>;
-  
+  createDriverAgreement(
+    agreement: InsertDriverAgreement
+  ): Promise<DriverAgreement>;
+
   // Drivers
   getAllDrivers(): Promise<Driver[]>;
   getDriver(id: number): Promise<Driver | undefined>;
   createDriver(driver: InsertDriver): Promise<Driver>;
-  updateDriver(id: number, updates: Partial<Driver>): Promise<Driver | undefined>;
+  updateDriver(
+    id: number,
+    updates: Partial<Driver>
+  ): Promise<Driver | undefined>;
   deleteDriver(id: number): Promise<boolean>;
-  
+
   // Volunteers
   getAllVolunteers(): Promise<Volunteer[]>;
   getVolunteer(id: number): Promise<Volunteer | undefined>;
   createVolunteer(volunteer: InsertVolunteer): Promise<Volunteer>;
-  updateVolunteer(id: number, updates: Partial<Volunteer>): Promise<Volunteer | undefined>;
+  updateVolunteer(
+    id: number,
+    updates: Partial<Volunteer>
+  ): Promise<Volunteer | undefined>;
   deleteVolunteer(id: number): Promise<boolean>;
-  
+
   // Hosts
   getAllHosts(): Promise<Host[]>;
   getAllHostsWithContacts(): Promise<Array<Host & { contacts: HostContact[] }>>;
@@ -201,70 +347,106 @@ export interface IStorage {
   createHost(host: InsertHost): Promise<Host>;
   updateHost(id: number, updates: Partial<Host>): Promise<Host | undefined>;
   deleteHost(id: number): Promise<boolean>;
-  
+
   // Recipients
   getAllRecipients(): Promise<Recipient[]>;
   getRecipient(id: number): Promise<Recipient | undefined>;
   createRecipient(recipient: InsertRecipient): Promise<Recipient>;
-  updateRecipient(id: number, updates: Partial<Recipient>): Promise<Recipient | undefined>;
+  updateRecipient(
+    id: number,
+    updates: Partial<Recipient>
+  ): Promise<Recipient | undefined>;
   deleteRecipient(id: number): Promise<boolean>;
-  
+
   // General Contacts
   getAllContacts(): Promise<Contact[]>;
   getContact(id: number): Promise<Contact | undefined>;
   createContact(contact: InsertContact): Promise<Contact>;
-  updateContact(id: number, updates: Partial<Contact>): Promise<Contact | undefined>;
+  updateContact(
+    id: number,
+    updates: Partial<Contact>
+  ): Promise<Contact | undefined>;
   deleteContact(id: number): Promise<boolean>;
-  
+
   // Host Contacts
   createHostContact(contact: InsertHostContact): Promise<HostContact>;
   getHostContacts(hostId: number): Promise<HostContact[]>;
-  updateHostContact(id: number, updates: Partial<HostContact>): Promise<HostContact | undefined>;
+  updateHostContact(
+    id: number,
+    updates: Partial<HostContact>
+  ): Promise<HostContact | undefined>;
   deleteHostContact(id: number): Promise<boolean>;
   getAllHostsWithContacts(): Promise<Array<Host & { contacts: HostContact[] }>>;
-  
+
   // Notifications & Celebrations
   getUserNotifications(userId: string): Promise<Notification[]>;
   createNotification(notification: InsertNotification): Promise<Notification>;
   markNotificationRead(id: number): Promise<boolean>;
   deleteNotification(id: number): Promise<boolean>;
-  createCelebration(userId: string, taskId: number, message: string): Promise<Notification>;
-  
+  createCelebration(
+    userId: string,
+    taskId: number,
+    message: string
+  ): Promise<Notification>;
+
   // Announcements
   getAllAnnouncements(): Promise<any[]>;
   createAnnouncement(announcement: any): Promise<any>;
   updateAnnouncement(id: number, updates: any): Promise<any | undefined>;
   deleteAnnouncement(id: number): Promise<boolean>;
-  
+
   // Suggestions Portal
   getAllSuggestions(): Promise<Suggestion[]>;
   getSuggestion(id: number): Promise<Suggestion | undefined>;
   createSuggestion(suggestion: InsertSuggestion): Promise<Suggestion>;
-  updateSuggestion(id: number, updates: Partial<Suggestion>): Promise<Suggestion | undefined>;
+  updateSuggestion(
+    id: number,
+    updates: Partial<Suggestion>
+  ): Promise<Suggestion | undefined>;
   deleteSuggestion(id: number): Promise<boolean>;
   upvoteSuggestion(id: number): Promise<boolean>;
 
   // Wishlist Suggestions
   getAllWishlistSuggestions(): Promise<WishlistSuggestion[]>;
   getWishlistSuggestion(id: number): Promise<WishlistSuggestion | undefined>;
-  createWishlistSuggestion(suggestion: InsertWishlistSuggestion): Promise<WishlistSuggestion>;
-  updateWishlistSuggestion(id: number, updates: Partial<WishlistSuggestion>): Promise<WishlistSuggestion | undefined>;
+  createWishlistSuggestion(
+    suggestion: InsertWishlistSuggestion
+  ): Promise<WishlistSuggestion>;
+  updateWishlistSuggestion(
+    id: number,
+    updates: Partial<WishlistSuggestion>
+  ): Promise<WishlistSuggestion | undefined>;
   deleteWishlistSuggestion(id: number): Promise<boolean>;
   getRecentWishlistActivity(limit?: number): Promise<WishlistSuggestion[]>;
 
   // Suggestion Responses
   getSuggestionResponses(suggestionId: number): Promise<SuggestionResponse[]>;
-  createSuggestionResponse(response: InsertSuggestionResponse): Promise<SuggestionResponse>;
+  createSuggestionResponse(
+    response: InsertSuggestionResponse
+  ): Promise<SuggestionResponse>;
   deleteSuggestionResponse(id: number): Promise<boolean>;
 
   // Project assignments
   getProjectAssignments(projectId: number): Promise<any[]>;
-  addProjectAssignment(assignment: { projectId: number; userId: string; role: string }): Promise<any>;
+  addProjectAssignment(assignment: {
+    projectId: number;
+    userId: string;
+    role: string;
+  }): Promise<any>;
   removeProjectAssignment(projectId: number, userId: string): Promise<boolean>;
-  updateProjectAssignment(projectId: number, userId: string, updates: { role: string }): Promise<any>;
+  updateProjectAssignment(
+    projectId: number,
+    userId: string,
+    updates: { role: string }
+  ): Promise<any>;
 
   // Chat message methods for Socket.IO
-  createChatMessage(data: { channel: string; userId: string; userName: string; content: string }): Promise<any>;
+  createChatMessage(data: {
+    channel: string;
+    userId: string;
+    userName: string;
+    content: string;
+  }): Promise<any>;
   getChatMessages(channel: string, limit?: number): Promise<any[]>;
   updateChatMessage(id: number, updates: { content: string }): Promise<void>;
   deleteChatMessage(id: number): Promise<void>;
@@ -275,19 +457,40 @@ export interface IStorage {
   getDocument(id: number): Promise<Document | undefined>;
   getDocumentsForUser(userId: string): Promise<Document[]>; // Get documents user can access
   createDocument(document: InsertDocument): Promise<Document>;
-  updateDocument(id: number, updates: Partial<Document>): Promise<Document | undefined>;
+  updateDocument(
+    id: number,
+    updates: Partial<Document>
+  ): Promise<Document | undefined>;
   deleteDocument(id: number): Promise<boolean>;
-  
+
   // Document Permissions
   getDocumentPermissions(documentId: number): Promise<DocumentPermission[]>;
-  getUserDocumentPermission(documentId: number, userId: string): Promise<DocumentPermission | undefined>;
-  checkUserDocumentAccess(documentId: number, userId: string, permission: string): Promise<boolean>;
-  grantDocumentPermission(permission: InsertDocumentPermission): Promise<DocumentPermission>;
-  revokeDocumentPermission(documentId: number, userId: string, permissionType: string): Promise<boolean>;
-  updateDocumentPermission(id: number, updates: Partial<DocumentPermission>): Promise<DocumentPermission | undefined>;
-  
+  getUserDocumentPermission(
+    documentId: number,
+    userId: string
+  ): Promise<DocumentPermission | undefined>;
+  checkUserDocumentAccess(
+    documentId: number,
+    userId: string,
+    permission: string
+  ): Promise<boolean>;
+  grantDocumentPermission(
+    permission: InsertDocumentPermission
+  ): Promise<DocumentPermission>;
+  revokeDocumentPermission(
+    documentId: number,
+    userId: string,
+    permissionType: string
+  ): Promise<boolean>;
+  updateDocumentPermission(
+    id: number,
+    updates: Partial<DocumentPermission>
+  ): Promise<DocumentPermission | undefined>;
+
   // Document Access Logging
-  logDocumentAccess(access: InsertDocumentAccessLog): Promise<DocumentAccessLog>;
+  logDocumentAccess(
+    access: InsertDocumentAccessLog
+  ): Promise<DocumentAccessLog>;
   getDocumentAccessLogs(documentId: number): Promise<DocumentAccessLog[]>;
 
   // Shoutout methods
@@ -306,56 +509,95 @@ export interface IStorage {
 
   // User Activity methods
   logUserActivity(activity: InsertUserActivityLog): Promise<UserActivityLog>;
-  getUserActivityStats(userId: string, days?: number): Promise<{
+  getUserActivityStats(
+    userId: string,
+    days?: number
+  ): Promise<{
     totalActions: number;
     sectionsUsed: string[];
     topActions: { action: string; count: number }[];
     dailyActivity: { date: string; count: number }[];
   }>;
-  getAllUsersActivitySummary(days?: number): Promise<{
-    userId: string;
-    email: string;
-    firstName: string;
-    lastName: string;
-    totalActions: number;
-    lastActive: Date | null;
-    topSection: string;
-  }[]>;
+  getAllUsersActivitySummary(days?: number): Promise<
+    {
+      userId: string;
+      email: string;
+      firstName: string;
+      lastName: string;
+      totalActions: number;
+      lastActive: Date | null;
+      topSection: string;
+    }[]
+  >;
 
   // Sandwich Distributions (Distribution Tracking)
   getAllSandwichDistributions(): Promise<SandwichDistribution[]>;
-  getSandwichDistribution(id: number): Promise<SandwichDistribution | undefined>;
-  createSandwichDistribution(insertDistribution: InsertSandwichDistribution): Promise<SandwichDistribution>;
-  updateSandwichDistribution(id: number, updates: Partial<SandwichDistribution>): Promise<SandwichDistribution | undefined>;
+  getSandwichDistribution(
+    id: number
+  ): Promise<SandwichDistribution | undefined>;
+  createSandwichDistribution(
+    insertDistribution: InsertSandwichDistribution
+  ): Promise<SandwichDistribution>;
+  updateSandwichDistribution(
+    id: number,
+    updates: Partial<SandwichDistribution>
+  ): Promise<SandwichDistribution | undefined>;
   deleteSandwichDistribution(id: number): Promise<boolean>;
-  getSandwichDistributionsByWeek(weekEnding: string): Promise<SandwichDistribution[]>;
-  getSandwichDistributionsByHost(hostId: number): Promise<SandwichDistribution[]>;
-  getSandwichDistributionsByRecipient(recipientId: number): Promise<SandwichDistribution[]>;
+  getSandwichDistributionsByWeek(
+    weekEnding: string
+  ): Promise<SandwichDistribution[]>;
+  getSandwichDistributionsByHost(
+    hostId: number
+  ): Promise<SandwichDistribution[]>;
+  getSandwichDistributionsByRecipient(
+    recipientId: number
+  ): Promise<SandwichDistribution[]>;
 
   // Event Requests (Event Planning)
   getAllEventRequests(): Promise<EventRequest[]>;
   getEventRequest(id: number): Promise<EventRequest | undefined>;
-  createEventRequest(insertEventRequest: InsertEventRequest): Promise<EventRequest>;
-  updateEventRequest(id: number, updates: Partial<EventRequest>): Promise<EventRequest | undefined>;
+  createEventRequest(
+    insertEventRequest: InsertEventRequest
+  ): Promise<EventRequest>;
+  updateEventRequest(
+    id: number,
+    updates: Partial<EventRequest>
+  ): Promise<EventRequest | undefined>;
   deleteEventRequest(id: number): Promise<boolean>;
   getEventRequestsByStatus(status: string): Promise<EventRequest[]>;
-  getEventRequestsByOrganization(organizationName: string): Promise<EventRequest[]>;
-  checkOrganizationDuplicates(organizationName: string): Promise<{ exists: boolean; matches: Organization[] }>;
+  getEventRequestsByOrganization(
+    organizationName: string
+  ): Promise<EventRequest[]>;
+  checkOrganizationDuplicates(
+    organizationName: string
+  ): Promise<{ exists: boolean; matches: Organization[] }>;
 
   // Organizations (for duplicate detection)
   getAllOrganizations(): Promise<Organization[]>;
   getOrganization(id: number): Promise<Organization | undefined>;
-  createOrganization(insertOrganization: InsertOrganization): Promise<Organization>;
-  updateOrganization(id: number, updates: Partial<Organization>): Promise<Organization | undefined>;
+  createOrganization(
+    insertOrganization: InsertOrganization
+  ): Promise<Organization>;
+  updateOrganization(
+    id: number,
+    updates: Partial<Organization>
+  ): Promise<Organization | undefined>;
   deleteOrganization(id: number): Promise<boolean>;
   searchOrganizations(query: string): Promise<Organization[]>;
 
   // Event volunteers
   getAllEventVolunteers(): Promise<EventVolunteer[]>;
-  getEventVolunteersByEventId(eventRequestId: number): Promise<EventVolunteer[]>;
+  getEventVolunteersByEventId(
+    eventRequestId: number
+  ): Promise<EventVolunteer[]>;
   getEventVolunteersByUserId(userId: string): Promise<EventVolunteer[]>;
-  createEventVolunteer(volunteer: InsertEventVolunteer): Promise<EventVolunteer>;
-  updateEventVolunteer(id: number, updates: Partial<EventVolunteer>): Promise<EventVolunteer | undefined>;
+  createEventVolunteer(
+    volunteer: InsertEventVolunteer
+  ): Promise<EventVolunteer>;
+  updateEventVolunteer(
+    id: number,
+    updates: Partial<EventVolunteer>
+  ): Promise<EventVolunteer | undefined>;
   deleteEventVolunteer(id: number): Promise<boolean>;
 
   // Event reminders
@@ -497,9 +739,9 @@ export class MemStorage implements IStorage {
       documentAccessLog: 1,
       eventRequest: 1,
       organization: 1,
-      eventVolunteer: 1
+      eventVolunteer: 1,
     };
-    
+
     // No sample data - start with clean storage
   }
 
@@ -543,7 +785,7 @@ export class MemStorage implements IStorage {
       metadata: userData.metadata || {},
       isActive: userData.isActive ?? true,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
     this.users.set(userData.id, newUser);
     return newUser;
@@ -552,7 +794,11 @@ export class MemStorage implements IStorage {
   async upsertUser(userData: UpsertUser): Promise<User> {
     const existingUser = await this.getUser(userData.id);
     if (existingUser) {
-      const updated: User = { ...existingUser, ...userData, updatedAt: new Date() };
+      const updated: User = {
+        ...existingUser,
+        ...userData,
+        updatedAt: new Date(),
+      };
       this.users.set(userData.id, updated);
       return updated;
     } else {
@@ -566,7 +812,7 @@ export class MemStorage implements IStorage {
         permissions: userData.permissions || {},
         isActive: userData.isActive ?? true,
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
       this.users.set(userData.id, newUser);
       return newUser;
@@ -577,10 +823,13 @@ export class MemStorage implements IStorage {
     return Array.from(this.users.values());
   }
 
-  async updateUser(id: string, updates: Partial<User>): Promise<User | undefined> {
+  async updateUser(
+    id: string,
+    updates: Partial<User>
+  ): Promise<User | undefined> {
     const user = await this.getUser(id);
     if (!user) return undefined;
-    
+
     const updated: User = { ...user, ...updates, updatedAt: new Date() };
     this.users.set(id, updated);
     return updated;
@@ -589,7 +838,11 @@ export class MemStorage implements IStorage {
   async setUserPassword(id: string, password: string): Promise<void> {
     const user = await this.getUser(id);
     if (user) {
-      const updated: User = { ...user, passwordHash: password, updatedAt: new Date() };
+      const updated: User = {
+        ...user,
+        passwordHash: password,
+        updatedAt: new Date(),
+      };
       this.users.set(id, updated);
     }
   }
@@ -604,10 +857,10 @@ export class MemStorage implements IStorage {
 
   // Legacy user methods (for backwards compatibility)
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(user => user.email === username);
+    return Array.from(this.users.values()).find(
+      (user) => user.email === username
+    );
   }
-
-
 
   // Project methods
   async getAllProjects(): Promise<Project[]> {
@@ -625,10 +878,13 @@ export class MemStorage implements IStorage {
     return project;
   }
 
-  async updateProject(id: number, updates: Partial<Project>): Promise<Project | undefined> {
+  async updateProject(
+    id: number,
+    updates: Partial<Project>
+  ): Promise<Project | undefined> {
     const project = this.projects.get(id);
     if (!project) return undefined;
-    
+
     const updatedProject = { ...project, ...updates };
     this.projects.set(id, updatedProject);
     return updatedProject;
@@ -643,55 +899,70 @@ export class MemStorage implements IStorage {
     return [];
   }
 
-  async archiveProject(id: number, userId?: string, userName?: string): Promise<boolean> {
+  async archiveProject(
+    id: number,
+    userId?: string,
+    userName?: string
+  ): Promise<boolean> {
     // For MemStorage, just delete the project (simulating archive)
     return this.deleteProject(id);
   }
 
   async getProjectsForReview(): Promise<Project[]> {
     return Array.from(this.projects.values())
-      .filter(project => 
-        project.reviewInNextMeeting === true && 
-        project.status !== 'completed' && 
-        project.status !== 'archived'
+      .filter(
+        (project) =>
+          project.reviewInNextMeeting === true &&
+          project.status !== 'completed' &&
+          project.status !== 'archived'
       )
       .sort((a, b) => {
         // Sort by priority first, then by creation date
-        const priorityOrder = { 'high': 3, 'medium': 2, 'low': 1 };
-        const aPriority = priorityOrder[a.priority as keyof typeof priorityOrder] || 1;
-        const bPriority = priorityOrder[b.priority as keyof typeof priorityOrder] || 1;
-        
+        const priorityOrder = { high: 3, medium: 2, low: 1 };
+        const aPriority =
+          priorityOrder[a.priority as keyof typeof priorityOrder] || 1;
+        const bPriority =
+          priorityOrder[b.priority as keyof typeof priorityOrder] || 1;
+
         if (aPriority !== bPriority) {
           return bPriority - aPriority;
         }
-        
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+
+        return (
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
       });
   }
 
   // Project Task methods
   async getProjectTasks(projectId: number): Promise<ProjectTask[]> {
     return Array.from(this.projectTasks.values())
-      .filter(task => task.projectId === projectId)
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      .filter((task) => task.projectId === projectId)
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
   }
 
   async createProjectTask(insertTask: InsertProjectTask): Promise<ProjectTask> {
     const id = this.currentIds.projectTask++;
-    const task: ProjectTask = { 
-      ...insertTask, 
+    const task: ProjectTask = {
+      ...insertTask,
       id,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
     this.projectTasks.set(id, task);
     return task;
   }
 
-  async updateProjectTask(id: number, updates: Partial<ProjectTask>): Promise<ProjectTask | undefined> {
+  async updateProjectTask(
+    id: number,
+    updates: Partial<ProjectTask>
+  ): Promise<ProjectTask | undefined> {
     const task = this.projectTasks.get(id);
     if (!task) return undefined;
-    
+
     const updatedTask = { ...task, ...updates, updatedAt: new Date() };
     this.projectTasks.set(id, updatedTask);
     return updatedTask;
@@ -718,7 +989,9 @@ export class MemStorage implements IStorage {
   }
 
   // Task completion methods (for fallback storage)
-  async createTaskCompletion(completion: InsertTaskCompletion): Promise<TaskCompletion> {
+  async createTaskCompletion(
+    completion: InsertTaskCompletion
+  ): Promise<TaskCompletion> {
     // For fallback storage, we'll just return a mock completion
     const mockCompletion: TaskCompletion = {
       id: Date.now(),
@@ -726,7 +999,7 @@ export class MemStorage implements IStorage {
       userId: completion.userId,
       userName: completion.userName,
       completedAt: new Date(),
-      notes: completion.notes
+      notes: completion.notes,
     };
     return mockCompletion;
   }
@@ -744,16 +1017,21 @@ export class MemStorage implements IStorage {
   // Project Comment methods
   async getProjectComments(projectId: number): Promise<ProjectComment[]> {
     return Array.from(this.projectComments.values())
-      .filter(comment => comment.projectId === projectId)
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      .filter((comment) => comment.projectId === projectId)
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
   }
 
-  async createProjectComment(insertComment: InsertProjectComment): Promise<ProjectComment> {
+  async createProjectComment(
+    insertComment: InsertProjectComment
+  ): Promise<ProjectComment> {
     const id = this.currentIds.projectComment++;
-    const comment: ProjectComment = { 
-      ...insertComment, 
+    const comment: ProjectComment = {
+      ...insertComment,
       id,
-      createdAt: new Date()
+      createdAt: new Date(),
     };
     this.projectComments.set(id, comment);
     return comment;
@@ -765,8 +1043,9 @@ export class MemStorage implements IStorage {
 
   // Message methods
   async getAllMessages(): Promise<Message[]> {
-    return Array.from(this.messages.values()).sort((a, b) => 
-      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    return Array.from(this.messages.values()).sort(
+      (a, b) =>
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
     );
   }
 
@@ -777,17 +1056,20 @@ export class MemStorage implements IStorage {
 
   async getMessagesByCommittee(committee: string): Promise<Message[]> {
     return Array.from(this.messages.values())
-      .filter(message => message.committee === committee)
+      .filter((message) => message.committee === committee)
       .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
   }
 
-  async getDirectMessages(userId1: string, userId2: string): Promise<Message[]> {
+  async getDirectMessages(
+    userId1: string,
+    userId2: string
+  ): Promise<Message[]> {
     return Array.from(this.messages.values())
-      .filter(message => 
-        message.committee === "direct" && (
-          (message.userId === userId1 && message.recipientId === userId2) ||
-          (message.userId === userId2 && message.recipientId === userId1)
-        )
+      .filter(
+        (message) =>
+          message.committee === 'direct' &&
+          ((message.userId === userId1 && message.recipientId === userId2) ||
+            (message.userId === userId2 && message.recipientId === userId1))
       )
       .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
   }
@@ -800,53 +1082,62 @@ export class MemStorage implements IStorage {
     // For the real-time messaging system, we don't have a read status field in the Message schema
     // This is a placeholder implementation for now
     // In a real implementation, you would need a separate table for message read status
-    console.log(`MemStorage: Marking message ${messageId} as read for user ${userId}`);
+    console.log(
+      `MemStorage: Marking message ${messageId} as read for user ${userId}`
+    );
   }
 
   async createMessage(insertMessage: InsertMessage): Promise<Message> {
     const id = this.currentIds.message++;
-    const message: Message = { 
-      ...insertMessage, 
-      id, 
+    const message: Message = {
+      ...insertMessage,
+      id,
       timestamp: new Date(),
       parentId: insertMessage.parentId || null,
       threadId: insertMessage.threadId || id,
       replyCount: 0,
-      committee: insertMessage.committee || "general"
+      committee: insertMessage.committee || 'general',
     };
     this.messages.set(id, message);
     return message;
   }
 
-
-  async createReply(insertMessage: InsertMessage, parentId: number): Promise<Message> {
+  async createReply(
+    insertMessage: InsertMessage,
+    parentId: number
+  ): Promise<Message> {
     const parentMessage = this.messages.get(parentId);
     if (!parentMessage) {
-      throw new Error("Parent message not found");
+      throw new Error('Parent message not found');
     }
 
     const id = this.currentIds.message++;
-    const message: Message = { 
-      ...insertMessage, 
+    const message: Message = {
+      ...insertMessage,
       id,
       timestamp: new Date(),
       parentId: parentId,
       threadId: parentMessage.threadId,
-      replyCount: 0
+      replyCount: 0,
     };
-    
+
     this.messages.set(id, message);
-    await this.updateReplyCount(parentMessage.threadId === parentMessage.id ? parentMessage.id : parentMessage.threadId);
-    
+    await this.updateReplyCount(
+      parentMessage.threadId === parentMessage.id
+        ? parentMessage.id
+        : parentMessage.threadId
+    );
+
     return message;
   }
 
   async updateReplyCount(messageId: number): Promise<void> {
     const message = this.messages.get(messageId);
     if (message) {
-      const replyCount = Array.from(this.messages.values())
-        .filter(m => m.threadId === message.threadId && m.id !== message.id).length;
-      
+      const replyCount = Array.from(this.messages.values()).filter(
+        (m) => m.threadId === message.threadId && m.id !== message.id
+      ).length;
+
       const updatedMessage = { ...message, replyCount };
       this.messages.set(messageId, updatedMessage);
     }
@@ -858,24 +1149,27 @@ export class MemStorage implements IStorage {
 
   async getMessagesBySender(senderId: string): Promise<Message[]> {
     return Array.from(this.messages.values())
-      .filter(message => message.senderId === senderId || message.userId === senderId)
+      .filter(
+        (message) =>
+          message.senderId === senderId || message.userId === senderId
+      )
       .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
   }
 
   async getMessagesBySenderWithReadStatus(senderId: string): Promise<any[]> {
     // For memory storage, return messages with mock read status since we don't have recipient tracking
     const messages = await this.getMessagesBySender(senderId);
-    return messages.map(message => ({
+    return messages.map((message) => ({
       message,
       recipientRead: false, // Always unread in memory storage since we don't track recipients
       recipientReadAt: null,
-      recipientId: message.contextId || 'unknown'
+      recipientId: message.contextId || 'unknown',
     }));
   }
 
   async getMessagesForRecipient(recipientId: string): Promise<Message[]> {
     return Array.from(this.messages.values())
-      .filter(message => message.contextId === recipientId)
+      .filter((message) => message.contextId === recipientId)
       .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
   }
 
@@ -892,20 +1186,23 @@ export class MemStorage implements IStorage {
     const newCommittee: Committee = {
       ...committee,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
     this.committees.set(newCommittee.id, newCommittee);
     return newCommittee;
   }
 
-  async updateCommittee(id: string, updates: Partial<Committee>): Promise<Committee | undefined> {
+  async updateCommittee(
+    id: string,
+    updates: Partial<Committee>
+  ): Promise<Committee | undefined> {
     const committee = this.committees.get(id);
     if (!committee) return undefined;
-    
-    const updatedCommittee = { 
-      ...committee, 
-      ...updates, 
-      updatedAt: new Date() 
+
+    const updatedCommittee = {
+      ...committee,
+      ...updates,
+      updatedAt: new Date(),
     };
     this.committees.set(id, updatedCommittee);
     return updatedCommittee;
@@ -916,10 +1213,13 @@ export class MemStorage implements IStorage {
   }
 
   // Committee membership management methods
-  async getUserCommittees(userId: string): Promise<Array<Committee & { membership: CommitteeMembership }>> {
-    const memberships = Array.from(this.committeeMemberships.values())
-      .filter(membership => membership.userId === userId);
-    
+  async getUserCommittees(
+    userId: string
+  ): Promise<Array<Committee & { membership: CommitteeMembership }>> {
+    const memberships = Array.from(this.committeeMemberships.values()).filter(
+      (membership) => membership.userId === userId
+    );
+
     const result: Array<Committee & { membership: CommitteeMembership }> = [];
     for (const membership of memberships) {
       const committee = this.committees.get(membership.committeeId);
@@ -930,10 +1230,13 @@ export class MemStorage implements IStorage {
     return result;
   }
 
-  async getCommitteeMembers(committeeId: string): Promise<Array<User & { membership: CommitteeMembership }>> {
-    const memberships = Array.from(this.committeeMemberships.values())
-      .filter(membership => membership.committeeId === committeeId);
-    
+  async getCommitteeMembers(
+    committeeId: string
+  ): Promise<Array<User & { membership: CommitteeMembership }>> {
+    const memberships = Array.from(this.committeeMemberships.values()).filter(
+      (membership) => membership.committeeId === committeeId
+    );
+
     const result: Array<User & { membership: CommitteeMembership }> = [];
     for (const membership of memberships) {
       const user = await this.getUser(membership.userId);
@@ -944,38 +1247,55 @@ export class MemStorage implements IStorage {
     return result;
   }
 
-  async addUserToCommittee(membership: InsertCommitteeMembership): Promise<CommitteeMembership> {
+  async addUserToCommittee(
+    membership: InsertCommitteeMembership
+  ): Promise<CommitteeMembership> {
     const id = this.currentIds.committeeMembership++;
     const newMembership: CommitteeMembership = {
       ...membership,
       id,
-      joinedAt: new Date()
+      joinedAt: new Date(),
     };
     this.committeeMemberships.set(id, newMembership);
     return newMembership;
   }
 
-  async updateCommitteeMembership(id: number, updates: Partial<CommitteeMembership>): Promise<CommitteeMembership | undefined> {
+  async updateCommitteeMembership(
+    id: number,
+    updates: Partial<CommitteeMembership>
+  ): Promise<CommitteeMembership | undefined> {
     const membership = this.committeeMemberships.get(id);
     if (!membership) return undefined;
-    
+
     const updatedMembership = { ...membership, ...updates };
     this.committeeMemberships.set(id, updatedMembership);
     return updatedMembership;
   }
 
-  async removeUserFromCommittee(userId: string, committeeId: string): Promise<boolean> {
+  async removeUserFromCommittee(
+    userId: string,
+    committeeId: string
+  ): Promise<boolean> {
     for (const [id, membership] of this.committeeMemberships.entries()) {
-      if (membership.userId === userId && membership.committeeId === committeeId) {
+      if (
+        membership.userId === userId &&
+        membership.committeeId === committeeId
+      ) {
         return this.committeeMemberships.delete(id);
       }
     }
     return false;
   }
 
-  async isUserCommitteeMember(userId: string, committeeId: string): Promise<boolean> {
+  async isUserCommitteeMember(
+    userId: string,
+    committeeId: string
+  ): Promise<boolean> {
     for (const membership of this.committeeMemberships.values()) {
-      if (membership.userId === userId && membership.committeeId === committeeId) {
+      if (
+        membership.userId === userId &&
+        membership.committeeId === committeeId
+      ) {
         return true;
       }
     }
@@ -984,17 +1304,20 @@ export class MemStorage implements IStorage {
 
   // Weekly Report methods
   async getAllWeeklyReports(): Promise<WeeklyReport[]> {
-    return Array.from(this.weeklyReports.values()).sort((a, b) => 
-      new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
+    return Array.from(this.weeklyReports.values()).sort(
+      (a, b) =>
+        new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
     );
   }
 
-  async createWeeklyReport(insertReport: InsertWeeklyReport): Promise<WeeklyReport> {
+  async createWeeklyReport(
+    insertReport: InsertWeeklyReport
+  ): Promise<WeeklyReport> {
     const id = this.currentIds.weeklyReport++;
-    const report: WeeklyReport = { 
-      ...insertReport, 
-      id, 
-      submittedAt: new Date()
+    const report: WeeklyReport = {
+      ...insertReport,
+      id,
+      submittedAt: new Date(),
     };
     this.weeklyReports.set(id, report);
     return report;
@@ -1002,31 +1325,39 @@ export class MemStorage implements IStorage {
 
   // Sandwich Collection methods
   async getAllSandwichCollections(): Promise<SandwichCollection[]> {
-    return Array.from(this.sandwichCollections.values()).sort((a, b) => 
-      new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
+    return Array.from(this.sandwichCollections.values()).sort(
+      (a, b) =>
+        new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
     );
   }
 
-  async getSandwichCollections(limit: number, offset: number, sortField = 'collectionDate', sortOrder = 'desc'): Promise<SandwichCollection[]> {
+  async getSandwichCollections(
+    limit: number,
+    offset: number,
+    sortField = 'collectionDate',
+    sortOrder = 'desc'
+  ): Promise<SandwichCollection[]> {
     const all = await this.getAllSandwichCollections();
-    
+
     // Sort the data
     all.sort((a: any, b: any) => {
       const aVal = a[sortField];
       const bVal = b[sortField];
-      
+
       if (aVal === bVal) return 0;
       if (aVal === null || aVal === undefined) return 1;
       if (bVal === null || bVal === undefined) return -1;
-      
+
       const comparison = aVal < bVal ? -1 : 1;
       return sortOrder === 'asc' ? comparison : -comparison;
     });
-    
+
     return all.slice(offset, offset + limit);
   }
 
-  async getSandwichCollectionById(id: number): Promise<SandwichCollection | null> {
+  async getSandwichCollectionById(
+    id: number
+  ): Promise<SandwichCollection | null> {
     return this.sandwichCollections.get(id) || null;
   }
 
@@ -1034,7 +1365,10 @@ export class MemStorage implements IStorage {
     return this.sandwichCollections.size;
   }
 
-  async getCollectionStats(): Promise<{ totalEntries: number; totalSandwiches: number; }> {
+  async getCollectionStats(): Promise<{
+    totalEntries: number;
+    totalSandwiches: number;
+  }> {
     const collections = Array.from(this.sandwichCollections.values());
     // PHASE 5: Use ONLY new columns - no JSON parsing
     const totalSandwiches = collections.reduce((sum, collection) => {
@@ -1045,29 +1379,37 @@ export class MemStorage implements IStorage {
     }, 0);
     return {
       totalEntries: collections.length,
-      totalSandwiches
+      totalSandwiches,
     };
   }
 
-  async createSandwichCollection(insertCollection: InsertSandwichCollection & {id?: number}): Promise<SandwichCollection> {
+  async createSandwichCollection(
+    insertCollection: InsertSandwichCollection & { id?: number }
+  ): Promise<SandwichCollection> {
     const id = insertCollection.id || this.currentIds.sandwichCollection++;
     // Update currentIds if a higher ID is provided
-    if (insertCollection.id && insertCollection.id >= this.currentIds.sandwichCollection) {
+    if (
+      insertCollection.id &&
+      insertCollection.id >= this.currentIds.sandwichCollection
+    ) {
       this.currentIds.sandwichCollection = insertCollection.id + 1;
     }
-    const collection: SandwichCollection = { 
-      ...insertCollection, 
-      id, 
-      submittedAt: new Date()
+    const collection: SandwichCollection = {
+      ...insertCollection,
+      id,
+      submittedAt: new Date(),
     };
     this.sandwichCollections.set(id, collection);
     return collection;
   }
 
-  async updateSandwichCollection(id: number, updates: Partial<SandwichCollection>): Promise<SandwichCollection | undefined> {
+  async updateSandwichCollection(
+    id: number,
+    updates: Partial<SandwichCollection>
+  ): Promise<SandwichCollection | undefined> {
     const existing = this.sandwichCollections.get(id);
     if (!existing) return undefined;
-    
+
     const updated: SandwichCollection = { ...existing, ...updates };
     this.sandwichCollections.set(id, updated);
     return updated;
@@ -1077,7 +1419,10 @@ export class MemStorage implements IStorage {
     return this.sandwichCollections.delete(id);
   }
 
-  async updateCollectionHostNames(oldHostName: string, newHostName: string): Promise<number> {
+  async updateCollectionHostNames(
+    oldHostName: string,
+    newHostName: string
+  ): Promise<number> {
     let updatedCount = 0;
     for (const collection of this.sandwichCollections.values()) {
       if (collection.hostName === oldHostName) {
@@ -1098,7 +1443,9 @@ export class MemStorage implements IStorage {
     return allMinutes.slice(0, limit);
   }
 
-  async createMeetingMinutes(insertMinutes: InsertMeetingMinutes): Promise<MeetingMinutes> {
+  async createMeetingMinutes(
+    insertMinutes: InsertMeetingMinutes
+  ): Promise<MeetingMinutes> {
     const id = this.currentIds.meetingMinutes++;
     const minutes: MeetingMinutes = { ...insertMinutes, id };
     this.meetingMinutes.set(id, minutes);
@@ -1123,35 +1470,42 @@ export class MemStorage implements IStorage {
 
   // Agenda Items
   async getAllAgendaItems(): Promise<AgendaItem[]> {
-    return Array.from(this.agendaItems.values()).sort((a, b) => 
-      new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
+    return Array.from(this.agendaItems.values()).sort(
+      (a, b) =>
+        new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
     );
   }
 
   async createAgendaItem(insertItem: InsertAgendaItem): Promise<AgendaItem> {
     const id = this.currentIds.agendaItem++;
-    const item: AgendaItem = { 
-      ...insertItem, 
+    const item: AgendaItem = {
+      ...insertItem,
       id,
-      submittedAt: new Date()
+      submittedAt: new Date(),
     };
     this.agendaItems.set(id, item);
     return item;
   }
 
-  async updateAgendaItemStatus(id: number, status: string): Promise<AgendaItem | undefined> {
+  async updateAgendaItemStatus(
+    id: number,
+    status: string
+  ): Promise<AgendaItem | undefined> {
     const item = this.agendaItems.get(id);
     if (!item) return undefined;
-    
+
     const updated: AgendaItem = { ...item, status };
     this.agendaItems.set(id, updated);
     return updated;
   }
 
-  async updateAgendaItem(id: number, updates: Partial<AgendaItem>): Promise<AgendaItem | undefined> {
+  async updateAgendaItem(
+    id: number,
+    updates: Partial<AgendaItem>
+  ): Promise<AgendaItem | undefined> {
     const item = this.agendaItems.get(id);
     if (!item) return undefined;
-    
+
     const updated: AgendaItem = { ...item, ...updates };
     this.agendaItems.set(id, updated);
     return updated;
@@ -1164,52 +1518,58 @@ export class MemStorage implements IStorage {
   // Meetings
   async getCurrentMeeting(): Promise<Meeting | undefined> {
     const meetings = Array.from(this.meetings.values());
-    return meetings.find(m => m.status === "planning") || meetings[0];
+    return meetings.find((m) => m.status === 'planning') || meetings[0];
   }
 
   async getAllMeetings(): Promise<Meeting[]> {
-    return Array.from(this.meetings.values()).sort((a, b) => 
-      new Date(a.date).getTime() - new Date(b.date).getTime()
+    return Array.from(this.meetings.values()).sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
     );
   }
 
   async getMeetingsByType(type: string): Promise<Meeting[]> {
     return Array.from(this.meetings.values())
-      .filter(m => m.type === type)
+      .filter((m) => m.type === type)
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   }
 
   async createMeeting(insertMeeting: InsertMeeting): Promise<Meeting> {
     const id = this.currentIds.meeting++;
-    const meeting: Meeting = { 
-      ...insertMeeting, 
+    const meeting: Meeting = {
+      ...insertMeeting,
       id,
-      createdAt: new Date()
+      createdAt: new Date(),
     };
     this.meetings.set(id, meeting);
     return meeting;
   }
 
-  async updateMeetingAgenda(id: number, agenda: string): Promise<Meeting | undefined> {
+  async updateMeetingAgenda(
+    id: number,
+    agenda: string
+  ): Promise<Meeting | undefined> {
     const meeting = this.meetings.get(id);
     if (!meeting) return undefined;
-    
-    const updated: Meeting = { 
-      ...meeting, 
+
+    const updated: Meeting = {
+      ...meeting,
       finalAgenda: agenda,
-      status: "agenda_set"
+      status: 'agenda_set',
     };
     this.meetings.set(id, updated);
     return updated;
   }
 
-  async updateMeeting(id: number, updates: Partial<Meeting>): Promise<Meeting | undefined> {
+  async updateMeeting(
+    id: number,
+    updates: Partial<Meeting>
+  ): Promise<Meeting | undefined> {
     const meeting = this.meetings.get(id);
     if (!meeting) return undefined;
-    
-    const updated: Meeting = { 
-      ...meeting, 
-      ...updates
+
+    const updated: Meeting = {
+      ...meeting,
+      ...updates,
     };
     this.meetings.set(id, updated);
     return updated;
@@ -1219,12 +1579,14 @@ export class MemStorage implements IStorage {
     return this.meetings.delete(id);
   }
 
-  async createDriverAgreement(insertAgreement: InsertDriverAgreement): Promise<DriverAgreement> {
+  async createDriverAgreement(
+    insertAgreement: InsertDriverAgreement
+  ): Promise<DriverAgreement> {
     const id = this.currentIds.driverAgreement++;
-    const agreement: DriverAgreement = { 
-      ...insertAgreement, 
+    const agreement: DriverAgreement = {
+      ...insertAgreement,
       id,
-      submittedAt: new Date()
+      submittedAt: new Date(),
     };
     this.driverAgreements.set(id, agreement);
     return agreement;
@@ -1232,7 +1594,9 @@ export class MemStorage implements IStorage {
 
   // Driver methods
   async getAllDrivers(): Promise<Driver[]> {
-    return Array.from(this.drivers.values()).sort((a, b) => a.name.localeCompare(b.name));
+    return Array.from(this.drivers.values()).sort((a, b) =>
+      a.name.localeCompare(b.name)
+    );
   }
 
   async getDriver(id: number): Promise<Driver | undefined> {
@@ -1241,24 +1605,27 @@ export class MemStorage implements IStorage {
 
   async createDriver(insertDriver: InsertDriver): Promise<Driver> {
     const id = this.currentIds.driver++;
-    const driver: Driver = { 
-      ...insertDriver, 
+    const driver: Driver = {
+      ...insertDriver,
       id,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
     this.drivers.set(id, driver);
     return driver;
   }
 
-  async updateDriver(id: number, updates: Partial<Driver>): Promise<Driver | undefined> {
+  async updateDriver(
+    id: number,
+    updates: Partial<Driver>
+  ): Promise<Driver | undefined> {
     const driver = this.drivers.get(id);
     if (!driver) return undefined;
-    
-    const updatedDriver: Driver = { 
-      ...driver, 
-      ...updates, 
-      updatedAt: new Date()
+
+    const updatedDriver: Driver = {
+      ...driver,
+      ...updates,
+      updatedAt: new Date(),
     };
     this.drivers.set(id, updatedDriver);
     return updatedDriver;
@@ -1279,24 +1646,27 @@ export class MemStorage implements IStorage {
 
   async createVolunteer(insertVolunteer: InsertVolunteer): Promise<Volunteer> {
     const id = this.currentIds.volunteer++;
-    const volunteer: Volunteer = { 
-      ...insertVolunteer, 
+    const volunteer: Volunteer = {
+      ...insertVolunteer,
       id,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
     this.volunteers.set(id, volunteer);
     return volunteer;
   }
 
-  async updateVolunteer(id: number, updates: Partial<Volunteer>): Promise<Volunteer | undefined> {
+  async updateVolunteer(
+    id: number,
+    updates: Partial<Volunteer>
+  ): Promise<Volunteer | undefined> {
     const volunteer = this.volunteers.get(id);
     if (!volunteer) return undefined;
-    
-    const updatedVolunteer: Volunteer = { 
-      ...volunteer, 
-      ...updates, 
-      updatedAt: new Date()
+
+    const updatedVolunteer: Volunteer = {
+      ...volunteer,
+      ...updates,
+      updatedAt: new Date(),
     };
     this.volunteers.set(id, updatedVolunteer);
     return updatedVolunteer;
@@ -1317,24 +1687,27 @@ export class MemStorage implements IStorage {
 
   async createHost(insertHost: InsertHost): Promise<Host> {
     const id = this.currentIds.host++;
-    const host: Host = { 
-      ...insertHost, 
+    const host: Host = {
+      ...insertHost,
       id,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
     this.hosts.set(id, host);
     return host;
   }
 
-  async updateHost(id: number, updates: Partial<Host>): Promise<Host | undefined> {
+  async updateHost(
+    id: number,
+    updates: Partial<Host>
+  ): Promise<Host | undefined> {
     const host = this.hosts.get(id);
     if (!host) return undefined;
-    
-    const updatedHost: Host = { 
-      ...host, 
-      ...updates, 
-      updatedAt: new Date()
+
+    const updatedHost: Host = {
+      ...host,
+      ...updates,
+      updatedAt: new Date(),
     };
     this.hosts.set(id, updatedHost);
     return updatedHost;
@@ -1355,24 +1728,27 @@ export class MemStorage implements IStorage {
 
   async createRecipient(insertRecipient: InsertRecipient): Promise<Recipient> {
     const id = this.currentIds.recipient++;
-    const recipient: Recipient = { 
-      ...insertRecipient, 
+    const recipient: Recipient = {
+      ...insertRecipient,
       id,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
     this.recipients.set(id, recipient);
     return recipient;
   }
 
-  async updateRecipient(id: number, updates: Partial<Recipient>): Promise<Recipient | undefined> {
+  async updateRecipient(
+    id: number,
+    updates: Partial<Recipient>
+  ): Promise<Recipient | undefined> {
     const recipient = this.recipients.get(id);
     if (!recipient) return undefined;
-    
-    const updatedRecipient: Recipient = { 
-      ...recipient, 
-      ...updates, 
-      updatedAt: new Date()
+
+    const updatedRecipient: Recipient = {
+      ...recipient,
+      ...updates,
+      updatedAt: new Date(),
     };
     this.recipients.set(id, updatedRecipient);
     return updatedRecipient;
@@ -1384,7 +1760,9 @@ export class MemStorage implements IStorage {
 
   // General Contacts methods
   async getAllContacts(): Promise<Contact[]> {
-    return Array.from(this.contacts.values()).sort((a, b) => a.name.localeCompare(b.name));
+    return Array.from(this.contacts.values()).sort((a, b) =>
+      a.name.localeCompare(b.name)
+    );
   }
 
   async getContact(id: number): Promise<Contact | undefined> {
@@ -1399,7 +1777,7 @@ export class MemStorage implements IStorage {
       ...insertContact,
       createdAt: now,
       updatedAt: now,
-      status: insertContact.status || "active",
+      status: insertContact.status || 'active',
       email: insertContact.email || null,
       address: insertContact.address || null,
       organization: insertContact.organization || null,
@@ -1410,14 +1788,17 @@ export class MemStorage implements IStorage {
     return contact;
   }
 
-  async updateContact(id: number, updates: Partial<Contact>): Promise<Contact | undefined> {
+  async updateContact(
+    id: number,
+    updates: Partial<Contact>
+  ): Promise<Contact | undefined> {
     const contact = this.contacts.get(id);
     if (!contact) return undefined;
-    
-    const updatedContact: Contact = { 
-      ...contact, 
-      ...updates, 
-      updatedAt: new Date()
+
+    const updatedContact: Contact = {
+      ...contact,
+      ...updates,
+      updatedAt: new Date(),
     };
     this.contacts.set(id, updatedContact);
     return updatedContact;
@@ -1428,17 +1809,24 @@ export class MemStorage implements IStorage {
   }
 
   // Host Contact methods
-  async createHostContact(insertContact: InsertHostContact): Promise<HostContact> {
+  async createHostContact(
+    insertContact: InsertHostContact
+  ): Promise<HostContact> {
     // Check for existing contact with same name and email to prevent duplicates
     if (insertContact.name && insertContact.email) {
       for (const contact of this.hostContacts.values()) {
-        if (contact.name === insertContact.name && contact.email === insertContact.email) {
-          console.log(`Duplicate host contact prevented in memory: ${insertContact.name} (${insertContact.email})`);
+        if (
+          contact.name === insertContact.name &&
+          contact.email === insertContact.email
+        ) {
+          console.log(
+            `Duplicate host contact prevented in memory: ${insertContact.name} (${insertContact.email})`
+          );
           return contact;
         }
       }
     }
-    
+
     const id = this.currentIds.hostContact++;
     const now = new Date();
     const contact: HostContact = {
@@ -1453,18 +1841,21 @@ export class MemStorage implements IStorage {
 
   async getHostContacts(hostId: number): Promise<HostContact[]> {
     return Array.from(this.hostContacts.values())
-      .filter(contact => contact.hostId === hostId)
+      .filter((contact) => contact.hostId === hostId)
       .sort((a, b) => a.name.localeCompare(b.name));
   }
 
-  async updateHostContact(id: number, updates: Partial<HostContact>): Promise<HostContact | undefined> {
+  async updateHostContact(
+    id: number,
+    updates: Partial<HostContact>
+  ): Promise<HostContact | undefined> {
     const contact = this.hostContacts.get(id);
     if (!contact) return undefined;
-    
-    const updatedContact: HostContact = { 
-      ...contact, 
-      ...updates, 
-      updatedAt: new Date()
+
+    const updatedContact: HostContact = {
+      ...contact,
+      ...updates,
+      updatedAt: new Date(),
     };
     this.hostContacts.set(id, updatedContact);
     return updatedContact;
@@ -1474,20 +1865,28 @@ export class MemStorage implements IStorage {
     return this.hostContacts.delete(id);
   }
 
-  async getAllHostsWithContacts(): Promise<Array<Host & { contacts: HostContact[] }>> {
+  async getAllHostsWithContacts(): Promise<
+    Array<Host & { contacts: HostContact[] }>
+  > {
     const allHosts = Array.from(this.hosts.values());
-    return allHosts.map(host => ({
+    return allHosts.map((host) => ({
       ...host,
-      contacts: Array.from(this.hostContacts.values()).filter(contact => contact.hostId === host.id)
+      contacts: Array.from(this.hostContacts.values()).filter(
+        (contact) => contact.hostId === host.id
+      ),
     }));
   }
 
   // Notifications & Celebrations
   async getUserNotifications(userId: string): Promise<Notification[]> {
-    return Array.from(this.notifications.values()).filter(n => n.userId === userId);
+    return Array.from(this.notifications.values()).filter(
+      (n) => n.userId === userId
+    );
   }
 
-  async createNotification(notification: InsertNotification): Promise<Notification> {
+  async createNotification(
+    notification: InsertNotification
+  ): Promise<Notification> {
     const id = this.currentIds.notification++;
     const newNotification: Notification = {
       id,
@@ -1512,24 +1911,29 @@ export class MemStorage implements IStorage {
     return this.notifications.delete(id);
   }
 
-  async createCelebration(userId: string, taskId: number, message: string): Promise<Notification> {
-    const celebrationEmojis = ["🎉", "🌟", "🎊", "🥳", "🏆", "✨", "👏", "💪"];
-    const randomEmoji = celebrationEmojis[Math.floor(Math.random() * celebrationEmojis.length)];
-    
+  async createCelebration(
+    userId: string,
+    taskId: number,
+    message: string
+  ): Promise<Notification> {
+    const celebrationEmojis = ['🎉', '🌟', '🎊', '🥳', '🏆', '✨', '👏', '💪'];
+    const randomEmoji =
+      celebrationEmojis[Math.floor(Math.random() * celebrationEmojis.length)];
+
     return this.createNotification({
       userId,
-      type: "celebration",
+      type: 'celebration',
       title: `${randomEmoji} Task Completed!`,
       message: `Thanks for completing your task! ${message}`,
       isRead: false,
-      relatedType: "task",
+      relatedType: 'task',
       relatedId: taskId,
       celebrationData: {
         emoji: randomEmoji,
-        achievementType: "task_completion",
+        achievementType: 'task_completion',
         taskId,
-        completedAt: new Date().toISOString()
-      }
+        completedAt: new Date().toISOString(),
+      },
     });
   }
 
@@ -1574,37 +1978,49 @@ export class MemStorage implements IStorage {
     return [];
   }
 
-  async addProjectAssignment(assignment: { projectId: number; userId: string; role: string }): Promise<any> {
+  async addProjectAssignment(assignment: {
+    projectId: number;
+    userId: string;
+    role: string;
+  }): Promise<any> {
     // For MemStorage, return basic assignment object
     return {
       id: Date.now(),
       projectId: assignment.projectId,
       userId: assignment.userId,
       role: assignment.role,
-      assignedAt: new Date()
+      assignedAt: new Date(),
     };
   }
 
-  async removeProjectAssignment(projectId: number, userId: string): Promise<boolean> {
+  async removeProjectAssignment(
+    projectId: number,
+    userId: string
+  ): Promise<boolean> {
     // For MemStorage, return true
     return true;
   }
 
-  async updateProjectAssignment(projectId: number, userId: string, updates: { role: string }): Promise<any> {
+  async updateProjectAssignment(
+    projectId: number,
+    userId: string,
+    updates: { role: string }
+  ): Promise<any> {
     // For MemStorage, return updated assignment
     return {
       id: Date.now(),
       projectId,
       userId,
       role: updates.role,
-      assignedAt: new Date()
+      assignedAt: new Date(),
     };
   }
 
   // Suggestions Portal methods
   async getAllSuggestions(): Promise<Suggestion[]> {
-    return Array.from(this.suggestions.values()).sort((a, b) => 
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    return Array.from(this.suggestions.values()).sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
   }
 
@@ -1619,20 +2035,23 @@ export class MemStorage implements IStorage {
       id,
       ...suggestion,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     };
     this.suggestions.set(id, newSuggestion);
     return newSuggestion;
   }
 
-  async updateSuggestion(id: number, updates: Partial<Suggestion>): Promise<Suggestion | undefined> {
+  async updateSuggestion(
+    id: number,
+    updates: Partial<Suggestion>
+  ): Promise<Suggestion | undefined> {
     const suggestion = this.suggestions.get(id);
     if (!suggestion) return undefined;
-    
-    const updatedSuggestion: Suggestion = { 
-      ...suggestion, 
-      ...updates, 
-      updatedAt: new Date()
+
+    const updatedSuggestion: Suggestion = {
+      ...suggestion,
+      ...updates,
+      updatedAt: new Date(),
     };
     this.suggestions.set(id, updatedSuggestion);
     return updatedSuggestion;
@@ -1659,18 +2078,25 @@ export class MemStorage implements IStorage {
     return false;
   }
 
-  async getSuggestionResponses(suggestionId: number): Promise<SuggestionResponse[]> {
+  async getSuggestionResponses(
+    suggestionId: number
+  ): Promise<SuggestionResponse[]> {
     return Array.from(this.suggestionResponses.values())
-      .filter(response => response.suggestionId === suggestionId)
-      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+      .filter((response) => response.suggestionId === suggestionId)
+      .sort(
+        (a, b) =>
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      );
   }
 
-  async createSuggestionResponse(response: InsertSuggestionResponse): Promise<SuggestionResponse> {
+  async createSuggestionResponse(
+    response: InsertSuggestionResponse
+  ): Promise<SuggestionResponse> {
     const id = this.currentIds.suggestionResponse++;
     const newResponse: SuggestionResponse = {
       id,
       ...response,
-      createdAt: new Date()
+      createdAt: new Date(),
     };
     this.suggestionResponses.set(id, newResponse);
     return newResponse;
@@ -1696,30 +2122,36 @@ export class MemStorage implements IStorage {
     const newLog = {
       id,
       ...log,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     };
     this.shoutoutLogs.set(id, newLog);
     return newLog;
   }
 
   async getShoutoutHistory(): Promise<any[]> {
-    return Array.from(this.shoutoutLogs.values())
-      .sort((a, b) => new Date(b.sentAt).getTime() - new Date(a.sentAt).getTime());
+    return Array.from(this.shoutoutLogs.values()).sort(
+      (a, b) => new Date(b.sentAt).getTime() - new Date(a.sentAt).getTime()
+    );
   }
 
   // User Activity Tracking methods (memory storage implementations)
-  async logUserActivity(activity: InsertUserActivityLog): Promise<UserActivityLog> {
+  async logUserActivity(
+    activity: InsertUserActivityLog
+  ): Promise<UserActivityLog> {
     const id = this.currentIds.userActivity++;
     const log: UserActivityLog = {
       id,
       ...activity,
-      createdAt: new Date()
+      createdAt: new Date(),
     };
     // Store in temporary memory for demo purposes
     return log;
   }
 
-  async getUserActivityStats(userId: string, days: number = 30): Promise<{
+  async getUserActivityStats(
+    userId: string,
+    days: number = 30
+  ): Promise<{
     totalActions: number;
     sectionsUsed: string[];
     topActions: { action: string; count: number }[];
@@ -1730,33 +2162,33 @@ export class MemStorage implements IStorage {
       totalActions: 0,
       sectionsUsed: [],
       topActions: [],
-      dailyActivity: []
+      dailyActivity: [],
     };
   }
 
-  async getAllUsersActivitySummary(days: number = 30): Promise<{
-    userId: string;
-    email: string;
-    firstName: string;
-    lastName: string;
-    totalActions: number;
-    lastActive: Date | null;
-    topSection: string;
-  }[]> {
+  async getAllUsersActivitySummary(days: number = 30): Promise<
+    {
+      userId: string;
+      email: string;
+      firstName: string;
+      lastName: string;
+      totalActions: number;
+      lastActive: Date | null;
+      topSection: string;
+    }[]
+  > {
     // Return user list with empty activity for memory storage
     const users = Array.from(this.users.values());
-    return users.map(user => ({
+    return users.map((user) => ({
       userId: user.id,
       email: user.email || '',
       firstName: user.firstName || '',
       lastName: user.lastName || '',
       totalActions: 0,
       lastActive: null,
-      topSection: 'none'
+      topSection: 'none',
     }));
   }
-
-
 
   // Conversation methods (stub implementations for memory storage)
   async createConversation(conversationData: any, participants: string[]) {
@@ -1774,7 +2206,11 @@ export class MemStorage implements IStorage {
     return null;
   }
 
-  async updateConversationMessage(messageId: number, userId: string, updates: any) {
+  async updateConversationMessage(
+    messageId: number,
+    userId: string,
+    updates: any
+  ) {
     // TODO: Implement in memory storage
     return null;
   }
@@ -1790,17 +2226,27 @@ export class MemStorage implements IStorage {
   }
 
   // Chat message methods for Socket.IO (fallback implementations)
-  async createChatMessage(data: { channel: string; userId: string; userName: string; content: string }): Promise<any> {
+  async createChatMessage(data: {
+    channel: string;
+    userId: string;
+    userName: string;
+    content: string;
+  }): Promise<any> {
     return {
       id: Date.now(),
       ...data,
-      createdAt: new Date()
+      createdAt: new Date(),
     };
   }
 
-  async updateChatMessage(id: number, updates: { content: string }): Promise<void> {
+  async updateChatMessage(
+    id: number,
+    updates: { content: string }
+  ): Promise<void> {
     // In-memory storage doesn't persist anyway, so just log
-    console.log(`[MemStorage] Updated chat message ${id} with content: ${updates.content}`);
+    console.log(
+      `[MemStorage] Updated chat message ${id} with content: ${updates.content}`
+    );
   }
 
   async getChatMessages(channel: string, limit?: number): Promise<any[]> {
@@ -1811,20 +2257,29 @@ export class MemStorage implements IStorage {
     // No-op for memory storage
   }
 
-  async markChannelMessagesAsRead(userId: string, channel: string): Promise<void> {
+  async markChannelMessagesAsRead(
+    userId: string,
+    channel: string
+  ): Promise<void> {
     // No-op for memory storage since it doesn't persist anyway
-    console.log(`[MemStorage] Marked all messages in ${channel} as read for user ${userId}`);
+    console.log(
+      `[MemStorage] Marked all messages in ${channel} as read for user ${userId}`
+    );
   }
 
   // Chat message likes methods (stub implementations for memory storage)
-  async likeChatMessage(messageId: number, userId: string, userName: string): Promise<ChatMessageLike | null> {
+  async likeChatMessage(
+    messageId: number,
+    userId: string,
+    userName: string
+  ): Promise<ChatMessageLike | null> {
     // Return a mock like object for memory storage
     return {
       id: Date.now(),
       messageId,
       userId,
       userName,
-      likedAt: new Date()
+      likedAt: new Date(),
     } as ChatMessageLike;
   }
 
@@ -1838,19 +2293,26 @@ export class MemStorage implements IStorage {
     return [];
   }
 
-  async hasUserLikedChatMessage(messageId: number, userId: string): Promise<boolean> {
+  async hasUserLikedChatMessage(
+    messageId: number,
+    userId: string
+  ): Promise<boolean> {
     // Return false for memory storage
     return false;
   }
 
   // Message likes methods (stub implementations)
-  async likeMessage(messageId: number, userId: string, userName: string): Promise<any> {
+  async likeMessage(
+    messageId: number,
+    userId: string,
+    userName: string
+  ): Promise<any> {
     return {
       id: Date.now(),
       messageId,
       userId,
       userName,
-      likedAt: new Date()
+      likedAt: new Date(),
     };
   }
 
@@ -1862,8 +2324,11 @@ export class MemStorage implements IStorage {
     return [];
   }
 
-  async hasUserLikedMessage(messageId: number, userId: string): Promise<boolean> {
-    return false;  
+  async hasUserLikedMessage(
+    messageId: number,
+    userId: string
+  ): Promise<boolean> {
+    return false;
   }
 
   // Sandwich Distribution Methods
@@ -1871,11 +2336,15 @@ export class MemStorage implements IStorage {
     return Array.from(this.sandwichDistributions.values());
   }
 
-  async getSandwichDistribution(id: number): Promise<SandwichDistribution | undefined> {
+  async getSandwichDistribution(
+    id: number
+  ): Promise<SandwichDistribution | undefined> {
     return this.sandwichDistributions.get(id);
   }
 
-  async createSandwichDistribution(insertDistribution: InsertSandwichDistribution): Promise<SandwichDistribution> {
+  async createSandwichDistribution(
+    insertDistribution: InsertSandwichDistribution
+  ): Promise<SandwichDistribution> {
     const id = this.currentIds.sandwichDistribution++;
     const now = new Date();
     const distribution: SandwichDistribution = {
@@ -1888,7 +2357,10 @@ export class MemStorage implements IStorage {
     return distribution;
   }
 
-  async updateSandwichDistribution(id: number, updates: Partial<SandwichDistribution>): Promise<SandwichDistribution | undefined> {
+  async updateSandwichDistribution(
+    id: number,
+    updates: Partial<SandwichDistribution>
+  ): Promise<SandwichDistribution | undefined> {
     const distribution = this.sandwichDistributions.get(id);
     if (!distribution) return undefined;
 
@@ -1905,24 +2377,30 @@ export class MemStorage implements IStorage {
     return this.sandwichDistributions.delete(id);
   }
 
-  async getSandwichDistributionsByWeek(weekEnding: string): Promise<SandwichDistribution[]> {
+  async getSandwichDistributionsByWeek(
+    weekEnding: string
+  ): Promise<SandwichDistribution[]> {
     const distributions = Array.from(this.sandwichDistributions.values());
-    return distributions.filter(d => d.weekEnding === weekEnding);
+    return distributions.filter((d) => d.weekEnding === weekEnding);
   }
 
-  async getSandwichDistributionsByHost(hostId: number): Promise<SandwichDistribution[]> {
+  async getSandwichDistributionsByHost(
+    hostId: number
+  ): Promise<SandwichDistribution[]> {
     const distributions = Array.from(this.sandwichDistributions.values());
-    return distributions.filter(d => d.hostId === hostId);
+    return distributions.filter((d) => d.hostId === hostId);
   }
 
-  async getSandwichDistributionsByRecipient(recipientId: number): Promise<SandwichDistribution[]> {
+  async getSandwichDistributionsByRecipient(
+    recipientId: number
+  ): Promise<SandwichDistribution[]> {
     const distributions = Array.from(this.sandwichDistributions.values());
-    return distributions.filter(d => d.recipientId === recipientId);
+    return distributions.filter((d) => d.recipientId === recipientId);
   }
 
   // Document Management Methods
   async getAllDocuments(): Promise<Document[]> {
-    return Array.from(this.documents.values()).filter(doc => doc.isActive);
+    return Array.from(this.documents.values()).filter((doc) => doc.isActive);
   }
 
   async getDocument(id: number): Promise<Document | undefined> {
@@ -1932,12 +2410,14 @@ export class MemStorage implements IStorage {
   async getDocumentsForUser(userId: string): Promise<Document[]> {
     // Check if user has confidential documents access
     const user = await this.getUserById(userId);
-    const hasConfidentialAccess = user?.permissions?.includes("DOCUMENTS_CONFIDENTIAL") || false;
+    const hasConfidentialAccess =
+      user?.permissions?.includes('DOCUMENTS_CONFIDENTIAL') || false;
 
     // For memory storage, filter documents based on confidential access
-    return Array.from(this.documents.values()).filter(doc => 
-      doc.isActive && 
-      (hasConfidentialAccess || doc.category !== "confidential")
+    return Array.from(this.documents.values()).filter(
+      (doc) =>
+        doc.isActive &&
+        (hasConfidentialAccess || doc.category !== 'confidential')
     );
   }
 
@@ -1954,7 +2434,10 @@ export class MemStorage implements IStorage {
     return document;
   }
 
-  async updateDocument(id: number, updates: Partial<Document>): Promise<Document | undefined> {
+  async updateDocument(
+    id: number,
+    updates: Partial<Document>
+  ): Promise<Document | undefined> {
     const document = this.documents.get(id);
     if (!document) return undefined;
 
@@ -1970,7 +2453,7 @@ export class MemStorage implements IStorage {
   async deleteDocument(id: number): Promise<boolean> {
     const document = this.documents.get(id);
     if (!document) return false;
-    
+
     // Soft delete
     document.isActive = false;
     document.updatedAt = new Date();
@@ -1979,29 +2462,47 @@ export class MemStorage implements IStorage {
   }
 
   // Document Permissions Methods
-  async getDocumentPermissions(documentId: number): Promise<DocumentPermission[]> {
-    return Array.from(this.documentPermissions.values()).filter(p => p.documentId === documentId && p.isActive);
-  }
-
-  async getUserDocumentPermission(documentId: number, userId: string): Promise<DocumentPermission | undefined> {
-    return Array.from(this.documentPermissions.values()).find(p => 
-      p.documentId === documentId && p.userId === userId && p.isActive
+  async getDocumentPermissions(
+    documentId: number
+  ): Promise<DocumentPermission[]> {
+    return Array.from(this.documentPermissions.values()).filter(
+      (p) => p.documentId === documentId && p.isActive
     );
   }
 
-  async checkUserDocumentAccess(documentId: number, userId: string, permission: string): Promise<boolean> {
-    const userPermission = await this.getUserDocumentPermission(documentId, userId);
+  async getUserDocumentPermission(
+    documentId: number,
+    userId: string
+  ): Promise<DocumentPermission | undefined> {
+    return Array.from(this.documentPermissions.values()).find(
+      (p) => p.documentId === documentId && p.userId === userId && p.isActive
+    );
+  }
+
+  async checkUserDocumentAccess(
+    documentId: number,
+    userId: string,
+    permission: string
+  ): Promise<boolean> {
+    const userPermission = await this.getUserDocumentPermission(
+      documentId,
+      userId
+    );
     if (!userPermission) return false;
-    
+
     // Check if permission type allows the requested action
     const permissionHierarchy = ['view', 'download', 'edit', 'admin'];
-    const userLevel = permissionHierarchy.indexOf(userPermission.permissionType);
+    const userLevel = permissionHierarchy.indexOf(
+      userPermission.permissionType
+    );
     const requiredLevel = permissionHierarchy.indexOf(permission);
-    
+
     return userLevel >= requiredLevel;
   }
 
-  async grantDocumentPermission(insertPermission: InsertDocumentPermission): Promise<DocumentPermission> {
+  async grantDocumentPermission(
+    insertPermission: InsertDocumentPermission
+  ): Promise<DocumentPermission> {
     const id = this.currentIds.documentPermission++;
     const permission: DocumentPermission = {
       id,
@@ -2012,19 +2513,30 @@ export class MemStorage implements IStorage {
     return permission;
   }
 
-  async revokeDocumentPermission(documentId: number, userId: string, permissionType: string): Promise<boolean> {
-    const permission = Array.from(this.documentPermissions.values()).find(p => 
-      p.documentId === documentId && p.userId === userId && p.permissionType === permissionType && p.isActive
+  async revokeDocumentPermission(
+    documentId: number,
+    userId: string,
+    permissionType: string
+  ): Promise<boolean> {
+    const permission = Array.from(this.documentPermissions.values()).find(
+      (p) =>
+        p.documentId === documentId &&
+        p.userId === userId &&
+        p.permissionType === permissionType &&
+        p.isActive
     );
-    
+
     if (!permission) return false;
-    
+
     permission.isActive = false;
     this.documentPermissions.set(permission.id, permission);
     return true;
   }
 
-  async updateDocumentPermission(id: number, updates: Partial<DocumentPermission>): Promise<DocumentPermission | undefined> {
+  async updateDocumentPermission(
+    id: number,
+    updates: Partial<DocumentPermission>
+  ): Promise<DocumentPermission | undefined> {
     const permission = this.documentPermissions.get(id);
     if (!permission) return undefined;
 
@@ -2034,7 +2546,9 @@ export class MemStorage implements IStorage {
   }
 
   // Document Access Logging Methods
-  async logDocumentAccess(insertAccess: InsertDocumentAccessLog): Promise<DocumentAccessLog> {
+  async logDocumentAccess(
+    insertAccess: InsertDocumentAccessLog
+  ): Promise<DocumentAccessLog> {
     const id = this.currentIds.documentAccessLog++;
     const accessLog: DocumentAccessLog = {
       id,
@@ -2045,16 +2559,22 @@ export class MemStorage implements IStorage {
     return accessLog;
   }
 
-  async getDocumentAccessLogs(documentId: number): Promise<DocumentAccessLog[]> {
+  async getDocumentAccessLogs(
+    documentId: number
+  ): Promise<DocumentAccessLog[]> {
     return Array.from(this.documentAccessLogs.values())
-      .filter(log => log.documentId === documentId)
-      .sort((a, b) => new Date(b.accessedAt).getTime() - new Date(a.accessedAt).getTime());
+      .filter((log) => log.documentId === documentId)
+      .sort(
+        (a, b) =>
+          new Date(b.accessedAt).getTime() - new Date(a.accessedAt).getTime()
+      );
   }
 
   // Event Request methods
   async getAllEventRequests(): Promise<EventRequest[]> {
-    return Array.from(this.eventRequests.values()).sort((a, b) => 
-      new Date(b.createdDate).getTime() - new Date(a.createdDate).getTime()
+    return Array.from(this.eventRequests.values()).sort(
+      (a, b) =>
+        new Date(b.createdDate).getTime() - new Date(a.createdDate).getTime()
     );
   }
 
@@ -2062,20 +2582,25 @@ export class MemStorage implements IStorage {
     return this.eventRequests.get(id);
   }
 
-  async createEventRequest(insertEventRequest: InsertEventRequest): Promise<EventRequest> {
+  async createEventRequest(
+    insertEventRequest: InsertEventRequest
+  ): Promise<EventRequest> {
     const id = this.currentIds.eventRequest++;
     const eventRequest: EventRequest = {
       ...insertEventRequest,
       id,
       createdDate: new Date(),
       lastUpdated: new Date(),
-      status: insertEventRequest.status || 'new'
+      status: insertEventRequest.status || 'new',
     };
     this.eventRequests.set(id, eventRequest);
     return eventRequest;
   }
 
-  async updateEventRequest(id: number, updates: Partial<EventRequest>): Promise<EventRequest | undefined> {
+  async updateEventRequest(
+    id: number,
+    updates: Partial<EventRequest>
+  ): Promise<EventRequest | undefined> {
     const eventRequest = this.eventRequests.get(id);
     if (!eventRequest) return undefined;
 
@@ -2090,44 +2615,66 @@ export class MemStorage implements IStorage {
 
   async getEventRequestsByStatus(status: string): Promise<EventRequest[]> {
     return Array.from(this.eventRequests.values())
-      .filter(request => request.status === status)
-      .sort((a, b) => new Date(b.createdDate).getTime() - new Date(a.createdDate).getTime());
+      .filter((request) => request.status === status)
+      .sort(
+        (a, b) =>
+          new Date(b.createdDate).getTime() - new Date(a.createdDate).getTime()
+      );
   }
 
-  async getEventRequestsByOrganization(organizationName: string): Promise<EventRequest[]> {
+  async getEventRequestsByOrganization(
+    organizationName: string
+  ): Promise<EventRequest[]> {
     return Array.from(this.eventRequests.values())
-      .filter(request => request.organizationName.toLowerCase().includes(organizationName.toLowerCase()))
-      .sort((a, b) => new Date(b.createdDate).getTime() - new Date(a.createdDate).getTime());
+      .filter((request) =>
+        request.organizationName
+          .toLowerCase()
+          .includes(organizationName.toLowerCase())
+      )
+      .sort(
+        (a, b) =>
+          new Date(b.createdDate).getTime() - new Date(a.createdDate).getTime()
+      );
   }
 
-  async checkOrganizationDuplicates(organizationName: string): Promise<{ exists: boolean; matches: Organization[] }> {
-    const matches = Array.from(this.organizations.values())
-      .filter(org => org.name.toLowerCase().includes(organizationName.toLowerCase()));
+  async checkOrganizationDuplicates(
+    organizationName: string
+  ): Promise<{ exists: boolean; matches: Organization[] }> {
+    const matches = Array.from(this.organizations.values()).filter((org) =>
+      org.name.toLowerCase().includes(organizationName.toLowerCase())
+    );
     return { exists: matches.length > 0, matches };
   }
 
   // Organization methods
   async getAllOrganizations(): Promise<Organization[]> {
-    return Array.from(this.organizations.values()).sort((a, b) => a.name.localeCompare(b.name));
+    return Array.from(this.organizations.values()).sort((a, b) =>
+      a.name.localeCompare(b.name)
+    );
   }
 
   async getOrganization(id: number): Promise<Organization | undefined> {
     return this.organizations.get(id);
   }
 
-  async createOrganization(insertOrganization: InsertOrganization): Promise<Organization> {
+  async createOrganization(
+    insertOrganization: InsertOrganization
+  ): Promise<Organization> {
     const id = this.currentIds.organization++;
     const organization: Organization = {
       ...insertOrganization,
       id,
       createdDate: new Date(),
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     };
     this.organizations.set(id, organization);
     return organization;
   }
 
-  async updateOrganization(id: number, updates: Partial<Organization>): Promise<Organization | undefined> {
+  async updateOrganization(
+    id: number,
+    updates: Partial<Organization>
+  ): Promise<Organization | undefined> {
     const organization = this.organizations.get(id);
     if (!organization) return undefined;
 
@@ -2143,33 +2690,43 @@ export class MemStorage implements IStorage {
   async searchOrganizations(query: string): Promise<Organization[]> {
     const lowerQuery = query.toLowerCase();
     return Array.from(this.organizations.values())
-      .filter(org => 
-        org.name.toLowerCase().includes(lowerQuery) ||
-        org.category?.toLowerCase().includes(lowerQuery) ||
-        org.description?.toLowerCase().includes(lowerQuery)
+      .filter(
+        (org) =>
+          org.name.toLowerCase().includes(lowerQuery) ||
+          org.category?.toLowerCase().includes(lowerQuery) ||
+          org.description?.toLowerCase().includes(lowerQuery)
       )
       .sort((a, b) => a.name.localeCompare(b.name));
   }
 
   // Event volunteers methods
   async getAllEventVolunteers(): Promise<EventVolunteer[]> {
-    return Array.from(this.eventVolunteers.values())
-      .sort((a, b) => new Date(b.signedUpAt).getTime() - new Date(a.signedUpAt).getTime());
+    return Array.from(this.eventVolunteers.values()).sort(
+      (a, b) =>
+        new Date(b.signedUpAt).getTime() - new Date(a.signedUpAt).getTime()
+    );
   }
 
-  async getEventVolunteersByEventId(eventRequestId: number): Promise<EventVolunteer[]> {
+  async getEventVolunteersByEventId(
+    eventRequestId: number
+  ): Promise<EventVolunteer[]> {
     return Array.from(this.eventVolunteers.values())
-      .filter(volunteer => volunteer.eventRequestId === eventRequestId)
+      .filter((volunteer) => volunteer.eventRequestId === eventRequestId)
       .sort((a, b) => a.role.localeCompare(b.role));
   }
 
   async getEventVolunteersByUserId(userId: string): Promise<EventVolunteer[]> {
     return Array.from(this.eventVolunteers.values())
-      .filter(volunteer => volunteer.volunteerUserId === userId)
-      .sort((a, b) => new Date(b.signedUpAt).getTime() - new Date(a.signedUpAt).getTime());
+      .filter((volunteer) => volunteer.volunteerUserId === userId)
+      .sort(
+        (a, b) =>
+          new Date(b.signedUpAt).getTime() - new Date(a.signedUpAt).getTime()
+      );
   }
 
-  async createEventVolunteer(volunteer: InsertEventVolunteer): Promise<EventVolunteer> {
+  async createEventVolunteer(
+    volunteer: InsertEventVolunteer
+  ): Promise<EventVolunteer> {
     const id = this.currentIds.eventVolunteer++;
     const now = new Date();
     const newVolunteer: EventVolunteer = {
@@ -2178,20 +2735,23 @@ export class MemStorage implements IStorage {
       signedUpAt: now,
       createdAt: now,
       updatedAt: now,
-      confirmedAt: null
+      confirmedAt: null,
     };
     this.eventVolunteers.set(id, newVolunteer);
     return newVolunteer;
   }
 
-  async updateEventVolunteer(id: number, updates: Partial<EventVolunteer>): Promise<EventVolunteer | undefined> {
+  async updateEventVolunteer(
+    id: number,
+    updates: Partial<EventVolunteer>
+  ): Promise<EventVolunteer | undefined> {
     const existing = this.eventVolunteers.get(id);
     if (!existing) return undefined;
-    
+
     const updated: EventVolunteer = {
       ...existing,
       ...updates,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
     this.eventVolunteers.set(id, updated);
     return updated;
@@ -2207,23 +2767,28 @@ export class MemStorage implements IStorage {
 
   async getEventRemindersCount(userId?: string): Promise<number> {
     if (userId) {
-      return Array.from(this.eventReminders.values()).filter(reminder => 
-        reminder.assignedToUserId === userId && reminder.status === 'pending'
+      return Array.from(this.eventReminders.values()).filter(
+        (reminder) =>
+          reminder.assignedToUserId === userId && reminder.status === 'pending'
       ).length;
     }
-    return Array.from(this.eventReminders.values()).filter(reminder => 
-      reminder.status === 'pending'
+    return Array.from(this.eventReminders.values()).filter(
+      (reminder) => reminder.status === 'pending'
     ).length;
   }
 
   async getAllEventReminders(userId?: string): Promise<any[]> {
     let reminders = Array.from(this.eventReminders.values());
     if (userId) {
-      reminders = reminders.filter(reminder => 
-        reminder.assignedToUserId === userId || reminder.createdBy === userId
+      reminders = reminders.filter(
+        (reminder) =>
+          reminder.assignedToUserId === userId || reminder.createdBy === userId
       );
     }
-    return reminders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    return reminders.sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
   }
 
   async createEventReminder(reminderData: any): Promise<any> {
@@ -2242,18 +2807,18 @@ export class MemStorage implements IStorage {
   async updateEventReminder(id: number, updates: any): Promise<any> {
     const reminder = this.eventReminders.get(id);
     if (!reminder) return null;
-    
+
     const updated = {
       ...reminder,
       ...updates,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
-    
+
     // Handle completion
     if (updates.status === 'completed' && !reminder.completedAt) {
       updated.completedAt = new Date();
     }
-    
+
     this.eventReminders.set(id, updated);
     return updated;
   }
@@ -2274,15 +2839,20 @@ try {
   if (process.env.DATABASE_URL) {
     console.log('Using database storage for data persistence...');
     storageInstance = new DatabaseStorage();
-  } 
-  // Old Google Sheets storage system completely removed 
+  }
+  // Old Google Sheets storage system completely removed
   // Fallback: Memory storage (data will not persist across deployments)
   else {
-    console.log('No persistent storage configured, using memory storage (data will not persist)');
+    console.log(
+      'No persistent storage configured, using memory storage (data will not persist)'
+    );
     storageInstance = new MemStorage();
   }
 } catch (error) {
-  console.error('Failed to initialize persistent storage, falling back to memory:', error);
+  console.error(
+    'Failed to initialize persistent storage, falling back to memory:',
+    error
+  );
   storageInstance = new MemStorage();
 }
 

@@ -1,20 +1,51 @@
-import { useState, useMemo } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { Users, Plus, Edit, Trash2, Phone, Mail, MapPin, Upload, Search, Filter, X, Download, ChevronDown, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import TSPContactManager from "./tsp-contact-manager";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useAuth } from "@/hooks/useAuth";
-import { hasPermission, PERMISSIONS } from "@shared/auth-utils";
-import type { Recipient } from "@shared/schema";
+import { useState, useMemo } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import {
+  Users,
+  Plus,
+  Edit,
+  Trash2,
+  Phone,
+  Mail,
+  MapPin,
+  Upload,
+  Search,
+  Filter,
+  X,
+  Download,
+  ChevronDown,
+  ChevronRight,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import TSPContactManager from './tsp-contact-manager';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest, queryClient } from '@/lib/queryClient';
+import { useAuth } from '@/hooks/useAuth';
+import { hasPermission, PERMISSIONS } from '@shared/auth-utils';
+import type { Recipient } from '@shared/schema';
 
 export default function RecipientsManagement() {
   const { toast } = useToast();
@@ -22,68 +53,77 @@ export default function RecipientsManagement() {
   const canEdit = hasPermission(user, PERMISSIONS.MANAGE_RECIPIENTS);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
-  const [editingRecipient, setEditingRecipient] = useState<Recipient | null>(null);
+  const [editingRecipient, setEditingRecipient] = useState<Recipient | null>(
+    null
+  );
 
   // Search and filter states
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [contractFilter, setContractFilter] = useState<string>("all");
-  const [regionFilter, setRegionFilter] = useState<string>("all");
-  const [tspContactFilter, setTspContactFilter] = useState<string>("all");
-  const [sandwichTypeFilter, setSandwichTypeFilter] = useState<string>("all");
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [contractFilter, setContractFilter] = useState<string>('all');
+  const [regionFilter, setRegionFilter] = useState<string>('all');
+  const [tspContactFilter, setTspContactFilter] = useState<string>('all');
+  const [sandwichTypeFilter, setSandwichTypeFilter] = useState<string>('all');
   const [showFilters, setShowFilters] = useState(false);
   const [importFile, setImportFile] = useState<File | null>(null);
-  const [importResults, setImportResults] = useState<{ imported: number; skipped: number } | null>(null);
-  
+  const [importResults, setImportResults] = useState<{
+    imported: number;
+    skipped: number;
+  } | null>(null);
+
   // Collapsible section states
   const [basicInfoSectionOpen, setBasicInfoSectionOpen] = useState(true);
   const [contactSectionOpen, setContactSectionOpen] = useState(true);
-  const [secondContactSectionOpen, setSecondContactSectionOpen] = useState(false);
+  const [secondContactSectionOpen, setSecondContactSectionOpen] =
+    useState(false);
   const [operationalSectionOpen, setOperationalSectionOpen] = useState(false);
-  
+
   // Edit form collapsible states
-  const [editBasicInfoSectionOpen, setEditBasicInfoSectionOpen] = useState(true);
+  const [editBasicInfoSectionOpen, setEditBasicInfoSectionOpen] =
+    useState(true);
   const [editContactSectionOpen, setEditContactSectionOpen] = useState(true);
-  const [editSecondContactSectionOpen, setEditSecondContactSectionOpen] = useState(false);
-  const [editOperationalSectionOpen, setEditOperationalSectionOpen] = useState(false);
+  const [editSecondContactSectionOpen, setEditSecondContactSectionOpen] =
+    useState(false);
+  const [editOperationalSectionOpen, setEditOperationalSectionOpen] =
+    useState(false);
   const [newRecipient, setNewRecipient] = useState({
-    name: "",
-    phone: "",
-    email: "",
-    website: "",
-    instagramHandle: "",
-    address: "",
-    region: "",
-    preferences: "", // Legacy field - keeping for backward compatibility
-    status: "active" as const,
-    contactPersonName: "",
-    contactPersonPhone: "",
-    contactPersonEmail: "",
-    contactPersonRole: "",
+    name: '',
+    phone: '',
+    email: '',
+    website: '',
+    instagramHandle: '',
+    address: '',
+    region: '',
+    preferences: '', // Legacy field - keeping for backward compatibility
+    status: 'active' as const,
+    contactPersonName: '',
+    contactPersonPhone: '',
+    contactPersonEmail: '',
+    contactPersonRole: '',
     // Second contact person fields
-    secondContactPersonName: "",
-    secondContactPersonPhone: "",
-    secondContactPersonEmail: "",
-    secondContactPersonRole: "",
+    secondContactPersonName: '',
+    secondContactPersonPhone: '',
+    secondContactPersonEmail: '',
+    secondContactPersonRole: '',
     // New enhanced fields
-    reportingGroup: "",
-    estimatedSandwiches: "",
-    sandwichType: "",
-    focusArea: "", // New field for group focus (youth, veterans, etc.)
-    tspContact: "",
-    tspContactUserId: "",
+    reportingGroup: '',
+    estimatedSandwiches: '',
+    sandwichType: '',
+    focusArea: '', // New field for group focus (youth, veterans, etc.)
+    tspContact: '',
+    tspContactUserId: '',
     contractSigned: false,
-    contractSignedDate: ""
+    contractSignedDate: '',
   });
 
   const { data: recipients = [], isLoading } = useQuery<Recipient[]>({
-    queryKey: ["/api/recipients"],
+    queryKey: ['/api/recipients'],
     staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
   });
 
   // Fetch users for TSP contact selection
   const { data: users = [] } = useQuery({
-    queryKey: ["/api/users"],
+    queryKey: ['/api/users'],
     staleTime: 10 * 60 * 1000, // Consider data fresh for 10 minutes
   });
 
@@ -94,146 +134,172 @@ export default function RecipientsManagement() {
     // Apply search filter
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(recipient =>
-        recipient.name?.toLowerCase().includes(term) ||
-        recipient.email?.toLowerCase().includes(term) ||
-        recipient.phone?.toLowerCase().includes(term) ||
-        recipient.address?.toLowerCase().includes(term) ||
-        recipient.region?.toLowerCase().includes(term) ||
-        recipient.contactPersonName?.toLowerCase().includes(term) ||
-        recipient.contactPersonEmail?.toLowerCase().includes(term) ||
-        (recipient as any).secondContactPersonName?.toLowerCase().includes(term) ||
-        (recipient as any).secondContactPersonEmail?.toLowerCase().includes(term) ||
-        recipient.reportingGroup?.toLowerCase().includes(term) ||
-        (recipient as any).focusArea?.toLowerCase().includes(term) ||
-        (recipient as any).instagramHandle?.toLowerCase().includes(term)
+      filtered = filtered.filter(
+        (recipient) =>
+          recipient.name?.toLowerCase().includes(term) ||
+          recipient.email?.toLowerCase().includes(term) ||
+          recipient.phone?.toLowerCase().includes(term) ||
+          recipient.address?.toLowerCase().includes(term) ||
+          recipient.region?.toLowerCase().includes(term) ||
+          recipient.contactPersonName?.toLowerCase().includes(term) ||
+          recipient.contactPersonEmail?.toLowerCase().includes(term) ||
+          (recipient as any).secondContactPersonName
+            ?.toLowerCase()
+            .includes(term) ||
+          (recipient as any).secondContactPersonEmail
+            ?.toLowerCase()
+            .includes(term) ||
+          recipient.reportingGroup?.toLowerCase().includes(term) ||
+          (recipient as any).focusArea?.toLowerCase().includes(term) ||
+          (recipient as any).instagramHandle?.toLowerCase().includes(term)
       );
     }
 
     // Apply status filter
-    if (statusFilter !== "all") {
-      filtered = filtered.filter(recipient => recipient.status === statusFilter);
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(
+        (recipient) => recipient.status === statusFilter
+      );
     }
 
     // Apply contract filter
-    if (contractFilter === "signed") {
-      filtered = filtered.filter(recipient => recipient.contractSigned === true);
-    } else if (contractFilter === "unsigned") {
-      filtered = filtered.filter(recipient => !recipient.contractSigned);
+    if (contractFilter === 'signed') {
+      filtered = filtered.filter(
+        (recipient) => recipient.contractSigned === true
+      );
+    } else if (contractFilter === 'unsigned') {
+      filtered = filtered.filter((recipient) => !recipient.contractSigned);
     }
 
     // Apply region filter
-    if (regionFilter !== "all") {
-      filtered = filtered.filter(recipient => recipient.region === regionFilter);
+    if (regionFilter !== 'all') {
+      filtered = filtered.filter(
+        (recipient) => recipient.region === regionFilter
+      );
     }
 
     // Apply TSP contact filter
-    if (tspContactFilter !== "all") {
-      filtered = filtered.filter(recipient => 
-        recipient.tspContact && 
-        recipient.tspContact.toLowerCase().includes(tspContactFilter.toLowerCase())
+    if (tspContactFilter !== 'all') {
+      filtered = filtered.filter(
+        (recipient) =>
+          recipient.tspContact &&
+          recipient.tspContact
+            .toLowerCase()
+            .includes(tspContactFilter.toLowerCase())
       );
     }
 
     // Apply sandwich type filter
-    if (sandwichTypeFilter !== "all") {
-      filtered = filtered.filter(recipient => recipient.sandwichType === sandwichTypeFilter);
+    if (sandwichTypeFilter !== 'all') {
+      filtered = filtered.filter(
+        (recipient) => recipient.sandwichType === sandwichTypeFilter
+      );
     }
 
     return filtered;
-  }, [recipients, searchTerm, statusFilter, contractFilter, regionFilter, tspContactFilter, sandwichTypeFilter]);
+  }, [
+    recipients,
+    searchTerm,
+    statusFilter,
+    contractFilter,
+    regionFilter,
+    tspContactFilter,
+    sandwichTypeFilter,
+  ]);
 
   // Get unique values for filter dropdowns
   const uniqueRegions = useMemo(() => {
-    const regions = recipients.map(r => r.region).filter(Boolean);
+    const regions = recipients.map((r) => r.region).filter(Boolean);
     return [...new Set(regions)].sort();
   }, [recipients]);
 
   const uniqueTspContacts = useMemo(() => {
     const allContacts = recipients
-      .map(r => r.tspContact)
+      .map((r) => r.tspContact)
       .filter(Boolean)
-      .flatMap(contact => 
+      .flatMap((contact) =>
         // Split contacts by common separators (/, &, and, comma)
-        contact.split(/[/&,]|and/i).map(c => c.trim())
+        contact.split(/[/&,]|and/i).map((c) => c.trim())
       )
-      .filter(contact => contact.length > 0);
-    
+      .filter((contact) => contact.length > 0);
+
     return [...new Set(allContacts)].sort();
   }, [recipients]);
 
   const uniqueSandwichTypes = useMemo(() => {
-    const types = recipients.map(r => r.sandwichType).filter(Boolean);
+    const types = recipients.map((r) => r.sandwichType).filter(Boolean);
     return [...new Set(types)].sort();
   }, [recipients]);
 
   const uniqueFocusAreas = useMemo(() => {
-    const areas = recipients.map(r => (r as any).focusArea).filter(Boolean);
+    const areas = recipients.map((r) => (r as any).focusArea).filter(Boolean);
     return [...new Set(areas)].sort();
   }, [recipients]);
 
   const createRecipientMutation = useMutation({
-    mutationFn: (recipient: any) => apiRequest('POST', '/api/recipients', recipient),
+    mutationFn: (recipient: any) =>
+      apiRequest('POST', '/api/recipients', recipient),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/recipients"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/recipients'] });
       setIsAddModalOpen(false);
       setNewRecipient({
-        name: "",
-        phone: "",
-        email: "",
-        website: "",
-        instagramHandle: "",
-        address: "",
-        region: "",
-        preferences: "",
-        status: "active",
-        contactPersonName: "",
-        contactPersonPhone: "",
-        contactPersonEmail: "",
-        contactPersonRole: "",
-        secondContactPersonName: "",
-        secondContactPersonPhone: "",
-        secondContactPersonEmail: "",
-        secondContactPersonRole: "",
+        name: '',
+        phone: '',
+        email: '',
+        website: '',
+        instagramHandle: '',
+        address: '',
+        region: '',
+        preferences: '',
+        status: 'active',
+        contactPersonName: '',
+        contactPersonPhone: '',
+        contactPersonEmail: '',
+        contactPersonRole: '',
+        secondContactPersonName: '',
+        secondContactPersonPhone: '',
+        secondContactPersonEmail: '',
+        secondContactPersonRole: '',
         // Reset new enhanced fields
-        reportingGroup: "",
-        estimatedSandwiches: "",
-        sandwichType: "",
-        focusArea: "", // Reset focus area field
-        tspContact: "",
-        tspContactUserId: "",
+        reportingGroup: '',
+        estimatedSandwiches: '',
+        sandwichType: '',
+        focusArea: '', // Reset focus area field
+        tspContact: '',
+        tspContactUserId: '',
         contractSigned: false,
-        contractSignedDate: ""
+        contractSignedDate: '',
       });
       toast({
-        title: "Success",
-        description: "Recipient added successfully",
+        title: 'Success',
+        description: 'Recipient added successfully',
       });
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to add recipient",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to add recipient',
+        variant: 'destructive',
       });
     },
   });
 
   const updateRecipientMutation = useMutation({
-    mutationFn: ({ id, ...updates }: any) => apiRequest('PUT', `/api/recipients/${id}`, updates),
+    mutationFn: ({ id, ...updates }: any) =>
+      apiRequest('PUT', `/api/recipients/${id}`, updates),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/recipients"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/recipients'] });
       setEditingRecipient(null);
       toast({
-        title: "Success",
-        description: "Recipient updated successfully",
+        title: 'Success',
+        description: 'Recipient updated successfully',
       });
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to update recipient",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to update recipient',
+        variant: 'destructive',
       });
     },
   });
@@ -241,17 +307,17 @@ export default function RecipientsManagement() {
   const deleteRecipientMutation = useMutation({
     mutationFn: (id: number) => apiRequest('DELETE', `/api/recipients/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/recipients"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/recipients'] });
       toast({
-        title: "Success",
-        description: "Recipient deleted successfully",
+        title: 'Success',
+        description: 'Recipient deleted successfully',
       });
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to delete recipient",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to delete recipient',
+        variant: 'destructive',
       });
     },
   });
@@ -263,22 +329,22 @@ export default function RecipientsManagement() {
       return fetch('/api/recipients/import', {
         method: 'POST',
         body: formData,
-      }).then(res => res.json());
+      }).then((res) => res.json());
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/recipients"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/recipients'] });
       setImportResults(data);
       setImportFile(null);
       toast({
-        title: "Import Complete",
+        title: 'Import Complete',
         description: `Successfully imported ${data.imported} recipients`,
       });
     },
     onError: () => {
       toast({
-        title: "Import Error",
-        description: "Failed to import recipients",
-        variant: "destructive",
+        title: 'Import Error',
+        description: 'Failed to import recipients',
+        variant: 'destructive',
       });
     },
   });
@@ -287,26 +353,26 @@ export default function RecipientsManagement() {
     e.preventDefault();
     if (!newRecipient.name || !newRecipient.phone) {
       toast({
-        title: "Validation Error",
-        description: "Name and phone are required",
-        variant: "destructive",
+        title: 'Validation Error',
+        description: 'Name and phone are required',
+        variant: 'destructive',
       });
       return;
     }
-    
+
     // Convert data types to match schema expectations
     const submissionData = {
       ...newRecipient,
       // Convert estimatedSandwiches from string to number (or null if empty)
-      estimatedSandwiches: newRecipient.estimatedSandwiches 
-        ? parseInt(newRecipient.estimatedSandwiches, 10) 
+      estimatedSandwiches: newRecipient.estimatedSandwiches
+        ? parseInt(newRecipient.estimatedSandwiches, 10)
         : null,
       // Convert contractSignedDate from string to Date (or null if empty)
-      contractSignedDate: newRecipient.contractSignedDate 
-        ? new Date(newRecipient.contractSignedDate) 
+      contractSignedDate: newRecipient.contractSignedDate
+        ? new Date(newRecipient.contractSignedDate)
         : null,
     };
-    
+
     createRecipientMutation.mutate(submissionData);
   };
 
@@ -316,25 +382,25 @@ export default function RecipientsManagement() {
 
   const handleUpdate = () => {
     if (!editingRecipient) return;
-    
+
     // Convert data types to match schema expectations for update
     const updateData = {
       ...editingRecipient,
       // Convert estimatedSandwiches from string to number (or null if empty)
-      estimatedSandwiches: (editingRecipient as any).estimatedSandwiches 
-        ? parseInt((editingRecipient as any).estimatedSandwiches, 10) 
+      estimatedSandwiches: (editingRecipient as any).estimatedSandwiches
+        ? parseInt((editingRecipient as any).estimatedSandwiches, 10)
         : null,
       // Convert contractSignedDate from string to Date (or null if empty)
-      contractSignedDate: (editingRecipient as any).contractSignedDate 
-        ? new Date((editingRecipient as any).contractSignedDate) 
+      contractSignedDate: (editingRecipient as any).contractSignedDate
+        ? new Date((editingRecipient as any).contractSignedDate)
         : null,
     };
-    
+
     updateRecipientMutation.mutate(updateData);
   };
 
   const handleDelete = (id: number) => {
-    if (confirm("Are you sure you want to delete this recipient?")) {
+    if (confirm('Are you sure you want to delete this recipient?')) {
       deleteRecipientMutation.mutate(id);
     }
   };
@@ -355,29 +421,29 @@ export default function RecipientsManagement() {
 
   const handleExport = async () => {
     try {
-      const response = await fetch("/api/recipients/export", {
-        credentials: "include",
+      const response = await fetch('/api/recipients/export', {
+        credentials: 'include',
       });
-      if (!response.ok) throw new Error("Export failed");
+      if (!response.ok) throw new Error('Export failed');
 
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
+      const a = document.createElement('a');
       a.href = url;
-      a.download = `recipients-export-${new Date().toISOString().split("T")[0]}.csv`;
+      a.download = `recipients-export-${new Date().toISOString().split('T')[0]}.csv`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-      toast({ 
-        title: "Export completed successfully",
-        description: `Exported ${filteredRecipients.length} recipients to CSV`
+      toast({
+        title: 'Export completed successfully',
+        description: `Exported ${filteredRecipients.length} recipients to CSV`,
       });
     } catch (error) {
-      toast({ 
-        title: "Export failed", 
-        description: "Failed to export recipients data",
-        variant: "destructive" 
+      toast({
+        title: 'Export failed',
+        description: 'Failed to export recipients data',
+        variant: 'destructive',
       });
     }
   };
@@ -396,15 +462,18 @@ export default function RecipientsManagement() {
             Recipients Management
           </h1>
           <div className="flex gap-2">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={handleExport}
               className="flex items-center gap-2"
             >
               <Download className="w-4 h-4" />
               Export CSV
             </Button>
-            <Dialog open={isImportModalOpen} onOpenChange={setIsImportModalOpen}>
+            <Dialog
+              open={isImportModalOpen}
+              onOpenChange={setIsImportModalOpen}
+            >
               <DialogTrigger asChild>
                 <Button variant="outline" className="flex items-center gap-2">
                   <Upload className="w-4 h-4" />
@@ -415,8 +484,13 @@ export default function RecipientsManagement() {
                 <DialogHeader>
                   <DialogTitle>Import Recipients from CSV/XLSX</DialogTitle>
                 </DialogHeader>
-                <p id="import-recipients-description" className="text-sm text-slate-600 mb-4">
-                  Upload a CSV or Excel file with recipient data. Required columns: name, phone. Optional: email, address, preferences, status.
+                <p
+                  id="import-recipients-description"
+                  className="text-sm text-slate-600 mb-4"
+                >
+                  Upload a CSV or Excel file with recipient data. Required
+                  columns: name, phone. Optional: email, address, preferences,
+                  status.
                 </p>
 
                 <div className="space-y-4">
@@ -438,10 +512,14 @@ export default function RecipientsManagement() {
 
                   {importResults && (
                     <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                      <h4 className="font-medium text-green-800">Import Results</h4>
+                      <h4 className="font-medium text-green-800">
+                        Import Results
+                      </h4>
                       <p className="text-sm text-green-700 mt-1">
-                        Successfully imported {importResults.imported} recipients
-                        {importResults.skipped > 0 && `, skipped ${importResults.skipped} duplicates`}
+                        Successfully imported {importResults.imported}{' '}
+                        recipients
+                        {importResults.skipped > 0 &&
+                          `, skipped ${importResults.skipped} duplicates`}
                       </p>
                     </div>
                   )}
@@ -459,9 +537,13 @@ export default function RecipientsManagement() {
                     </Button>
                     <Button
                       onClick={handleImport}
-                      disabled={!importFile || importRecipientsMutation.isPending}
+                      disabled={
+                        !importFile || importRecipientsMutation.isPending
+                      }
                     >
-                      {importRecipientsMutation.isPending ? "Importing..." : "Import"}
+                      {importRecipientsMutation.isPending
+                        ? 'Importing...'
+                        : 'Import'}
                     </Button>
                   </div>
                 </div>
@@ -475,307 +557,515 @@ export default function RecipientsManagement() {
                   Add Recipient
                 </Button>
               </DialogTrigger>
-              <DialogContent aria-describedby="add-recipient-description" className="max-h-[90vh] flex flex-col">
+              <DialogContent
+                aria-describedby="add-recipient-description"
+                className="max-h-[90vh] flex flex-col"
+              >
                 <DialogHeader className="flex-shrink-0">
                   <DialogTitle>Add New Recipient</DialogTitle>
                 </DialogHeader>
                 <div className="flex-1 overflow-y-auto px-1">
-                  <p id="add-recipient-description" className="text-sm text-slate-600 mb-4">
+                  <p
+                    id="add-recipient-description"
+                    className="text-sm text-slate-600 mb-4"
+                  >
                     Add a new recipient to the system for sandwich deliveries.
                   </p>
                   <form onSubmit={handleSubmit} className="space-y-4">
-                  
-                  {/* Basic Information Section */}
-                  <Collapsible open={basicInfoSectionOpen} onOpenChange={setBasicInfoSectionOpen}>
-                    <div>
-                      <CollapsibleTrigger asChild>
-                        <Button variant="ghost" className="w-full justify-between p-0 h-auto">
-                          <h4 className="font-medium text-sm text-slate-700">Basic Information</h4>
-                          {basicInfoSectionOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                        </Button>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent className="mt-3">
-                        <div className="space-y-4">
-                          <div>
-                            <Label htmlFor="name">Name *</Label>
-                            <Input
-                              id="name"
-                              value={newRecipient.name}
-                              onChange={(e) => setNewRecipient({ ...newRecipient, name: e.target.value })}
-                              placeholder="Enter recipient name"
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="phone">Phone Number *</Label>
-                            <Input
-                              id="phone"
-                              value={newRecipient.phone}
-                              onChange={(e) => setNewRecipient({ ...newRecipient, phone: e.target.value })}
-                              placeholder="(555) 123-4567"
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="email">Email</Label>
-                            <Input
-                              id="email"
-                              type="email"
-                              value={newRecipient.email}
-                              onChange={(e) => setNewRecipient({ ...newRecipient, email: e.target.value })}
-                              placeholder="email@example.com"
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="website">Website</Label>
-                            <Input
-                              id="website"
-                              type="text"
-                              value={newRecipient.website}
-                              onChange={(e) => setNewRecipient({ ...newRecipient, website: e.target.value })}
-                              placeholder="www.organization.org or https://organization.org"
-                            />
-                          </div>
-                          
-                          <div>
-                            <Label htmlFor="instagramHandle">Instagram Handle</Label>
-                            <Input
-                              id="instagramHandle"
-                              type="text"
-                              value={newRecipient.instagramHandle}
-                              onChange={(e) => setNewRecipient({ ...newRecipient, instagramHandle: e.target.value })}
-                              placeholder="@organizationhandle"
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="address">Street Address</Label>
-                            <Input
-                              id="address"
-                              value={newRecipient.address}
-                              onChange={(e) => setNewRecipient({ ...newRecipient, address: e.target.value })}
-                              placeholder="123 Main St, City, State 12345"
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="region">Region/Area</Label>
-                            <Input
-                              id="region"
-                              value={newRecipient.region}
-                              onChange={(e) => setNewRecipient({ ...newRecipient, region: e.target.value })}
-                              placeholder="Downtown, Sandy Springs, Buckhead, etc."
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="preferences">Preferences</Label>
-                            <Input
-                              id="preferences"
-                              value={newRecipient.preferences}
-                              onChange={(e) => setNewRecipient({ ...newRecipient, preferences: e.target.value })}
-                              placeholder="Dietary restrictions or preferences"
-                            />
-                          </div>
-                        </div>
-                      </CollapsibleContent>
-                    </div>
-                  </Collapsible>
-                  
-                  {/* Contact Person Section */}
-                  <Collapsible open={contactSectionOpen} onOpenChange={setContactSectionOpen}>
-                    <div className="border-t pt-4 mt-4">
-                      <CollapsibleTrigger asChild>
-                        <Button variant="ghost" className="w-full justify-between p-0 h-auto">
-                          <h4 className="font-medium text-sm text-slate-700">Contact Person Information</h4>
-                          {contactSectionOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                        </Button>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent className="mt-3">
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <Label htmlFor="contactPersonName">Contact Name</Label>
-                            <Input
-                              id="contactPersonName"
-                              value={newRecipient.contactPersonName}
-                              onChange={(e) => setNewRecipient({ ...newRecipient, contactPersonName: e.target.value })}
-                              placeholder="John Smith"
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="contactPersonRole">Role/Title</Label>
-                            <Input
-                              id="contactPersonRole"
-                              value={newRecipient.contactPersonRole}
-                              onChange={(e) => setNewRecipient({ ...newRecipient, contactPersonRole: e.target.value })}
-                              placeholder="Program Director, Manager, etc."
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="contactPersonPhone">Contact Phone</Label>
-                            <Input
-                              id="contactPersonPhone"
-                              value={newRecipient.contactPersonPhone}
-                              onChange={(e) => setNewRecipient({ ...newRecipient, contactPersonPhone: e.target.value })}
-                              placeholder="(555) 123-4567"
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="contactPersonEmail">Contact Email</Label>
-                            <Input
-                              id="contactPersonEmail"
-                              type="email"
-                              value={newRecipient.contactPersonEmail}
-                              onChange={(e) => setNewRecipient({ ...newRecipient, contactPersonEmail: e.target.value })}
-                              placeholder="john@organization.org"
-                            />
-                          </div>
-                        </div>
-                      </CollapsibleContent>
-                    </div>
-                  </Collapsible>
+                    {/* Basic Information Section */}
+                    <Collapsible
+                      open={basicInfoSectionOpen}
+                      onOpenChange={setBasicInfoSectionOpen}
+                    >
+                      <div>
+                        <CollapsibleTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            className="w-full justify-between p-0 h-auto"
+                          >
+                            <h4 className="font-medium text-sm text-slate-700">
+                              Basic Information
+                            </h4>
+                            {basicInfoSectionOpen ? (
+                              <ChevronDown className="h-4 w-4" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent className="mt-3">
+                          <div className="space-y-4">
+                            <div>
+                              <Label htmlFor="name">Name *</Label>
+                              <Input
+                                id="name"
+                                value={newRecipient.name}
+                                onChange={(e) =>
+                                  setNewRecipient({
+                                    ...newRecipient,
+                                    name: e.target.value,
+                                  })
+                                }
+                                placeholder="Enter recipient name"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="phone">Phone Number *</Label>
+                              <Input
+                                id="phone"
+                                value={newRecipient.phone}
+                                onChange={(e) =>
+                                  setNewRecipient({
+                                    ...newRecipient,
+                                    phone: e.target.value,
+                                  })
+                                }
+                                placeholder="(555) 123-4567"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="email">Email</Label>
+                              <Input
+                                id="email"
+                                type="email"
+                                value={newRecipient.email}
+                                onChange={(e) =>
+                                  setNewRecipient({
+                                    ...newRecipient,
+                                    email: e.target.value,
+                                  })
+                                }
+                                placeholder="email@example.com"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="website">Website</Label>
+                              <Input
+                                id="website"
+                                type="text"
+                                value={newRecipient.website}
+                                onChange={(e) =>
+                                  setNewRecipient({
+                                    ...newRecipient,
+                                    website: e.target.value,
+                                  })
+                                }
+                                placeholder="www.organization.org or https://organization.org"
+                              />
+                            </div>
 
-                  {/* Second Contact Person Section */}
-                  <Collapsible open={secondContactSectionOpen} onOpenChange={setSecondContactSectionOpen}>
-                    <div className="border-t pt-4 mt-4">
-                      <CollapsibleTrigger asChild>
-                        <Button variant="ghost" className="w-full justify-between p-0 h-auto">
-                          <h4 className="font-medium text-sm text-slate-700">Second Contact Person (Optional)</h4>
-                          {secondContactSectionOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                        </Button>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent className="mt-3">
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <Label htmlFor="secondContactPersonName">Contact Name</Label>
-                            <Input
-                              id="secondContactPersonName"
-                              value={newRecipient.secondContactPersonName}
-                              onChange={(e) => setNewRecipient({ ...newRecipient, secondContactPersonName: e.target.value })}
-                              placeholder="Jane Doe"
-                            />
+                            <div>
+                              <Label htmlFor="instagramHandle">
+                                Instagram Handle
+                              </Label>
+                              <Input
+                                id="instagramHandle"
+                                type="text"
+                                value={newRecipient.instagramHandle}
+                                onChange={(e) =>
+                                  setNewRecipient({
+                                    ...newRecipient,
+                                    instagramHandle: e.target.value,
+                                  })
+                                }
+                                placeholder="@organizationhandle"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="address">Street Address</Label>
+                              <Input
+                                id="address"
+                                value={newRecipient.address}
+                                onChange={(e) =>
+                                  setNewRecipient({
+                                    ...newRecipient,
+                                    address: e.target.value,
+                                  })
+                                }
+                                placeholder="123 Main St, City, State 12345"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="region">Region/Area</Label>
+                              <Input
+                                id="region"
+                                value={newRecipient.region}
+                                onChange={(e) =>
+                                  setNewRecipient({
+                                    ...newRecipient,
+                                    region: e.target.value,
+                                  })
+                                }
+                                placeholder="Downtown, Sandy Springs, Buckhead, etc."
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="preferences">Preferences</Label>
+                              <Input
+                                id="preferences"
+                                value={newRecipient.preferences}
+                                onChange={(e) =>
+                                  setNewRecipient({
+                                    ...newRecipient,
+                                    preferences: e.target.value,
+                                  })
+                                }
+                                placeholder="Dietary restrictions or preferences"
+                              />
+                            </div>
                           </div>
-                          <div>
-                            <Label htmlFor="secondContactPersonRole">Role/Title</Label>
-                            <Input
-                              id="secondContactPersonRole"
-                              value={newRecipient.secondContactPersonRole}
-                              onChange={(e) => setNewRecipient({ ...newRecipient, secondContactPersonRole: e.target.value })}
-                              placeholder="Assistant Manager, etc."
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="secondContactPersonPhone">Contact Phone</Label>
-                            <Input
-                              id="secondContactPersonPhone"
-                              value={newRecipient.secondContactPersonPhone}
-                              onChange={(e) => setNewRecipient({ ...newRecipient, secondContactPersonPhone: e.target.value })}
-                              placeholder="(555) 987-6543"
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="secondContactPersonEmail">Contact Email</Label>
-                            <Input
-                              id="secondContactPersonEmail"
-                              type="email"
-                              value={newRecipient.secondContactPersonEmail}
-                              onChange={(e) => setNewRecipient({ ...newRecipient, secondContactPersonEmail: e.target.value })}
-                              placeholder="jane@organization.org"
-                            />
-                          </div>
-                        </div>
-                      </CollapsibleContent>
-                    </div>
-                  </Collapsible>
+                        </CollapsibleContent>
+                      </div>
+                    </Collapsible>
 
-                  {/* Enhanced Operational Fields */}
-                  <Collapsible open={operationalSectionOpen} onOpenChange={setOperationalSectionOpen}>
-                    <div className="border-t pt-4 mt-4">
-                      <CollapsibleTrigger asChild>
-                        <Button variant="ghost" className="w-full justify-between p-0 h-auto">
-                          <h4 className="font-medium text-sm text-slate-700">Operational Details</h4>
-                          {operationalSectionOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                        </Button>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent className="mt-3">
-                        <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <Label htmlFor="reportingGroup">Reporting Group</Label>
-                        <Input
-                          id="reportingGroup"
-                          value={newRecipient.reportingGroup}
-                          onChange={(e) => setNewRecipient({ ...newRecipient, reportingGroup: e.target.value })}
-                          placeholder="Corresponds to host locations"
-                        />
+                    {/* Contact Person Section */}
+                    <Collapsible
+                      open={contactSectionOpen}
+                      onOpenChange={setContactSectionOpen}
+                    >
+                      <div className="border-t pt-4 mt-4">
+                        <CollapsibleTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            className="w-full justify-between p-0 h-auto"
+                          >
+                            <h4 className="font-medium text-sm text-slate-700">
+                              Contact Person Information
+                            </h4>
+                            {contactSectionOpen ? (
+                              <ChevronDown className="h-4 w-4" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent className="mt-3">
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <Label htmlFor="contactPersonName">
+                                Contact Name
+                              </Label>
+                              <Input
+                                id="contactPersonName"
+                                value={newRecipient.contactPersonName}
+                                onChange={(e) =>
+                                  setNewRecipient({
+                                    ...newRecipient,
+                                    contactPersonName: e.target.value,
+                                  })
+                                }
+                                placeholder="John Smith"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="contactPersonRole">
+                                Role/Title
+                              </Label>
+                              <Input
+                                id="contactPersonRole"
+                                value={newRecipient.contactPersonRole}
+                                onChange={(e) =>
+                                  setNewRecipient({
+                                    ...newRecipient,
+                                    contactPersonRole: e.target.value,
+                                  })
+                                }
+                                placeholder="Program Director, Manager, etc."
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="contactPersonPhone">
+                                Contact Phone
+                              </Label>
+                              <Input
+                                id="contactPersonPhone"
+                                value={newRecipient.contactPersonPhone}
+                                onChange={(e) =>
+                                  setNewRecipient({
+                                    ...newRecipient,
+                                    contactPersonPhone: e.target.value,
+                                  })
+                                }
+                                placeholder="(555) 123-4567"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="contactPersonEmail">
+                                Contact Email
+                              </Label>
+                              <Input
+                                id="contactPersonEmail"
+                                type="email"
+                                value={newRecipient.contactPersonEmail}
+                                onChange={(e) =>
+                                  setNewRecipient({
+                                    ...newRecipient,
+                                    contactPersonEmail: e.target.value,
+                                  })
+                                }
+                                placeholder="john@organization.org"
+                              />
+                            </div>
+                          </div>
+                        </CollapsibleContent>
                       </div>
-                      <div>
-                        <Label htmlFor="estimatedSandwiches">Estimated Sandwiches</Label>
-                        <Input
-                          id="estimatedSandwiches"
-                          type="number"
-                          value={newRecipient.estimatedSandwiches}
-                          onChange={(e) => setNewRecipient({ ...newRecipient, estimatedSandwiches: e.target.value })}
-                          placeholder="Number of sandwiches needed"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="sandwichType">Sandwich Type</Label>
-                        <Input
-                          id="sandwichType"
-                          value={newRecipient.sandwichType}
-                          onChange={(e) => setNewRecipient({ ...newRecipient, sandwichType: e.target.value })}
-                          placeholder="Type preferred (e.g., PB&J, Deli, Mixed)"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="focusArea">Focus Area</Label>
-                        <Input
-                          id="focusArea"
-                          value={newRecipient.focusArea}
-                          onChange={(e) => setNewRecipient({ ...newRecipient, focusArea: e.target.value })}
-                          placeholder="Group focus (e.g., youth, veterans, seniors, families)"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="tspContact">TSP Contact</Label>
-                        <Input
-                          id="tspContact"
-                          value={newRecipient.tspContact}
-                          onChange={(e) => setNewRecipient({ ...newRecipient, tspContact: e.target.value })}
-                          placeholder="TSP team member name"
-                        />
-                      </div>
-                      <div className="col-span-2">
-                        <div className="flex items-center space-x-2">
-                          <input
-                            type="checkbox"
-                            id="contractSigned"
-                            checked={newRecipient.contractSigned}
-                            onChange={(e) => setNewRecipient({ ...newRecipient, contractSigned: e.target.checked })}
-                            className="h-4 w-4 text-[#236383] focus:ring-[#236383] border-gray-300 rounded"
-                          />
-                          <Label htmlFor="contractSigned" className="text-sm">Contract Signed</Label>
-                        </div>
-                      </div>
-                      {newRecipient.contractSigned && (
-                        <div>
-                          <Label htmlFor="contractSignedDate">Contract Signed Date</Label>
-                          <Input
-                            id="contractSignedDate"
-                            type="date"
-                            value={newRecipient.contractSignedDate}
-                            onChange={(e) => setNewRecipient({ ...newRecipient, contractSignedDate: e.target.value })}
-                          />
-                        </div>
-                      )}
-                        </div>
-                      </CollapsibleContent>
-                    </div>
-                  </Collapsible>
+                    </Collapsible>
 
-                  <div className="flex justify-end space-x-2 mt-6 pt-4 border-t bg-white sticky bottom-0">
-                    <Button type="button" variant="outline" onClick={() => setIsAddModalOpen(false)}>
-                      Cancel
-                    </Button>
-                    <Button type="submit" disabled={createRecipientMutation.isPending}>
-                      {createRecipientMutation.isPending ? "Adding..." : "Add Recipient"}
-                    </Button>
-                  </div>
+                    {/* Second Contact Person Section */}
+                    <Collapsible
+                      open={secondContactSectionOpen}
+                      onOpenChange={setSecondContactSectionOpen}
+                    >
+                      <div className="border-t pt-4 mt-4">
+                        <CollapsibleTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            className="w-full justify-between p-0 h-auto"
+                          >
+                            <h4 className="font-medium text-sm text-slate-700">
+                              Second Contact Person (Optional)
+                            </h4>
+                            {secondContactSectionOpen ? (
+                              <ChevronDown className="h-4 w-4" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent className="mt-3">
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <Label htmlFor="secondContactPersonName">
+                                Contact Name
+                              </Label>
+                              <Input
+                                id="secondContactPersonName"
+                                value={newRecipient.secondContactPersonName}
+                                onChange={(e) =>
+                                  setNewRecipient({
+                                    ...newRecipient,
+                                    secondContactPersonName: e.target.value,
+                                  })
+                                }
+                                placeholder="Jane Doe"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="secondContactPersonRole">
+                                Role/Title
+                              </Label>
+                              <Input
+                                id="secondContactPersonRole"
+                                value={newRecipient.secondContactPersonRole}
+                                onChange={(e) =>
+                                  setNewRecipient({
+                                    ...newRecipient,
+                                    secondContactPersonRole: e.target.value,
+                                  })
+                                }
+                                placeholder="Assistant Manager, etc."
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="secondContactPersonPhone">
+                                Contact Phone
+                              </Label>
+                              <Input
+                                id="secondContactPersonPhone"
+                                value={newRecipient.secondContactPersonPhone}
+                                onChange={(e) =>
+                                  setNewRecipient({
+                                    ...newRecipient,
+                                    secondContactPersonPhone: e.target.value,
+                                  })
+                                }
+                                placeholder="(555) 987-6543"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="secondContactPersonEmail">
+                                Contact Email
+                              </Label>
+                              <Input
+                                id="secondContactPersonEmail"
+                                type="email"
+                                value={newRecipient.secondContactPersonEmail}
+                                onChange={(e) =>
+                                  setNewRecipient({
+                                    ...newRecipient,
+                                    secondContactPersonEmail: e.target.value,
+                                  })
+                                }
+                                placeholder="jane@organization.org"
+                              />
+                            </div>
+                          </div>
+                        </CollapsibleContent>
+                      </div>
+                    </Collapsible>
+
+                    {/* Enhanced Operational Fields */}
+                    <Collapsible
+                      open={operationalSectionOpen}
+                      onOpenChange={setOperationalSectionOpen}
+                    >
+                      <div className="border-t pt-4 mt-4">
+                        <CollapsibleTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            className="w-full justify-between p-0 h-auto"
+                          >
+                            <h4 className="font-medium text-sm text-slate-700">
+                              Operational Details
+                            </h4>
+                            {operationalSectionOpen ? (
+                              <ChevronDown className="h-4 w-4" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent className="mt-3">
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <Label htmlFor="reportingGroup">
+                                Reporting Group
+                              </Label>
+                              <Input
+                                id="reportingGroup"
+                                value={newRecipient.reportingGroup}
+                                onChange={(e) =>
+                                  setNewRecipient({
+                                    ...newRecipient,
+                                    reportingGroup: e.target.value,
+                                  })
+                                }
+                                placeholder="Corresponds to host locations"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="estimatedSandwiches">
+                                Estimated Sandwiches
+                              </Label>
+                              <Input
+                                id="estimatedSandwiches"
+                                type="number"
+                                value={newRecipient.estimatedSandwiches}
+                                onChange={(e) =>
+                                  setNewRecipient({
+                                    ...newRecipient,
+                                    estimatedSandwiches: e.target.value,
+                                  })
+                                }
+                                placeholder="Number of sandwiches needed"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="sandwichType">
+                                Sandwich Type
+                              </Label>
+                              <Input
+                                id="sandwichType"
+                                value={newRecipient.sandwichType}
+                                onChange={(e) =>
+                                  setNewRecipient({
+                                    ...newRecipient,
+                                    sandwichType: e.target.value,
+                                  })
+                                }
+                                placeholder="Type preferred (e.g., PB&J, Deli, Mixed)"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="focusArea">Focus Area</Label>
+                              <Input
+                                id="focusArea"
+                                value={newRecipient.focusArea}
+                                onChange={(e) =>
+                                  setNewRecipient({
+                                    ...newRecipient,
+                                    focusArea: e.target.value,
+                                  })
+                                }
+                                placeholder="Group focus (e.g., youth, veterans, seniors, families)"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="tspContact">TSP Contact</Label>
+                              <Input
+                                id="tspContact"
+                                value={newRecipient.tspContact}
+                                onChange={(e) =>
+                                  setNewRecipient({
+                                    ...newRecipient,
+                                    tspContact: e.target.value,
+                                  })
+                                }
+                                placeholder="TSP team member name"
+                              />
+                            </div>
+                            <div className="col-span-2">
+                              <div className="flex items-center space-x-2">
+                                <input
+                                  type="checkbox"
+                                  id="contractSigned"
+                                  checked={newRecipient.contractSigned}
+                                  onChange={(e) =>
+                                    setNewRecipient({
+                                      ...newRecipient,
+                                      contractSigned: e.target.checked,
+                                    })
+                                  }
+                                  className="h-4 w-4 text-[#236383] focus:ring-[#236383] border-gray-300 rounded"
+                                />
+                                <Label
+                                  htmlFor="contractSigned"
+                                  className="text-sm"
+                                >
+                                  Contract Signed
+                                </Label>
+                              </div>
+                            </div>
+                            {newRecipient.contractSigned && (
+                              <div>
+                                <Label htmlFor="contractSignedDate">
+                                  Contract Signed Date
+                                </Label>
+                                <Input
+                                  id="contractSignedDate"
+                                  type="date"
+                                  value={newRecipient.contractSignedDate}
+                                  onChange={(e) =>
+                                    setNewRecipient({
+                                      ...newRecipient,
+                                      contractSignedDate: e.target.value,
+                                    })
+                                  }
+                                />
+                              </div>
+                            )}
+                          </div>
+                        </CollapsibleContent>
+                      </div>
+                    </Collapsible>
+
+                    <div className="flex justify-end space-x-2 mt-6 pt-4 border-t bg-white sticky bottom-0">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setIsAddModalOpen(false)}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        type="submit"
+                        disabled={createRecipientMutation.isPending}
+                      >
+                        {createRecipientMutation.isPending
+                          ? 'Adding...'
+                          : 'Add Recipient'}
+                      </Button>
+                    </div>
                   </form>
                 </div>
               </DialogContent>
@@ -797,7 +1087,7 @@ export default function RecipientsManagement() {
               className="pl-10"
             />
           </div>
-          
+
           {/* Filter Toggle Button */}
           <Button
             variant="outline"
@@ -806,9 +1096,21 @@ export default function RecipientsManagement() {
           >
             <Filter className="w-4 h-4" />
             Filters
-            {(statusFilter !== "all" || contractFilter !== "all" || regionFilter !== "all" || tspContactFilter !== "all" || sandwichTypeFilter !== "all") && (
+            {(statusFilter !== 'all' ||
+              contractFilter !== 'all' ||
+              regionFilter !== 'all' ||
+              tspContactFilter !== 'all' ||
+              sandwichTypeFilter !== 'all') && (
               <Badge variant="secondary" className="ml-1">
-                {[statusFilter !== "all" && "Status", contractFilter !== "all" && "Contract", regionFilter !== "all" && "Region", tspContactFilter !== "all" && "TSP Contact", sandwichTypeFilter !== "all" && "Sandwich Type"].filter(Boolean).length}
+                {
+                  [
+                    statusFilter !== 'all' && 'Status',
+                    contractFilter !== 'all' && 'Contract',
+                    regionFilter !== 'all' && 'Region',
+                    tspContactFilter !== 'all' && 'TSP Contact',
+                    sandwichTypeFilter !== 'all' && 'Sandwich Type',
+                  ].filter(Boolean).length
+                }
               </Badge>
             )}
           </Button>
@@ -820,7 +1122,9 @@ export default function RecipientsManagement() {
             {/* First row of filters */}
             <div className="flex flex-col md:flex-row gap-3">
               <div className="flex flex-col space-y-2">
-                <Label className="text-xs font-medium text-slate-600">Status</Label>
+                <Label className="text-xs font-medium text-slate-600">
+                  Status
+                </Label>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
                   <SelectTrigger className="w-[140px]">
                     <SelectValue />
@@ -834,8 +1138,13 @@ export default function RecipientsManagement() {
               </div>
 
               <div className="flex flex-col space-y-2">
-                <Label className="text-xs font-medium text-slate-600">Contract</Label>
-                <Select value={contractFilter} onValueChange={setContractFilter}>
+                <Label className="text-xs font-medium text-slate-600">
+                  Contract
+                </Label>
+                <Select
+                  value={contractFilter}
+                  onValueChange={setContractFilter}
+                >
                   <SelectTrigger className="w-[160px]">
                     <SelectValue />
                   </SelectTrigger>
@@ -848,15 +1157,19 @@ export default function RecipientsManagement() {
               </div>
 
               <div className="flex flex-col space-y-2">
-                <Label className="text-xs font-medium text-slate-600">Region</Label>
+                <Label className="text-xs font-medium text-slate-600">
+                  Region
+                </Label>
                 <Select value={regionFilter} onValueChange={setRegionFilter}>
                   <SelectTrigger className="w-[180px]">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Regions</SelectItem>
-                    {uniqueRegions.map(region => (
-                      <SelectItem key={region} value={region}>{region}</SelectItem>
+                    {uniqueRegions.map((region) => (
+                      <SelectItem key={region} value={region}>
+                        {region}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -866,30 +1179,44 @@ export default function RecipientsManagement() {
             {/* Second row of filters */}
             <div className="flex flex-col md:flex-row gap-3">
               <div className="flex flex-col space-y-2">
-                <Label className="text-xs font-medium text-slate-600">TSP Contact</Label>
-                <Select value={tspContactFilter} onValueChange={setTspContactFilter}>
+                <Label className="text-xs font-medium text-slate-600">
+                  TSP Contact
+                </Label>
+                <Select
+                  value={tspContactFilter}
+                  onValueChange={setTspContactFilter}
+                >
                   <SelectTrigger className="w-[180px]">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All TSP Contacts</SelectItem>
-                    {uniqueTspContacts.map(contact => (
-                      <SelectItem key={contact} value={contact}>{contact}</SelectItem>
+                    {uniqueTspContacts.map((contact) => (
+                      <SelectItem key={contact} value={contact}>
+                        {contact}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="flex flex-col space-y-2">
-                <Label className="text-xs font-medium text-slate-600">Sandwich Type</Label>
-                <Select value={sandwichTypeFilter} onValueChange={setSandwichTypeFilter}>
+                <Label className="text-xs font-medium text-slate-600">
+                  Sandwich Type
+                </Label>
+                <Select
+                  value={sandwichTypeFilter}
+                  onValueChange={setSandwichTypeFilter}
+                >
                   <SelectTrigger className="w-[180px]">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Sandwich Types</SelectItem>
-                    {uniqueSandwichTypes.map(type => (
-                      <SelectItem key={type} value={type}>{type}</SelectItem>
+                    {uniqueSandwichTypes.map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {type}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -900,12 +1227,12 @@ export default function RecipientsManagement() {
                   variant="ghost"
                   size="sm"
                   onClick={() => {
-                    setSearchTerm("");
-                    setStatusFilter("all");
-                    setContractFilter("all");
-                    setRegionFilter("all");
-                    setTspContactFilter("all");
-                    setSandwichTypeFilter("all");
+                    setSearchTerm('');
+                    setStatusFilter('all');
+                    setContractFilter('all');
+                    setRegionFilter('all');
+                    setTspContactFilter('all');
+                    setSandwichTypeFilter('all');
                   }}
                   className="text-slate-500 hover:text-slate-700"
                 >
@@ -916,16 +1243,20 @@ export default function RecipientsManagement() {
             </div>
           </div>
         )}
-        
+
         {/* Results Summary */}
         <div className="text-sm text-slate-600">
           Showing {filteredRecipients.length} of {recipients.length} recipients
           {searchTerm && <span> • Search: "{searchTerm}"</span>}
-          {statusFilter !== "all" && <span> • {statusFilter}</span>}
-          {contractFilter !== "all" && <span> • {contractFilter}</span>}
-          {regionFilter !== "all" && <span> • Region: {regionFilter}</span>}
-          {tspContactFilter !== "all" && <span> • TSP Contact: {tspContactFilter}</span>}
-          {sandwichTypeFilter !== "all" && <span> • Type: {sandwichTypeFilter}</span>}
+          {statusFilter !== 'all' && <span> • {statusFilter}</span>}
+          {contractFilter !== 'all' && <span> • {contractFilter}</span>}
+          {regionFilter !== 'all' && <span> • Region: {regionFilter}</span>}
+          {tspContactFilter !== 'all' && (
+            <span> • TSP Contact: {tspContactFilter}</span>
+          )}
+          {sandwichTypeFilter !== 'all' && (
+            <span> • Type: {sandwichTypeFilter}</span>
+          )}
         </div>
       </div>
 
@@ -933,216 +1264,299 @@ export default function RecipientsManagement() {
       <div className="grid gap-4">
         {filteredRecipients.map((recipient) => {
           // Debug: Log each recipient being rendered
-          if (recipient.name.includes('Boys') || recipient.id === 19 || recipient.id === 36) {
+          if (
+            recipient.name.includes('Boys') ||
+            recipient.id === 19 ||
+            recipient.id === 36
+          ) {
             console.log('Recipients Debug - Rendering:', {
               id: recipient.id,
               name: recipient.name,
               isBoysAndGirls: recipient.name.includes('Boys'),
-              isZaban: recipient.name.includes('Zaban')
+              isZaban: recipient.name.includes('Zaban'),
             });
           }
           return (
-          <Card key={recipient.id} className="border border-slate-200">
-            <CardHeader className="pb-3">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <CardTitle className="text-lg">{recipient.name}</CardTitle>
-                    {(recipient as any).focusArea && (
-                      <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                        {(recipient as any).focusArea}
+            <Card key={recipient.id} className="border border-slate-200">
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <CardTitle className="text-lg">
+                        {recipient.name}
+                      </CardTitle>
+                      {(recipient as any).focusArea && (
+                        <Badge
+                          variant="outline"
+                          className="bg-blue-50 text-blue-700 border-blue-200"
+                        >
+                          {(recipient as any).focusArea}
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge
+                        variant={
+                          recipient.status === 'active'
+                            ? 'default'
+                            : 'secondary'
+                        }
+                      >
+                        {recipient.status}
                       </Badge>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant={recipient.status === "active" ? "default" : "secondary"}>
-                      {recipient.status}
-                    </Badge>
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    disabled={!canEdit}
-                    onClick={() => handleEdit(recipient)}
-                  >
-                    <Edit className="w-3 h-3" />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    disabled={!canEdit}
-                    onClick={() => handleDelete(recipient.id)}
-                    className="text-red-600 hover:text-red-700"
-                  >
-                    <Trash2 className="w-3 h-3" />
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="flex items-center gap-2 text-sm text-slate-600">
-                <Phone className="w-4 h-4" />
-                <span>{recipient.phone}</span>
-              </div>
-              {recipient.email && (
-                <div className="flex items-center gap-2 text-sm text-slate-600">
-                  <Mail className="w-4 h-4" />
-                  <span>{recipient.email}</span>
-                </div>
-              )}
-              {(recipient as any).website && (
-                <div className="flex items-center gap-2 text-sm text-slate-600">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9" />
-                  </svg>
-                  <a href={(recipient as any).website} target="_blank" rel="noopener noreferrer" className="hover:text-[#236383] underline">
-                    {(recipient as any).website}
-                  </a>
-                </div>
-              )}
-              {(recipient as any).instagramHandle && (
-                <div className="flex items-center gap-2 text-sm text-slate-600">
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                  </svg>
-                  <a href={`https://instagram.com/${(recipient as any).instagramHandle.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="hover:text-[#236383] underline">
-                    {(recipient as any).instagramHandle}
-                  </a>
-                </div>
-              )}
-              {recipient.address && (
-                <div className="flex items-center gap-2 text-sm text-slate-600">
-                  <MapPin className="w-4 h-4" />
-                  <span>{recipient.address}</span>
-                </div>
-              )}
-              {recipient.region && (
-                <div className="flex items-center gap-2 text-sm text-slate-600">
-                  <MapPin className="w-4 h-4" />
-                  <span className="font-medium">Region:</span> <span>{recipient.region}</span>
-                </div>
-              )}
-              {recipient.preferences && (
-                <div className="text-sm text-slate-600">
-                  <strong>Preferences:</strong> {recipient.preferences}
-                </div>
-              )}
-
-              {/* Enhanced Operational Information */}
-              {(recipient.reportingGroup || (recipient as any).estimatedSandwiches || (recipient as any).weeklyEstimate || (recipient as any).estimated_sandwiches || (recipient as any).weekly_estimate || recipient.sandwichType || recipient.tspContact || recipient.contractSigned) && (
-                <div className="border-t pt-3 mt-3">
-                  <div className="text-sm font-medium text-slate-700 mb-2">Operational Details</div>
-                  <div className="grid grid-cols-2 gap-2">
-                    {recipient.reportingGroup && (
-                      <div className="text-sm text-slate-600">
-                        <span className="font-medium">Reporting Group:</span> {recipient.reportingGroup}
-                      </div>
-                    )}
-                    {((recipient as any).estimatedSandwiches || (recipient as any).weeklyEstimate || (recipient as any).estimated_sandwiches || (recipient as any).weekly_estimate) && (
-                      <div className="text-sm text-slate-600">
-                        <span className="font-medium">Weekly Estimate:</span> {(recipient as any).estimatedSandwiches || (recipient as any).weeklyEstimate || (recipient as any).estimated_sandwiches || (recipient as any).weekly_estimate} sandwiches
-                      </div>
-                    )}
-                    {recipient.sandwichType && (
-                      <div className="text-sm text-slate-600">
-                        <span className="font-medium">Type:</span> {recipient.sandwichType}
-                      </div>
-                    )}
-
-                    <div className="col-span-2 flex items-center gap-2">
-                      {recipient.contractSigned ? (
-                        <Badge variant="default" className="text-xs bg-green-100 text-green-800">
-                          Contract Signed
-                          {recipient.contractSignedDate && (
-                            <span className="ml-1">({new Date(recipient.contractSignedDate).toLocaleDateString()})</span>
-                          )}
-                        </Badge>
-                      ) : (
-                        <Badge variant="secondary" className="text-xs">
-                          Contract Pending
-                        </Badge>
-                      )}
                     </div>
                   </div>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={!canEdit}
+                      onClick={() => handleEdit(recipient)}
+                    >
+                      <Edit className="w-3 h-3" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={!canEdit}
+                      onClick={() => handleDelete(recipient.id)}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
+                  </div>
                 </div>
-              )}
-              
-              {/* Contact Person Information */}
-              {(recipient.contactPersonName || recipient.contactPersonPhone || recipient.contactPersonEmail) && (
-                <div className="border-t pt-3 mt-3">
-                  <div className="text-sm font-medium text-slate-700 mb-2">Contact Person</div>
-                  {recipient.contactPersonName && (
-                    <div className="text-sm text-slate-600 flex items-center gap-2">
-                      <span className="font-medium">Name:</span> 
-                      <span>{recipient.contactPersonName}</span>
-                      {recipient.contactPersonRole && (
-                        <Badge variant="outline" className="text-xs">
-                          {recipient.contactPersonRole}
-                        </Badge>
-                      )}
-                    </div>
-                  )}
-                  {recipient.contactPersonPhone && (
-                    <div className="flex items-center gap-2 text-sm text-slate-600 mt-1">
-                      <Phone className="w-4 h-4" />
-                      <span>{recipient.contactPersonPhone}</span>
-                    </div>
-                  )}
-                  {recipient.contactPersonEmail && (
-                    <div className="flex items-center gap-2 text-sm text-slate-600 mt-1">
-                      <Mail className="w-4 h-4" />
-                      <span>{recipient.contactPersonEmail}</span>
-                    </div>
-                  )}
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <div className="flex items-center gap-2 text-sm text-slate-600">
+                  <Phone className="w-4 h-4" />
+                  <span>{recipient.phone}</span>
                 </div>
-              )}
+                {recipient.email && (
+                  <div className="flex items-center gap-2 text-sm text-slate-600">
+                    <Mail className="w-4 h-4" />
+                    <span>{recipient.email}</span>
+                  </div>
+                )}
+                {(recipient as any).website && (
+                  <div className="flex items-center gap-2 text-sm text-slate-600">
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9"
+                      />
+                    </svg>
+                    <a
+                      href={(recipient as any).website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-[#236383] underline"
+                    >
+                      {(recipient as any).website}
+                    </a>
+                  </div>
+                )}
+                {(recipient as any).instagramHandle && (
+                  <div className="flex items-center gap-2 text-sm text-slate-600">
+                    <svg
+                      className="w-4 h-4"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+                    </svg>
+                    <a
+                      href={`https://instagram.com/${(recipient as any).instagramHandle.replace('@', '')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-[#236383] underline"
+                    >
+                      {(recipient as any).instagramHandle}
+                    </a>
+                  </div>
+                )}
+                {recipient.address && (
+                  <div className="flex items-center gap-2 text-sm text-slate-600">
+                    <MapPin className="w-4 h-4" />
+                    <span>{recipient.address}</span>
+                  </div>
+                )}
+                {recipient.region && (
+                  <div className="flex items-center gap-2 text-sm text-slate-600">
+                    <MapPin className="w-4 h-4" />
+                    <span className="font-medium">Region:</span>{' '}
+                    <span>{recipient.region}</span>
+                  </div>
+                )}
+                {recipient.preferences && (
+                  <div className="text-sm text-slate-600">
+                    <strong>Preferences:</strong> {recipient.preferences}
+                  </div>
+                )}
 
-              {/* Second Contact Person Information */}
-              {((recipient as any).secondContactPersonName || (recipient as any).secondContactPersonPhone || (recipient as any).secondContactPersonEmail) && (
-                <div className="border-t pt-3 mt-3">
-                  <div className="text-sm font-medium text-slate-700 mb-2">Second Contact Person</div>
-                  {(recipient as any).secondContactPersonName && (
-                    <div className="text-sm text-slate-600 flex items-center gap-2">
-                      <span className="font-medium">Name:</span> 
-                      <span>{(recipient as any).secondContactPersonName}</span>
-                      {(recipient as any).secondContactPersonRole && (
-                        <Badge variant="outline" className="text-xs">
-                          {(recipient as any).secondContactPersonRole}
-                        </Badge>
+                {/* Enhanced Operational Information */}
+                {(recipient.reportingGroup ||
+                  (recipient as any).estimatedSandwiches ||
+                  (recipient as any).weeklyEstimate ||
+                  (recipient as any).estimated_sandwiches ||
+                  (recipient as any).weekly_estimate ||
+                  recipient.sandwichType ||
+                  recipient.tspContact ||
+                  recipient.contractSigned) && (
+                  <div className="border-t pt-3 mt-3">
+                    <div className="text-sm font-medium text-slate-700 mb-2">
+                      Operational Details
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      {recipient.reportingGroup && (
+                        <div className="text-sm text-slate-600">
+                          <span className="font-medium">Reporting Group:</span>{' '}
+                          {recipient.reportingGroup}
+                        </div>
                       )}
-                    </div>
-                  )}
-                  {(recipient as any).secondContactPersonPhone && (
-                    <div className="flex items-center gap-2 text-sm text-slate-600 mt-1">
-                      <Phone className="w-4 h-4" />
-                      <span>{(recipient as any).secondContactPersonPhone}</span>
-                    </div>
-                  )}
-                  {(recipient as any).secondContactPersonEmail && (
-                    <div className="flex items-center gap-2 text-sm text-slate-600 mt-1">
-                      <Mail className="w-4 h-4" />
-                      <span>{(recipient as any).secondContactPersonEmail}</span>
-                    </div>
-                  )}
-                </div>
-              )}
+                      {((recipient as any).estimatedSandwiches ||
+                        (recipient as any).weeklyEstimate ||
+                        (recipient as any).estimated_sandwiches ||
+                        (recipient as any).weekly_estimate) && (
+                        <div className="text-sm text-slate-600">
+                          <span className="font-medium">Weekly Estimate:</span>{' '}
+                          {(recipient as any).estimatedSandwiches ||
+                            (recipient as any).weeklyEstimate ||
+                            (recipient as any).estimated_sandwiches ||
+                            (recipient as any).weekly_estimate}{' '}
+                          sandwiches
+                        </div>
+                      )}
+                      {recipient.sandwichType && (
+                        <div className="text-sm text-slate-600">
+                          <span className="font-medium">Type:</span>{' '}
+                          {recipient.sandwichType}
+                        </div>
+                      )}
 
-              {/* TSP Contacts - Integrated */}
-              <TSPContactManager 
-                recipientId={recipient.id} 
-                recipientName={recipient.name} 
-                compact={true}
-              />
-            </CardContent>
-          </Card>
+                      <div className="col-span-2 flex items-center gap-2">
+                        {recipient.contractSigned ? (
+                          <Badge
+                            variant="default"
+                            className="text-xs bg-green-100 text-green-800"
+                          >
+                            Contract Signed
+                            {recipient.contractSignedDate && (
+                              <span className="ml-1">
+                                (
+                                {new Date(
+                                  recipient.contractSignedDate
+                                ).toLocaleDateString()}
+                                )
+                              </span>
+                            )}
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary" className="text-xs">
+                            Contract Pending
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Contact Person Information */}
+                {(recipient.contactPersonName ||
+                  recipient.contactPersonPhone ||
+                  recipient.contactPersonEmail) && (
+                  <div className="border-t pt-3 mt-3">
+                    <div className="text-sm font-medium text-slate-700 mb-2">
+                      Contact Person
+                    </div>
+                    {recipient.contactPersonName && (
+                      <div className="text-sm text-slate-600 flex items-center gap-2">
+                        <span className="font-medium">Name:</span>
+                        <span>{recipient.contactPersonName}</span>
+                        {recipient.contactPersonRole && (
+                          <Badge variant="outline" className="text-xs">
+                            {recipient.contactPersonRole}
+                          </Badge>
+                        )}
+                      </div>
+                    )}
+                    {recipient.contactPersonPhone && (
+                      <div className="flex items-center gap-2 text-sm text-slate-600 mt-1">
+                        <Phone className="w-4 h-4" />
+                        <span>{recipient.contactPersonPhone}</span>
+                      </div>
+                    )}
+                    {recipient.contactPersonEmail && (
+                      <div className="flex items-center gap-2 text-sm text-slate-600 mt-1">
+                        <Mail className="w-4 h-4" />
+                        <span>{recipient.contactPersonEmail}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Second Contact Person Information */}
+                {((recipient as any).secondContactPersonName ||
+                  (recipient as any).secondContactPersonPhone ||
+                  (recipient as any).secondContactPersonEmail) && (
+                  <div className="border-t pt-3 mt-3">
+                    <div className="text-sm font-medium text-slate-700 mb-2">
+                      Second Contact Person
+                    </div>
+                    {(recipient as any).secondContactPersonName && (
+                      <div className="text-sm text-slate-600 flex items-center gap-2">
+                        <span className="font-medium">Name:</span>
+                        <span>
+                          {(recipient as any).secondContactPersonName}
+                        </span>
+                        {(recipient as any).secondContactPersonRole && (
+                          <Badge variant="outline" className="text-xs">
+                            {(recipient as any).secondContactPersonRole}
+                          </Badge>
+                        )}
+                      </div>
+                    )}
+                    {(recipient as any).secondContactPersonPhone && (
+                      <div className="flex items-center gap-2 text-sm text-slate-600 mt-1">
+                        <Phone className="w-4 h-4" />
+                        <span>
+                          {(recipient as any).secondContactPersonPhone}
+                        </span>
+                      </div>
+                    )}
+                    {(recipient as any).secondContactPersonEmail && (
+                      <div className="flex items-center gap-2 text-sm text-slate-600 mt-1">
+                        <Mail className="w-4 h-4" />
+                        <span>
+                          {(recipient as any).secondContactPersonEmail}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* TSP Contacts - Integrated */}
+                <TSPContactManager
+                  recipientId={recipient.id}
+                  recipientName={recipient.name}
+                  compact={true}
+                />
+              </CardContent>
+            </Card>
           );
         })}
 
         {filteredRecipients.length === 0 && recipients.length > 0 && (
           <div className="text-center py-12 text-slate-500">
-            No recipients match your current filters. Try adjusting your search or filter criteria.
+            No recipients match your current filters. Try adjusting your search
+            or filter criteria.
           </div>
         )}
 
@@ -1155,23 +1569,43 @@ export default function RecipientsManagement() {
 
       {/* Edit Modal */}
       {editingRecipient && (
-        <Dialog open={!!editingRecipient} onOpenChange={() => setEditingRecipient(null)}>
-          <DialogContent aria-describedby="edit-recipient-description" className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <Dialog
+          open={!!editingRecipient}
+          onOpenChange={() => setEditingRecipient(null)}
+        >
+          <DialogContent
+            aria-describedby="edit-recipient-description"
+            className="max-w-2xl max-h-[90vh] overflow-y-auto"
+          >
             <DialogHeader>
               <DialogTitle>Edit Recipient</DialogTitle>
             </DialogHeader>
-            <p id="edit-recipient-description" className="text-sm text-slate-600 mb-4">
+            <p
+              id="edit-recipient-description"
+              className="text-sm text-slate-600 mb-4"
+            >
               Update recipient information.
             </p>
             <div className="space-y-4">
-              
               {/* Basic Information Section */}
-              <Collapsible open={editBasicInfoSectionOpen} onOpenChange={setEditBasicInfoSectionOpen}>
+              <Collapsible
+                open={editBasicInfoSectionOpen}
+                onOpenChange={setEditBasicInfoSectionOpen}
+              >
                 <div>
                   <CollapsibleTrigger asChild>
-                    <Button variant="ghost" className="w-full justify-between p-0 h-auto">
-                      <h4 className="font-medium text-sm text-slate-700">Basic Information</h4>
-                      {editBasicInfoSectionOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-between p-0 h-auto"
+                    >
+                      <h4 className="font-medium text-sm text-slate-700">
+                        Basic Information
+                      </h4>
+                      {editBasicInfoSectionOpen ? (
+                        <ChevronDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4" />
+                      )}
                     </Button>
                   </CollapsibleTrigger>
                   <CollapsibleContent className="mt-3">
@@ -1181,7 +1615,12 @@ export default function RecipientsManagement() {
                         <Input
                           id="edit-name"
                           value={editingRecipient.name}
-                          onChange={(e) => setEditingRecipient({ ...editingRecipient, name: e.target.value })}
+                          onChange={(e) =>
+                            setEditingRecipient({
+                              ...editingRecipient,
+                              name: e.target.value,
+                            })
+                          }
                         />
                       </div>
                       <div>
@@ -1189,7 +1628,12 @@ export default function RecipientsManagement() {
                         <Input
                           id="edit-phone"
                           value={editingRecipient.phone}
-                          onChange={(e) => setEditingRecipient({ ...editingRecipient, phone: e.target.value })}
+                          onChange={(e) =>
+                            setEditingRecipient({
+                              ...editingRecipient,
+                              phone: e.target.value,
+                            })
+                          }
                         />
                       </div>
                       <div>
@@ -1197,8 +1641,13 @@ export default function RecipientsManagement() {
                         <Input
                           id="edit-email"
                           type="email"
-                          value={editingRecipient.email || ""}
-                          onChange={(e) => setEditingRecipient({ ...editingRecipient, email: e.target.value })}
+                          value={editingRecipient.email || ''}
+                          onChange={(e) =>
+                            setEditingRecipient({
+                              ...editingRecipient,
+                              email: e.target.value,
+                            })
+                          }
                         />
                       </div>
                       <div>
@@ -1206,19 +1655,33 @@ export default function RecipientsManagement() {
                         <Input
                           id="edit-website"
                           type="text"
-                          value={(editingRecipient as any).website || ""}
-                          onChange={(e) => setEditingRecipient({ ...editingRecipient, website: e.target.value })}
+                          value={(editingRecipient as any).website || ''}
+                          onChange={(e) =>
+                            setEditingRecipient({
+                              ...editingRecipient,
+                              website: e.target.value,
+                            })
+                          }
                           placeholder="www.organization.org or https://organization.org"
                         />
                       </div>
-                      
+
                       <div>
-                        <Label htmlFor="edit-instagramHandle">Instagram Handle</Label>
+                        <Label htmlFor="edit-instagramHandle">
+                          Instagram Handle
+                        </Label>
                         <Input
                           id="edit-instagramHandle"
                           type="text"
-                          value={(editingRecipient as any).instagramHandle || ""}
-                          onChange={(e) => setEditingRecipient({ ...editingRecipient, instagramHandle: e.target.value })}
+                          value={
+                            (editingRecipient as any).instagramHandle || ''
+                          }
+                          onChange={(e) =>
+                            setEditingRecipient({
+                              ...editingRecipient,
+                              instagramHandle: e.target.value,
+                            })
+                          }
                           placeholder="@organizationhandle"
                         />
                       </div>
@@ -1226,232 +1689,421 @@ export default function RecipientsManagement() {
                         <Label htmlFor="edit-address">Street Address</Label>
                         <Input
                           id="edit-address"
-                          value={editingRecipient.address || ""}
-                          onChange={(e) => setEditingRecipient({ ...editingRecipient, address: e.target.value })}
+                          value={editingRecipient.address || ''}
+                          onChange={(e) =>
+                            setEditingRecipient({
+                              ...editingRecipient,
+                              address: e.target.value,
+                            })
+                          }
                         />
                       </div>
                       <div>
                         <Label htmlFor="edit-region">Region/Area</Label>
                         <Input
                           id="edit-region"
-                          value={editingRecipient.region || ""}
-                          onChange={(e) => setEditingRecipient({ ...editingRecipient, region: e.target.value })}
+                          value={editingRecipient.region || ''}
+                          onChange={(e) =>
+                            setEditingRecipient({
+                              ...editingRecipient,
+                              region: e.target.value,
+                            })
+                          }
                         />
                       </div>
                       <div>
                         <Label htmlFor="edit-preferences">Preferences</Label>
                         <Input
                           id="edit-preferences"
-                          value={editingRecipient.preferences || ""}
-                          onChange={(e) => setEditingRecipient({ ...editingRecipient, preferences: e.target.value })}
+                          value={editingRecipient.preferences || ''}
+                          onChange={(e) =>
+                            setEditingRecipient({
+                              ...editingRecipient,
+                              preferences: e.target.value,
+                            })
+                          }
                         />
                       </div>
                     </div>
                   </CollapsibleContent>
                 </div>
               </Collapsible>
-              
+
               {/* Contact Person Section */}
-              <Collapsible open={editContactSectionOpen} onOpenChange={setEditContactSectionOpen}>
+              <Collapsible
+                open={editContactSectionOpen}
+                onOpenChange={setEditContactSectionOpen}
+              >
                 <div className="border-t pt-4 mt-4">
                   <CollapsibleTrigger asChild>
-                    <Button variant="ghost" className="w-full justify-between p-0 h-auto">
-                      <h4 className="font-medium text-sm text-slate-700">Contact Person Information</h4>
-                      {editContactSectionOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-between p-0 h-auto"
+                    >
+                      <h4 className="font-medium text-sm text-slate-700">
+                        Contact Person Information
+                      </h4>
+                      {editContactSectionOpen ? (
+                        <ChevronDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4" />
+                      )}
                     </Button>
                   </CollapsibleTrigger>
                   <CollapsibleContent className="mt-3">
                     <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label htmlFor="edit-contactPersonName">Contact Name</Label>
-                    <Input
-                      id="edit-contactPersonName"
-                      value={editingRecipient.contactPersonName || ""}
-                      onChange={(e) => setEditingRecipient({ ...editingRecipient, contactPersonName: e.target.value })}
-                      placeholder="John Smith"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="edit-contactPersonRole">Role/Title</Label>
-                    <Input
-                      id="edit-contactPersonRole"
-                      value={editingRecipient.contactPersonRole || ""}
-                      onChange={(e) => setEditingRecipient({ ...editingRecipient, contactPersonRole: e.target.value })}
-                      placeholder="Program Director, Manager, etc."
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="edit-contactPersonPhone">Contact Phone</Label>
-                    <Input
-                      id="edit-contactPersonPhone"
-                      value={editingRecipient.contactPersonPhone || ""}
-                      onChange={(e) => setEditingRecipient({ ...editingRecipient, contactPersonPhone: e.target.value })}
-                      placeholder="(555) 123-4567"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="edit-contactPersonEmail">Contact Email</Label>
-                    <Input
-                      id="edit-contactPersonEmail"
-                      type="email"
-                      value={editingRecipient.contactPersonEmail || ""}
-                      onChange={(e) => setEditingRecipient({ ...editingRecipient, contactPersonEmail: e.target.value })}
-                      placeholder="john@organization.org"
-                    />
-                  </div>
+                      <div>
+                        <Label htmlFor="edit-contactPersonName">
+                          Contact Name
+                        </Label>
+                        <Input
+                          id="edit-contactPersonName"
+                          value={editingRecipient.contactPersonName || ''}
+                          onChange={(e) =>
+                            setEditingRecipient({
+                              ...editingRecipient,
+                              contactPersonName: e.target.value,
+                            })
+                          }
+                          placeholder="John Smith"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="edit-contactPersonRole">
+                          Role/Title
+                        </Label>
+                        <Input
+                          id="edit-contactPersonRole"
+                          value={editingRecipient.contactPersonRole || ''}
+                          onChange={(e) =>
+                            setEditingRecipient({
+                              ...editingRecipient,
+                              contactPersonRole: e.target.value,
+                            })
+                          }
+                          placeholder="Program Director, Manager, etc."
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="edit-contactPersonPhone">
+                          Contact Phone
+                        </Label>
+                        <Input
+                          id="edit-contactPersonPhone"
+                          value={editingRecipient.contactPersonPhone || ''}
+                          onChange={(e) =>
+                            setEditingRecipient({
+                              ...editingRecipient,
+                              contactPersonPhone: e.target.value,
+                            })
+                          }
+                          placeholder="(555) 123-4567"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="edit-contactPersonEmail">
+                          Contact Email
+                        </Label>
+                        <Input
+                          id="edit-contactPersonEmail"
+                          type="email"
+                          value={editingRecipient.contactPersonEmail || ''}
+                          onChange={(e) =>
+                            setEditingRecipient({
+                              ...editingRecipient,
+                              contactPersonEmail: e.target.value,
+                            })
+                          }
+                          placeholder="john@organization.org"
+                        />
+                      </div>
                     </div>
                   </CollapsibleContent>
                 </div>
               </Collapsible>
 
               {/* Second Contact Person Section */}
-              <Collapsible open={editSecondContactSectionOpen} onOpenChange={setEditSecondContactSectionOpen}>
+              <Collapsible
+                open={editSecondContactSectionOpen}
+                onOpenChange={setEditSecondContactSectionOpen}
+              >
                 <div className="border-t pt-4 mt-4">
                   <CollapsibleTrigger asChild>
-                    <Button variant="ghost" className="w-full justify-between p-0 h-auto">
-                      <h4 className="font-medium text-sm text-slate-700">Second Contact Person (Optional)</h4>
-                      {editSecondContactSectionOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-between p-0 h-auto"
+                    >
+                      <h4 className="font-medium text-sm text-slate-700">
+                        Second Contact Person (Optional)
+                      </h4>
+                      {editSecondContactSectionOpen ? (
+                        <ChevronDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4" />
+                      )}
                     </Button>
                   </CollapsibleTrigger>
                   <CollapsibleContent className="mt-3">
                     <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label htmlFor="edit-secondContactPersonName">Contact Name</Label>
-                    <Input
-                      id="edit-secondContactPersonName"
-                      value={(editingRecipient as any).secondContactPersonName || ""}
-                      onChange={(e) => setEditingRecipient({ ...editingRecipient, secondContactPersonName: e.target.value })}
-                      placeholder="Jane Doe"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="edit-secondContactPersonRole">Role/Title</Label>
-                    <Input
-                      id="edit-secondContactPersonRole"
-                      value={(editingRecipient as any).secondContactPersonRole || ""}
-                      onChange={(e) => setEditingRecipient({ ...editingRecipient, secondContactPersonRole: e.target.value })}
-                      placeholder="Assistant Manager, etc."
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="edit-secondContactPersonPhone">Contact Phone</Label>
-                    <Input
-                      id="edit-secondContactPersonPhone"
-                      value={(editingRecipient as any).secondContactPersonPhone || ""}
-                      onChange={(e) => setEditingRecipient({ ...editingRecipient, secondContactPersonPhone: e.target.value })}
-                      placeholder="(555) 987-6543"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="edit-secondContactPersonEmail">Contact Email</Label>
-                    <Input
-                      id="edit-secondContactPersonEmail"
-                      type="email"
-                      value={(editingRecipient as any).secondContactPersonEmail || ""}
-                      onChange={(e) => setEditingRecipient({ ...editingRecipient, secondContactPersonEmail: e.target.value })}
-                      placeholder="jane@organization.org"
-                    />
-                  </div>
+                      <div>
+                        <Label htmlFor="edit-secondContactPersonName">
+                          Contact Name
+                        </Label>
+                        <Input
+                          id="edit-secondContactPersonName"
+                          value={
+                            (editingRecipient as any).secondContactPersonName ||
+                            ''
+                          }
+                          onChange={(e) =>
+                            setEditingRecipient({
+                              ...editingRecipient,
+                              secondContactPersonName: e.target.value,
+                            })
+                          }
+                          placeholder="Jane Doe"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="edit-secondContactPersonRole">
+                          Role/Title
+                        </Label>
+                        <Input
+                          id="edit-secondContactPersonRole"
+                          value={
+                            (editingRecipient as any).secondContactPersonRole ||
+                            ''
+                          }
+                          onChange={(e) =>
+                            setEditingRecipient({
+                              ...editingRecipient,
+                              secondContactPersonRole: e.target.value,
+                            })
+                          }
+                          placeholder="Assistant Manager, etc."
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="edit-secondContactPersonPhone">
+                          Contact Phone
+                        </Label>
+                        <Input
+                          id="edit-secondContactPersonPhone"
+                          value={
+                            (editingRecipient as any)
+                              .secondContactPersonPhone || ''
+                          }
+                          onChange={(e) =>
+                            setEditingRecipient({
+                              ...editingRecipient,
+                              secondContactPersonPhone: e.target.value,
+                            })
+                          }
+                          placeholder="(555) 987-6543"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="edit-secondContactPersonEmail">
+                          Contact Email
+                        </Label>
+                        <Input
+                          id="edit-secondContactPersonEmail"
+                          type="email"
+                          value={
+                            (editingRecipient as any)
+                              .secondContactPersonEmail || ''
+                          }
+                          onChange={(e) =>
+                            setEditingRecipient({
+                              ...editingRecipient,
+                              secondContactPersonEmail: e.target.value,
+                            })
+                          }
+                          placeholder="jane@organization.org"
+                        />
+                      </div>
                     </div>
                   </CollapsibleContent>
                 </div>
               </Collapsible>
 
               {/* Enhanced Operational Fields */}
-              <Collapsible open={editOperationalSectionOpen} onOpenChange={setEditOperationalSectionOpen}>
+              <Collapsible
+                open={editOperationalSectionOpen}
+                onOpenChange={setEditOperationalSectionOpen}
+              >
                 <div className="border-t pt-4 mt-4">
                   <CollapsibleTrigger asChild>
-                    <Button variant="ghost" className="w-full justify-between p-0 h-auto">
-                      <h4 className="font-medium text-sm text-slate-700">Operational Details</h4>
-                      {editOperationalSectionOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-between p-0 h-auto"
+                    >
+                      <h4 className="font-medium text-sm text-slate-700">
+                        Operational Details
+                      </h4>
+                      {editOperationalSectionOpen ? (
+                        <ChevronDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4" />
+                      )}
                     </Button>
                   </CollapsibleTrigger>
                   <CollapsibleContent className="mt-3">
                     <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label htmlFor="edit-reportingGroup">Reporting Group</Label>
-                    <Input
-                      id="edit-reportingGroup"
-                      value={editingRecipient.reportingGroup || ""}
-                      onChange={(e) => setEditingRecipient({ ...editingRecipient, reportingGroup: e.target.value })}
-                      placeholder="Corresponds to host locations"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="edit-estimatedSandwiches">Estimated Sandwiches</Label>
-                    <Input
-                      id="edit-estimatedSandwiches"
-                      type="number"
-                      value={editingRecipient.estimatedSandwiches || ""}
-                      onChange={(e) => setEditingRecipient({ ...editingRecipient, estimatedSandwiches: parseInt(e.target.value) || null })}
-                      placeholder="Number of sandwiches needed"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="edit-sandwichType">Sandwich Type</Label>
-                    <Input
-                      id="edit-sandwichType"
-                      value={editingRecipient.sandwichType || ""}
-                      onChange={(e) => setEditingRecipient({ ...editingRecipient, sandwichType: e.target.value })}
-                      placeholder="Type preferred (e.g., PB&J, Deli, Mixed)"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="edit-focusArea">Focus Area</Label>
-                    <Input
-                      id="edit-focusArea"
-                      value={(editingRecipient as any).focusArea || ""}
-                      onChange={(e) => setEditingRecipient({ ...editingRecipient, focusArea: e.target.value })}
-                      placeholder="Group focus (e.g., youth, veterans, seniors, families)"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="edit-tspContact">TSP Contact</Label>
-                    <Input
-                      id="edit-tspContact"
-                      value={editingRecipient.tspContact || ""}
-                      onChange={(e) => setEditingRecipient({ ...editingRecipient, tspContact: e.target.value })}
-                      placeholder="TSP team member name"
-                    />
-                  </div>
-                  <div className="col-span-2">
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        id="edit-contractSigned"
-                        checked={editingRecipient.contractSigned || false}
-                        onChange={(e) => setEditingRecipient({ ...editingRecipient, contractSigned: e.target.checked })}
-                        className="h-4 w-4 text-[#236383] focus:ring-[#236383] border-gray-300 rounded"
-                      />
-                      <Label htmlFor="edit-contractSigned" className="text-sm">Contract Signed</Label>
-                    </div>
-                  </div>
-                  {editingRecipient.contractSigned && (
-                    <div>
-                      <Label htmlFor="edit-contractSignedDate">Contract Signed Date</Label>
-                      <Input
-                        id="edit-contractSignedDate"
-                        type="date"
-                        value={editingRecipient.contractSignedDate ? 
-                          (typeof editingRecipient.contractSignedDate === 'string' ? 
-                            (editingRecipient.contractSignedDate.includes && editingRecipient.contractSignedDate.includes('T') ? 
-                             editingRecipient.contractSignedDate.split('T')[0] : editingRecipient.contractSignedDate) : 
-                            new Date(editingRecipient.contractSignedDate).toISOString().split('T')[0]) : ""}
-                        onChange={(e) => setEditingRecipient({ ...editingRecipient, contractSignedDate: e.target.value as any })}
-                      />
-                    </div>
-                  )}
+                      <div>
+                        <Label htmlFor="edit-reportingGroup">
+                          Reporting Group
+                        </Label>
+                        <Input
+                          id="edit-reportingGroup"
+                          value={editingRecipient.reportingGroup || ''}
+                          onChange={(e) =>
+                            setEditingRecipient({
+                              ...editingRecipient,
+                              reportingGroup: e.target.value,
+                            })
+                          }
+                          placeholder="Corresponds to host locations"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="edit-estimatedSandwiches">
+                          Estimated Sandwiches
+                        </Label>
+                        <Input
+                          id="edit-estimatedSandwiches"
+                          type="number"
+                          value={editingRecipient.estimatedSandwiches || ''}
+                          onChange={(e) =>
+                            setEditingRecipient({
+                              ...editingRecipient,
+                              estimatedSandwiches:
+                                parseInt(e.target.value) || null,
+                            })
+                          }
+                          placeholder="Number of sandwiches needed"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="edit-sandwichType">Sandwich Type</Label>
+                        <Input
+                          id="edit-sandwichType"
+                          value={editingRecipient.sandwichType || ''}
+                          onChange={(e) =>
+                            setEditingRecipient({
+                              ...editingRecipient,
+                              sandwichType: e.target.value,
+                            })
+                          }
+                          placeholder="Type preferred (e.g., PB&J, Deli, Mixed)"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="edit-focusArea">Focus Area</Label>
+                        <Input
+                          id="edit-focusArea"
+                          value={(editingRecipient as any).focusArea || ''}
+                          onChange={(e) =>
+                            setEditingRecipient({
+                              ...editingRecipient,
+                              focusArea: e.target.value,
+                            })
+                          }
+                          placeholder="Group focus (e.g., youth, veterans, seniors, families)"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="edit-tspContact">TSP Contact</Label>
+                        <Input
+                          id="edit-tspContact"
+                          value={editingRecipient.tspContact || ''}
+                          onChange={(e) =>
+                            setEditingRecipient({
+                              ...editingRecipient,
+                              tspContact: e.target.value,
+                            })
+                          }
+                          placeholder="TSP team member name"
+                        />
+                      </div>
+                      <div className="col-span-2">
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            id="edit-contractSigned"
+                            checked={editingRecipient.contractSigned || false}
+                            onChange={(e) =>
+                              setEditingRecipient({
+                                ...editingRecipient,
+                                contractSigned: e.target.checked,
+                              })
+                            }
+                            className="h-4 w-4 text-[#236383] focus:ring-[#236383] border-gray-300 rounded"
+                          />
+                          <Label
+                            htmlFor="edit-contractSigned"
+                            className="text-sm"
+                          >
+                            Contract Signed
+                          </Label>
+                        </div>
+                      </div>
+                      {editingRecipient.contractSigned && (
+                        <div>
+                          <Label htmlFor="edit-contractSignedDate">
+                            Contract Signed Date
+                          </Label>
+                          <Input
+                            id="edit-contractSignedDate"
+                            type="date"
+                            value={
+                              editingRecipient.contractSignedDate
+                                ? typeof editingRecipient.contractSignedDate ===
+                                  'string'
+                                  ? editingRecipient.contractSignedDate
+                                      .includes &&
+                                    editingRecipient.contractSignedDate.includes(
+                                      'T'
+                                    )
+                                    ? editingRecipient.contractSignedDate.split(
+                                        'T'
+                                      )[0]
+                                    : editingRecipient.contractSignedDate
+                                  : new Date(
+                                      editingRecipient.contractSignedDate
+                                    )
+                                      .toISOString()
+                                      .split('T')[0]
+                                : ''
+                            }
+                            onChange={(e) =>
+                              setEditingRecipient({
+                                ...editingRecipient,
+                                contractSignedDate: e.target.value as any,
+                              })
+                            }
+                          />
+                        </div>
+                      )}
                     </div>
                   </CollapsibleContent>
                 </div>
               </Collapsible>
 
               <div className="flex justify-end space-x-2">
-                <Button variant="outline" onClick={() => setEditingRecipient(null)}>
+                <Button
+                  variant="outline"
+                  onClick={() => setEditingRecipient(null)}
+                >
                   Cancel
                 </Button>
-                <Button onClick={handleUpdate} disabled={updateRecipientMutation.isPending}>
-                  {updateRecipientMutation.isPending ? "Updating..." : "Update Recipient"}
+                <Button
+                  onClick={handleUpdate}
+                  disabled={updateRecipientMutation.isPending}
+                >
+                  {updateRecipientMutation.isPending
+                    ? 'Updating...'
+                    : 'Update Recipient'}
                 </Button>
               </div>
             </div>

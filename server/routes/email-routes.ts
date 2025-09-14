@@ -1,22 +1,22 @@
-import { Router } from "express";
-import { emailService } from "../services/email-service";
-import { isAuthenticated } from "../temp-auth";
-import { db } from "../db";
-import { kudosTracking } from "@shared/schema";
-import { eq } from "drizzle-orm";
+import { Router } from 'express';
+import { emailService } from '../services/email-service';
+import { isAuthenticated } from '../temp-auth';
+import { db } from '../db';
+import { kudosTracking } from '@shared/schema';
+import { eq } from 'drizzle-orm';
 
 const router = Router();
 
 // Get emails by folder with optional threading
-router.get("/", isAuthenticated, async (req: any, res) => {
+router.get('/', isAuthenticated, async (req: any, res) => {
   try {
     const user = req.user;
     if (!user?.id) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({ message: 'Unauthorized' });
     }
 
-    const folder = (req.query.folder as string) || "inbox";
-    const threaded = req.query.threaded === "true";
+    const folder = (req.query.folder as string) || 'inbox';
+    const threaded = req.query.threaded === 'true';
     console.log(
       `[Email API] Getting emails for folder: ${folder}, user: ${user.email}, threaded: ${threaded}`
     );
@@ -42,7 +42,7 @@ router.get("/", isAuthenticated, async (req: any, res) => {
         isRead: email.isRead,
         isStarred: email.isStarred,
         folder: folder,
-        committee: email.contextType || "email",
+        committee: email.contextType || 'email',
       }));
 
       console.log(
@@ -51,17 +51,17 @@ router.get("/", isAuthenticated, async (req: any, res) => {
       res.json(formattedEmails);
     }
   } catch (error) {
-    console.error("[Email API] Error fetching emails:", error);
-    res.status(500).json({ message: "Failed to fetch emails" });
+    console.error('[Email API] Error fetching emails:', error);
+    res.status(500).json({ message: 'Failed to fetch emails' });
   }
 });
 
 // Send new email
-router.post("/", isAuthenticated, async (req: any, res) => {
+router.post('/', isAuthenticated, async (req: any, res) => {
   try {
     const user = req.user;
     if (!user?.id) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({ message: 'Unauthorized' });
     }
 
     const {
@@ -79,13 +79,13 @@ router.post("/", isAuthenticated, async (req: any, res) => {
     if (!subject || !content) {
       return res
         .status(400)
-        .json({ message: "Subject and content are required" });
+        .json({ message: 'Subject and content are required' });
     }
 
     if (!isDraft && (!recipientId || !recipientName || !recipientEmail)) {
       return res
         .status(400)
-        .json({ message: "Recipient information is required" });
+        .json({ message: 'Recipient information is required' });
     }
 
     console.log(
@@ -97,7 +97,7 @@ router.post("/", isAuthenticated, async (req: any, res) => {
       senderName: `${user.firstName} ${user.lastName}`.trim() || user.email,
       senderEmail: user.email,
       recipientId: recipientId || user.id, // For drafts
-      recipientName: recipientName || "Draft",
+      recipientName: recipientName || 'Draft',
       recipientEmail: recipientEmail || user.email,
       subject,
       content,
@@ -110,17 +110,17 @@ router.post("/", isAuthenticated, async (req: any, res) => {
 
     res.status(201).json(newEmail);
   } catch (error) {
-    console.error("[Email API] Error sending email:", error);
-    res.status(500).json({ message: "Failed to send email" });
+    console.error('[Email API] Error sending email:', error);
+    res.status(500).json({ message: 'Failed to send email' });
   }
 });
 
 // Update email status (star, archive, trash, mark read)
-router.patch("/:id", isAuthenticated, async (req: any, res) => {
+router.patch('/:id', isAuthenticated, async (req: any, res) => {
   try {
     const user = req.user;
     if (!user?.id) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({ message: 'Unauthorized' });
     }
 
     const emailId = parseInt(req.params.id);
@@ -151,14 +151,14 @@ router.patch("/:id", isAuthenticated, async (req: any, res) => {
       if (kudoCheck[0].recipientId !== user.id) {
         return res
           .status(403)
-          .json({ message: "Not authorized to update this kudo" });
+          .json({ message: 'Not authorized to update this kudo' });
       }
     }
 
     if (!actualEmailId) {
       return res
         .status(404)
-        .json({ message: "No corresponding message found for this kudo" });
+        .json({ message: 'No corresponding message found for this kudo' });
     }
 
     const success = await emailService.updateEmailStatus(
@@ -170,22 +170,22 @@ router.patch("/:id", isAuthenticated, async (req: any, res) => {
     if (!success) {
       return res
         .status(404)
-        .json({ message: "Email not found or access denied" });
+        .json({ message: 'Email not found or access denied' });
     }
 
     res.json({ success: true });
   } catch (error) {
-    console.error("[Email API] Error updating email:", error);
-    res.status(500).json({ message: "Failed to update email" });
+    console.error('[Email API] Error updating email:', error);
+    res.status(500).json({ message: 'Failed to update email' });
   }
 });
 
 // Delete email
-router.delete("/:id", isAuthenticated, async (req: any, res) => {
+router.delete('/:id', isAuthenticated, async (req: any, res) => {
   try {
     const user = req.user;
     if (!user?.id) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({ message: 'Unauthorized' });
     }
 
     const emailId = parseInt(req.params.id);
@@ -196,43 +196,43 @@ router.delete("/:id", isAuthenticated, async (req: any, res) => {
     if (!success) {
       return res
         .status(404)
-        .json({ message: "Email not found or access denied" });
+        .json({ message: 'Email not found or access denied' });
     }
 
     res.status(204).send();
   } catch (error) {
-    console.error("[Email API] Error deleting email:", error);
-    res.status(500).json({ message: "Failed to delete email" });
+    console.error('[Email API] Error deleting email:', error);
+    res.status(500).json({ message: 'Failed to delete email' });
   }
 });
 
 // Get unread email count
-router.get("/unread-count", isAuthenticated, async (req: any, res) => {
+router.get('/unread-count', isAuthenticated, async (req: any, res) => {
   try {
     const user = req.user;
     if (!user?.id) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({ message: 'Unauthorized' });
     }
 
     const count = await emailService.getUnreadEmailCount(user.id);
     res.json({ count });
   } catch (error) {
-    console.error("[Email API] Error getting unread count:", error);
-    res.status(500).json({ message: "Failed to get unread count" });
+    console.error('[Email API] Error getting unread count:', error);
+    res.status(500).json({ message: 'Failed to get unread count' });
   }
 });
 
 // Search emails
-router.get("/search", isAuthenticated, async (req: any, res) => {
+router.get('/search', isAuthenticated, async (req: any, res) => {
   try {
     const user = req.user;
     if (!user?.id) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({ message: 'Unauthorized' });
     }
 
     const searchTerm = req.query.q as string;
     if (!searchTerm) {
-      return res.status(400).json({ message: "Search term is required" });
+      return res.status(400).json({ message: 'Search term is required' });
     }
 
     console.log(`[Email API] Searching emails for "${searchTerm}"`);
@@ -240,23 +240,23 @@ router.get("/search", isAuthenticated, async (req: any, res) => {
     const emails = await emailService.searchEmails(user.id, searchTerm);
     res.json(emails);
   } catch (error) {
-    console.error("[Email API] Error searching emails:", error);
-    res.status(500).json({ message: "Failed to search emails" });
+    console.error('[Email API] Error searching emails:', error);
+    res.status(500).json({ message: 'Failed to search emails' });
   }
 });
 
 // Get kudos for current user - integrates with messaging system
-router.get("/kudos", isAuthenticated, async (req: any, res) => {
+router.get('/kudos', isAuthenticated, async (req: any, res) => {
   try {
     const user = req.user;
     if (!user?.id) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({ message: 'Unauthorized' });
     }
 
     console.log(`[Email API] Getting kudos for user: ${user.email}`);
 
     // Import here to avoid circular dependency
-    const { messagingService } = await import("../services/messaging-service");
+    const { messagingService } = await import('../services/messaging-service');
     const kudos = await messagingService.getReceivedKudos(user.id);
 
     // Format kudos for Gmail interface
@@ -279,22 +279,22 @@ router.get("/kudos", isAuthenticated, async (req: any, res) => {
     console.log(`[Email API] Found ${formattedKudos.length} kudos`);
     res.json(formattedKudos);
   } catch (error) {
-    console.error("[Email API] Error fetching kudos:", error);
-    res.status(500).json({ message: "Failed to fetch kudos" });
+    console.error('[Email API] Error fetching kudos:', error);
+    res.status(500).json({ message: 'Failed to fetch kudos' });
   }
 });
 
 // Mark message as read - works for both emails and kudos
-router.post("/:messageId/read", isAuthenticated, async (req: any, res) => {
+router.post('/:messageId/read', isAuthenticated, async (req: any, res) => {
   try {
     const user = req.user;
     if (!user?.id) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({ message: 'Unauthorized' });
     }
 
     const messageId = parseInt(req.params.messageId);
     if (isNaN(messageId)) {
-      return res.status(400).json({ message: "Invalid message ID" });
+      return res.status(400).json({ message: 'Invalid message ID' });
     }
 
     console.log(
@@ -324,18 +324,18 @@ router.post("/:messageId/read", isAuthenticated, async (req: any, res) => {
       if (kudoCheck[0].recipientId !== user.id) {
         return res
           .status(403)
-          .json({ message: "Not authorized to mark this kudo as read" });
+          .json({ message: 'Not authorized to mark this kudo as read' });
       }
     }
 
     if (!actualMessageId) {
       return res
         .status(404)
-        .json({ message: "No corresponding message found for this kudo" });
+        .json({ message: 'No corresponding message found for this kudo' });
     }
 
     // Import messaging service dynamically to avoid circular dependency
-    const { messagingService } = await import("../services/messaging-service");
+    const { messagingService } = await import('../services/messaging-service');
 
     // Mark the message as read in messageRecipients
     const success = await messagingService.markMessageRead(
@@ -346,22 +346,22 @@ router.post("/:messageId/read", isAuthenticated, async (req: any, res) => {
     if (!success) {
       return res
         .status(404)
-        .json({ message: "Message not found or already read" });
+        .json({ message: 'Message not found or already read' });
     }
 
-    res.json({ success: true, message: "Message marked as read" });
+    res.json({ success: true, message: 'Message marked as read' });
   } catch (error) {
-    console.error("[Email API] Error marking message as read:", error);
-    res.status(500).json({ message: "Failed to mark message as read" });
+    console.error('[Email API] Error marking message as read:', error);
+    res.status(500).json({ message: 'Failed to mark message as read' });
   }
 });
 
 // Event-specific email endpoint with attachment support
-router.post("/event", isAuthenticated, async (req: any, res) => {
+router.post('/event', isAuthenticated, async (req: any, res) => {
   try {
     const user = req.user;
     if (!user?.id) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({ message: 'Unauthorized' });
     }
 
     const {
@@ -380,56 +380,56 @@ router.post("/event", isAuthenticated, async (req: any, res) => {
     if (!subject || !content) {
       return res
         .status(400)
-        .json({ message: "Subject and content are required" });
+        .json({ message: 'Subject and content are required' });
     }
 
     if (!isDraft && !recipientEmail) {
-      return res.status(400).json({ message: "Recipient email is required" });
+      return res.status(400).json({ message: 'Recipient email is required' });
     }
 
     console.log(
       `[Event Email API] Sending event email from ${user.email} to ${recipientEmail}`
     );
-    console.log(`[Event Email API] Attachments: ${attachments.join(", ")}`);
+    console.log(`[Event Email API] Attachments: ${attachments.join(', ')}`);
 
     // Enhanced content with attachment list
     let enhancedContent = content;
     if (attachments.length > 0 && !isDraft) {
       enhancedContent += `\n\n📎 Attachments:\n${attachments
         .map((att) => `• ${att}`)
-        .join("\n")}`;
+        .join('\n')}`;
     }
 
     const newEmail = await emailService.sendEmail({
       senderId: user.id,
       senderName: user.name || user.email,
       senderEmail: user.email,
-      recipientId: "external",
-      recipientName: recipientName || "Event Contact",
+      recipientId: 'external',
+      recipientName: recipientName || 'Event Contact',
       recipientEmail: recipientEmail,
       subject,
       content: enhancedContent,
       isDraft,
-      contextType: contextType || "event_request",
+      contextType: contextType || 'event_request',
       contextId: contextId || eventRequestId?.toString(),
       contextTitle: contextTitle || `Event Communication`,
     });
 
     console.log(
       `[Event Email API] Email ${
-        isDraft ? "saved as draft" : "sent"
+        isDraft ? 'saved as draft' : 'sent'
       } successfully`
     );
     res.json({
       success: true,
-      message: isDraft ? "Draft saved successfully" : "Email sent successfully",
+      message: isDraft ? 'Draft saved successfully' : 'Email sent successfully',
       emailId: newEmail.id,
     });
   } catch (error) {
-    console.error("[Event Email API] Error:", error);
+    console.error('[Event Email API] Error:', error);
     res.status(500).json({
-      message: "Failed to send email",
-      error: error instanceof Error ? error.message : "Unknown error",
+      message: 'Failed to send email',
+      error: error instanceof Error ? error.message : 'Unknown error',
     });
   }
 });

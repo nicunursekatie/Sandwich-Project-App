@@ -1,15 +1,15 @@
-import { useState, useEffect } from "react";
-import { Heart } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect } from 'react';
+import { Heart } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@/hooks/useAuth";
-import { apiRequest } from "@/lib/queryClient";
+} from '@/components/ui/tooltip';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '@/hooks/useAuth';
+import { apiRequest } from '@/lib/queryClient';
 
 interface MessageLike {
   id: number;
@@ -26,7 +26,7 @@ interface MessageLikeButtonProps {
 
 export function MessageLikeButton({
   messageId,
-  className = "",
+  className = '',
 }: MessageLikeButtonProps) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -35,7 +35,7 @@ export function MessageLikeButton({
   const numericMessageId = Number(messageId);
 
   // Debug logging
-  console.log("MessageLikeButton rendered:", {
+  console.log('MessageLikeButton rendered:', {
     messageId,
     numericMessageId,
     user: user?.id,
@@ -43,8 +43,8 @@ export function MessageLikeButton({
 
   // Fetch likes for this message
   const { data: likes = [], isLoading } = useQuery({
-    queryKey: ["message-likes", numericMessageId],
-    queryFn: () => apiRequest("GET", `/api/messages/${numericMessageId}/likes`),
+    queryKey: ['message-likes', numericMessageId],
+    queryFn: () => apiRequest('GET', `/api/messages/${numericMessageId}/likes`),
     staleTime: 30000, // 30 seconds
   });
 
@@ -57,19 +57,19 @@ export function MessageLikeButton({
   const likeMutation = useMutation({
     mutationFn: async () => {
       if (hasUserLiked) {
-        return apiRequest("DELETE", `/api/messages/${numericMessageId}/like`);
+        return apiRequest('DELETE', `/api/messages/${numericMessageId}/like`);
       } else {
-        return apiRequest("POST", `/api/messages/${numericMessageId}/like`);
+        return apiRequest('POST', `/api/messages/${numericMessageId}/like`);
       }
     },
     onSuccess: () => {
       // Invalidate and refetch likes
       queryClient.invalidateQueries({
-        queryKey: ["message-likes", numericMessageId],
+        queryKey: ['message-likes', numericMessageId],
       });
     },
     onError: (error) => {
-      console.error("Error toggling message like:", error);
+      console.error('Error toggling message like:', error);
     },
   });
 
@@ -81,7 +81,7 @@ export function MessageLikeButton({
   // Create tooltip content showing who liked the message
   const tooltipContent = () => {
     if (likeCount === 0) {
-      return "Be the first to like this message";
+      return 'Be the first to like this message';
     } else if (likeCount === 1) {
       return `Liked by ${likes[0].userName}`;
     } else if (likeCount === 2) {
@@ -90,10 +90,10 @@ export function MessageLikeButton({
       const firstTwo = likes
         .slice(0, 2)
         .map((like: MessageLike) => like.userName)
-        .join(", ");
+        .join(', ');
       const remaining = likeCount - 2;
       return `Liked by ${firstTwo} and ${remaining} other${
-        remaining > 1 ? "s" : ""
+        remaining > 1 ? 's' : ''
       }`;
     }
   };
@@ -120,14 +120,14 @@ export function MessageLikeButton({
             <Heart
               className={`w-4 h-4 mr-1 transition-colors ${
                 hasUserLiked
-                  ? "text-red-500 fill-red-500"
-                  : "text-gray-400 hover:text-red-400"
+                  ? 'text-red-500 fill-red-500'
+                  : 'text-gray-400 hover:text-red-400'
               }`}
             />
             {likeCount > 0 && (
               <span
                 className={`text-xs ${
-                  hasUserLiked ? "text-red-500" : "text-gray-500"
+                  hasUserLiked ? 'text-red-500' : 'text-gray-500'
                 }`}
               >
                 {likeCount}

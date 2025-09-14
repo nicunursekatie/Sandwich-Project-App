@@ -174,7 +174,7 @@ export function CollectionTable({ collections, onEdit, onDelete, isUpdating, isD
       <div className="overflow-x-auto">
         <table className="w-full border-collapse">
           <thead>
-            <tr className="border-b bg-gray-50"
+            <tr className="border-b bg-gray-50">
               <th className="text-left p-3 font-medium">Date</th>
               <th className="text-left p-3 font-medium">Host</th>
               <th className="text-left p-3 font-medium">Individual</th>

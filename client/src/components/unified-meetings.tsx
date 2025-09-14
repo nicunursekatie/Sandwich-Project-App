@@ -1,14 +1,14 @@
-import { useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ClipboardList, FileText, Calendar } from "lucide-react";
-import MeetingMinutes from "@/pages/meeting-minutes";
-import MeetingAgenda from "@/pages/meeting-agenda";
-import MeetingCalendar from "@/pages/meeting-calendar";
-import { MeetingHelpWrapper } from "@/components/meeting-help";
-import { QuickHelp } from "@/components/help-system";
+import { useState } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ClipboardList, FileText, Calendar } from 'lucide-react';
+import MeetingMinutes from '@/pages/meeting-minutes';
+import MeetingAgenda from '@/pages/meeting-agenda';
+import MeetingCalendar from '@/pages/meeting-calendar';
+import { MeetingHelpWrapper } from '@/components/meeting-help';
+import { QuickHelp } from '@/components/help-system';
 
 export default function UnifiedMeetings() {
-  const [activeTab, setActiveTab] = useState("minutes");
+  const [activeTab, setActiveTab] = useState('minutes');
 
   return (
     <div className="space-y-6">

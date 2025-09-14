@@ -1,19 +1,19 @@
-import { useState, useEffect, useRef } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useState, useEffect, useRef } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { useAuth } from "@/hooks/useAuth";
-import { queryClient, apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import { formatDistanceToNow } from "date-fns";
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/hooks/useAuth';
+import { queryClient, apiRequest } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
+import { formatDistanceToNow } from 'date-fns';
 import {
   CheckCircle2,
   Heart,
@@ -21,13 +21,13 @@ import {
   Trash2,
   MoreVertical,
   Edit,
-} from "lucide-react";
+} from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 
 interface Message {
   id: number;
@@ -42,25 +42,25 @@ interface Message {
 export default function RecipientChat() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState('');
   const [editingMessageId, setEditingMessageId] = useState<number | null>(null);
-  const [editContent, setEditContent] = useState("");
+  const [editContent, setEditContent] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Check if user has Recipient Chat access
   const hasRecipientChatAccess =
-    user?.permissions?.includes("recipient_chat") ||
-    user?.role === "admin" ||
-    user?.role === "admin_coordinator" ||
-    user?.role === "super_admin";
+    user?.permissions?.includes('recipient_chat') ||
+    user?.role === 'admin' ||
+    user?.role === 'admin_coordinator' ||
+    user?.role === 'super_admin';
 
   // Get all conversations to find Recipient Chat
   const { data: conversations = [] } = useQuery({
-    queryKey: ["/api/conversations"],
+    queryKey: ['/api/conversations'],
     queryFn: async () => {
-      const response = await fetch("/api/conversations");
+      const response = await fetch('/api/conversations');
       if (!response.ok) {
-        throw new Error("Failed to fetch conversations");
+        throw new Error('Failed to fetch conversations');
       }
       const data = await response.json();
       return data;
@@ -70,7 +70,7 @@ export default function RecipientChat() {
 
   // Find Recipient Chat conversation from the list
   const recipientConversation = conversations.find(
-    (c: any) => c.type === "channel" && c.name === "Recipient Chat"
+    (c: any) => c.type === 'channel' && c.name === 'Recipient Chat'
   );
 
   // Fetch recipient messages from the conversation system
@@ -79,7 +79,7 @@ export default function RecipientChat() {
     isLoading: messagesLoading,
     error: messagesError,
   } = useQuery<Message[]>({
-    queryKey: ["/api/conversations", recipientConversation?.id, "messages"],
+    queryKey: ['/api/conversations', recipientConversation?.id, 'messages'],
     queryFn: async () => {
       if (!recipientConversation?.id) {
         return [];
@@ -90,7 +90,7 @@ export default function RecipientChat() {
       );
       if (!response.ok) {
         const errorText = await response.text();
-        console.error("Failed to fetch Recipient messages:", errorText);
+        console.error('Failed to fetch Recipient messages:', errorText);
         throw new Error(`Failed to fetch messages: ${response.statusText}`);
       }
       const data = await response.json();
@@ -104,11 +104,11 @@ export default function RecipientChat() {
   const postMessageMutation = useMutation({
     mutationFn: async (content: string) => {
       if (!recipientConversation?.id) {
-        throw new Error("Recipient conversation not found");
+        throw new Error('Recipient conversation not found');
       }
 
       const response = await apiRequest(
-        "POST",
+        'POST',
         `/api/conversations/${recipientConversation.id}/messages`,
         {
           content,
@@ -118,18 +118,18 @@ export default function RecipientChat() {
       return response;
     },
     onSuccess: () => {
-      setMessage("");
+      setMessage('');
       queryClient.invalidateQueries({
-        queryKey: ["/api/conversations", recipientConversation?.id, "messages"],
+        queryKey: ['/api/conversations', recipientConversation?.id, 'messages'],
       });
     },
     onError: (error) => {
-      console.error("Failed to post message:", error);
+      console.error('Failed to post message:', error);
       toast({
-        title: "Failed to send message",
+        title: 'Failed to send message',
         description:
-          error instanceof Error ? error.message : "An error occurred",
-        variant: "destructive",
+          error instanceof Error ? error.message : 'An error occurred',
+        variant: 'destructive',
       });
     },
   });
@@ -143,28 +143,28 @@ export default function RecipientChat() {
       messageId: number;
       content: string;
     }) => {
-      const response = await apiRequest("PATCH", `/api/messages/${messageId}`, {
+      const response = await apiRequest('PATCH', `/api/messages/${messageId}`, {
         content,
       });
       return response;
     },
     onSuccess: () => {
       setEditingMessageId(null);
-      setEditContent("");
+      setEditContent('');
       queryClient.invalidateQueries({
-        queryKey: ["/api/conversations", recipientConversation?.id, "messages"],
+        queryKey: ['/api/conversations', recipientConversation?.id, 'messages'],
       });
       toast({
-        title: "Message updated",
-        description: "Your message has been edited successfully.",
+        title: 'Message updated',
+        description: 'Your message has been edited successfully.',
       });
     },
     onError: (error) => {
       toast({
-        title: "Failed to edit message",
+        title: 'Failed to edit message',
         description:
-          error instanceof Error ? error.message : "An error occurred",
-        variant: "destructive",
+          error instanceof Error ? error.message : 'An error occurred',
+        variant: 'destructive',
       });
     },
   });
@@ -172,36 +172,36 @@ export default function RecipientChat() {
   // Delete message mutation
   const deleteMessageMutation = useMutation({
     mutationFn: async (messageId: number) => {
-      const response = await apiRequest("DELETE", `/api/messages/${messageId}`);
+      const response = await apiRequest('DELETE', `/api/messages/${messageId}`);
       return response;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["/api/conversations", recipientConversation?.id, "messages"],
+        queryKey: ['/api/conversations', recipientConversation?.id, 'messages'],
       });
       toast({
-        title: "Message deleted",
-        description: "Your message has been removed.",
+        title: 'Message deleted',
+        description: 'Your message has been removed.',
       });
     },
     onError: (error) => {
       toast({
-        title: "Failed to delete message",
+        title: 'Failed to delete message',
         description:
-          error instanceof Error ? error.message : "An error occurred",
-        variant: "destructive",
+          error instanceof Error ? error.message : 'An error occurred',
+        variant: 'destructive',
       });
     },
   });
 
   // Filter out null/undefined messages and ensure we have valid data
   const displayedMessages = (messages || []).filter((msg): msg is Message => {
-    return msg && typeof msg === "object" && "content" in msg;
+    return msg && typeof msg === 'object' && 'content' in msg;
   });
 
   // Scroll to bottom when messages change
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [displayedMessages]);
 
   const handleSendMessage = () => {
@@ -211,7 +211,7 @@ export default function RecipientChat() {
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
     }
@@ -224,7 +224,7 @@ export default function RecipientChat() {
 
   const cancelEdit = () => {
     setEditingMessageId(null);
-    setEditContent("");
+    setEditContent('');
   };
 
   const saveEdit = (messageId: number) => {
@@ -234,7 +234,7 @@ export default function RecipientChat() {
   };
 
   const handleDelete = (messageId: number) => {
-    if (window.confirm("Are you sure you want to delete this message?")) {
+    if (window.confirm('Are you sure you want to delete this message?')) {
       deleteMessageMutation.mutate(messageId);
     }
   };
@@ -275,10 +275,10 @@ export default function RecipientChat() {
           )}
           {messagesError && (
             <div className="text-center text-destructive">
-              Error loading messages:{" "}
+              Error loading messages:{' '}
               {messagesError instanceof Error
                 ? messagesError.message
-                : "Unknown error"}
+                : 'Unknown error'}
             </div>
           )}
           {!messagesLoading &&
@@ -296,11 +296,11 @@ export default function RecipientChat() {
             return (
               <div
                 key={msg.id}
-                className={`flex gap-3 ${isOwnMessage ? "justify-end" : ""}`}
+                className={`flex gap-3 ${isOwnMessage ? 'justify-end' : ''}`}
               >
                 <div
                   className={`flex gap-3 max-w-[85%] xs:max-w-[80%] sm:max-w-[75%] ${
-                    isOwnMessage ? "flex-row-reverse" : ""
+                    isOwnMessage ? 'flex-row-reverse' : ''
                   }`}
                 >
                   <div className="flex-shrink-0">
@@ -313,22 +313,22 @@ export default function RecipientChat() {
                     </div>
                   </div>
                   <div
-                    className={`space-y-1 ${isOwnMessage ? "items-end" : ""}`}
+                    className={`space-y-1 ${isOwnMessage ? 'items-end' : ''}`}
                   >
                     <div
                       className={`flex items-center gap-2 ${
-                        isOwnMessage ? "flex-row-reverse" : ""
+                        isOwnMessage ? 'flex-row-reverse' : ''
                       }`}
                     >
                       <span className="text-sm font-medium">
-                        {msg.sender || "Recipient"}
+                        {msg.sender || 'Recipient'}
                       </span>
                       <span className="text-xs text-muted-foreground">
                         {msgCreatedAt
                           ? formatDistanceToNow(new Date(msgCreatedAt), {
                               addSuffix: true,
                             })
-                          : "just now"}
+                          : 'just now'}
                       </span>
                       {isOwnMessage && (
                         <DropdownMenu>
@@ -384,7 +384,7 @@ export default function RecipientChat() {
                     ) : (
                       <div
                         className={`rounded-lg px-3 py-2 ${
-                          isOwnMessage ? "bg-pink-500 text-white" : "bg-muted"
+                          isOwnMessage ? 'bg-pink-500 text-white' : 'bg-muted'
                         }`}
                       >
                         <p className="text-sm whitespace-pre-wrap">

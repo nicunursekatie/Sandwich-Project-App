@@ -9,15 +9,17 @@ global.loginUser = async (email, password) => {
   const response = await request(global.API_BASE)
     .post('/api/auth/login')
     .send({ email, password });
-  
+
   if (response.status !== 200) {
-    throw new Error(`Login failed for ${email}: ${response.body?.message || response.status}`);
+    throw new Error(
+      `Login failed for ${email}: ${response.body?.message || response.status}`
+    );
   }
-  
+
   return response.headers['set-cookie'][0];
 };
 
 // Add a small delay to prevent overwhelming the server
 beforeEach(async () => {
-  await new Promise(resolve => setTimeout(resolve, 100));
+  await new Promise((resolve) => setTimeout(resolve, 100));
 });

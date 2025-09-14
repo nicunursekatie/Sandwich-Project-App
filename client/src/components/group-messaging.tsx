@@ -669,7 +669,7 @@ export function GroupMessaging({ currentUser }: GroupMessagesProps) {
         {selectedGroup ? (
           <>
             {/* Group header */}
-            <div className="p-4 border-b bg-white"
+            <div className="p-4 border-b bg-white">
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-semibold flex items-center gap-2">

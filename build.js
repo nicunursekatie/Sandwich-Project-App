@@ -46,7 +46,7 @@ try {
     '--external:vite',
     '--external:@google-cloud/storage',
     '--external:@google-cloud/local-auth',
-    '--external:googleapis', 
+    '--external:googleapis',
     '--external:@sendgrid/mail',
     '--external:@slack/web-api',
     '--external:twilio',
@@ -60,7 +60,7 @@ try {
     '--packages=external',
     '--bundle',
     '--format=esm',
-    '--outdir=dist'
+    '--outdir=dist',
   ].join(' ');
 
   execSync(esbuildCommand, { stdio: 'inherit' });
@@ -68,7 +68,6 @@ try {
   console.log('✅ Build completed successfully!');
   console.log('📁 Output directory: dist/');
   console.log('🎯 Ready for deployment');
-
 } catch (error) {
   console.error('❌ Build failed:', error.message);
   process.exit(1);

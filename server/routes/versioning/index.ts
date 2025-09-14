@@ -1,12 +1,12 @@
-import { Router } from "express";
-import { VersioningService } from "../../services/versioning";
-import { createStandardMiddleware, createErrorHandler } from "../../middleware";
+import { Router } from 'express';
+import { VersioningService } from '../../services/versioning';
+import { createStandardMiddleware, createErrorHandler } from '../../middleware';
 
 const router = Router();
 
 // Apply standard middleware and error handling for this module
 const standardMiddleware = createStandardMiddleware();
-const errorHandler = createErrorHandler("versioning");
+const errorHandler = createErrorHandler('versioning');
 
 /**
  * Version Control Routes - Entity versioning and change management
@@ -15,7 +15,7 @@ const errorHandler = createErrorHandler("versioning");
 
 // Get version history for an entity
 router.get(
-  "/:entityType/:entityId/history",
+  '/:entityType/:entityId/history',
   ...standardMiddleware,
   async (req, res) => {
     try {
@@ -33,7 +33,7 @@ router.get(
 
 // Get specific version of an entity
 router.get(
-  "/:entityType/:entityId/version/:version",
+  '/:entityType/:entityId/version/:version',
   ...standardMiddleware,
   async (req, res) => {
     try {
@@ -44,7 +44,7 @@ router.get(
         parseInt(version)
       );
       if (!versionData) {
-        return res.status(404).json({ error: "Version not found" });
+        return res.status(404).json({ error: 'Version not found' });
       }
       res.json(versionData);
     } catch (error) {
@@ -55,7 +55,7 @@ router.get(
 
 // Restore a specific version of an entity
 router.post(
-  "/:entityType/:entityId/restore/:version",
+  '/:entityType/:entityId/restore/:version',
   ...standardMiddleware,
   async (req, res) => {
     try {
@@ -70,9 +70,9 @@ router.post(
       );
 
       if (success) {
-        res.json({ success: true, message: "Version restored successfully" });
+        res.json({ success: true, message: 'Version restored successfully' });
       } else {
-        res.status(400).json({ error: "Failed to restore version" });
+        res.status(400).json({ error: 'Failed to restore version' });
       }
     } catch (error) {
       res.status(500).json({ error: error.message });
@@ -82,7 +82,7 @@ router.post(
 
 // Compare two versions of an entity
 router.get(
-  "/:entityType/:entityId/compare/:version1/:version2",
+  '/:entityType/:entityId/compare/:version1/:version2',
   ...standardMiddleware,
   async (req, res) => {
     try {
@@ -101,7 +101,7 @@ router.get(
 );
 
 // Create a changeset
-router.post("/changeset", ...standardMiddleware, async (req, res) => {
+router.post('/changeset', ...standardMiddleware, async (req, res) => {
   try {
     const userId = req.user?.claims?.sub;
     const result = await VersioningService.createChangeset(req.body, userId);
@@ -112,7 +112,7 @@ router.post("/changeset", ...standardMiddleware, async (req, res) => {
 });
 
 // Get change statistics
-router.get("/stats", ...standardMiddleware, async (req, res) => {
+router.get('/stats', ...standardMiddleware, async (req, res) => {
   try {
     const { entityType, userId, startDate, endDate } = req.query;
     const stats = await VersioningService.getChangeStats(
@@ -128,7 +128,7 @@ router.get("/stats", ...standardMiddleware, async (req, res) => {
 });
 
 // Export version history
-router.get("/export", ...standardMiddleware, async (req, res) => {
+router.get('/export', ...standardMiddleware, async (req, res) => {
   try {
     const { entityType, entityId } = req.query;
     const history = await VersioningService.exportVersionHistory(

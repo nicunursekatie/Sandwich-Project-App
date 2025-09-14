@@ -1,5 +1,5 @@
-import { Request, Response, Express } from "express";
-import { eq, sql, and, gt, or, isNull } from "drizzle-orm";
+import { Request, Response, Express } from 'express';
+import { eq, sql, and, gt, or, isNull } from 'drizzle-orm';
 import {
   messages,
   messageRecipients,
@@ -9,31 +9,31 @@ import {
   kudosTracking,
   users,
   emailMessages,
-} from "../../shared/schema";
-import { db } from "../db";
-import { isAuthenticated } from "../temp-auth";
-import { hasPermission, PERMISSIONS } from "../../shared/auth-utils";
+} from '../../shared/schema';
+import { db } from '../db';
+import { isAuthenticated } from '../temp-auth';
+import { hasPermission, PERMISSIONS } from '../../shared/auth-utils';
 
 // Helper function to check if user has permission for specific chat type
 function checkUserChatPermission(user: any, chatType: string): boolean {
   if (!user) return false;
 
   switch (chatType) {
-    case "core_team":
+    case 'core_team':
       return hasPermission(user, PERMISSIONS.CORE_TEAM_CHAT);
-    case "committee":
+    case 'committee':
       return hasPermission(user, PERMISSIONS.COMMITTEE_CHAT);
-    case "hosts":
+    case 'hosts':
       return hasPermission(user, PERMISSIONS.HOST_CHAT);
-    case "drivers":
+    case 'drivers':
       return hasPermission(user, PERMISSIONS.DRIVER_CHAT);
-    case "recipients":
+    case 'recipients':
       return hasPermission(user, PERMISSIONS.RECIPIENT_CHAT);
-    case "direct":
+    case 'direct':
       return hasPermission(user, PERMISSIONS.DIRECT_MESSAGES);
-    case "groups":
+    case 'groups':
       return hasPermission(user, PERMISSIONS.GROUP_MESSAGES);
-    case "general":
+    case 'general':
       return hasPermission(user, PERMISSIONS.GENERAL_CHAT);
     default:
       return hasPermission(user, PERMISSIONS.GENERAL_CHAT);
@@ -43,22 +43,22 @@ function checkUserChatPermission(user: any, chatType: string): boolean {
 // Get unread message counts for a user
 const getUnreadCounts = async (req: Request, res: Response) => {
   try {
-    console.log("=== UNREAD COUNTS REQUEST ===");
-    console.log("req.user exists:", !!(req as any).user);
-    console.log("req.user?.id:", (req as any).user?.id);
-    console.log("req.session exists:", !!(req as any).session);
-    console.log("req.session?.user exists:", !!(req as any).session?.user);
+    console.log('=== UNREAD COUNTS REQUEST ===');
+    console.log('req.user exists:', !!(req as any).user);
+    console.log('req.user?.id:', (req as any).user?.id);
+    console.log('req.session exists:', !!(req as any).session);
+    console.log('req.session?.user exists:', !!(req as any).session?.user);
 
     // Try to get user from both req.user and req.session.user for compatibility
     const userId = (req as any).user?.id || (req as any).session?.user?.id;
     const user = (req as any).user || (req as any).session?.user;
 
     if (!userId || !user) {
-      console.log("Authentication failed: No user ID found");
-      return res.status(401).json({ message: "Unauthorized" });
+      console.log('Authentication failed: No user ID found');
+      return res.status(401).json({ message: 'Unauthorized' });
     }
 
-    console.log("Using user data:", {
+    console.log('Using user data:', {
       id: userId,
       permissions: user.permissions?.length || 0,
     });
@@ -80,23 +80,23 @@ const getUnreadCounts = async (req: Request, res: Response) => {
     try {
       // Get chat message counts from Socket.IO chat system (chat_messages table)
       const chatChannels = [
-        { channel: "general", permission: "general_chat", key: "general" },
+        { channel: 'general', permission: 'general_chat', key: 'general' },
         {
-          channel: "core-team",
-          permission: "core_team_chat",
-          key: "core_team",
+          channel: 'core-team',
+          permission: 'core_team_chat',
+          key: 'core_team',
         },
         {
-          channel: "committee",
-          permission: "committee_chat",
-          key: "committee",
+          channel: 'committee',
+          permission: 'committee_chat',
+          key: 'committee',
         },
-        { channel: "host", permission: "host_chat", key: "hosts" },
-        { channel: "driver", permission: "driver_chat", key: "drivers" },
+        { channel: 'host', permission: 'host_chat', key: 'hosts' },
+        { channel: 'driver', permission: 'driver_chat', key: 'drivers' },
         {
-          channel: "recipient",
-          permission: "recipient_chat",
-          key: "recipients",
+          channel: 'recipient',
+          permission: 'recipient_chat',
+          key: 'recipients',
         },
       ];
 
@@ -107,7 +107,7 @@ const getUnreadCounts = async (req: Request, res: Response) => {
         }
 
         // Count unread messages in this channel (messages that haven't been marked as read)
-        const { chatMessageReads } = await import("../../shared/schema");
+        const { chatMessageReads } = await import('../../shared/schema');
         const unreadCount = await db
           .select({ count: sql<number>`COUNT(*)::int` })
           .from(chatMessages)
@@ -155,7 +155,7 @@ const getUnreadCounts = async (req: Request, res: Response) => {
         );
         unreadCounts.groups = 0; // Groups functionality not implemented yet
       } catch (directMsgError) {
-        console.error("Error getting direct message counts:", directMsgError);
+        console.error('Error getting direct message counts:', directMsgError);
         unreadCounts.direct = 0;
         unreadCounts.groups = 0;
       }
@@ -178,7 +178,7 @@ const getUnreadCounts = async (req: Request, res: Response) => {
 
         unreadCounts.kudos = parseInt(String(kudosCount[0]?.count || 0));
       } catch (kudosError) {
-        console.error("Error getting kudos counts:", kudosError);
+        console.error('Error getting kudos counts:', kudosError);
         unreadCounts.kudos = 0;
       }
 
@@ -194,14 +194,14 @@ const getUnreadCounts = async (req: Request, res: Response) => {
         unreadCounts.groups +
         unreadCounts.kudos;
     } catch (dbError) {
-      console.error("Database query error in unread counts:", dbError);
+      console.error('Database query error in unread counts:', dbError);
       // Return fallback counts on database error
     }
 
     res.json(unreadCounts);
   } catch (error) {
-    console.error("Error getting unread counts:", error);
-    res.status(500).json({ error: "Failed to get unread counts" });
+    console.error('Error getting unread counts:', error);
+    res.status(500).json({ error: 'Failed to get unread counts' });
   }
 };
 
@@ -214,13 +214,13 @@ const markChatMessagesRead = async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user?.id || (req as any).session?.user?.id;
     if (!userId) {
-      return res.status(401).json({ error: "User not authenticated" });
+      return res.status(401).json({ error: 'User not authenticated' });
     }
 
     const { channel, messageIds } = req.body;
 
     if (!channel) {
-      return res.status(400).json({ error: "Channel is required" });
+      return res.status(400).json({ error: 'Channel is required' });
     }
 
     console.log(
@@ -257,8 +257,8 @@ const markChatMessagesRead = async (req: Request, res: Response) => {
       res.json({ success: true, channel, userId, markedRead: markedCount });
     }
   } catch (error) {
-    console.error("Error marking chat messages as read:", error);
-    res.status(500).json({ error: "Failed to mark chat messages as read" });
+    console.error('Error marking chat messages as read:', error);
+    res.status(500).json({ error: 'Failed to mark chat messages as read' });
   }
 };
 
@@ -267,20 +267,20 @@ const markMessagesRead = async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user?.id || (req as any).session?.user?.id;
     if (!userId) {
-      return res.status(401).json({ error: "User not authenticated" });
+      return res.status(401).json({ error: 'User not authenticated' });
     }
 
     const { conversationId } = req.body;
 
     if (!conversationId) {
-      return res.status(400).json({ error: "Conversation ID is required" });
+      return res.status(400).json({ error: 'Conversation ID is required' });
     }
 
     // TODO: Implement read tracking when messageReads table is added
     res.json({ success: true, markedCount: 0 });
   } catch (error) {
-    console.error("Error marking messages as read:", error);
-    res.status(500).json({ error: "Failed to mark messages as read" });
+    console.error('Error marking messages as read:', error);
+    res.status(500).json({ error: 'Failed to mark messages as read' });
   }
 };
 
@@ -289,14 +289,14 @@ const markAllRead = async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user?.id || (req as any).session?.user?.id;
     if (!userId) {
-      return res.status(401).json({ error: "User not authenticated" });
+      return res.status(401).json({ error: 'User not authenticated' });
     }
 
     // TODO: Implement when messageReads table is added
     res.json({ success: true, markedCount: 0 });
   } catch (error) {
-    console.error("Error marking all messages as read:", error);
-    res.status(500).json({ error: "Failed to mark all messages as read" });
+    console.error('Error marking all messages as read:', error);
+    res.status(500).json({ error: 'Failed to mark all messages as read' });
   }
 };
 
@@ -304,22 +304,22 @@ const markAllRead = async (req: Request, res: Response) => {
 export function registerMessageNotificationRoutes(app: Express) {
   // Use the proper unread counts function with the existing database schema
   app.get(
-    "/api/message-notifications/unread-counts",
+    '/api/message-notifications/unread-counts',
     isAuthenticated,
     getUnreadCounts
   );
   app.post(
-    "/api/message-notifications/mark-read",
+    '/api/message-notifications/mark-read',
     isAuthenticated,
     markMessagesRead
   );
   app.post(
-    "/api/message-notifications/mark-chat-read",
+    '/api/message-notifications/mark-chat-read',
     isAuthenticated,
     markChatMessagesRead
   );
   app.post(
-    "/api/message-notifications/mark-all-read",
+    '/api/message-notifications/mark-all-read',
     isAuthenticated,
     markAllRead
   );

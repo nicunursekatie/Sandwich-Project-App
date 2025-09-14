@@ -1,19 +1,19 @@
-import { useState, useEffect } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { User, Lock, Mail, FileText, Save } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useState, useEffect } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { User, Lock, Mail, FileText, Save } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card';
 import {
   Form,
   FormControl,
@@ -21,28 +21,28 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Separator } from "@/components/ui/separator";
-import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+} from '@/components/ui/form';
+import { Separator } from '@/components/ui/separator';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import { apiRequest, queryClient } from '@/lib/queryClient';
 
 const profileSchema = z.object({
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
-  displayName: z.string().min(1, "Display name is required"),
-  email: z.string().email("Invalid email address"),
+  firstName: z.string().min(1, 'First name is required'),
+  lastName: z.string().min(1, 'Last name is required'),
+  displayName: z.string().min(1, 'Display name is required'),
+  email: z.string().email('Invalid email address'),
 });
 
 const passwordSchema = z
   .object({
-    currentPassword: z.string().min(1, "Current password is required"),
-    newPassword: z.string().min(6, "Password must be at least 6 characters"),
-    confirmPassword: z.string().min(1, "Please confirm your password"),
+    currentPassword: z.string().min(1, 'Current password is required'),
+    newPassword: z.string().min(6, 'Password must be at least 6 characters'),
+    confirmPassword: z.string().min(1, 'Please confirm your password'),
   })
   .refine((data) => data.newPassword === data.confirmPassword, {
     message: "Passwords don't match",
-    path: ["confirmPassword"],
+    path: ['confirmPassword'],
   });
 
 type ProfileFormData = z.infer<typeof profileSchema>;
@@ -51,42 +51,42 @@ type PasswordFormData = z.infer<typeof passwordSchema>;
 export default function UserProfile() {
   const { toast } = useToast();
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<"profile" | "password">("profile");
+  const [activeTab, setActiveTab] = useState<'profile' | 'password'>('profile');
 
   const profileForm = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      firstName: "",
-      lastName: "",
-      displayName: "",
-      email: "",
+      firstName: '',
+      lastName: '',
+      displayName: '',
+      email: '',
     },
   });
 
   const passwordForm = useForm<PasswordFormData>({
     resolver: zodResolver(passwordSchema),
     defaultValues: {
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: '',
     },
   });
 
   // Load user profile data
   const { data: userProfile, isLoading } = useQuery({
-    queryKey: ["/api/auth/profile"],
+    queryKey: ['/api/auth/profile'],
     enabled: !!user,
   });
 
   // Update form when profile data loads
   useEffect(() => {
-    if (userProfile && typeof userProfile === "object") {
+    if (userProfile && typeof userProfile === 'object') {
       const profile = userProfile as any;
       profileForm.reset({
-        firstName: profile.firstName || "",
-        lastName: profile.lastName || "",
-        displayName: profile.displayName || "",
-        email: profile.email || "",
+        firstName: profile.firstName || '',
+        lastName: profile.lastName || '',
+        displayName: profile.displayName || '',
+        email: profile.email || '',
       });
     }
   }, [userProfile, profileForm]);
@@ -94,21 +94,21 @@ export default function UserProfile() {
   // Update profile mutation
   const updateProfileMutation = useMutation({
     mutationFn: async (data: ProfileFormData) => {
-      return await apiRequest("PUT", "/api/auth/profile", data);
+      return await apiRequest('PUT', '/api/auth/profile', data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/profile"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/profile'] });
       toast({
-        title: "Profile updated",
-        description: "Your profile has been successfully updated.",
+        title: 'Profile updated',
+        description: 'Your profile has been successfully updated.',
       });
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to update profile",
-        variant: "destructive",
+        title: 'Error',
+        description: error.message || 'Failed to update profile',
+        variant: 'destructive',
       });
     },
   });
@@ -116,7 +116,7 @@ export default function UserProfile() {
   // Change password mutation
   const changePasswordMutation = useMutation({
     mutationFn: async (data: PasswordFormData) => {
-      return await apiRequest("PUT", "/api/auth/change-password", {
+      return await apiRequest('PUT', '/api/auth/change-password', {
         currentPassword: data.currentPassword,
         newPassword: data.newPassword,
       });
@@ -124,15 +124,15 @@ export default function UserProfile() {
     onSuccess: () => {
       passwordForm.reset();
       toast({
-        title: "Password changed",
-        description: "Your password has been successfully updated.",
+        title: 'Password changed',
+        description: 'Your password has been successfully updated.',
       });
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to change password",
-        variant: "destructive",
+        title: 'Error',
+        description: error.message || 'Failed to change password',
+        variant: 'destructive',
       });
     },
   });
@@ -170,22 +170,22 @@ export default function UserProfile() {
       {/* Tab Navigation */}
       <div className="flex space-x-1 border-b">
         <button
-          onClick={() => setActiveTab("profile")}
+          onClick={() => setActiveTab('profile')}
           className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-            activeTab === "profile"
-              ? "border-primary text-primary"
-              : "border-transparent text-muted-foreground hover:text-foreground"
+            activeTab === 'profile'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
           <User className="w-4 h-4 inline mr-2" />
           Profile
         </button>
         <button
-          onClick={() => setActiveTab("password")}
+          onClick={() => setActiveTab('password')}
           className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-            activeTab === "password"
-              ? "border-primary text-primary"
-              : "border-transparent text-muted-foreground hover:text-foreground"
+            activeTab === 'password'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
           <Lock className="w-4 h-4 inline mr-2" />
@@ -194,7 +194,7 @@ export default function UserProfile() {
       </div>
 
       {/* Profile Tab */}
-      {activeTab === "profile" && (
+      {activeTab === 'profile' && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -282,8 +282,8 @@ export default function UserProfile() {
                 >
                   <Save className="w-4 h-4 mr-2" />
                   {updateProfileMutation.isPending
-                    ? "Saving..."
-                    : "Save Changes"}
+                    ? 'Saving...'
+                    : 'Save Changes'}
                 </Button>
               </form>
             </Form>
@@ -292,7 +292,7 @@ export default function UserProfile() {
       )}
 
       {/* Password Tab */}
-      {activeTab === "password" && (
+      {activeTab === 'password' && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -372,8 +372,8 @@ export default function UserProfile() {
                 >
                   <Lock className="w-4 h-4 mr-2" />
                   {changePasswordMutation.isPending
-                    ? "Changing..."
-                    : "Change Password"}
+                    ? 'Changing...'
+                    : 'Change Password'}
                 </Button>
               </form>
             </Form>

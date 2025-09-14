@@ -6,7 +6,7 @@
 // Replaced by: client/src/components/enhanced-permissions-dialog.tsx
 // Reason: Enhanced UI with role presets and better permission categorization
 
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -14,31 +14,31 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
-import { ScrollArea } from "@/components/ui/scroll-area";
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion";
+} from '@/components/ui/accordion';
 import {
   USER_ROLES,
   PERMISSIONS,
   getDefaultPermissionsForRole,
   getRoleDisplayName,
-} from "@shared/auth-utils";
+} from '@shared/auth-utils';
 import {
   MessageCircle,
   Shield,
@@ -52,7 +52,7 @@ import {
   Settings,
   ChevronRight,
   Award,
-} from "lucide-react";
+} from 'lucide-react';
 
 interface User {
   id: string;
@@ -74,208 +74,208 @@ interface UserPermissionsDialogProps {
 // Note: Users automatically own content they create - these permissions are for managing others' content
 const PERMISSION_CATEGORIES = [
   {
-    id: "content_management",
-    label: "Content Management Authority",
+    id: 'content_management',
+    label: 'Content Management Authority',
     icon: Shield,
     description:
       "Authority to edit/delete other users' content (you automatically own your own content)",
     permissions: [
       {
         key: PERMISSIONS.EDIT_ALL_COLLECTIONS,
-        label: "Edit All Collections",
-        description: "Edit any collection entry regardless of who created it",
+        label: 'Edit All Collections',
+        description: 'Edit any collection entry regardless of who created it',
       },
       {
         key: PERMISSIONS.DELETE_ALL_COLLECTIONS,
-        label: "Delete All Collections",
-        description: "Delete any collection entry regardless of who created it",
+        label: 'Delete All Collections',
+        description: 'Delete any collection entry regardless of who created it',
       },
       {
         key: PERMISSIONS.CREATE_PROJECTS,
-        label: "Create Projects",
+        label: 'Create Projects',
         description:
-          "Create new projects + edit/delete own projects + edit projects where assigned",
+          'Create new projects + edit/delete own projects + edit projects where assigned',
       },
       {
         key: PERMISSIONS.EDIT_ALL_PROJECTS,
-        label: "Edit All Projects",
-        description: "Edit any project regardless of ownership",
+        label: 'Edit All Projects',
+        description: 'Edit any project regardless of ownership',
       },
       {
         key: PERMISSIONS.DELETE_ALL_PROJECTS,
-        label: "Delete All Projects",
-        description: "Delete any project regardless of ownership",
+        label: 'Delete All Projects',
+        description: 'Delete any project regardless of ownership',
       },
     ],
   },
   {
-    id: "organizational_management",
-    label: "Organizational Data Management",
+    id: 'organizational_management',
+    label: 'Organizational Data Management',
     icon: Database,
     description:
-      "Authority to manage organizational data (hosts, recipients, drivers)",
+      'Authority to manage organizational data (hosts, recipients, drivers)',
     permissions: [
       {
         key: PERMISSIONS.MANAGE_RECIPIENTS,
-        label: "Manage Recipients",
-        description: "Edit recipient information",
+        label: 'Manage Recipients',
+        description: 'Edit recipient information',
       },
       {
         key: PERMISSIONS.MANAGE_HOSTS,
-        label: "Manage Hosts",
-        description: "Edit host information",
+        label: 'Manage Hosts',
+        description: 'Edit host information',
       },
       {
         key: PERMISSIONS.MANAGE_DRIVERS,
-        label: "Manage Drivers",
-        description: "Edit driver information",
+        label: 'Manage Drivers',
+        description: 'Edit driver information',
       },
     ],
   },
   {
-    id: "access_control",
-    label: "Access & Visibility",
+    id: 'access_control',
+    label: 'Access & Visibility',
     icon: Eye,
-    description: "Access to view different sections and data",
+    description: 'Access to view different sections and data',
     permissions: [
       {
         key: PERMISSIONS.VIEW_COLLECTIONS,
-        label: "View Collections",
-        description: "Access collection logs",
+        label: 'View Collections',
+        description: 'Access collection logs',
       },
       {
         key: PERMISSIONS.VIEW_PROJECTS,
-        label: "View Projects",
-        description: "Access project information",
+        label: 'View Projects',
+        description: 'Access project information',
       },
       {
         key: PERMISSIONS.VIEW_ANALYTICS,
-        label: "View Analytics",
-        description: "Access analytics dashboards",
+        label: 'View Analytics',
+        description: 'Access analytics dashboards',
       },
       {
         key: PERMISSIONS.VIEW_REPORTS,
-        label: "View Reports",
-        description: "Access and generate reports",
+        label: 'View Reports',
+        description: 'Access and generate reports',
       },
       {
         key: PERMISSIONS.VIEW_MEETINGS,
-        label: "View Meetings",
-        description: "Access meeting information",
+        label: 'View Meetings',
+        description: 'Access meeting information',
       },
       {
         key: PERMISSIONS.VIEW_SUGGESTIONS,
-        label: "View Suggestions",
-        description: "View suggestion portal",
+        label: 'View Suggestions',
+        description: 'View suggestion portal',
       },
       {
         key: PERMISSIONS.SUBMIT_SUGGESTIONS,
-        label: "Submit Suggestions",
-        description: "Submit your own suggestions",
+        label: 'Submit Suggestions',
+        description: 'Submit your own suggestions',
       },
     ],
   },
   {
-    id: "communication",
-    label: "Communication Access",
+    id: 'communication',
+    label: 'Communication Access',
     icon: MessageCircle,
-    description: "Access to chat rooms and messaging features",
+    description: 'Access to chat rooms and messaging features',
     permissions: [
       {
         key: PERMISSIONS.GENERAL_CHAT,
-        label: "General Chat",
-        description: "Access to general chat room",
+        label: 'General Chat',
+        description: 'Access to general chat room',
       },
       {
         key: PERMISSIONS.COMMITTEE_CHAT,
-        label: "Committee Chat",
-        description: "Access to committee chat room",
+        label: 'Committee Chat',
+        description: 'Access to committee chat room',
       },
       {
         key: PERMISSIONS.HOST_CHAT,
-        label: "Host Chat",
-        description: "Access to host chat room",
+        label: 'Host Chat',
+        description: 'Access to host chat room',
       },
       {
         key: PERMISSIONS.DRIVER_CHAT,
-        label: "Driver Chat",
-        description: "Access to driver chat room",
+        label: 'Driver Chat',
+        description: 'Access to driver chat room',
       },
       {
         key: PERMISSIONS.RECIPIENT_CHAT,
-        label: "Recipient Chat",
-        description: "Access to recipient chat room",
+        label: 'Recipient Chat',
+        description: 'Access to recipient chat room',
       },
       {
-        key: "core_team_chat",
-        label: "Core Team Chat",
-        description: "Access to core team chat room",
+        key: 'core_team_chat',
+        label: 'Core Team Chat',
+        description: 'Access to core team chat room',
       },
     ],
   },
   {
-    id: "recognition",
-    label: "Recognition & Kudos",
+    id: 'recognition',
+    label: 'Recognition & Kudos',
     icon: Award,
-    description: "Permissions for the kudos recognition system",
+    description: 'Permissions for the kudos recognition system',
     permissions: [
       {
         key: PERMISSIONS.SEND_KUDOS,
-        label: "Send Kudos",
-        description: "Send recognition kudos to other users",
+        label: 'Send Kudos',
+        description: 'Send recognition kudos to other users',
       },
       {
         key: PERMISSIONS.RECEIVE_KUDOS,
-        label: "Receive Kudos",
-        description: "Receive recognition kudos from other users",
+        label: 'Receive Kudos',
+        description: 'Receive recognition kudos from other users',
       },
       {
         key: PERMISSIONS.VIEW_KUDOS,
-        label: "View Kudos",
-        description: "View kudos messages in inbox",
+        label: 'View Kudos',
+        description: 'View kudos messages in inbox',
       },
       {
         key: PERMISSIONS.MANAGE_ALL_KUDOS,
-        label: "Manage All Kudos",
-        description: "Administrative control over all kudos (view, delete)",
+        label: 'Manage All Kudos',
+        description: 'Administrative control over all kudos (view, delete)',
       },
     ],
   },
   {
-    id: "system_administration",
-    label: "System Administration",
+    id: 'system_administration',
+    label: 'System Administration',
     icon: UserCog,
-    description: "System management and advanced administrative functions",
+    description: 'System management and advanced administrative functions',
     permissions: [
       {
         key: PERMISSIONS.MANAGE_USERS,
-        label: "Full User Management",
-        description: "Complete control over user accounts",
+        label: 'Full User Management',
+        description: 'Complete control over user accounts',
       },
       {
         key: PERMISSIONS.MANAGE_ANNOUNCEMENTS,
-        label: "Manage Announcements",
-        description: "Create and edit system announcements",
+        label: 'Manage Announcements',
+        description: 'Create and edit system announcements',
       },
       {
         key: PERMISSIONS.MANAGE_SUGGESTIONS,
-        label: "Manage All Suggestions",
-        description: "Review and update suggestion workflow",
+        label: 'Manage All Suggestions',
+        description: 'Review and update suggestion workflow',
       },
       {
         key: PERMISSIONS.RESPOND_TO_SUGGESTIONS,
-        label: "Official Responses",
-        description: "Post official organizational responses",
+        label: 'Official Responses',
+        description: 'Post official organizational responses',
       },
       {
-        key: "access_work_logs",
-        label: "View Work Logs",
-        description: "Access work log system",
+        key: 'access_work_logs',
+        label: 'View Work Logs',
+        description: 'Access work log system',
       },
       {
-        key: "view_all_work_logs",
-        label: "View All Work Logs",
-        description: "See all user work logs for oversight",
+        key: 'view_all_work_logs',
+        label: 'View All Work Logs',
+        description: 'See all user work logs for oversight',
       },
     ],
   },
@@ -287,7 +287,7 @@ export function UserPermissionsDialog({
   onOpenChange,
   onSave,
 }: UserPermissionsDialogProps) {
-  const [editingRole, setEditingRole] = useState<string>("");
+  const [editingRole, setEditingRole] = useState<string>('');
   const [editingPermissions, setEditingPermissions] = useState<string[]>([]);
   const [hasChanges, setHasChanges] = useState(false);
 
@@ -351,10 +351,10 @@ export function UserPermissionsDialog({
         <DialogHeader>
           <DialogTitle>Edit User Permissions</DialogTitle>
           <DialogDescription>
-            Configure role and permissions for{" "}
+            Configure role and permissions for{' '}
             <span className="font-semibold">
               {user.firstName} {user.lastName}
-            </span>{" "}
+            </span>{' '}
             ({user.email})
           </DialogDescription>
           <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg mt-3">

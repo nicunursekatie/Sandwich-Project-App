@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useState, useEffect } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import {
   Calendar,
   Clock,
@@ -15,29 +15,29 @@ import {
   Trash2,
   Save,
   X,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+} from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest, queryClient } from '@/lib/queryClient';
 
 interface AgendaItem {
   id: number;
@@ -45,7 +45,7 @@ interface AgendaItem {
   submittedBy: string;
   title: string;
   description: string;
-  status: "pending" | "approved" | "rejected";
+  status: 'pending' | 'approved' | 'rejected';
   submittedAt: string;
 }
 
@@ -58,7 +58,7 @@ interface Meeting {
   location?: string;
   description?: string;
   finalAgenda?: string;
-  status: "planning" | "agenda_set" | "completed";
+  status: 'planning' | 'agenda_set' | 'completed';
 }
 
 export default function MeetingAgenda() {
@@ -69,24 +69,24 @@ export default function MeetingAgenda() {
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [newItem, setNewItem] = useState({
-    submittedBy: "",
-    title: "",
-    description: "",
+    submittedBy: '',
+    title: '',
+    description: '',
   });
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [editingItem, setEditingItem] = useState<number | null>(null);
-  const [editForm, setEditForm] = useState({ title: "", description: "" });
+  const [editForm, setEditForm] = useState({ title: '', description: '' });
 
   const { data: meetings = [], isLoading: meetingsLoading } = useQuery<
     Meeting[]
   >({
-    queryKey: ["/api/meetings"],
+    queryKey: ['/api/meetings'],
   });
 
   const { data: agendaItems = [], isLoading: itemsLoading } = useQuery<
     AgendaItem[]
   >({
-    queryKey: ["/api/agenda-items"],
+    queryKey: ['/api/agenda-items'],
   });
 
   // Filter agenda items for selected meeting
@@ -104,7 +104,7 @@ export default function MeetingAgenda() {
     if (!selectedMeetingId && meetings.length > 0) {
       const upcomingMeeting =
         meetings.find(
-          (m) => m.status === "planning" || m.status === "agenda_set"
+          (m) => m.status === 'planning' || m.status === 'agenda_set'
         ) || meetings[0];
       setSelectedMeetingId(upcomingMeeting.id);
     }
@@ -112,22 +112,22 @@ export default function MeetingAgenda() {
 
   const submitItemMutation = useMutation({
     mutationFn: async (data: typeof newItem) => {
-      if (!selectedMeetingId) throw new Error("No meeting selected");
-      const response = await fetch("/api/agenda-items", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      if (!selectedMeetingId) throw new Error('No meeting selected');
+      const response = await fetch('/api/agenda-items', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...data, meetingId: selectedMeetingId }),
       });
-      if (!response.ok) throw new Error("Failed to submit agenda item");
+      if (!response.ok) throw new Error('Failed to submit agenda item');
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/agenda-items"] });
-      setNewItem({ submittedBy: "", title: "", description: "" });
+      queryClient.invalidateQueries({ queryKey: ['/api/agenda-items'] });
+      setNewItem({ submittedBy: '', title: '', description: '' });
       setIsSubmitModalOpen(false);
       toast({
-        title: "Agenda item submitted",
-        description: "Your agenda item has been submitted for review.",
+        title: 'Agenda item submitted',
+        description: 'Your agenda item has been submitted for review.',
       });
     },
   });
@@ -138,47 +138,47 @@ export default function MeetingAgenda() {
       status,
     }: {
       id: number;
-      status: "approved" | "rejected";
+      status: 'approved' | 'rejected';
     }) => {
       const response = await fetch(`/api/agenda-items/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status }),
       });
-      if (!response.ok) throw new Error("Failed to update status");
+      if (!response.ok) throw new Error('Failed to update status');
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/agenda-items"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/agenda-items'] });
       toast({
-        title: "Status updated",
-        description: "Agenda item status has been updated.",
+        title: 'Status updated',
+        description: 'Agenda item status has been updated.',
       });
     },
   });
 
   const uploadAgendaMutation = useMutation({
     mutationFn: async (file: File) => {
-      if (!selectedMeetingId) throw new Error("No meeting selected");
+      if (!selectedMeetingId) throw new Error('No meeting selected');
       const formData = new FormData();
-      formData.append("agenda", file);
+      formData.append('agenda', file);
       const response = await fetch(
         `/api/meetings/${selectedMeetingId}/upload-agenda`,
         {
-          method: "POST",
+          method: 'POST',
           body: formData,
         }
       );
-      if (!response.ok) throw new Error("Failed to upload agenda");
+      if (!response.ok) throw new Error('Failed to upload agenda');
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/meetings"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/meetings'] });
       setIsUploadModalOpen(false);
       setUploadedFile(null);
       toast({
-        title: "Agenda uploaded",
-        description: "The meeting agenda has been uploaded successfully.",
+        title: 'Agenda uploaded',
+        description: 'The meeting agenda has been uploaded successfully.',
       });
     },
   });
@@ -194,20 +194,20 @@ export default function MeetingAgenda() {
       description: string;
     }) => {
       const response = await fetch(`/api/agenda-items/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title, description }),
       });
-      if (!response.ok) throw new Error("Failed to update agenda item");
+      if (!response.ok) throw new Error('Failed to update agenda item');
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/agenda-items"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/agenda-items'] });
       setEditingItem(null);
-      setEditForm({ title: "", description: "" });
+      setEditForm({ title: '', description: '' });
       toast({
-        title: "Agenda item updated",
-        description: "The agenda item has been updated successfully.",
+        title: 'Agenda item updated',
+        description: 'The agenda item has been updated successfully.',
       });
     },
   });
@@ -215,16 +215,16 @@ export default function MeetingAgenda() {
   const deleteItemMutation = useMutation({
     mutationFn: async (id: number) => {
       const response = await fetch(`/api/agenda-items/${id}`, {
-        method: "DELETE",
+        method: 'DELETE',
       });
-      if (!response.ok) throw new Error("Failed to delete agenda item");
+      if (!response.ok) throw new Error('Failed to delete agenda item');
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/agenda-items"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/agenda-items'] });
       toast({
-        title: "Agenda item deleted",
-        description: "The agenda item has been deleted successfully.",
+        title: 'Agenda item deleted',
+        description: 'The agenda item has been deleted successfully.',
       });
     },
   });
@@ -233,9 +233,9 @@ export default function MeetingAgenda() {
     e.preventDefault();
     if (!selectedMeetingId) {
       toast({
-        title: "No meeting selected",
-        description: "Please select a meeting before submitting agenda items.",
-        variant: "destructive",
+        title: 'No meeting selected',
+        description: 'Please select a meeting before submitting agenda items.',
+        variant: 'destructive',
       });
       return;
     }
@@ -266,24 +266,24 @@ export default function MeetingAgenda() {
 
   const handleCancelEdit = () => {
     setEditingItem(null);
-    setEditForm({ title: "", description: "" });
+    setEditForm({ title: '', description: '' });
   };
 
   const handleDeleteItem = (id: number) => {
-    if (confirm("Are you sure you want to delete this agenda item?")) {
+    if (confirm('Are you sure you want to delete this agenda item?')) {
       deleteItemMutation.mutate(id);
     }
   };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "approved":
+      case 'approved':
         return (
           <Badge variant="default" className="bg-green-100 text-green-800">
             Approved
           </Badge>
         );
-      case "rejected":
+      case 'rejected':
         return <Badge variant="destructive">Rejected</Badge>;
       default:
         return <Badge variant="secondary">Pending</Badge>;
@@ -292,18 +292,18 @@ export default function MeetingAgenda() {
 
   const getMeetingTypeColor = (type: string) => {
     switch (type) {
-      case "weekly":
-        return "bg-blue-100 text-blue-800";
-      case "marketing_committee":
-        return "bg-purple-100 text-purple-800";
-      case "grant_committee":
-        return "bg-green-100 text-green-800";
-      case "core_group":
-        return "bg-orange-100 text-orange-800";
-      case "all_team":
-        return "bg-red-100 text-red-800";
+      case 'weekly':
+        return 'bg-blue-100 text-blue-800';
+      case 'marketing_committee':
+        return 'bg-purple-100 text-purple-800';
+      case 'grant_committee':
+        return 'bg-green-100 text-green-800';
+      case 'core_group':
+        return 'bg-orange-100 text-orange-800';
+      case 'all_team':
+        return 'bg-red-100 text-red-800';
       default:
-        return "bg-gray-100 text-gray-800";
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -400,7 +400,7 @@ export default function MeetingAgenda() {
               Select Meeting
             </Label>
             <Select
-              value={selectedMeetingId?.toString() || ""}
+              value={selectedMeetingId?.toString() || ''}
               onValueChange={(value) => setSelectedMeetingId(parseInt(value))}
             >
               <SelectTrigger className="w-full max-w-md">
@@ -409,7 +409,7 @@ export default function MeetingAgenda() {
               <SelectContent>
                 {meetings.map((meeting) => (
                   <SelectItem key={meeting.id} value={meeting.id.toString()}>
-                    {meeting.title} -{" "}
+                    {meeting.title} -{' '}
                     {new Date(meeting.date).toLocaleDateString()}
                   </SelectItem>
                 ))}
@@ -428,7 +428,7 @@ export default function MeetingAgenda() {
                     <Badge
                       className={getMeetingTypeColor(selectedMeeting.type)}
                     >
-                      {selectedMeeting.type.replace("_", " ")}
+                      {selectedMeeting.type.replace('_', ' ')}
                     </Badge>
                   </div>
                   <div className="flex items-center gap-4 text-sm text-slate-600 mt-1">
@@ -510,7 +510,7 @@ export default function MeetingAgenda() {
             <div className="text-center py-8 text-slate-500">
               {selectedMeeting
                 ? `No agenda items submitted for ${selectedMeeting.title} yet.`
-                : "Select a meeting to view agenda items."}
+                : 'Select a meeting to view agenda items.'}
             </div>
           ) : (
             <div className="space-y-4">
@@ -595,7 +595,7 @@ export default function MeetingAgenda() {
                               >
                                 <Trash2 className="w-3 h-3" />
                               </Button>
-                              {item.status === "pending" && (
+                              {item.status === 'pending' && (
                                 <>
                                   <Button
                                     size="sm"
@@ -603,7 +603,7 @@ export default function MeetingAgenda() {
                                     onClick={() =>
                                       updateItemStatusMutation.mutate({
                                         id: item.id,
-                                        status: "approved",
+                                        status: 'approved',
                                       })
                                     }
                                     className="text-green-600 hover:text-green-700"
@@ -617,7 +617,7 @@ export default function MeetingAgenda() {
                                     onClick={() =>
                                       updateItemStatusMutation.mutate({
                                         id: item.id,
-                                        status: "rejected",
+                                        status: 'rejected',
                                       })
                                     }
                                     className="text-red-600 hover:text-red-700"
@@ -678,7 +678,7 @@ export default function MeetingAgenda() {
                 </span>
               </div>
               <div className="text-sm text-slate-600">
-                Final agenda file has been uploaded and is available for{" "}
+                Final agenda file has been uploaded and is available for{' '}
                 {selectedMeeting.title}.
               </div>
             </div>
@@ -686,7 +686,7 @@ export default function MeetingAgenda() {
             <div className="text-center py-8 text-slate-500">
               {selectedMeeting
                 ? `No final agenda uploaded for ${selectedMeeting.title} yet.`
-                : "Select a meeting to view final agenda status."}
+                : 'Select a meeting to view final agenda status.'}
             </div>
           )}
         </div>

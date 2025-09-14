@@ -1,16 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Search, Check, X, User, Users } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Search, Check, X, User, Users } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 
 interface User {
   id: string;
@@ -42,31 +42,29 @@ export function VolunteerSelectionModal({
   selectedVolunteers,
   eventId,
 }: VolunteerSelectionModalProps) {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [tempSelectedVolunteers, setTempSelectedVolunteers] = useState<
-    string[]
-  >(selectedVolunteers);
-  const [customVolunteerName, setCustomVolunteerName] = useState("");
-  const [showCustomVolunteerInput, setShowCustomVolunteerInput] = useState(
-    false
-  );
+  const [searchTerm, setSearchTerm] = useState('');
+  const [tempSelectedVolunteers, setTempSelectedVolunteers] =
+    useState<string[]>(selectedVolunteers);
+  const [customVolunteerName, setCustomVolunteerName] = useState('');
+  const [showCustomVolunteerInput, setShowCustomVolunteerInput] =
+    useState(false);
 
   // Reset temp selection when modal opens
   useEffect(() => {
     setTempSelectedVolunteers(selectedVolunteers);
-    setCustomVolunteerName("");
+    setCustomVolunteerName('');
     setShowCustomVolunteerInput(false);
   }, [selectedVolunteers, isOpen]);
 
   // Fetch available users for volunteer assignments
   const { data: users = [], isLoading: usersLoading } = useQuery<User[]>({
-    queryKey: ["/api/users/for-assignments"],
+    queryKey: ['/api/users/for-assignments'],
     enabled: isOpen,
   });
 
   // Fetch drivers for volunteer assignments (multi-faceted volunteers)
   const { data: drivers = [], isLoading: driversLoading } = useQuery<Driver[]>({
-    queryKey: ["/api/drivers"],
+    queryKey: ['/api/drivers'],
     enabled: isOpen,
   });
 
@@ -77,8 +75,8 @@ export function VolunteerSelectionModal({
     const name =
       user.firstName && user.lastName
         ? `${user.firstName} ${user.lastName}`
-        : user.displayName || user.email || "";
-    const email = user.email || "";
+        : user.displayName || user.email || '';
+    const email = user.email || '';
     return (
       name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       email.toLowerCase().includes(searchTerm.toLowerCase())
@@ -86,8 +84,8 @@ export function VolunteerSelectionModal({
   });
 
   const filteredDrivers = drivers.filter((driver) => {
-    const name = driver.name || "";
-    const email = driver.email || "";
+    const name = driver.name || '';
+    const email = driver.email || '';
     return (
       name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       email.toLowerCase().includes(searchTerm.toLowerCase())
@@ -97,7 +95,7 @@ export function VolunteerSelectionModal({
   const getUserDisplayName = (user: User) => {
     return user.firstName && user.lastName
       ? `${user.firstName} ${user.lastName}`
-      : user.displayName || user.email || "Unknown User";
+      : user.displayName || user.email || 'Unknown User';
   };
 
   const toggleVolunteerSelection = (volunteerId: string) => {
@@ -114,7 +112,7 @@ export function VolunteerSelectionModal({
         ...prev,
         customVolunteerName.trim(),
       ]);
-      setCustomVolunteerName("");
+      setCustomVolunteerName('');
       setShowCustomVolunteerInput(false);
     }
   };
@@ -132,7 +130,7 @@ export function VolunteerSelectionModal({
 
   const handleCancel = () => {
     setTempSelectedVolunteers(selectedVolunteers);
-    setCustomVolunteerName("");
+    setCustomVolunteerName('');
     setShowCustomVolunteerInput(false);
     onClose();
   };
@@ -174,8 +172,8 @@ export function VolunteerSelectionModal({
                   const displayName = user
                     ? getUserDisplayName(user)
                     : driver
-                    ? driver.name
-                    : volunteerId;
+                      ? driver.name
+                      : volunteerId;
 
                   return (
                     <Badge
@@ -217,8 +215,8 @@ export function VolunteerSelectionModal({
                             key={user.id}
                             className={`p-3 rounded-lg border cursor-pointer transition-colors ${
                               isSelected
-                                ? "bg-green-50 border-green-200 text-green-700"
-                                : "bg-white border-gray-200 hover:bg-gray-50"
+                                ? 'bg-green-50 border-green-200 text-green-700'
+                                : 'bg-white border-gray-200 hover:bg-gray-50'
                             }`}
                             onClick={() => toggleVolunteerSelection(user.id)}
                           >
@@ -256,16 +254,15 @@ export function VolunteerSelectionModal({
                     <div className="space-y-1">
                       {filteredDrivers.map((driver) => {
                         const driverId = driver.name; // Using name as ID for drivers
-                        const isSelected = tempSelectedVolunteers.includes(
-                          driverId
-                        );
+                        const isSelected =
+                          tempSelectedVolunteers.includes(driverId);
                         return (
                           <div
                             key={driver.id}
                             className={`p-3 rounded-lg border cursor-pointer transition-colors ${
                               isSelected
-                                ? "bg-green-50 border-green-200 text-green-700"
-                                : "bg-white border-gray-200 hover:bg-gray-50"
+                                ? 'bg-green-50 border-green-200 text-green-700'
+                                : 'bg-white border-gray-200 hover:bg-gray-50'
                             }`}
                             onClick={() => toggleVolunteerSelection(driverId)}
                           >
@@ -315,7 +312,7 @@ export function VolunteerSelectionModal({
                         value={customVolunteerName}
                         onChange={(e) => setCustomVolunteerName(e.target.value)}
                         onKeyPress={(e) =>
-                          e.key === "Enter" && addCustomVolunteer()
+                          e.key === 'Enter' && addCustomVolunteer()
                         }
                         className="flex-1"
                       />
@@ -332,7 +329,7 @@ export function VolunteerSelectionModal({
                         variant="outline"
                         onClick={() => {
                           setShowCustomVolunteerInput(false);
-                          setCustomVolunteerName("");
+                          setCustomVolunteerName('');
                         }}
                       >
                         Cancel

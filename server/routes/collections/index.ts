@@ -1,24 +1,24 @@
-import { Router } from "express";
-import { z } from "zod";
-import { parse } from "csv-parse/sync";
-import fs from "fs/promises";
-import { storage } from "../../storage-wrapper";
+import { Router } from 'express';
+import { z } from 'zod';
+import { parse } from 'csv-parse/sync';
+import fs from 'fs/promises';
+import { storage } from '../../storage-wrapper';
 import {
   requirePermission,
   requireOwnershipPermission,
-} from "../../middleware/auth";
-import { logger } from "../../middleware/logger";
-import { upload } from "../../middleware/uploads";
-import { QueryOptimizer } from "../../performance/query-optimizer";
-import { insertSandwichCollectionSchema } from "@shared/schema";
+} from '../../middleware/auth';
+import { logger } from '../../middleware/logger';
+import { upload } from '../../middleware/uploads';
+import { QueryOptimizer } from '../../performance/query-optimizer';
+import { insertSandwichCollectionSchema } from '@shared/schema';
 
 const collectionsRouter = Router();
 
 // Sandwich Collections Stats - Complete totals including individual + group collections (Optimized)
-collectionsRouter.get("/stats", async (req, res) => {
+collectionsRouter.get('/stats', async (req, res) => {
   try {
     const stats = await QueryOptimizer.getCachedQuery(
-      "sandwich-collections-stats",
+      'sandwich-collections-stats',
       async () => {
         const collections = await storage.getAllSandwichCollections();
 
@@ -70,18 +70,18 @@ collectionsRouter.get("/stats", async (req, res) => {
   } catch (error) {
     res
       .status(500)
-      .json({ message: "Failed to fetch sandwich collection stats" });
+      .json({ message: 'Failed to fetch sandwich collection stats' });
   }
 });
 
 // Sandwich Collections
-collectionsRouter.get("/", async (req, res) => {
+collectionsRouter.get('/', async (req, res) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 50;
     const offset = (page - 1) * limit;
-    const sortField = (req.query.sort as string) || "collectionDate";
-    const sortOrder = (req.query.order as string) || "desc";
+    const sortField = (req.query.sort as string) || 'collectionDate';
+    const sortOrder = (req.query.order as string) || 'desc';
 
     const result = await storage.getSandwichCollections(
       limit,
@@ -103,13 +103,13 @@ collectionsRouter.get("/", async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch sandwich collections" });
+    res.status(500).json({ message: 'Failed to fetch sandwich collections' });
   }
 });
 
 collectionsRouter.post(
-  "/",
-  requirePermission("COLLECTIONS_ADD"),
+  '/',
+  requirePermission('COLLECTIONS_ADD'),
   async (req, res) => {
     try {
       // CRITICAL BUG FIX: Handle unlimited groups using new JSONB column
@@ -127,28 +127,27 @@ collectionsRouter.post(
 
         // Also set first two groups in legacy format for backward compatibility
         if (groups.length > 0) {
-          processedBody.group1Name = groups[0].name || "";
+          processedBody.group1Name = groups[0].name || '';
           processedBody.group1Count = groups[0].count || 0;
         }
         if (groups.length > 1) {
-          processedBody.group2Name = groups[1].name || "";
+          processedBody.group2Name = groups[1].name || '';
           processedBody.group2Count = groups[1].count || 0;
         }
       }
 
-      const collectionData = insertSandwichCollectionSchema.parse(
-        processedBody
-      );
+      const collectionData =
+        insertSandwichCollectionSchema.parse(processedBody);
 
       // Add user attribution to the collection
       const user = req.user || req.session?.user;
       const enrichedCollectionData = {
         ...collectionData,
-        createdBy: user?.id || "unknown",
+        createdBy: user?.id || 'unknown',
         createdByName:
           user?.firstName && user?.lastName
             ? `${user.firstName} ${user.lastName}`
-            : user?.email || "Unknown User",
+            : user?.email || 'Unknown User',
       };
 
       const collection = await storage.createSandwichCollection(
@@ -156,52 +155,52 @@ collectionsRouter.post(
       );
 
       // Invalidate cache when new collection is created
-      QueryOptimizer.invalidateCache("sandwich-collections");
-      QueryOptimizer.invalidateCache("sandwich-collections-stats");
+      QueryOptimizer.invalidateCache('sandwich-collections');
+      QueryOptimizer.invalidateCache('sandwich-collections-stats');
 
       res.status(201).json(collection);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        logger.warn("Invalid sandwich collection input", {
+        logger.warn('Invalid sandwich collection input', {
           error: error.errors,
           ip: req.ip,
         });
         res
           .status(400)
-          .json({ message: "Invalid collection data", errors: error.errors });
+          .json({ message: 'Invalid collection data', errors: error.errors });
       } else {
-        logger.error("Failed to create sandwich collection", error);
-        res.status(500).json({ message: "Failed to create collection" });
+        logger.error('Failed to create sandwich collection', error);
+        res.status(500).json({ message: 'Failed to create collection' });
       }
     }
   }
 );
 
 // GET individual sandwich collection by ID
-collectionsRouter.get("/:id", async (req, res) => {
+collectionsRouter.get('/:id', async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
-      return res.status(400).json({ message: "Invalid collection ID" });
+      return res.status(400).json({ message: 'Invalid collection ID' });
     }
 
     const collection = await storage.getSandwichCollectionById(id);
     if (!collection) {
-      return res.status(404).json({ message: "Collection not found" });
+      return res.status(404).json({ message: 'Collection not found' });
     }
 
     res.json(collection);
   } catch (error) {
-    logger.error("Failed to fetch sandwich collection", error);
-    res.status(500).json({ message: "Failed to fetch collection" });
+    logger.error('Failed to fetch sandwich collection', error);
+    res.status(500).json({ message: 'Failed to fetch collection' });
   }
 });
 
 collectionsRouter.put(
-  "/:id",
+  '/:id',
   requireOwnershipPermission(
-    "COLLECTIONS_EDIT_OWN",
-    "COLLECTIONS_EDIT_ALL",
+    'COLLECTIONS_EDIT_OWN',
+    'COLLECTIONS_EDIT_ALL',
     async (req) => {
       const id = parseInt(req.params.id);
       const collection = await storage.getSandwichCollectionById(id);
@@ -214,24 +213,24 @@ collectionsRouter.put(
       const updates = req.body;
       const collection = await storage.updateSandwichCollection(id, updates);
       if (!collection) {
-        return res.status(404).json({ message: "Collection not found" });
+        return res.status(404).json({ message: 'Collection not found' });
       }
 
       // Invalidate cache when collection is updated
-      QueryOptimizer.invalidateCache("sandwich-collections");
+      QueryOptimizer.invalidateCache('sandwich-collections');
 
       res.json(collection);
     } catch (error) {
-      logger.error("Failed to update sandwich collection", error);
-      res.status(400).json({ message: "Invalid update data" });
+      logger.error('Failed to update sandwich collection', error);
+      res.status(400).json({ message: 'Invalid update data' });
     }
   }
 );
 
 // Fix data corruption in sandwich collections - MUST be before /:id route
 collectionsRouter.patch(
-  "/fix-data-corruption",
-  requirePermission("COLLECTIONS_EDIT_ALL"),
+  '/fix-data-corruption',
+  requirePermission('COLLECTIONS_EDIT_ALL'),
   async (req, res) => {
     try {
       const collections = await storage.getAllSandwichCollections();
@@ -252,29 +251,29 @@ collectionsRouter.patch(
         if (individual > 0 && groupTotal > 0 && individual === groupTotal) {
           updates.individualSandwiches = 0;
           needsUpdate = true;
-          fixType.push("removed duplicate individual count");
+          fixType.push('removed duplicate individual count');
         }
 
         // Fix 2: Check if host name is "Groups" with individual count but no group data
         if (
-          (collection.hostName === "Groups" ||
-            collection.hostName === "groups") &&
+          (collection.hostName === 'Groups' ||
+            collection.hostName === 'groups') &&
           individual > 0 &&
           groupTotal === 0
         ) {
           // Move individual count to group data
           const newGroupData = [
             {
-              name: "Group",
+              name: 'Group',
               count: individual,
-              groupName: "Group",
+              groupName: 'Group',
               sandwichCount: individual,
             },
           ];
           updates.individualSandwiches = 0;
           updates.groupCollections = JSON.stringify(newGroupData);
           needsUpdate = true;
-          fixType.push("moved individual count to group data for Groups entry");
+          fixType.push('moved individual count to group data for Groups entry');
         }
 
         if (needsUpdate) {
@@ -292,7 +291,7 @@ collectionsRouter.patch(
                   : individual,
               newGroupData:
                 updates.groupCollections || collection.groupCollections,
-              fixType: fixType.join(", "),
+              fixType: fixType.join(', '),
             });
           } catch (updateError) {
             logger.warn(
@@ -310,17 +309,17 @@ collectionsRouter.patch(
         fixes: fixes.slice(0, 10), // Return first 10 fixes for review
       });
     } catch (error) {
-      logger.error("Failed to fix data corruption:", error);
-      res.status(500).json({ message: "Failed to fix data corruption" });
+      logger.error('Failed to fix data corruption:', error);
+      res.status(500).json({ message: 'Failed to fix data corruption' });
     }
   }
 );
 
 collectionsRouter.patch(
-  "/:id",
+  '/:id',
   requireOwnershipPermission(
-    "COLLECTIONS_EDIT_OWN",
-    "COLLECTIONS_EDIT_ALL",
+    'COLLECTIONS_EDIT_OWN',
+    'COLLECTIONS_EDIT_ALL',
     async (req) => {
       const id = parseInt(req.params.id);
       const collection = await storage.getSandwichCollectionById(id);
@@ -331,32 +330,32 @@ collectionsRouter.patch(
     try {
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
-        return res.status(400).json({ message: "Invalid collection ID" });
+        return res.status(400).json({ message: 'Invalid collection ID' });
       }
 
       const updates = req.body;
       const collection = await storage.updateSandwichCollection(id, updates);
       if (!collection) {
-        return res.status(404).json({ message: "Collection not found" });
+        return res.status(404).json({ message: 'Collection not found' });
       }
 
       // Invalidate cache when collection is updated
-      QueryOptimizer.invalidateCache("sandwich-collections");
+      QueryOptimizer.invalidateCache('sandwich-collections');
 
       res.json(collection);
     } catch (error) {
-      logger.error("Failed to patch sandwich collection", error);
-      res.status(500).json({ message: "Failed to update collection" });
+      logger.error('Failed to patch sandwich collection', error);
+      res.status(500).json({ message: 'Failed to update collection' });
     }
   }
 );
 
-collectionsRouter.delete("/bulk", async (req, res) => {
+collectionsRouter.delete('/bulk', async (req, res) => {
   try {
     const collections = await storage.getAllSandwichCollections();
     const collectionsToDelete = collections.filter((collection) => {
       const hostName = collection.hostName;
-      return hostName.startsWith("Loc ") || /^Group [1-8]/.test(hostName);
+      return hostName.startsWith('Loc ') || /^Group [1-8]/.test(hostName);
     });
 
     let deletedCount = 0;
@@ -377,43 +376,43 @@ collectionsRouter.delete("/bulk", async (req, res) => {
     res.json({
       message: `Successfully deleted ${deletedCount} duplicate entries`,
       deletedCount,
-      patterns: ["Loc *", "Group 1-8"],
+      patterns: ['Loc *', 'Group 1-8'],
     });
   } catch (error) {
-    logger.error("Failed to bulk delete sandwich collections", error);
-    res.status(500).json({ message: "Failed to delete duplicate entries" });
+    logger.error('Failed to bulk delete sandwich collections', error);
+    res.status(500).json({ message: 'Failed to delete duplicate entries' });
   }
 });
 
 // DELETE individual collection
 collectionsRouter.delete(
-  "/:id",
-  requirePermission("COLLECTIONS_DELETE"),
+  '/:id',
+  requirePermission('COLLECTIONS_DELETE'),
   async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
-        return res.status(400).json({ message: "Invalid collection ID" });
+        return res.status(400).json({ message: 'Invalid collection ID' });
       }
 
       const deleted = await storage.deleteSandwichCollection(id);
       if (!deleted) {
-        return res.status(404).json({ message: "Collection not found" });
+        return res.status(404).json({ message: 'Collection not found' });
       }
 
       // Invalidate cache when collection is deleted
-      QueryOptimizer.invalidateCache("sandwich-collections");
+      QueryOptimizer.invalidateCache('sandwich-collections');
 
       res.status(204).send();
     } catch (error) {
-      logger.error("Failed to delete sandwich collection", error);
-      res.status(500).json({ message: "Failed to delete collection" });
+      logger.error('Failed to delete sandwich collection', error);
+      res.status(500).json({ message: 'Failed to delete collection' });
     }
   }
 );
 
 // Analyze duplicates in sandwich collections
-collectionsRouter.get("/analyze-duplicates", async (req, res) => {
+collectionsRouter.get('/analyze-duplicates', async (req, res) => {
   try {
     const collections = await storage.getAllSandwichCollections();
 
@@ -431,18 +430,18 @@ collectionsRouter.get("/analyze-duplicates", async (req, res) => {
       duplicateGroups.get(key).push(collection);
 
       // Check for suspicious patterns - ONLY truly problematic entries
-      const hostName = (collection.hostName || "").toLowerCase().trim();
+      const hostName = (collection.hostName || '').toLowerCase().trim();
       if (
-        hostName.startsWith("loc ") ||
+        hostName.startsWith('loc ') ||
         hostName.match(/^group \d+(-\d+)?$/) ||
         hostName.match(/^loc\d+$/) ||
-        hostName === "test" ||
-        hostName.includes("test") ||
-        hostName.includes("duplicate") ||
-        hostName.includes("unknown") ||
-        hostName.includes("no location") ||
-        hostName === "" ||
-        hostName === "null" ||
+        hostName === 'test' ||
+        hostName.includes('test') ||
+        hostName.includes('duplicate') ||
+        hostName.includes('unknown') ||
+        hostName.includes('no location') ||
+        hostName === '' ||
+        hostName === 'null' ||
         // Check for obviously incorrect host names
         hostName.length < 3 ||
         hostName.match(/^\d+$/) || // Pure numbers
@@ -454,16 +453,16 @@ collectionsRouter.get("/analyze-duplicates", async (req, res) => {
 
     // Find OG Sandwich Project duplicates with early collections
     const ogCollections = collections.filter(
-      (c) => c.hostName === "OG Sandwich Project"
+      (c) => c.hostName === 'OG Sandwich Project'
     );
     const earlyCollections = collections.filter(
       (c) =>
-        c.hostName !== "OG Sandwich Project" &&
-        (c.hostName === "" ||
+        c.hostName !== 'OG Sandwich Project' &&
+        (c.hostName === '' ||
           c.hostName === null ||
-          c.hostName.trim() === "" ||
-          c.hostName.toLowerCase().includes("unknown") ||
-          c.hostName.toLowerCase().includes("no location"))
+          c.hostName.trim() === '' ||
+          c.hostName.toLowerCase().includes('unknown') ||
+          c.hostName.toLowerCase().includes('no location'))
     );
 
     const ogMap = new Map();
@@ -482,7 +481,7 @@ collectionsRouter.get("/analyze-duplicates", async (req, res) => {
         ogDuplicates.push({
           ogEntry: ogEntries[0],
           earlyEntry: early,
-          reason: "Same date and sandwich count as OG Project entry",
+          reason: 'Same date and sandwich count as OG Project entry',
         });
       }
     });
@@ -499,7 +498,7 @@ collectionsRouter.get("/analyze-duplicates", async (req, res) => {
           ogDuplicates.push({
             ogEntry: sorted[0],
             duplicateOgEntry: duplicate,
-            reason: "Duplicate OG Project entry",
+            reason: 'Duplicate OG Project entry',
           });
         });
       }
@@ -533,21 +532,21 @@ collectionsRouter.get("/analyze-duplicates", async (req, res) => {
       ogDuplicateEntries: ogDuplicates,
     });
   } catch (error) {
-    logger.error("Failed to analyze duplicates", error);
-    res.status(500).json({ message: "Failed to analyze duplicates" });
+    logger.error('Failed to analyze duplicates', error);
+    res.status(500).json({ message: 'Failed to analyze duplicates' });
   }
 });
 
 // Clean selected suspicious entries from sandwich collections
 collectionsRouter.delete(
-  "/clean-selected",
-  requirePermission("DATA_EXPORT"),
+  '/clean-selected',
+  requirePermission('DATA_EXPORT'),
   async (req, res) => {
     try {
       const { ids } = req.body;
 
       if (!Array.isArray(ids) || ids.length === 0) {
-        return res.status(400).json({ message: "Invalid or empty IDs array" });
+        return res.status(400).json({ message: 'Invalid or empty IDs array' });
       }
 
       let deletedCount = 0;
@@ -565,24 +564,24 @@ collectionsRouter.delete(
         deletedCount,
       });
     } catch (error) {
-      logger.error("Failed to delete selected suspicious entries:", error);
-      res.status(500).json({ message: "Failed to delete selected entries" });
+      logger.error('Failed to delete selected suspicious entries:', error);
+      res.status(500).json({ message: 'Failed to delete selected entries' });
     }
   }
 );
 
 // Clean duplicates from sandwich collections
 collectionsRouter.delete(
-  "/clean-duplicates",
-  requirePermission("DATA_EXPORT"),
+  '/clean-duplicates',
+  requirePermission('DATA_EXPORT'),
   async (req, res) => {
     try {
-      const { mode = "exact" } = req.body; // 'exact', 'suspicious', or 'og-duplicates'
+      const { mode = 'exact' } = req.body; // 'exact', 'suspicious', or 'og-duplicates'
       const collections = await storage.getAllSandwichCollections();
 
       let collectionsToDelete = [];
 
-      if (mode === "exact") {
+      if (mode === 'exact') {
         // Find exact duplicates based on date, host, and counts
         const duplicateGroups = new Map();
 
@@ -606,23 +605,23 @@ collectionsRouter.delete(
             collectionsToDelete.push(...sorted.slice(1)); // Keep first (newest), delete rest
           }
         });
-      } else if (mode === "suspicious") {
+      } else if (mode === 'suspicious') {
         // Remove entries with suspicious patterns (improved detection)
         collectionsToDelete = collections.filter((collection) => {
-          const hostName = (collection.hostName || "").toLowerCase().trim();
+          const hostName = (collection.hostName || '').toLowerCase().trim();
           return (
-            hostName.startsWith("loc ") ||
-            hostName.startsWith("group ") ||
+            hostName.startsWith('loc ') ||
+            hostName.startsWith('group ') ||
             hostName.match(/^group \d+(-\d+)?$/) ||
             hostName.match(/^loc\d+$/) ||
-            hostName === "groups" ||
-            hostName === "test" ||
-            hostName.includes("test") ||
-            hostName.includes("duplicate") ||
-            hostName.includes("unknown") ||
-            hostName.includes("no location") ||
-            hostName === "" ||
-            hostName === "null" ||
+            hostName === 'groups' ||
+            hostName === 'test' ||
+            hostName.includes('test') ||
+            hostName.includes('duplicate') ||
+            hostName.includes('unknown') ||
+            hostName.includes('no location') ||
+            hostName === '' ||
+            hostName === 'null' ||
             // Check for obviously incorrect host names
             hostName.length < 3 ||
             hostName.match(/^\d+$/) || // Pure numbers
@@ -652,7 +651,7 @@ collectionsRouter.delete(
           }
         } catch (error) {
           const errorMessage =
-            error instanceof Error ? error.message : "Unknown error";
+            error instanceof Error ? error.message : 'Unknown error';
           errors.push(
             `Failed to delete collection ${collection.id}: ${errorMessage}`
           );
@@ -668,19 +667,19 @@ collectionsRouter.delete(
         mode,
       });
     } catch (error) {
-      logger.error("Failed to clean duplicates", error);
-      res.status(500).json({ message: "Failed to clean duplicate entries" });
+      logger.error('Failed to clean duplicates', error);
+      res.status(500).json({ message: 'Failed to clean duplicate entries' });
     }
   }
 );
 
 // Batch delete sandwich collections (must be before :id route)
-collectionsRouter.delete("/batch-delete", async (req, res) => {
+collectionsRouter.delete('/batch-delete', async (req, res) => {
   try {
     const { ids } = req.body;
 
     if (!Array.isArray(ids) || ids.length === 0) {
-      return res.status(400).json({ message: "Invalid or empty IDs array" });
+      return res.status(400).json({ message: 'Invalid or empty IDs array' });
     }
 
     let deletedCount = 0;
@@ -700,7 +699,7 @@ collectionsRouter.delete("/batch-delete", async (req, res) => {
       } catch (error) {
         errors.push(
           `Failed to delete collection ${id}: ${
-            error instanceof Error ? error.message : "Unknown error"
+            error instanceof Error ? error.message : 'Unknown error'
           }`
         );
       }
@@ -713,25 +712,25 @@ collectionsRouter.delete("/batch-delete", async (req, res) => {
       errors: errors.length > 0 ? errors.slice(0, 5) : undefined,
     });
   } catch (error) {
-    logger.error("Failed to batch delete collections", error);
-    res.status(500).json({ message: "Failed to batch delete collections" });
+    logger.error('Failed to batch delete collections', error);
+    res.status(500).json({ message: 'Failed to batch delete collections' });
   }
 });
 
 // Batch edit sandwich collections
 collectionsRouter.patch(
-  "/batch-edit",
-  requirePermission("DATA_EXPORT"),
+  '/batch-edit',
+  requirePermission('DATA_EXPORT'),
   async (req, res) => {
     try {
       const { ids, updates } = req.body;
 
       if (!Array.isArray(ids) || ids.length === 0) {
-        return res.status(400).json({ message: "Invalid or empty IDs array" });
+        return res.status(400).json({ message: 'Invalid or empty IDs array' });
       }
 
       if (!updates || Object.keys(updates).length === 0) {
-        return res.status(400).json({ message: "No updates provided" });
+        return res.status(400).json({ message: 'No updates provided' });
       }
 
       let updatedCount = 0;
@@ -748,7 +747,7 @@ collectionsRouter.patch(
         } catch (error) {
           errors.push(
             `Failed to update collection ${id}: ${
-              error instanceof Error ? error.message : "Unknown error"
+              error instanceof Error ? error.message : 'Unknown error'
             }`
           );
         }
@@ -761,8 +760,8 @@ collectionsRouter.patch(
         errors: errors.length > 0 ? errors.slice(0, 5) : undefined,
       });
     } catch (error) {
-      logger.error("Failed to batch edit collections", error);
-      res.status(500).json({ message: "Failed to batch edit collections" });
+      logger.error('Failed to batch edit collections', error);
+      res.status(500).json({ message: 'Failed to batch edit collections' });
     }
   }
 );

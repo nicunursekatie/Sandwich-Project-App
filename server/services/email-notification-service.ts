@@ -1,12 +1,12 @@
-import sgMail from "@sendgrid/mail";
-import { db } from "../db";
-import { users } from "@shared/schema";
-import { eq, or, like, sql } from "drizzle-orm";
+import sgMail from '@sendgrid/mail';
+import { db } from '../db';
+import { users } from '@shared/schema';
+import { eq, or, like, sql } from 'drizzle-orm';
 
 // Initialize SendGrid
 if (!process.env.SENDGRID_API_KEY) {
   console.warn(
-    "SENDGRID_API_KEY not found - email notifications will be disabled"
+    'SENDGRID_API_KEY not found - email notifications will be disabled'
   );
 } else {
   sgMail.setApiKey(process.env.SENDGRID_API_KEY);
@@ -59,9 +59,7 @@ export class EmailNotificationService {
   /**
    * Find users mentioned in a message and return their details
    */
-  static async findMentionedUsers(
-    mentions: string[]
-  ): Promise<
+  static async findMentionedUsers(mentions: string[]): Promise<
     Array<{
       id: string;
       email: string;
@@ -76,10 +74,10 @@ export class EmailNotificationService {
       // Search by display name, email, firstName, or lastName
       const allUsers = await db.select().from(users);
       const mentionedUsers = allUsers.filter((user) => {
-        const lowerEmail = user.email?.toLowerCase() || "";
-        const lowerDisplayName = user.displayName?.toLowerCase() || "";
-        const lowerFirstName = user.firstName?.toLowerCase() || "";
-        const lowerLastName = user.lastName?.toLowerCase() || "";
+        const lowerEmail = user.email?.toLowerCase() || '';
+        const lowerDisplayName = user.displayName?.toLowerCase() || '';
+        const lowerFirstName = user.firstName?.toLowerCase() || '';
+        const lowerLastName = user.lastName?.toLowerCase() || '';
 
         return mentions.some((mention) => {
           const lowerMention = mention.toLowerCase();
@@ -94,7 +92,7 @@ export class EmailNotificationService {
 
       return mentionedUsers.filter((user) => user.email); // Only return users with email addresses
     } catch (error) {
-      console.error("Error finding mentioned users:", error);
+      console.error('Error finding mentioned users:', error);
       return [];
     }
   }
@@ -106,14 +104,14 @@ export class EmailNotificationService {
     notification: ChatMentionNotification
   ): Promise<boolean> {
     if (!process.env.SENDGRID_API_KEY) {
-      console.log("SendGrid not configured - skipping email notification");
+      console.log('SendGrid not configured - skipping email notification');
       return false;
     }
 
     try {
       const msg = {
         to: notification.mentionedUserEmail,
-        from: "noreply@sandwichproject.org", // Use your verified sender email
+        from: 'noreply@sandwichproject.org', // Use your verified sender email
         subject: `You were mentioned in ${notification.channel} chat - The Sandwich Project`,
         html: `
           <!DOCTYPE html>
@@ -139,8 +137,8 @@ export class EmailNotificationService {
                 <p><strong>${
                   notification.senderName
                 }</strong> mentioned you in the <strong>#${
-          notification.channel
-        }</strong> chat room:</p>
+                  notification.channel
+                }</strong> chat room:</p>
                 
                 <div class="message-box">
                   "${notification.messageContent}"
@@ -182,7 +180,7 @@ The Sandwich Project - Building community through food assistance
       );
       return true;
     } catch (error) {
-      console.error("Error sending chat mention notification:", error);
+      console.error('Error sending chat mention notification:', error);
       return false;
     }
   }
@@ -213,8 +211,8 @@ The Sandwich Project - Building community through food assistance
         const userName =
           user.displayName ||
           user.firstName ||
-          user.email?.split("@")[0] ||
-          "User";
+          user.email?.split('@')[0] ||
+          'User';
 
         await this.sendChatMentionNotification({
           mentionedUserId: user.id,
@@ -228,7 +226,7 @@ The Sandwich Project - Building community through food assistance
         });
       }
     } catch (error) {
-      console.error("Error processing chat message for mentions:", error);
+      console.error('Error processing chat message for mentions:', error);
     }
   }
 
@@ -237,9 +235,9 @@ The Sandwich Project - Building community through food assistance
    */
   private static getChatUrl(channel: string): string {
     const baseUrl =
-      process.env.NODE_ENV === "production"
-        ? "https://sandwich-project-platform-katielong2316.replit.app"
-        : "http://localhost:5000";
+      process.env.NODE_ENV === 'production'
+        ? 'https://sandwich-project-platform-katielong2316.replit.app'
+        : 'http://localhost:5000';
 
     return `${baseUrl}/dashboard?section=chat&channel=${encodeURIComponent(
       channel

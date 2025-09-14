@@ -6,9 +6,18 @@ describe('Permission Logic Unit Tests', () => {
   let adminCookie, christineCookie, volunteerCookie;
 
   beforeAll(async () => {
-    adminCookie = await global.loginUser('admin@sandwich.project', 'password123');
-    christineCookie = await global.loginUser('christine@thesandwichproject.org', 'password123');
-    volunteerCookie = await global.loginUser('juliet@thesandwichproject.org', 'password123');
+    adminCookie = await global.loginUser(
+      'admin@sandwich.project',
+      'password123'
+    );
+    christineCookie = await global.loginUser(
+      'christine@thesandwichproject.org',
+      'password123'
+    );
+    volunteerCookie = await global.loginUser(
+      'juliet@thesandwichproject.org',
+      'password123'
+    );
   });
 
   describe('Send to Agenda Permission Logic', () => {
@@ -17,7 +26,7 @@ describe('Permission Logic Unit Tests', () => {
         .patch('/api/projects/49')
         .set('Cookie', christineCookie)
         .send({ reviewInNextMeeting: true });
-      
+
       expect(response.status).toBe(200);
       expect(response.body.reviewInNextMeeting).toBe(true);
     });
@@ -27,7 +36,7 @@ describe('Permission Logic Unit Tests', () => {
         .patch('/api/projects/49')
         .set('Cookie', volunteerCookie)
         .send({ reviewInNextMeeting: true });
-      
+
       expect(response.status).toBe(403);
       expect(response.body.message).toContain('meeting management permissions');
     });
@@ -38,18 +47,18 @@ describe('Permission Logic Unit Tests', () => {
         .patch('/api/projects/49')
         .set('Cookie', christineCookie)
         .send({ reviewInNextMeeting: true });
-      
+
       expect(agendaResponse.status).toBe(200);
 
       // Test that only reviewInNextMeeting is treated as agenda action
       const multiUpdateResponse = await request(API_BASE)
         .patch('/api/projects/49')
         .set('Cookie', christineCookie)
-        .send({ 
-          reviewInNextMeeting: false, 
-          title: 'Updated Title' 
+        .send({
+          reviewInNextMeeting: false,
+          title: 'Updated Title',
         });
-      
+
       // This should use regular project edit permissions (not agenda permissions)
       expect(multiUpdateResponse.status).toBe(200);
     });
@@ -62,7 +71,7 @@ describe('Permission Logic Unit Tests', () => {
         .patch('/api/projects/49')
         .set('Cookie', christineCookie)
         .send({ reviewInNextMeeting: true });
-      
+
       expect(response.status).toBe(200);
     });
 
@@ -71,11 +80,11 @@ describe('Permission Logic Unit Tests', () => {
       const response = await request(API_BASE)
         .patch('/api/projects/49')
         .set('Cookie', christineCookie)
-        .send({ 
+        .send({
           reviewInNextMeeting: false,
-          description: 'Updated description'
+          description: 'Updated description',
         });
-      
+
       expect(response.status).toBe(200);
     });
   });

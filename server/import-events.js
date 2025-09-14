@@ -1,9 +1,9 @@
-import XLSX from "xlsx";
-import path from "path";
-import { fileURLToPath } from "url";
-import { drizzle } from "drizzle-orm/neon-serverless";
-import { Pool } from "@neondatabase/serverless";
-import { eventRequests } from "../shared/schema.ts";
+import XLSX from 'xlsx';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { drizzle } from 'drizzle-orm/neon-serverless';
+import { Pool } from '@neondatabase/serverless';
+import { eventRequests } from '../shared/schema.ts';
 
 // Get __dirname equivalent for ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -15,16 +15,16 @@ const db = drizzle(pool);
 
 async function importEvents() {
   try {
-    console.log("Starting event import...");
+    console.log('Starting event import...');
 
     // Read the Excel file
     const filePath = path.join(
       __dirname,
-      "..",
-      "attached_assets",
-      "Events for Import (1)_1756516126221.xlsx"
+      '..',
+      'attached_assets',
+      'Events for Import (1)_1756516126221.xlsx'
     );
-    console.log("Reading file:", filePath);
+    console.log('Reading file:', filePath);
 
     const workbook = XLSX.readFile(filePath);
     const sheetName = workbook.SheetNames[0]; // Get first sheet
@@ -33,9 +33,9 @@ async function importEvents() {
     // Convert to JSON with proper headers
     const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
-    console.log("Raw data from Excel:");
-    console.log("Headers (Row 1):", data[0]);
-    console.log("Sample data (Row 2):", data[1]);
+    console.log('Raw data from Excel:');
+    console.log('Headers (Row 1):', data[0]);
+    console.log('Sample data (Row 2):', data[1]);
     console.log(`Total rows: ${data.length}`);
 
     // Skip header row and process data
@@ -66,15 +66,12 @@ async function importEvents() {
       const phone = row[14]; // Contact Cell Number
 
       // Split contact name into first and last name
-      let firstName = "";
-      let lastName = "";
+      let firstName = '';
+      let lastName = '';
       if (contactName) {
-        const nameParts = contactName
-          .toString()
-          .trim()
-          .split(" ");
-        firstName = nameParts[0] || "";
-        lastName = nameParts.slice(1).join(" ") || "";
+        const nameParts = contactName.toString().trim().split(' ');
+        firstName = nameParts[0] || '';
+        lastName = nameParts.slice(1).join(' ') || '';
       }
 
       // Parse date
@@ -82,7 +79,7 @@ async function importEvents() {
       if (eventDate) {
         try {
           // Handle Excel date formats - TIMEZONE SAFE
-          if (typeof eventDate === "number") {
+          if (typeof eventDate === 'number') {
             // Excel numeric date
             const excelEpoch = new Date(1899, 11, 30);
             const tempDate = new Date(
@@ -99,7 +96,7 @@ async function importEvents() {
             const dateStr = eventDate.toString().trim();
             if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
               // Already in YYYY-MM-DD format
-              parsedDate = new Date(dateStr + "T12:00:00");
+              parsedDate = new Date(dateStr + 'T12:00:00');
             } else {
               // Try to parse and convert to local date
               const tempDate = new Date(dateStr);
@@ -125,14 +122,14 @@ async function importEvents() {
       if (firstName && organization && email) {
         events.push({
           firstName: firstName,
-          lastName: lastName || "",
+          lastName: lastName || '',
           email: email,
           phone: phone ? phone.toString() : null,
           organizationName: organization,
           desiredEventDate: parsedDate,
-          status: "new",
-          previouslyHosted: "i_dont_know",
-          message: "Imported from Excel file",
+          status: 'new',
+          previouslyHosted: 'i_dont_know',
+          message: 'Imported from Excel file',
         });
 
         console.log(
@@ -151,12 +148,12 @@ async function importEvents() {
     console.log(`\nPrepared ${events.length} events for import`);
 
     if (events.length === 0) {
-      console.log("No valid events to import. Exiting.");
+      console.log('No valid events to import. Exiting.');
       return;
     }
 
     // Show first few events for confirmation
-    console.log("\nSample events to be imported:");
+    console.log('\nSample events to be imported:');
     events.slice(0, 3).forEach((event, index) => {
       console.log(
         `${index + 1}. ${event.firstName} ${event.lastName} (${
@@ -164,13 +161,13 @@ async function importEvents() {
         }) - ${event.organizationName} - ${
           event.desiredEventDate
             ? event.desiredEventDate.toDateString()
-            : "No date"
+            : 'No date'
         }`
       );
     });
 
     // Import into database
-    console.log("\nInserting into database...");
+    console.log('\nInserting into database...');
     const result = await db
       .insert(eventRequests)
       .values(events)
@@ -178,13 +175,13 @@ async function importEvents() {
 
     console.log(`✅ Successfully imported ${result.length} events!`);
     console.log(
-      "Event IDs:",
+      'Event IDs:',
       result.map((r) => r.id)
     );
   } catch (error) {
-    console.error("❌ Error importing events:", error);
+    console.error('❌ Error importing events:', error);
     if (error.stack) {
-      console.error("Stack trace:", error.stack);
+      console.error('Stack trace:', error.stack);
     }
   } finally {
     await pool.end();

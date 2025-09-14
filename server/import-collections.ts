@@ -1,7 +1,7 @@
-import { readFileSync, existsSync } from "fs";
-import { parse } from "csv-parse/sync";
-import { db } from "./db";
-import { sandwichCollections } from "../shared/schema";
+import { readFileSync, existsSync } from 'fs';
+import { parse } from 'csv-parse/sync';
+import { db } from './db';
+import { sandwichCollections } from '../shared/schema';
 
 interface CSVRow {
   [key: string]: string;
@@ -16,7 +16,7 @@ export async function importCollectionsFromCSV(filePath: string) {
   }
 
   // Read and parse CSV
-  const csvContent = readFileSync(filePath, "utf-8");
+  const csvContent = readFileSync(filePath, 'utf-8');
   const records: CSVRow[] = parse(csvContent, {
     columns: true,
     skip_empty_lines: true,
@@ -27,9 +27,9 @@ export async function importCollectionsFromCSV(filePath: string) {
 
   // Debug: Log the first record to see the actual column names
   if (records.length > 0) {
-    console.log("Available columns in CSV:", Object.keys(records[0]));
-    console.log("First record sample:", records[0]);
-    console.log("Second record sample:", records[1]);
+    console.log('Available columns in CSV:', Object.keys(records[0]));
+    console.log('First record sample:', records[0]);
+    console.log('Second record sample:', records[1]);
   }
 
   let successCount = 0;
@@ -43,42 +43,44 @@ export async function importCollectionsFromCSV(filePath: string) {
     try {
       // Check for alternative column names
       const hostName =
-        record["Host Name"] ||
-        record["Host"] ||
-        record["host_name"] ||
-        record["HostName"];
+        record['Host Name'] ||
+        record['Host'] ||
+        record['host_name'] ||
+        record['HostName'];
       const sandwichCountStr =
-        record["Individual Sandwiches"] ||
-        record["Sandwich Count"] ||
-        record["Count"] ||
-        record["sandwich_count"] ||
-        record["SandwichCount"] ||
-        record["Sandwiches"];
+        record['Individual Sandwiches'] ||
+        record['Sandwich Count'] ||
+        record['Count'] ||
+        record['sandwich_count'] ||
+        record['SandwichCount'] ||
+        record['Sandwiches'];
       const date =
-        record["Collection Date"] ||
-        record["Date"] ||
-        record["date"] ||
-        record["CollectionDate"];
+        record['Collection Date'] ||
+        record['Date'] ||
+        record['date'] ||
+        record['CollectionDate'];
 
       // Validate required fields with better error messages
       if (!hostName) {
-        const availableKeys = Object.keys(record).join(", ");
+        const availableKeys = Object.keys(record).join(', ');
         throw new Error(
-          `Missing Host Name (available columns: ${availableKeys}) in row ${i +
-            1}`
+          `Missing Host Name (available columns: ${availableKeys}) in row ${
+            i + 1
+          }`
         );
       }
 
       if (!sandwichCountStr) {
-        const availableKeys = Object.keys(record).join(", ");
+        const availableKeys = Object.keys(record).join(', ');
         throw new Error(
-          `Missing Individual Sandwiches (available columns: ${availableKeys}) in row ${i +
-            1}`
+          `Missing Individual Sandwiches (available columns: ${availableKeys}) in row ${
+            i + 1
+          }`
         );
       }
 
       if (!date) {
-        const availableKeys = Object.keys(record).join(", ");
+        const availableKeys = Object.keys(record).join(', ');
         throw new Error(
           `Missing Date (available columns: ${availableKeys}) in row ${i + 1}`
         );
@@ -98,7 +100,7 @@ export async function importCollectionsFromCSV(filePath: string) {
 
       // Try to parse Created At if provided
       const createdAt =
-        record["Created At"] || record["created_at"] || record["CreatedAt"];
+        record['Created At'] || record['created_at'] || record['CreatedAt'];
       if (createdAt) {
         const parsedDate = new Date(createdAt);
         if (!isNaN(parsedDate.getTime())) {
@@ -107,14 +109,14 @@ export async function importCollectionsFromCSV(filePath: string) {
       }
 
       // Handle Group Collections data
-      const groupCollectionsStr = record["Group Collections"] || "";
-      let groupCollections = "[]";
-      if (groupCollectionsStr && groupCollectionsStr.trim() !== "") {
+      const groupCollectionsStr = record['Group Collections'] || '';
+      let groupCollections = '[]';
+      if (groupCollectionsStr && groupCollectionsStr.trim() !== '') {
         // If it's a number, convert to simple array format
         const groupCount = parseInt(groupCollectionsStr.trim());
         if (!isNaN(groupCount) && groupCount > 0) {
           groupCollections = JSON.stringify([
-            { count: groupCount, description: "Group Collection" },
+            { count: groupCount, description: 'Group Collection' },
           ]);
         }
       }
@@ -137,7 +139,7 @@ export async function importCollectionsFromCSV(filePath: string) {
     } catch (error) {
       errorCount++;
       const errorMsg = `Row ${i + 1}: ${
-        error instanceof Error ? error.message : "Unknown error"
+        error instanceof Error ? error.message : 'Unknown error'
       }`;
       errors.push(errorMsg);
       console.error(errorMsg);
@@ -145,13 +147,13 @@ export async function importCollectionsFromCSV(filePath: string) {
   }
 
   // Summary
-  console.log("\n=== Import Summary ===");
+  console.log('\n=== Import Summary ===');
   console.log(`Total records processed: ${records.length}`);
   console.log(`Successfully imported: ${successCount}`);
   console.log(`Errors: ${errorCount}`);
 
   if (errors.length > 0) {
-    console.log("\nError details:");
+    console.log('\nError details:');
     errors.slice(0, 10).forEach((error) => console.log(`  ${error}`));
     if (errors.length > 10) {
       console.log(`  ... and ${errors.length - 10} more errors`);
@@ -171,7 +173,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const csvPath = process.argv[2];
 
   if (!csvPath) {
-    console.error("Usage: tsx server/import-collections.ts <path-to-csv-file>");
+    console.error('Usage: tsx server/import-collections.ts <path-to-csv-file>');
     process.exit(1);
   }
 
@@ -183,7 +185,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       process.exit(result.errorCount > 0 ? 1 : 0);
     })
     .catch((error) => {
-      console.error("Import failed:", error);
+      console.error('Import failed:', error);
       process.exit(1);
     });
 }

@@ -1,6 +1,6 @@
-import { useState, useCallback } from "react";
-import { FileText, Download, ExternalLink } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useState, useCallback } from 'react';
+import { FileText, Download, ExternalLink } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface DocumentViewerProps {
   fileName: string;
@@ -15,15 +15,15 @@ export function DocumentViewer({
   fileType,
   filePath,
   mimeType,
-  className = "",
+  className = '',
 }: DocumentViewerProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   // Extract filename from full path if needed
   const getFileName = (path: string) => {
-    if (path.includes("/")) {
-      return path.split("/").pop() || path;
+    if (path.includes('/')) {
+      return path.split('/').pop() || path;
     }
     return path;
   };
@@ -37,12 +37,12 @@ export function DocumentViewer({
   };
 
   const handleError = () => {
-    setError("Failed to load document");
+    setError('Failed to load document');
     setIsLoading(false);
   };
 
   const downloadFile = () => {
-    const link = document.createElement("a");
+    const link = document.createElement('a');
     link.href = fileUrl;
     link.download = fileName;
     document.body.appendChild(link);
@@ -51,7 +51,7 @@ export function DocumentViewer({
   };
 
   const openInNewTab = () => {
-    window.open(fileUrl, "_blank");
+    window.open(fileUrl, '_blank');
   };
 
   if (error) {
@@ -96,7 +96,7 @@ export function DocumentViewer({
       </div>
 
       {/* Document Viewer */}
-      <div className="relative" style={{ height: "600px" }}>
+      <div className="relative" style={{ height: '600px' }}>
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-50">
             <div className="flex flex-col items-center">
@@ -106,7 +106,7 @@ export function DocumentViewer({
           </div>
         )}
 
-        {fileType === "pdf" ? (
+        {fileType === 'pdf' ? (
           <iframe
             src={fileUrl}
             className="w-full h-full border-0 rounded-b-lg"
@@ -114,7 +114,7 @@ export function DocumentViewer({
             onLoad={handleLoad}
             onError={handleError}
           />
-        ) : fileType === "docx" || fileType === "doc" ? (
+        ) : fileType === 'docx' || fileType === 'doc' ? (
           // For DOCX files, we'll use Office Online viewer if available, otherwise show download prompt
           <div className="flex flex-col items-center justify-center h-full p-8">
             <FileText className="h-16 w-16 text-blue-600 mb-4" />

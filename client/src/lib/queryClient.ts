@@ -1,4 +1,4 @@
-import { QueryClient, QueryFunction } from "@tanstack/react-query";
+import { QueryClient, QueryFunction } from '@tanstack/react-query';
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
@@ -8,15 +8,15 @@ async function throwIfResNotOk(res: Response) {
     let errorMessage = `${res.status}: ${text}`;
 
     if (res.status === 401) {
-      errorMessage = "AUTH_EXPIRED";
+      errorMessage = 'AUTH_EXPIRED';
     } else if (res.status === 403) {
-      errorMessage = "PERMISSION_DENIED";
+      errorMessage = 'PERMISSION_DENIED';
     } else if (res.status === 404) {
-      errorMessage = "DATA_LOADING_ERROR";
+      errorMessage = 'DATA_LOADING_ERROR';
     } else if (res.status >= 500) {
-      errorMessage = "DATABASE_ERROR";
+      errorMessage = 'DATABASE_ERROR';
     } else if (!navigator.onLine) {
-      errorMessage = "NETWORK_ERROR";
+      errorMessage = 'NETWORK_ERROR';
     }
 
     throw new Error(errorMessage);
@@ -35,17 +35,17 @@ export async function apiRequest(
     headers: isFormData
       ? {}
       : body
-      ? { "Content-Type": "application/json" }
-      : {},
+        ? { 'Content-Type': 'application/json' }
+        : {},
     body: isFormData ? body : body ? JSON.stringify(body) : undefined,
-    credentials: "include",
+    credentials: 'include',
   });
 
   await throwIfResNotOk(res);
 
   // If response has content, parse as JSON
-  const contentType = res.headers.get("content-type");
-  if (contentType && contentType.includes("application/json")) {
+  const contentType = res.headers.get('content-type');
+  if (contentType && contentType.includes('application/json')) {
     return await res.json();
   }
 
@@ -53,46 +53,46 @@ export async function apiRequest(
   return null;
 }
 
-type UnauthorizedBehavior = "returnNull" | "throw";
+type UnauthorizedBehavior = 'returnNull' | 'throw';
 export const getQueryFn: <T>(options: {
   on401: UnauthorizedBehavior;
-}) => QueryFunction<T> = ({ on401: unauthorizedBehavior }) => async ({
-  queryKey,
-}) => {
-  const res = await fetch(queryKey[0] as string, {
-    credentials: "include",
-  });
+}) => QueryFunction<T> =
+  ({ on401: unauthorizedBehavior }) =>
+  async ({ queryKey }) => {
+    const res = await fetch(queryKey[0] as string, {
+      credentials: 'include',
+    });
 
-  if (unauthorizedBehavior === "returnNull" && res.status === 401) {
-    return null;
-  }
+    if (unauthorizedBehavior === 'returnNull' && res.status === 401) {
+      return null;
+    }
 
-  await throwIfResNotOk(res);
-  return await res.json();
-};
+    await throwIfResNotOk(res);
+    return await res.json();
+  };
 
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      queryFn: getQueryFn({ on401: "throw" }),
+      queryFn: getQueryFn({ on401: 'throw' }),
       refetchInterval: false,
       refetchOnWindowFocus: false,
       staleTime: Infinity,
       retry: (failureCount, error) => {
         // Don't retry for auth, permission, or validation errors
         const noRetryErrors = [
-          "AUTH_EXPIRED",
-          "PERMISSION_DENIED",
-          "VALIDATION_ERROR",
+          'AUTH_EXPIRED',
+          'PERMISSION_DENIED',
+          'VALIDATION_ERROR',
         ];
-        const errorMessage = error?.message || "";
+        const errorMessage = error?.message || '';
 
         if (noRetryErrors.some((code) => errorMessage.includes(code))) {
           return false;
         }
 
         // Only retry network errors up to 2 times
-        if (errorMessage.includes("NETWORK_ERROR") && failureCount < 2) {
+        if (errorMessage.includes('NETWORK_ERROR') && failureCount < 2) {
           return true;
         }
 
@@ -103,8 +103,8 @@ export const queryClient = new QueryClient({
     mutations: {
       retry: (failureCount, error) => {
         // Retry database errors once, but not auth/permission errors
-        const errorMessage = error?.message || "";
-        const retryableErrors = ["DATABASE_ERROR", "NETWORK_ERROR"];
+        const errorMessage = error?.message || '';
+        const retryableErrors = ['DATABASE_ERROR', 'NETWORK_ERROR'];
 
         return (
           retryableErrors.some((code) => errorMessage.includes(code)) &&

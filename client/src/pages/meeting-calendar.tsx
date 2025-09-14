@@ -1,23 +1,23 @@
-import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useState } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Calendar,
   Clock,
@@ -29,10 +29,10 @@ import {
   Video,
   Phone,
   ArrowLeft,
-} from "lucide-react";
-import { queryClient } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import { useLocation } from "wouter";
+} from 'lucide-react';
+import { queryClient } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
+import { useLocation } from 'wouter';
 
 interface Meeting {
   id: number;
@@ -42,12 +42,12 @@ interface Meeting {
   startTime: string;
   endTime: string;
   location: string;
-  meetingType: "in_person" | "virtual" | "hybrid";
+  meetingType: 'in_person' | 'virtual' | 'hybrid';
   maxAttendees?: number;
   organizer: string;
   agenda?: string;
   meetingLink?: string;
-  status: "scheduled" | "in_progress" | "completed" | "cancelled";
+  status: 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
   createdAt: string;
 }
 
@@ -62,27 +62,27 @@ export default function MeetingCalendar({
   const [isCreating, setIsCreating] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().split("T")[0]
+    new Date().toISOString().split('T')[0]
   );
   const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    meetingDate: "",
-    startTime: "",
-    agenda: "",
-    meetingLink: "",
+    title: '',
+    description: '',
+    meetingDate: '',
+    startTime: '',
+    agenda: '',
+    meetingLink: '',
   });
   const { toast } = useToast();
 
   // Helper function to safely format dates
   const formatMeetingDate = (dateString: string) => {
-    if (!dateString) return "No date";
+    if (!dateString) return 'No date';
     try {
       const date = new Date(dateString);
-      if (isNaN(date.getTime())) return "Invalid date";
+      if (isNaN(date.getTime())) return 'Invalid date';
       return date.toLocaleDateString();
     } catch (error) {
-      return "Invalid date";
+      return 'Invalid date';
     }
   };
 
@@ -90,9 +90,9 @@ export default function MeetingCalendar({
   const formatTime12Hour = (time24: string) => {
     if (!time24) return null;
     try {
-      const [hours, minutes] = time24.split(":");
+      const [hours, minutes] = time24.split(':');
       const hour = parseInt(hours);
-      const ampm = hour >= 12 ? "PM" : "AM";
+      const ampm = hour >= 12 ? 'PM' : 'AM';
       const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
       return `${hour12}:${minutes} ${ampm}`;
     } catch (error) {
@@ -113,31 +113,31 @@ export default function MeetingCalendar({
   };
 
   const { data: meetings = [], isLoading } = useQuery({
-    queryKey: ["/api/meetings"],
+    queryKey: ['/api/meetings'],
   });
 
   const createMutation = useMutation({
     mutationFn: async (data: any) => {
-      const response = await fetch("/api/meetings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/api/meetings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      if (!response.ok) throw new Error("Failed to create meeting");
+      if (!response.ok) throw new Error('Failed to create meeting');
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/meetings"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/meetings'] });
       setIsCreating(false);
       setFormData({
-        title: "",
-        description: "",
-        meetingDate: "",
-        startTime: "",
-        agenda: "",
-        meetingLink: "",
+        title: '',
+        description: '',
+        meetingDate: '',
+        startTime: '',
+        agenda: '',
+        meetingLink: '',
       });
-      toast({ title: "Meeting scheduled successfully" });
+      toast({ title: 'Meeting scheduled successfully' });
     },
   });
 
@@ -148,24 +148,24 @@ export default function MeetingCalendar({
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "scheduled":
-        return "bg-blue-100 text-blue-800";
-      case "in_progress":
-        return "bg-green-100 text-green-800";
-      case "completed":
-        return "bg-gray-100 text-gray-800";
-      case "cancelled":
-        return "bg-red-100 text-red-800";
+      case 'scheduled':
+        return 'bg-blue-100 text-blue-800';
+      case 'in_progress':
+        return 'bg-green-100 text-green-800';
+      case 'completed':
+        return 'bg-gray-100 text-gray-800';
+      case 'cancelled':
+        return 'bg-red-100 text-red-800';
       default:
-        return "bg-gray-100 text-gray-800";
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getMeetingTypeIcon = (type: string) => {
     switch (type) {
-      case "virtual":
+      case 'virtual':
         return <Video className="w-4 h-4" />;
-      case "hybrid":
+      case 'hybrid':
         return <Phone className="w-4 h-4" />;
       default:
         return <MapPin className="w-4 h-4" />;
@@ -180,13 +180,13 @@ export default function MeetingCalendar({
   const upcomingMeetings = meetings.filter(
     (meeting: Meeting) =>
       isUpcoming(meeting.meetingDate, meeting.startTime) &&
-      meeting.status === "scheduled"
+      meeting.status === 'scheduled'
   );
 
   const pastMeetings = meetings.filter(
     (meeting: Meeting) =>
       !isUpcoming(meeting.meetingDate, meeting.startTime) ||
-      meeting.status === "completed"
+      meeting.status === 'completed'
   );
 
   if (isLoading) {
@@ -209,7 +209,7 @@ export default function MeetingCalendar({
             variant="outline"
             size="sm"
             onClick={() =>
-              (window as any).dashboardSetActiveSection?.("meetings")
+              (window as any).dashboardSetActiveSection?.('meetings')
             }
             className="flex items-center gap-2"
           >
@@ -366,8 +366,8 @@ export default function MeetingCalendar({
               <div className="flex gap-2">
                 <Button type="submit" disabled={createMutation.isPending}>
                   {createMutation.isPending
-                    ? "Scheduling..."
-                    : "Schedule Meeting"}
+                    ? 'Scheduling...'
+                    : 'Schedule Meeting'}
                 </Button>
                 <Button
                   type="button"
@@ -397,7 +397,7 @@ export default function MeetingCalendar({
                           {meeting.title}
                         </h3>
                         <Badge className={getStatusColor(meeting.status)}>
-                          {meeting.status.replace("_", " ")}
+                          {meeting.status.replace('_', ' ')}
                         </Badge>
                       </div>
                       <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-2">
@@ -425,7 +425,7 @@ export default function MeetingCalendar({
                       )}
                       {meeting.meetingLink && (
                         <p className="text-sm text-blue-600">
-                          Meeting Link:{" "}
+                          Meeting Link:{' '}
                           <a
                             href={meeting.meetingLink}
                             target="_blank"
@@ -472,7 +472,7 @@ export default function MeetingCalendar({
                           {meeting.title}
                         </h3>
                         <Badge className={getStatusColor(meeting.status)}>
-                          {meeting.status.replace("_", " ")}
+                          {meeting.status.replace('_', ' ')}
                         </Badge>
                       </div>
                       <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">

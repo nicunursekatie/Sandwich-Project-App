@@ -1,6 +1,6 @@
-import jsPDF from "jspdf";
-import "jspdf-autotable";
-import { ReportData } from "./report-generator";
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import { ReportData } from './report-generator';
 
 export class PDFGenerator {
   static async generatePDF(reportData: ReportData): Promise<Buffer> {
@@ -46,33 +46,33 @@ export class PDFGenerator {
       // Executive Summary
       doc.setFontSize(16);
       doc.setTextColor(...primaryColor);
-      doc.text("Executive Summary", 20, yPosition);
+      doc.text('Executive Summary', 20, yPosition);
       yPosition += 15;
 
       // Summary statistics in a grid
       const statsData = [
-        ["Total Sandwiches", summary.totalSandwiches.toLocaleString()],
-        ["Active Hosts", summary.totalHosts.toString()],
-        ["Active Projects", summary.activeProjects.toString()],
+        ['Total Sandwiches', summary.totalSandwiches.toLocaleString()],
+        ['Active Hosts', summary.totalHosts.toString()],
+        ['Active Projects', summary.activeProjects.toString()],
       ];
 
       (doc as any).autoTable({
         startY: yPosition,
-        head: [["Metric", "Value"]],
+        head: [['Metric', 'Value']],
         body: statsData,
-        theme: "grid",
+        theme: 'grid',
         headStyles: {
           fillColor: primaryColor,
           textColor: [255, 255, 255],
           fontSize: 11,
-          fontStyle: "bold",
+          fontStyle: 'bold',
         },
         bodyStyles: {
           fontSize: 10,
         },
         columnStyles: {
           0: { cellWidth: 60 },
-          1: { cellWidth: 40, halign: "right" },
+          1: { cellWidth: 40, halign: 'right' },
         },
       });
 
@@ -82,7 +82,7 @@ export class PDFGenerator {
       if (summary.topPerformers.length > 0) {
         doc.setFontSize(14);
         doc.setTextColor(...primaryColor);
-        doc.text("Top Performers", 20, yPosition);
+        doc.text('Top Performers', 20, yPosition);
         yPosition += 10;
 
         const performersData = summary.topPerformers.map((performer) => [
@@ -92,9 +92,9 @@ export class PDFGenerator {
 
         (doc as any).autoTable({
           startY: yPosition,
-          head: [["Name", "Count"]],
+          head: [['Name', 'Count']],
           body: performersData,
-          theme: "striped",
+          theme: 'striped',
           headStyles: {
             fillColor: primaryColor,
             textColor: [255, 255, 255],
@@ -105,7 +105,7 @@ export class PDFGenerator {
           },
           columnStyles: {
             0: { cellWidth: 80 },
-            1: { cellWidth: 30, halign: "right" },
+            1: { cellWidth: 30, halign: 'right' },
           },
         });
 
@@ -122,7 +122,7 @@ export class PDFGenerator {
 
         doc.setFontSize(16);
         doc.setTextColor(...primaryColor);
-        doc.text("Charts & Visualizations", 20, yPosition);
+        doc.text('Charts & Visualizations', 20, yPosition);
         yPosition += 15;
 
         charts.forEach((chart, index) => {
@@ -147,15 +147,15 @@ export class PDFGenerator {
             const chartData = chart.data
               .slice(0, 10)
               .map((item: any) => [
-                item.label || item.name || "N/A",
+                item.label || item.name || 'N/A',
                 (item.value || 0).toLocaleString(),
               ]);
 
             (doc as any).autoTable({
               startY: yPosition,
-              head: [["Category", "Value"]],
+              head: [['Category', 'Value']],
               body: chartData,
-              theme: "plain",
+              theme: 'plain',
               headStyles: {
                 fillColor: lightGray,
                 textColor: [0, 0, 0],
@@ -166,7 +166,7 @@ export class PDFGenerator {
               },
               columnStyles: {
                 0: { cellWidth: 80 },
-                1: { cellWidth: 30, halign: "right" },
+                1: { cellWidth: 30, halign: 'right' },
               },
             });
 
@@ -185,35 +185,37 @@ export class PDFGenerator {
 
         doc.setFontSize(16);
         doc.setTextColor(...primaryColor);
-        doc.text("Detailed Data", 20, yPosition);
+        doc.text('Detailed Data', 20, yPosition);
         yPosition += 15;
 
         // Prepare data for table
         const headers = Object.keys(data[0]);
-        const tableData = data.slice(0, 50).map((
-          row // Limit to first 50 rows
-        ) => headers.map((header) => this.formatValue(row[header])));
+        const tableData = data.slice(0, 50).map(
+          (
+            row // Limit to first 50 rows
+          ) => headers.map((header) => this.formatValue(row[header]))
+        );
 
         (doc as any).autoTable({
           startY: yPosition,
           head: [headers.map((header) => this.formatHeader(header))],
           body: tableData,
-          theme: "striped",
+          theme: 'striped',
           headStyles: {
             fillColor: primaryColor,
             textColor: [255, 255, 255],
             fontSize: 8,
-            fontStyle: "bold",
+            fontStyle: 'bold',
           },
           bodyStyles: {
             fontSize: 7,
           },
           styles: {
             cellPadding: 2,
-            overflow: "linebreak",
+            overflow: 'linebreak',
           },
           columnStyles: headers.reduce((acc, header, index) => {
-            acc[index] = { cellWidth: "auto" };
+            acc[index] = { cellWidth: 'auto' };
             return acc;
           }, {} as any),
         });
@@ -234,33 +236,33 @@ export class PDFGenerator {
       doc.setFontSize(8);
       doc.setTextColor(...darkGray);
       doc.text(
-        "Generated by The Sandwich Project Management System",
+        'Generated by The Sandwich Project Management System',
         20,
         yPosition
       );
 
-      return Buffer.from(doc.output("arraybuffer"));
+      return Buffer.from(doc.output('arraybuffer'));
     } catch (error) {
-      console.error("PDF generation failed:", error);
-      throw new Error("Failed to generate PDF");
+      console.error('PDF generation failed:', error);
+      throw new Error('Failed to generate PDF');
     }
   }
 
   private static formatHeader(header: string): string {
     return header
-      .replace(/([A-Z])/g, " $1")
+      .replace(/([A-Z])/g, ' $1')
       .replace(/^./, (str) => str.toUpperCase())
       .trim();
   }
 
   private static formatValue(value: any): string {
-    if (value === null || value === undefined) return "";
+    if (value === null || value === undefined) return '';
 
-    if (typeof value === "number") {
+    if (typeof value === 'number') {
       return value.toLocaleString();
     }
 
-    if (typeof value === "string" && value.includes("T")) {
+    if (typeof value === 'string' && value.includes('T')) {
       // Likely a date string
       try {
         const date = new Date(value);
@@ -272,7 +274,7 @@ export class PDFGenerator {
       }
     }
 
-    if (typeof value === "object") {
+    if (typeof value === 'object') {
       try {
         return JSON.stringify(value);
       } catch (e) {

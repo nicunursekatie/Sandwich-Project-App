@@ -1,8 +1,8 @@
-import { Router } from "express";
-import { z } from "zod";
-import { storage } from "../storage-wrapper";
-import { db } from "../db";
-import { users } from "@shared/schema";
+import { Router } from 'express';
+import { z } from 'zod';
+import { storage } from '../storage-wrapper';
+import { db } from '../db';
+import { users } from '@shared/schema';
 
 const router = Router();
 
@@ -15,7 +15,7 @@ const signupSchema = z.object({
   city: z.string().min(2),
   state: z.string().min(2),
   zipCode: z.string().min(5),
-  role: z.enum(["volunteer", "host", "driver", "coordinator"]),
+  role: z.enum(['volunteer', 'host', 'driver', 'coordinator']),
   availability: z.array(z.string()).min(1),
   interests: z.array(z.string()).optional(),
   emergencyContact: z.string().min(5),
@@ -23,11 +23,11 @@ const signupSchema = z.object({
   agreeToBackground: z.boolean().optional(),
 });
 
-router.post("/auth/signup", async (req, res) => {
-  console.log("=== SIGNUP ROUTE HIT ===");
-  console.log("Request method:", req.method);
-  console.log("Request URL:", req.url);
-  console.log("Request body:", req.body);
+router.post('/auth/signup', async (req, res) => {
+  console.log('=== SIGNUP ROUTE HIT ===');
+  console.log('Request method:', req.method);
+  console.log('Request URL:', req.url);
+  console.log('Request body:', req.body);
   try {
     // Validate request body
     const validatedData = signupSchema.parse(req.body);
@@ -36,21 +36,16 @@ router.post("/auth/signup", async (req, res) => {
     const existingUser = await storage.getUserByEmail(validatedData.email);
     if (existingUser) {
       return res.status(400).json({
-        message: "User with this email already exists",
+        message: 'User with this email already exists',
       });
     }
 
     // Create user account with registration data using direct database insert
     const userId =
-      "user_" +
-      Date.now() +
-      "_" +
-      Math.random()
-        .toString(36)
-        .substr(2, 9);
+      'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 
     // Use direct database insert with explicit casting
-    console.log("Creating user with ID:", userId);
+    console.log('Creating user with ID:', userId);
     const [newUser] = await db
       .insert(users)
       .values({
@@ -63,12 +58,12 @@ router.post("/auth/signup", async (req, res) => {
         isActive: false, // Requires approval
         metadata: {
           registrationData: validatedData,
-          status: "pending_approval",
+          status: 'pending_approval',
           registrationDate: new Date().toISOString(),
         } as any, // Cast to any for metadata
       } as any)
       .returning();
-    console.log("User created successfully:", newUser);
+    console.log('User created successfully:', newUser);
 
     // Store registration details in a simple format for admin review
     console.log(`
@@ -80,8 +75,8 @@ Role: ${validatedData.role}
 Address: ${validatedData.address}, ${validatedData.city}, ${
       validatedData.state
     } ${validatedData.zipCode}
-Availability: ${validatedData.availability.join(", ")}
-Interests: ${validatedData.interests?.join(", ") || "None specified"}
+Availability: ${validatedData.availability.join(', ')}
+Interests: ${validatedData.interests?.join(', ') || 'None specified'}
 Emergency Contact: ${validatedData.emergencyContact}
 Terms Agreed: ${validatedData.agreeToTerms}
 Background Check Consent: ${validatedData.agreeToBackground || false}
@@ -95,53 +90,53 @@ Registration Date: ${new Date().toISOString()}
       userId: newUser.id,
     });
   } catch (error) {
-    console.error("Signup error:", error);
+    console.error('Signup error:', error);
 
     if (error instanceof z.ZodError) {
       return res.status(400).json({
-        message: "Invalid registration data",
+        message: 'Invalid registration data',
         errors: error.errors,
       });
     }
 
     res.status(500).json({
-      message: "Registration failed. Please try again later.",
+      message: 'Registration failed. Please try again later.',
     });
   }
 });
 
 // Get pending registrations (admin only)
-router.get("/auth/pending-registrations", async (req, res) => {
+router.get('/auth/pending-registrations', async (req, res) => {
   try {
     // In a real implementation, check admin permissions here
     const users = await storage.getAllUsers();
     const pendingUsers = users.filter(
-      (user) => user.metadata?.status === "pending_approval" && !user.isActive
+      (user) => user.metadata?.status === 'pending_approval' && !user.isActive
     );
 
     res.json(pendingUsers);
   } catch (error) {
-    console.error("Error fetching pending registrations:", error);
-    res.status(500).json({ message: "Failed to fetch pending registrations" });
+    console.error('Error fetching pending registrations:', error);
+    res.status(500).json({ message: 'Failed to fetch pending registrations' });
   }
 });
 
 // Approve user registration (admin only)
-router.patch("/auth/approve-user/:userId", async (req, res) => {
+router.patch('/auth/approve-user/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
     const { approved } = req.body;
 
     const user = await storage.getUser(userId);
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: 'User not found' });
     }
 
     const updates = {
       isActive: approved,
       metadata: {
         ...user.metadata,
-        status: approved ? "approved" : "rejected",
+        status: approved ? 'approved' : 'rejected',
         approvedDate: approved ? new Date().toISOString() : undefined,
       },
     };
@@ -149,11 +144,11 @@ router.patch("/auth/approve-user/:userId", async (req, res) => {
     await storage.updateUser(userId, updates);
 
     res.json({
-      message: `User ${approved ? "approved" : "rejected"} successfully`,
+      message: `User ${approved ? 'approved' : 'rejected'} successfully`,
     });
   } catch (error) {
-    console.error("Error updating user approval:", error);
-    res.status(500).json({ message: "Failed to update user status" });
+    console.error('Error updating user approval:', error);
+    res.status(500).json({ message: 'Failed to update user status' });
   }
 });
 

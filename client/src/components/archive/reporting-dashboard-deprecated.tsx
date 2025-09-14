@@ -7,29 +7,29 @@
 // Reason: Reports tab removed, analytics provides better insights
 // Alternative: Use Analytics tab for data visualization and insights
 
-import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useState } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+} from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Calendar,
   FileText,
@@ -40,22 +40,22 @@ import {
   LineChart,
   PieChart,
   LogOut,
-} from "lucide-react";
-import { format, subDays, subWeeks, subMonths } from "date-fns";
-import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import SimpleNav from "@/components/simple-nav";
-import WeeklyImpactReport from "@/components/weekly-impact-report";
+} from 'lucide-react';
+import { format, subDays, subWeeks, subMonths } from 'date-fns';
+import { apiRequest } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
+import SimpleNav from '@/components/simple-nav';
+import WeeklyImpactReport from '@/components/weekly-impact-report';
 
 interface ReportConfig {
-  type: "collections" | "hosts" | "impact" | "comprehensive";
+  type: 'collections' | 'hosts' | 'impact' | 'comprehensive';
   dateRange: {
     start: string;
     end: string;
   };
-  format: "pdf" | "csv" | "json";
+  format: 'pdf' | 'csv' | 'json';
   includeCharts: boolean;
-  groupBy?: "week" | "month" | "host" | "project";
+  groupBy?: 'week' | 'month' | 'host' | 'project';
   filters?: {
     hostIds?: number[];
     projectIds?: number[];
@@ -67,12 +67,12 @@ interface ScheduledReport {
   id: number;
   config: ReportConfig;
   schedule: {
-    frequency: "daily" | "weekly" | "monthly";
+    frequency: 'daily' | 'weekly' | 'monthly';
     time: string;
     recipients: string[];
   };
   nextRun: string;
-  status: "active" | "paused";
+  status: 'active' | 'paused';
 }
 
 export default function ReportingDashboard({
@@ -82,76 +82,76 @@ export default function ReportingDashboard({
 }) {
   const { toast } = useToast();
   const [reportConfig, setReportConfig] = useState<ReportConfig>({
-    type: "collections",
+    type: 'collections',
     dateRange: {
-      start: format(subMonths(new Date(), 1), "yyyy-MM-dd"),
-      end: format(new Date(), "yyyy-MM-dd"),
+      start: format(subMonths(new Date(), 1), 'yyyy-MM-dd'),
+      end: format(new Date(), 'yyyy-MM-dd'),
     },
-    format: "pdf",
+    format: 'pdf',
     includeCharts: true,
-    groupBy: "month",
+    groupBy: 'month',
   });
 
   const [scheduleConfig, setScheduleConfig] = useState({
-    frequency: "weekly" as const,
-    time: "09:00",
-    recipients: [""],
+    frequency: 'weekly' as const,
+    time: '09:00',
+    recipients: [''],
   });
 
   // Query for scheduled reports
   const { data: scheduledReports = [], refetch: refetchScheduled } = useQuery<
     ScheduledReport[]
   >({
-    queryKey: ["/api/reports/scheduled"],
+    queryKey: ['/api/reports/scheduled'],
     retry: false,
   });
 
   // Query for recent reports
   const { data: recentReports = [] } = useQuery<any[]>({
-    queryKey: ["/api/reports/recent"],
+    queryKey: ['/api/reports/recent'],
     retry: false,
   });
 
   // Generate report mutation
   const generateReport = useMutation({
     mutationFn: async (config: ReportConfig) => {
-      return await apiRequest("POST", "/api/reports/generate", config);
+      return await apiRequest('POST', '/api/reports/generate', config);
     },
     onSuccess: (data) => {
       toast({
-        title: "Report Generated",
-        description: "Your report has been generated successfully.",
+        title: 'Report Generated',
+        description: 'Your report has been generated successfully.',
       });
 
       // Trigger download if data is valid
       if (data && data.id && data.metadata) {
         try {
           const downloadUrl = `/api/reports/download/${data.id}`;
-          const link = document.createElement("a");
+          const link = document.createElement('a');
           link.href = downloadUrl;
           link.download = `${data.metadata.title}-${format(
             new Date(),
-            "yyyy-MM-dd"
+            'yyyy-MM-dd'
           )}.${reportConfig.format}`;
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
         } catch (error) {
-          console.error("Download error:", error);
+          console.error('Download error:', error);
           toast({
-            title: "Download Failed",
+            title: 'Download Failed',
             description:
-              "Report generated but download failed. Please try again.",
-            variant: "destructive",
+              'Report generated but download failed. Please try again.',
+            variant: 'destructive',
           });
         }
       }
     },
     onError: (error) => {
       toast({
-        title: "Generation Failed",
+        title: 'Generation Failed',
         description: error.message,
-        variant: "destructive",
+        variant: 'destructive',
       });
     },
   });
@@ -159,23 +159,23 @@ export default function ReportingDashboard({
   // Schedule report mutation
   const scheduleReport = useMutation({
     mutationFn: async () => {
-      return await apiRequest("POST", "/api/reports/schedule", {
+      return await apiRequest('POST', '/api/reports/schedule', {
         config: reportConfig,
         schedule: scheduleConfig,
       });
     },
     onSuccess: () => {
       toast({
-        title: "Report Scheduled",
-        description: "Your automated report has been scheduled successfully.",
+        title: 'Report Scheduled',
+        description: 'Your automated report has been scheduled successfully.',
       });
       refetchScheduled();
     },
     onError: (error) => {
       toast({
-        title: "Scheduling Failed",
+        title: 'Scheduling Failed',
         description: error.message,
-        variant: "destructive",
+        variant: 'destructive',
       });
     },
   });
@@ -185,19 +185,19 @@ export default function ReportingDashboard({
     let start: Date;
 
     switch (range) {
-      case "last7days":
+      case 'last7days':
         start = subDays(now, 7);
         break;
-      case "last30days":
+      case 'last30days':
         start = subDays(now, 30);
         break;
-      case "last3months":
+      case 'last3months':
         start = subMonths(now, 3);
         break;
-      case "last6months":
+      case 'last6months':
         start = subMonths(now, 6);
         break;
-      case "lastyear":
+      case 'lastyear':
         start = subMonths(now, 12);
         break;
       default:
@@ -206,15 +206,15 @@ export default function ReportingDashboard({
 
     // Validate dates before formatting
     if (isNaN(start.getTime()) || isNaN(now.getTime())) {
-      console.error("Invalid date detected in handleQuickDateRange");
+      console.error('Invalid date detected in handleQuickDateRange');
       return;
     }
 
     setReportConfig({
       ...reportConfig,
       dateRange: {
-        start: format(start, "yyyy-MM-dd"),
-        end: format(now, "yyyy-MM-dd"),
+        start: format(start, 'yyyy-MM-dd'),
+        end: format(now, 'yyyy-MM-dd'),
       },
     });
   };
@@ -222,7 +222,7 @@ export default function ReportingDashboard({
   const addRecipient = () => {
     setScheduleConfig({
       ...scheduleConfig,
-      recipients: [...scheduleConfig.recipients, ""],
+      recipients: [...scheduleConfig.recipients, ''],
     });
   };
 
@@ -372,35 +372,35 @@ export default function ReportingDashboard({
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleQuickDateRange("last7days")}
+                        onClick={() => handleQuickDateRange('last7days')}
                       >
                         Last 7 Days
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleQuickDateRange("last30days")}
+                        onClick={() => handleQuickDateRange('last30days')}
                       >
                         Last 30 Days
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleQuickDateRange("last3months")}
+                        onClick={() => handleQuickDateRange('last3months')}
                       >
                         Last 3 Months
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleQuickDateRange("last6months")}
+                        onClick={() => handleQuickDateRange('last6months')}
                       >
                         Last 6 Months
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleQuickDateRange("lastyear")}
+                        onClick={() => handleQuickDateRange('lastyear')}
                       >
                         Last Year
                       </Button>
@@ -575,12 +575,12 @@ export default function ReportingDashboard({
                     <div className="flex justify-between">
                       <span className="text-sm font-medium">Type:</span>
                       <Badge variant="secondary">
-                        {reportConfig.type === "collections" &&
-                          "Collection Analysis"}
-                        {reportConfig.type === "hosts" && "Host Performance"}
-                        {reportConfig.type === "impact" && "Impact Assessment"}
-                        {reportConfig.type === "comprehensive" &&
-                          "Comprehensive"}
+                        {reportConfig.type === 'collections' &&
+                          'Collection Analysis'}
+                        {reportConfig.type === 'hosts' && 'Host Performance'}
+                        {reportConfig.type === 'impact' && 'Impact Assessment'}
+                        {reportConfig.type === 'comprehensive' &&
+                          'Comprehensive'}
                       </Badge>
                     </div>
 
@@ -593,7 +593,7 @@ export default function ReportingDashboard({
                               !reportConfig.dateRange.start ||
                               !reportConfig.dateRange.end
                             ) {
-                              return "Invalid date range";
+                              return 'Invalid date range';
                             }
                             const startDate = new Date(
                               reportConfig.dateRange.start
@@ -605,15 +605,15 @@ export default function ReportingDashboard({
                               isNaN(startDate.getTime()) ||
                               isNaN(endDate.getTime())
                             ) {
-                              return "Invalid date range";
+                              return 'Invalid date range';
                             }
-                            return `${format(startDate, "MMM dd")} - ${format(
+                            return `${format(startDate, 'MMM dd')} - ${format(
                               endDate,
-                              "MMM dd, yyyy"
+                              'MMM dd, yyyy'
                             )}`;
                           } catch (error) {
-                            console.error("Date formatting error:", error);
-                            return "Invalid date range";
+                            console.error('Date formatting error:', error);
+                            return 'Invalid date range';
                           }
                         })()}
                       </span>
@@ -630,8 +630,8 @@ export default function ReportingDashboard({
                       <span className="text-sm font-medium">Charts:</span>
                       <span className="text-sm text-gray-600">
                         {reportConfig.includeCharts
-                          ? "Included"
-                          : "Not included"}
+                          ? 'Included'
+                          : 'Not included'}
                       </span>
                     </div>
                   </div>
@@ -667,8 +667,8 @@ export default function ReportingDashboard({
                 >
                   <Download className="w-4 h-4 mr-2" />
                   {generateReport.isPending
-                    ? "Generating..."
-                    : "Generate Report"}
+                    ? 'Generating...'
+                    : 'Generate Report'}
                 </Button>
 
                 <Button
@@ -682,8 +682,8 @@ export default function ReportingDashboard({
                 >
                   <Calendar className="w-4 h-4 mr-2" />
                   {scheduleReport.isPending
-                    ? "Scheduling..."
-                    : "Schedule Report"}
+                    ? 'Scheduling...'
+                    : 'Schedule Report'}
                 </Button>
               </div>
 
@@ -730,21 +730,21 @@ export default function ReportingDashboard({
                       <div className="flex items-center justify-between">
                         <div>
                           <h4 className="font-medium">
-                            {report.config.type === "collections" &&
-                              "Collection Analysis"}
-                            {report.config.type === "hosts" &&
-                              "Host Performance"}
-                            {report.config.type === "impact" &&
-                              "Impact Assessment"}
-                            {report.config.type === "comprehensive" &&
-                              "Comprehensive Report"}
+                            {report.config.type === 'collections' &&
+                              'Collection Analysis'}
+                            {report.config.type === 'hosts' &&
+                              'Host Performance'}
+                            {report.config.type === 'impact' &&
+                              'Impact Assessment'}
+                            {report.config.type === 'comprehensive' &&
+                              'Comprehensive Report'}
                           </h4>
                           <p className="text-sm text-gray-500">
-                            {report.schedule.frequency} at{" "}
-                            {report.schedule.time} • Next:{" "}
+                            {report.schedule.frequency} at{' '}
+                            {report.schedule.time} • Next:{' '}
                             {format(
                               new Date(report.nextRun),
-                              "MMM dd, yyyy HH:mm"
+                              'MMM dd, yyyy HH:mm'
                             )}
                           </p>
                           <div className="flex items-center gap-4 mt-2">
@@ -753,9 +753,9 @@ export default function ReportingDashboard({
                             </span>
                             <Badge
                               variant={
-                                report.status === "active"
-                                  ? "default"
-                                  : "secondary"
+                                report.status === 'active'
+                                  ? 'default'
+                                  : 'secondary'
                               }
                             >
                               {report.status}
@@ -767,7 +767,7 @@ export default function ReportingDashboard({
                             Edit
                           </Button>
                           <Button variant="outline" size="sm">
-                            {report.status === "active" ? "Pause" : "Resume"}
+                            {report.status === 'active' ? 'Pause' : 'Resume'}
                           </Button>
                         </div>
                       </div>
@@ -807,17 +807,17 @@ export default function ReportingDashboard({
                         <div>
                           <h4 className="font-medium">{report.title}</h4>
                           <p className="text-sm text-gray-500">
-                            Generated{" "}
+                            Generated{' '}
                             {(() => {
                               try {
-                                if (!report.generatedAt) return "Unknown date";
+                                if (!report.generatedAt) return 'Unknown date';
                                 const date = new Date(report.generatedAt);
                                 if (isNaN(date.getTime()))
-                                  return "Invalid date";
-                                return format(date, "MMM dd, yyyy HH:mm");
+                                  return 'Invalid date';
+                                return format(date, 'MMM dd, yyyy HH:mm');
                               } catch (error) {
-                                console.error("Date formatting error:", error);
-                                return "Unknown date";
+                                console.error('Date formatting error:', error);
+                                return 'Unknown date';
                               }
                             })()}
                           </p>

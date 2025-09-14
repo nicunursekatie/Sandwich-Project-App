@@ -1,9 +1,9 @@
-import React, { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
+import React, { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import {
   Dialog,
   DialogContent,
@@ -11,7 +11,7 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Users,
   Plus,
@@ -27,22 +27,22 @@ import {
   Building2,
   ArrowRight,
   Download,
-} from "lucide-react";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+} from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
-import { format } from "date-fns";
-import { useAuth } from "@/hooks/useAuth";
-import { hasPermission, PERMISSIONS } from "@shared/auth-utils";
-import { apiRequest } from "@/lib/queryClient";
-import { ButtonTooltip } from "@/components/ui/button-tooltip";
+} from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
+import { format } from 'date-fns';
+import { useAuth } from '@/hooks/useAuth';
+import { hasPermission, PERMISSIONS } from '@shared/auth-utils';
+import { apiRequest } from '@/lib/queryClient';
+import { ButtonTooltip } from '@/components/ui/button-tooltip';
 
 export default function VolunteerManagement() {
   const { user } = useAuth();
@@ -50,8 +50,8 @@ export default function VolunteerManagement() {
   const queryClient = useQueryClient();
 
   // State for filters and search
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
 
   // State for form dialog
   const [showAddDialog, setShowAddDialog] = useState(false);
@@ -59,20 +59,20 @@ export default function VolunteerManagement() {
 
   // Form state
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    address: "",
-    notes: "",
-    availability: "available",
+    name: '',
+    email: '',
+    phone: '',
+    address: '',
+    notes: '',
+    availability: 'available',
     isActive: true,
   });
 
   // Host designation state
   const [showHostDesignation, setShowHostDesignation] = useState(false);
   const [selectedHostId, setSelectedHostId] = useState<number | null>(null);
-  const [hostRole, setHostRole] = useState("volunteer");
-  const [hostNotes, setHostNotes] = useState("");
+  const [hostRole, setHostRole] = useState('volunteer');
+  const [hostNotes, setHostNotes] = useState('');
 
   // Check permissions
   const canManage = hasPermission(user, PERMISSIONS.MANAGE_VOLUNTEERS);
@@ -102,14 +102,14 @@ export default function VolunteerManagement() {
 
   // Fetch volunteers from the dedicated volunteers table
   const { data: volunteers = [], isLoading } = useQuery({
-    queryKey: ["/api/volunteers"],
-    queryFn: () => apiRequest("GET", "/api/volunteers"),
+    queryKey: ['/api/volunteers'],
+    queryFn: () => apiRequest('GET', '/api/volunteers'),
   });
 
   // Fetch hosts for designation dropdown
   const { data: hosts = [] } = useQuery({
-    queryKey: ["/api/hosts"],
-    queryFn: () => apiRequest("GET", "/api/hosts"),
+    queryKey: ['/api/hosts'],
+    queryFn: () => apiRequest('GET', '/api/hosts'),
   });
 
   // Create/Update volunteer mutation
@@ -117,20 +117,20 @@ export default function VolunteerManagement() {
     mutationFn: async (volunteerData: any) => {
       if (editingVolunteer) {
         return apiRequest(
-          "PATCH",
+          'PATCH',
           `/api/volunteers/${editingVolunteer.id}`,
           volunteerData
         );
       } else {
-        return apiRequest("POST", "/api/volunteers", volunteerData);
+        return apiRequest('POST', '/api/volunteers', volunteerData);
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/volunteers"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/volunteers'] });
       toast({
-        title: "Success",
+        title: 'Success',
         description: `Volunteer ${
-          editingVolunteer ? "updated" : "added"
+          editingVolunteer ? 'updated' : 'added'
         } successfully`,
       });
       resetForm();
@@ -138,11 +138,11 @@ export default function VolunteerManagement() {
     },
     onError: (error) => {
       toast({
-        title: "Error",
+        title: 'Error',
         description: `Failed to ${
-          editingVolunteer ? "update" : "add"
+          editingVolunteer ? 'update' : 'add'
         } volunteer`,
-        variant: "destructive",
+        variant: 'destructive',
       });
     },
   });
@@ -157,19 +157,19 @@ export default function VolunteerManagement() {
       hostContactData: any;
     }) => {
       // First update the volunteer's hostId
-      await apiRequest("PATCH", `/api/drivers/${editingVolunteer.id}`, {
+      await apiRequest('PATCH', `/api/drivers/${editingVolunteer.id}`, {
         hostId: hostContactData.hostId,
         notes: volunteerData.notes,
       });
 
       // Then create a host contact entry
-      return await apiRequest("POST", "/api/host-contacts", hostContactData);
+      return await apiRequest('POST', '/api/host-contacts', hostContactData);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/drivers"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/hosts-with-contacts"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/drivers'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/hosts-with-contacts'] });
       toast({
-        title: "Success",
+        title: 'Success',
         description: `${editingVolunteer.firstName} ${editingVolunteer.lastName} has been designated as a host contact`,
       });
       resetForm();
@@ -178,9 +178,9 @@ export default function VolunteerManagement() {
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
+        title: 'Error',
         description: `Failed to designate as host: ${error.message}`,
-        variant: "destructive",
+        variant: 'destructive',
       });
     },
   });
@@ -188,58 +188,58 @@ export default function VolunteerManagement() {
   // Delete volunteer mutation
   const { mutate: deleteVolunteer } = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest("DELETE", `/api/volunteers/${id}`);
+      return apiRequest('DELETE', `/api/volunteers/${id}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/volunteers"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/volunteers'] });
       toast({
-        title: "Success",
-        description: "Volunteer deleted successfully",
+        title: 'Success',
+        description: 'Volunteer deleted successfully',
       });
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: "Failed to delete volunteer",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to delete volunteer',
+        variant: 'destructive',
       });
     },
   });
 
   const resetForm = () => {
     setFormData({
-      name: "",
-      email: "",
-      phone: "",
-      address: "",
-      notes: "",
-      availability: "available",
+      name: '',
+      email: '',
+      phone: '',
+      address: '',
+      notes: '',
+      availability: 'available',
       isActive: true,
     });
     setEditingVolunteer(null);
     setShowHostDesignation(false);
     setSelectedHostId(null);
-    setHostRole("volunteer");
-    setHostNotes("");
+    setHostRole('volunteer');
+    setHostNotes('');
   };
 
   const handleEdit = (volunteer: any) => {
     if (!canEdit) {
       toast({
-        title: "Access Denied",
+        title: 'Access Denied',
         description: "You don't have permission to edit volunteers",
-        variant: "destructive",
+        variant: 'destructive',
       });
       return;
     }
 
     setFormData({
-      name: volunteer.name || "",
-      email: volunteer.email || "",
-      phone: volunteer.phone || "",
-      address: volunteer.address || "",
-      notes: volunteer.notes || "",
-      availability: volunteer.availability || "available",
+      name: volunteer.name || '',
+      email: volunteer.email || '',
+      phone: volunteer.phone || '',
+      address: volunteer.address || '',
+      notes: volunteer.notes || '',
+      availability: volunteer.availability || 'available',
       isActive: volunteer.isActive !== undefined ? volunteer.isActive : true,
     });
     setEditingVolunteer(volunteer);
@@ -249,9 +249,9 @@ export default function VolunteerManagement() {
   const handleAdd = () => {
     if (!canAdd) {
       toast({
-        title: "Access Denied",
+        title: 'Access Denied',
         description: "You don't have permission to add volunteers",
-        variant: "destructive",
+        variant: 'destructive',
       });
       return;
     }
@@ -263,9 +263,9 @@ export default function VolunteerManagement() {
   const handleDelete = (volunteer: any) => {
     if (!canManage) {
       toast({
-        title: "Access Denied",
+        title: 'Access Denied',
         description: "You don't have permission to delete volunteers",
-        variant: "destructive",
+        variant: 'destructive',
       });
       return;
     }
@@ -294,9 +294,9 @@ export default function VolunteerManagement() {
   const handleHostDesignation = () => {
     if (!selectedHostId || !editingVolunteer) {
       toast({
-        title: "Error",
-        description: "Please select a host location",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Please select a host location',
+        variant: 'destructive',
       });
       return;
     }
@@ -304,17 +304,17 @@ export default function VolunteerManagement() {
     const volunteerData = {
       notes:
         formData.notes +
-        (hostNotes ? `\n\nDesignated as host: ${hostNotes}` : ""),
+        (hostNotes ? `\n\nDesignated as host: ${hostNotes}` : ''),
     };
 
     const hostContactData = {
       hostId: selectedHostId,
       name: formData.name,
       role: hostRole,
-      phone: formData.phone || "",
-      email: formData.email || "",
+      phone: formData.phone || '',
+      email: formData.email || '',
       notes: hostNotes,
-      isPrimary: hostRole === "primary",
+      isPrimary: hostRole === 'primary',
     };
 
     designateAsHost({ volunteerData, hostContactData });
@@ -329,40 +329,40 @@ export default function VolunteerManagement() {
       volunteer.phone?.includes(searchTerm);
 
     const matchesStatus =
-      statusFilter === "all" ||
-      (statusFilter === "active" && volunteer.isActive) ||
-      (statusFilter === "inactive" && !volunteer.isActive);
+      statusFilter === 'all' ||
+      (statusFilter === 'active' && volunteer.isActive) ||
+      (statusFilter === 'inactive' && !volunteer.isActive);
 
     return matchesSearch && matchesStatus;
   });
 
   const handleExport = async () => {
     try {
-      const response = await fetch("/api/volunteers/export", {
-        credentials: "include",
+      const response = await fetch('/api/volunteers/export', {
+        credentials: 'include',
       });
-      if (!response.ok) throw new Error("Export failed");
+      if (!response.ok) throw new Error('Export failed');
 
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
+      const a = document.createElement('a');
       a.href = url;
       a.download = `volunteers-export-${
-        new Date().toISOString().split("T")[0]
+        new Date().toISOString().split('T')[0]
       }.csv`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
       toast({
-        title: "Export completed successfully",
+        title: 'Export completed successfully',
         description: `Exported ${filteredVolunteers.length} volunteers to CSV`,
       });
     } catch (error) {
       toast({
-        title: "Export failed",
-        description: "Failed to export volunteers data",
-        variant: "destructive",
+        title: 'Export failed',
+        description: 'Failed to export volunteers data',
+        variant: 'destructive',
       });
     }
   };
@@ -446,9 +446,9 @@ export default function VolunteerManagement() {
                   No volunteers found
                 </h3>
                 <p className="mt-1 text-sm text-gray-500">
-                  {searchTerm || statusFilter !== "all"
-                    ? "Try adjusting your search criteria"
-                    : "Get started by adding a volunteer"}
+                  {searchTerm || statusFilter !== 'all'
+                    ? 'Try adjusting your search criteria'
+                    : 'Get started by adding a volunteer'}
                 </p>
               </div>
             </CardContent>
@@ -467,9 +467,9 @@ export default function VolunteerManagement() {
                         {volunteer.name}
                       </h3>
                       <Badge
-                        variant={volunteer.isActive ? "default" : "secondary"}
+                        variant={volunteer.isActive ? 'default' : 'secondary'}
                       >
-                        {volunteer.isActive ? "Active" : "Inactive"}
+                        {volunteer.isActive ? 'Active' : 'Inactive'}
                       </Badge>
                     </div>
 
@@ -510,8 +510,8 @@ export default function VolunteerManagement() {
                       <div className="flex items-center gap-2">
                         <Calendar className="w-4 h-4 text-gray-400" />
                         <span className="text-gray-600">
-                          Added{" "}
-                          {format(new Date(volunteer.createdAt), "MMM d, yyyy")}
+                          Added{' '}
+                          {format(new Date(volunteer.createdAt), 'MMM d, yyyy')}
                         </span>
                       </div>
                     </div>
@@ -579,7 +579,7 @@ export default function VolunteerManagement() {
           <form onSubmit={handleSubmit}>
             <DialogHeader>
               <DialogTitle>
-                {editingVolunteer ? "Edit Volunteer" : "Add New Volunteer"}
+                {editingVolunteer ? 'Edit Volunteer' : 'Add New Volunteer'}
               </DialogTitle>
             </DialogHeader>
 
@@ -666,9 +666,9 @@ export default function VolunteerManagement() {
               <div className="space-y-2">
                 <Label htmlFor="isActive">Status</Label>
                 <Select
-                  value={formData.isActive ? "active" : "inactive"}
+                  value={formData.isActive ? 'active' : 'inactive'}
                   onValueChange={(value) =>
-                    setFormData({ ...formData, isActive: value === "active" })
+                    setFormData({ ...formData, isActive: value === 'active' })
                   }
                 >
                   <SelectTrigger>
@@ -717,7 +717,7 @@ export default function VolunteerManagement() {
                           <div className="space-y-2">
                             <Label htmlFor="hostLocation">Host Location</Label>
                             <Select
-                              value={selectedHostId?.toString() || ""}
+                              value={selectedHostId?.toString() || ''}
                               onValueChange={(value) =>
                                 setSelectedHostId(parseInt(value))
                               }
@@ -795,7 +795,7 @@ export default function VolunteerManagement() {
                             className="bg-amber-600 hover:bg-amber-700"
                           >
                             {isDesignating ? (
-                              "Designating..."
+                              'Designating...'
                             ) : (
                               <>
                                 <ArrowRight className="w-4 h-4 mr-2" />
@@ -821,10 +821,10 @@ export default function VolunteerManagement() {
               </Button>
               <Button type="submit" disabled={isSaving}>
                 {isSaving
-                  ? "Saving..."
+                  ? 'Saving...'
                   : editingVolunteer
-                  ? "Save Changes"
-                  : "Add Volunteer"}
+                    ? 'Save Changes'
+                    : 'Add Volunteer'}
               </Button>
             </DialogFooter>
           </form>

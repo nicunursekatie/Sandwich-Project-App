@@ -1,6 +1,6 @@
-import { db } from "../db";
-import { emailMessages, users } from "@shared/schema";
-import { eq, and, or, desc, isNull, sql, inArray } from "drizzle-orm";
+import { db } from '../db';
+import { emailMessages, users } from '@shared/schema';
+import { eq, and, or, desc, isNull, sql, inArray } from 'drizzle-orm';
 
 export interface EmailMessage {
   id: number;
@@ -46,7 +46,7 @@ export class EmailService {
 
       return result[0]?.count || 0;
     } catch (error) {
-      console.error("Failed to get unread email count:", error);
+      console.error('Failed to get unread email count:', error);
       return 0;
     }
   }
@@ -62,7 +62,7 @@ export class EmailService {
       let query;
 
       switch (folder) {
-        case "inbox":
+        case 'inbox':
           query = db
             .select()
             .from(emailMessages)
@@ -76,7 +76,7 @@ export class EmailService {
             );
           break;
 
-        case "starred":
+        case 'starred':
           query = db
             .select()
             .from(emailMessages)
@@ -92,7 +92,7 @@ export class EmailService {
             );
           break;
 
-        case "sent":
+        case 'sent':
           query = db
             .select()
             .from(emailMessages)
@@ -105,7 +105,7 @@ export class EmailService {
             );
           break;
 
-        case "drafts":
+        case 'drafts':
           query = db
             .select()
             .from(emailMessages)
@@ -117,7 +117,7 @@ export class EmailService {
             );
           break;
 
-        case "archived":
+        case 'archived':
           query = db
             .select()
             .from(emailMessages)
@@ -133,7 +133,7 @@ export class EmailService {
             );
           break;
 
-        case "trash":
+        case 'trash':
           query = db
             .select()
             .from(emailMessages)
@@ -224,10 +224,10 @@ export class EmailService {
       // Then try to send SendGrid notification (but don't fail if it doesn't work)
       if (!data.isDraft) {
         try {
-          const { sendEmail: sendGridEmail } = await import("../sendgrid");
+          const { sendEmail: sendGridEmail } = await import('../sendgrid');
           await sendGridEmail({
             to: data.recipientEmail,
-            from: "katielong2316@gmail.com", // Your verified sender
+            from: 'katielong2316@gmail.com', // Your verified sender
             subject: `New message: ${data.subject}`,
             text: `You have a new message from ${data.senderName}.\n\nSubject: ${data.subject}\n\n${data.content}\n\nPlease log in to your account to view and respond to this message.`,
             html: `
@@ -247,8 +247,9 @@ export class EmailService {
           );
         } catch (emailError) {
           console.warn(
-            `[Email Service] SendGrid notification failed (but internal message saved): ${emailError?.message ||
-              "Unknown error"}`
+            `[Email Service] SendGrid notification failed (but internal message saved): ${
+              emailError?.message || 'Unknown error'
+            }`
           );
           // Don't throw - the internal message was saved successfully
         }
@@ -256,7 +257,7 @@ export class EmailService {
 
       return newEmail as EmailMessage;
     } catch (error) {
-      console.error("Failed to save internal email:", error);
+      console.error('Failed to save internal email:', error);
       throw error;
     }
   }
@@ -292,7 +293,7 @@ export class EmailService {
         );
 
       if (!email) {
-        console.error("Email not found or user does not have access");
+        console.error('Email not found or user does not have access');
         return false;
       }
 
@@ -330,7 +331,7 @@ export class EmailService {
 
       return true;
     } catch (error) {
-      console.error("Failed to update email status:", error);
+      console.error('Failed to update email status:', error);
       return false;
     }
   }
@@ -362,7 +363,7 @@ export class EmailService {
 
       return true;
     } catch (error) {
-      console.error("Failed to delete email:", error);
+      console.error('Failed to delete email:', error);
       return false;
     }
   }
@@ -390,7 +391,7 @@ export class EmailService {
 
       return (email as EmailMessage) || null;
     } catch (error) {
-      console.error("Failed to get email by ID:", error);
+      console.error('Failed to get email by ID:', error);
       return null;
     }
   }
@@ -428,7 +429,7 @@ export class EmailService {
 
       return results as EmailMessage[];
     } catch (error) {
-      console.error("Failed to search emails:", error);
+      console.error('Failed to search emails:', error);
       throw error;
     }
   }

@@ -1,10 +1,22 @@
-import { Filter, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import type { Host } from "@shared/schema";
+import { Filter, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import type { Host } from '@shared/schema';
 
 interface SearchFilters {
   hostName: string;
@@ -27,26 +39,28 @@ export function CollectionFilters({
   onFiltersChange,
   hosts,
   totalCollections,
-  filteredCollections
+  filteredCollections,
 }: CollectionFiltersProps) {
-  const hasActiveFilters = Object.values(searchFilters).some(value => value.trim() !== "");
+  const hasActiveFilters = Object.values(searchFilters).some(
+    (value) => value.trim() !== ''
+  );
 
   const clearFilters = () => {
     onFiltersChange({
-      hostName: "",
-      collectionDateFrom: "",
-      collectionDateTo: "",
-      individualMin: "",
-      individualMax: ""
+      hostName: '',
+      collectionDateFrom: '',
+      collectionDateTo: '',
+      individualMin: '',
+      individualMax: '',
     });
   };
 
   const updateFilter = (key: keyof SearchFilters, value: string) => {
     // Convert "all" back to empty string for filtering logic
-    const filterValue = value === "all" ? "" : value;
+    const filterValue = value === 'all' ? '' : value;
     onFiltersChange({
       ...searchFilters,
-      [key]: filterValue
+      [key]: filterValue,
     });
   };
 
@@ -70,68 +84,76 @@ export function CollectionFilters({
           </DialogHeader>
           <div className="flex-1 overflow-y-auto pr-2">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="hostFilter">Host Name</Label>
-              <Select
-                value={searchFilters.hostName}
-                onValueChange={(value) => updateFilter("hostName", value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="All hosts" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All hosts</SelectItem>
-                  {hosts.map((host) => (
-                    <SelectItem key={host.id} value={host.name}>
-                      {host.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div>
+                <Label htmlFor="hostFilter">Host Name</Label>
+                <Select
+                  value={searchFilters.hostName}
+                  onValueChange={(value) => updateFilter('hostName', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="All hosts" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All hosts</SelectItem>
+                    {hosts.map((host) => (
+                      <SelectItem key={host.id} value={host.name}>
+                        {host.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="dateFrom">Date From</Label>
+                <Input
+                  id="dateFrom"
+                  type="date"
+                  value={searchFilters.collectionDateFrom}
+                  onChange={(e) =>
+                    updateFilter('collectionDateFrom', e.target.value)
+                  }
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="dateTo">Date To</Label>
+                <Input
+                  id="dateTo"
+                  type="date"
+                  value={searchFilters.collectionDateTo}
+                  onChange={(e) =>
+                    updateFilter('collectionDateTo', e.target.value)
+                  }
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="individualMin">Min Individual Sandwiches</Label>
+                <Input
+                  id="individualMin"
+                  type="number"
+                  placeholder="Min"
+                  value={searchFilters.individualMin}
+                  onChange={(e) =>
+                    updateFilter('individualMin', e.target.value)
+                  }
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="individualMax">Max Individual Sandwiches</Label>
+                <Input
+                  id="individualMax"
+                  type="number"
+                  placeholder="Max"
+                  value={searchFilters.individualMax}
+                  onChange={(e) =>
+                    updateFilter('individualMax', e.target.value)
+                  }
+                />
+              </div>
             </div>
-            
-            <div>
-              <Label htmlFor="dateFrom">Date From</Label>
-              <Input
-                id="dateFrom"
-                type="date"
-                value={searchFilters.collectionDateFrom}
-                onChange={(e) => updateFilter("collectionDateFrom", e.target.value)}
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="dateTo">Date To</Label>
-              <Input
-                id="dateTo"
-                type="date"
-                value={searchFilters.collectionDateTo}
-                onChange={(e) => updateFilter("collectionDateTo", e.target.value)}
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="individualMin">Min Individual Sandwiches</Label>
-              <Input
-                id="individualMin"
-                type="number"
-                placeholder="Min"
-                value={searchFilters.individualMin}
-                onChange={(e) => updateFilter("individualMin", e.target.value)}
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="individualMax">Max Individual Sandwiches</Label>
-              <Input
-                id="individualMax"
-                type="number"
-                placeholder="Max"
-                value={searchFilters.individualMax}
-                onChange={(e) => updateFilter("individualMax", e.target.value)}
-              />
-            </div>
-          </div>
           </div>
         </DialogContent>
       </Dialog>

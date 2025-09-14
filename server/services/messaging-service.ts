@@ -1,5 +1,5 @@
-import { and, eq, sql, desc, inArray, isNull, lte, or, not } from "drizzle-orm";
-import { db } from "../db";
+import { and, eq, sql, desc, inArray, isNull, lte, or, not } from 'drizzle-orm';
+import { db } from '../db';
 import {
   messages,
   messageRecipients,
@@ -12,8 +12,8 @@ import {
   type InsertMessage,
   type InsertMessageRecipient,
   type InsertKudosTracking,
-} from "@shared/schema";
-import { NotificationService } from "../notification-service";
+} from '@shared/schema';
+import { NotificationService } from '../notification-service';
 
 export interface MessageWithSender extends Message {
   senderName?: string;
@@ -32,7 +32,7 @@ export interface SendMessageParams {
   senderId: string;
   recipientIds: string[];
   content: string;
-  contextType?: "suggestion" | "project" | "task" | "direct";
+  contextType?: 'suggestion' | 'project' | 'task' | 'direct';
   contextId?: string;
   parentMessageId?: number;
 }
@@ -69,8 +69,8 @@ export class MessagingService {
         .limit(1);
 
       const senderName = sender[0]
-        ? sender[0].displayName || sender[0].email || "Unknown User"
-        : "Unknown User";
+        ? sender[0].displayName || sender[0].email || 'Unknown User'
+        : 'Unknown User';
 
       // Create the message
       const [message] = await db
@@ -92,19 +92,19 @@ export class MessagingService {
           recipientId,
           read: false,
           notificationSent: false,
-        }),
+        })
       );
 
       await db.insert(messageRecipients).values(recipientValues);
 
       // Trigger notifications (don't await - let it run async)
       this.triggerNotifications(message, recipientIds).catch((error) => {
-        console.error("Failed to send notifications:", error);
+        console.error('Failed to send notifications:', error);
       });
 
       return message;
     } catch (error) {
-      console.error("Failed to send message:", error);
+      console.error('Failed to send message:', error);
       throw error;
     }
   }
@@ -118,7 +118,7 @@ export class MessagingService {
       contextType?: string;
       limit?: number;
       offset?: number;
-    },
+    }
   ): Promise<MessageWithSender[]> {
     const { contextType, limit = 50, offset = 0 } = options || {};
 
@@ -138,8 +138,8 @@ export class MessagingService {
             eq(messageRecipients.read, false),
             isNull(messages.deletedAt),
             eq(messageRecipients.contextAccessRevoked, false),
-            contextType ? eq(messages.contextType, contextType) : undefined,
-          ),
+            contextType ? eq(messages.contextType, contextType) : undefined
+          )
         )
         .orderBy(desc(messages.createdAt))
         .limit(limit)
@@ -149,11 +149,11 @@ export class MessagingService {
 
       return results.map((row) => ({
         ...row.message,
-        senderName: row.senderName || "Unknown User",
+        senderName: row.senderName || 'Unknown User',
         senderEmail: row.senderEmail || undefined,
       }));
     } catch (error) {
-      console.error("Failed to get unread messages:", error);
+      console.error('Failed to get unread messages:', error);
       throw error;
     }
   }
@@ -161,10 +161,7 @@ export class MessagingService {
   /**
    * Mark a message as read - ONLY if the current user is the recipient
    */
-  async markMessageRead(
-    userId: string,
-    messageId: number,
-  ): Promise<boolean> {
+  async markMessageRead(userId: string, messageId: number): Promise<boolean> {
     try {
       // First, check if the message exists and get sender info
       const messageInfo = await db
@@ -184,7 +181,9 @@ export class MessagingService {
 
       // If current user is the sender, don't update read status (sender messages are always "read")
       if (senderId === userId) {
-        console.log(`User ${userId} is sender of message ${messageId} - no read update needed`);
+        console.log(
+          `User ${userId} is sender of message ${messageId} - no read update needed`
+        );
         return true; // Return true since sender doesn't need to mark their own message as read
       }
 
@@ -198,14 +197,16 @@ export class MessagingService {
         .where(
           and(
             eq(messageRecipients.recipientId, userId),
-            eq(messageRecipients.messageId, messageId),
-          ),
+            eq(messageRecipients.messageId, messageId)
+          )
         );
 
-      console.log(`Marked message ${messageId} as read for recipient ${userId}`);
+      console.log(
+        `Marked message ${messageId} as read for recipient ${userId}`
+      );
       return true;
     } catch (error) {
-      console.error("Failed to mark message as read:", error);
+      console.error('Failed to mark message as read:', error);
       return false;
     }
   }
@@ -215,7 +216,7 @@ export class MessagingService {
    */
   async markAllMessagesRead(
     userId: string,
-    contextType?: string,
+    contextType?: string
   ): Promise<number> {
     try {
       if (contextType) {
@@ -225,7 +226,7 @@ export class MessagingService {
           .from(messages)
           .innerJoin(
             messageRecipients,
-            eq(messages.id, messageRecipients.messageId),
+            eq(messages.id, messageRecipients.messageId)
           )
           .where(
             and(
@@ -233,8 +234,8 @@ export class MessagingService {
               eq(messageRecipients.read, false),
               eq(messages.contextType, contextType),
               // Don't mark messages where user is the sender
-              not(eq(messages.senderId, userId)),
-            ),
+              not(eq(messages.senderId, userId))
+            )
           );
 
         if (messageIds.length > 0) {
@@ -246,13 +247,15 @@ export class MessagingService {
                 eq(messageRecipients.recipientId, userId),
                 inArray(
                   messageRecipients.messageId,
-                  messageIds.map((m) => m.id),
-                ),
-              ),
+                  messageIds.map((m) => m.id)
+                )
+              )
             );
         }
 
-        console.log(`Marked ${messageIds.length} messages as read for recipient ${userId} in context ${contextType}`);
+        console.log(
+          `Marked ${messageIds.length} messages as read for recipient ${userId} in context ${contextType}`
+        );
         return messageIds.length;
       } else {
         // Mark all messages as read, excluding messages where user is the sender
@@ -261,15 +264,15 @@ export class MessagingService {
           .from(messages)
           .innerJoin(
             messageRecipients,
-            eq(messages.id, messageRecipients.messageId),
+            eq(messages.id, messageRecipients.messageId)
           )
           .where(
             and(
               eq(messageRecipients.recipientId, userId),
               eq(messageRecipients.read, false),
               // Don't mark messages where user is the sender
-              not(eq(messages.senderId, userId)),
-            ),
+              not(eq(messages.senderId, userId))
+            )
           );
 
         if (messageIds.length > 0) {
@@ -281,17 +284,19 @@ export class MessagingService {
                 eq(messageRecipients.recipientId, userId),
                 inArray(
                   messageRecipients.messageId,
-                  messageIds.map((m) => m.id),
-                ),
-              ),
+                  messageIds.map((m) => m.id)
+                )
+              )
             );
         }
 
-        console.log(`Marked ${messageIds.length} total messages as read for recipient ${userId}`);
+        console.log(
+          `Marked ${messageIds.length} total messages as read for recipient ${userId}`
+        );
         return messageIds.length;
       }
     } catch (error) {
-      console.error("Failed to mark all messages as read:", error);
+      console.error('Failed to mark all messages as read:', error);
       throw error;
     }
   }
@@ -299,7 +304,9 @@ export class MessagingService {
   /**
    * Get unread message counts by context type - ONLY for recipients, never for senders
    */
-  async getUnreadCountsByContext(userId: string): Promise<Record<string, number>> {
+  async getUnreadCountsByContext(
+    userId: string
+  ): Promise<Record<string, number>> {
     try {
       const contextCounts = await db
         .select({
@@ -315,8 +322,8 @@ export class MessagingService {
             isNull(messages.deletedAt),
             eq(messageRecipients.contextAccessRevoked, false),
             // Don't count messages where user is the sender
-            not(eq(messages.senderId, userId)),
-          ),
+            not(eq(messages.senderId, userId))
+          )
         )
         .groupBy(messages.contextType);
 
@@ -337,7 +344,7 @@ export class MessagingService {
       console.log(`Unread counts by context for user ${userId}:`, result);
       return result;
     } catch (error) {
-      console.error("Failed to get unread counts by context:", error);
+      console.error('Failed to get unread counts by context:', error);
       throw error;
     }
   }
@@ -351,7 +358,7 @@ export class MessagingService {
     options?: {
       limit?: number;
       offset?: number;
-    },
+    }
   ): Promise<MessageWithSender[]> {
     const { limit = 50, offset = 0 } = options || {};
 
@@ -368,8 +375,8 @@ export class MessagingService {
           and(
             eq(messages.contextType, contextType),
             eq(messages.contextId, contextId),
-            isNull(messages.deletedAt),
-          ),
+            isNull(messages.deletedAt)
+          )
         )
         .orderBy(desc(messages.createdAt))
         .limit(limit)
@@ -377,11 +384,11 @@ export class MessagingService {
 
       return results.map((row) => ({
         ...row.message,
-        senderName: row.senderName || "Unknown User",
+        senderName: row.senderName || 'Unknown User',
         senderEmail: row.senderEmail || undefined,
       }));
     } catch (error) {
-      console.error("Failed to get context messages:", error);
+      console.error('Failed to get context messages:', error);
       throw error;
     }
   }
@@ -392,7 +399,7 @@ export class MessagingService {
   async editMessage(
     messageId: number,
     userId: string,
-    newContent: string,
+    newContent: string
   ): Promise<Message> {
     try {
       // Check if user is sender and within edit window (15 minutes)
@@ -403,11 +410,11 @@ export class MessagingService {
         .limit(1);
 
       if (!existingMessage) {
-        throw new Error("Message not found");
+        throw new Error('Message not found');
       }
 
       if (existingMessage.senderId !== userId) {
-        throw new Error("Only the sender can edit this message");
+        throw new Error('Only the sender can edit this message');
       }
 
       const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
@@ -415,7 +422,7 @@ export class MessagingService {
         existingMessage.createdAt &&
         existingMessage.createdAt < fifteenMinutesAgo
       ) {
-        throw new Error("Edit window has expired (15 minutes)");
+        throw new Error('Edit window has expired (15 minutes)');
       }
 
       // Update message
@@ -440,7 +447,7 @@ export class MessagingService {
 
       return updatedMessage;
     } catch (error) {
-      console.error("Failed to edit message:", error);
+      console.error('Failed to edit message:', error);
       throw error;
     }
   }
@@ -462,7 +469,7 @@ export class MessagingService {
 
       // Check if user is sender
       if (existingMessage.senderId !== userId) {
-        throw new Error("Only the sender can delete this message");
+        throw new Error('Only the sender can delete this message');
       }
 
       await db
@@ -484,7 +491,7 @@ export class MessagingService {
 
       return true;
     } catch (error) {
-      console.error("Failed to delete message:", error);
+      console.error('Failed to delete message:', error);
       return false;
     }
   }
@@ -495,7 +502,7 @@ export class MessagingService {
   async validateContextAccess(
     userId: string,
     contextType: string,
-    contextId: string,
+    contextId: string
   ): Promise<boolean> {
     // This would check against your project/suggestion/task permissions
     // For now, return true - implement based on your permission system
@@ -508,7 +515,7 @@ export class MessagingService {
   async syncContextPermissions(
     contextType: string,
     contextId: string,
-    allowedUserIds: string[],
+    allowedUserIds: string[]
   ): Promise<void> {
     try {
       // Get all recipients who have messages for this context
@@ -519,8 +526,8 @@ export class MessagingService {
         .where(
           and(
             eq(messages.contextType, contextType),
-            eq(messages.contextId, contextId),
-          ),
+            eq(messages.contextId, contextId)
+          )
         );
 
       // Mark access as revoked for users not in allowedUserIds
@@ -536,12 +543,12 @@ export class MessagingService {
             and(
               inArray(messageRecipients.recipientId, revokedUserIds),
               eq(messages.contextType, contextType),
-              eq(messages.contextId, contextId),
-            ),
+              eq(messages.contextId, contextId)
+            )
           );
       }
     } catch (error) {
-      console.error("Failed to sync context permissions:", error);
+      console.error('Failed to sync context permissions:', error);
       throw error;
     }
   }
@@ -553,7 +560,7 @@ export class MessagingService {
     senderId: string;
     recipientId: string;
     content: string;
-    contextType: "project" | "task";
+    contextType: 'project' | 'task';
     contextId: string;
     entityName: string;
   }): Promise<{ message: Message; alreadySent: boolean }> {
@@ -576,10 +583,10 @@ export class MessagingService {
 
       if (recipientExists.length === 0) {
         console.error(
-          `Kudos recipient not found in users table: ${recipientId}`,
+          `Kudos recipient not found in users table: ${recipientId}`
         );
         throw new Error(
-          `Invalid recipient: ${recipientId}. User does not exist in the system.`,
+          `Invalid recipient: ${recipientId}. User does not exist in the system.`
         );
       }
 
@@ -592,8 +599,8 @@ export class MessagingService {
             eq(kudosTracking.senderId, senderId),
             eq(kudosTracking.recipientId, recipientId),
             eq(kudosTracking.contextType, contextType),
-            eq(kudosTracking.contextId, contextId),
-          ),
+            eq(kudosTracking.contextId, contextId)
+          )
         )
         .limit(1);
 
@@ -624,7 +631,7 @@ export class MessagingService {
 
       return { message, alreadySent: false };
     } catch (error) {
-      console.error("Failed to send kudos:", error);
+      console.error('Failed to send kudos:', error);
       throw error;
     }
   }
@@ -636,7 +643,7 @@ export class MessagingService {
     senderId: string,
     recipientId: string,
     contextType: string,
-    contextId: string,
+    contextId: string
   ): Promise<boolean> {
     try {
       const result = await db
@@ -647,13 +654,13 @@ export class MessagingService {
             eq(kudosTracking.senderId, senderId),
             eq(kudosTracking.recipientId, recipientId),
             eq(kudosTracking.contextType, contextType),
-            eq(kudosTracking.contextId, contextId),
-          ),
+            eq(kudosTracking.contextId, contextId)
+          )
         );
 
       return result[0]?.count > 0;
     } catch (error) {
-      console.error("Failed to check kudos status:", error);
+      console.error('Failed to check kudos status:', error);
       return false;
     }
   }
@@ -661,7 +668,10 @@ export class MessagingService {
   /**
    * Mark kudos messages as read
    */
-  async markKudosAsRead(userId: string, kudosIds: number[]): Promise<{ count: number }> {
+  async markKudosAsRead(
+    userId: string,
+    kudosIds: number[]
+  ): Promise<{ count: number }> {
     try {
       // Get the message IDs from kudos tracking
       const kudosEntries = await db
@@ -670,7 +680,10 @@ export class MessagingService {
         .where(
           and(
             eq(kudosTracking.recipientId, userId),
-            sql`${kudosTracking.messageId} IN (${sql.join(kudosIds.map(id => sql`${id}`), sql`, `)})`
+            sql`${kudosTracking.messageId} IN (${sql.join(
+              kudosIds.map((id) => sql`${id}`),
+              sql`, `
+            )})`
           )
         );
 
@@ -678,25 +691,30 @@ export class MessagingService {
         return { count: 0 };
       }
 
-      const messageIds = kudosEntries.map(entry => entry.messageId).filter(id => id !== null) as number[];
+      const messageIds = kudosEntries
+        .map((entry) => entry.messageId)
+        .filter((id) => id !== null) as number[];
 
       // Mark the corresponding message recipients as read
       const result = await db
         .update(messageRecipients)
-        .set({ 
-          read: true, 
-          readAt: sql`NOW()` 
+        .set({
+          read: true,
+          readAt: sql`NOW()`,
         })
         .where(
           and(
             eq(messageRecipients.recipientId, userId),
-            sql`${messageRecipients.messageId} IN (${sql.join(messageIds.map(id => sql`${id}`), sql`, `)})`
+            sql`${messageRecipients.messageId} IN (${sql.join(
+              messageIds.map((id) => sql`${id}`),
+              sql`, `
+            )})`
           )
         );
 
       return { count: messageIds.length };
     } catch (error) {
-      console.error("Failed to mark kudos as read:", error);
+      console.error('Failed to mark kudos as read:', error);
       throw error;
     }
   }
@@ -731,24 +749,27 @@ export class MessagingService {
                 senderId: messages.senderId,
                 senderName:
                   sql<string>`COALESCE(${users.firstName} || ' ' || ${users.lastName}, ${users.displayName}, ${users.email})`.as(
-                    "senderName",
+                    'senderName'
                   ),
                 isRead: messageRecipients.read,
               })
               .from(messages)
               .leftJoin(users, eq(messages.senderId, users.id))
-              .leftJoin(messageRecipients, and(
-                eq(messages.id, messageRecipients.messageId),
-                eq(messageRecipients.recipientId, userId)
-              ))
+              .leftJoin(
+                messageRecipients,
+                and(
+                  eq(messages.id, messageRecipients.messageId),
+                  eq(messageRecipients.recipientId, userId)
+                )
+              )
               .where(eq(messages.id, entry.messageId!))
               .limit(1);
 
             if (!messageResult) return null;
 
             // Determine entity name based on context
-            let entityName = "Unknown";
-            if (entry.contextType === "task") {
+            let entityName = 'Unknown';
+            if (entry.contextType === 'task') {
               try {
                 const [task] = await db
                   .select({ title: sql<string>`title` })
@@ -759,7 +780,7 @@ export class MessagingService {
               } catch (error) {
                 entityName = `Task ${entry.contextId}`;
               }
-            } else if (entry.contextType === "project") {
+            } else if (entry.contextType === 'project') {
               try {
                 const [project] = await db
                   .select({ title: sql<string>`title` })
@@ -776,7 +797,7 @@ export class MessagingService {
               id: messageResult.id,
               content: messageResult.content,
               sender: messageResult.senderId,
-              senderName: messageResult.senderName || "Unknown User",
+              senderName: messageResult.senderName || 'Unknown User',
               contextType: entry.contextType,
               contextId: entry.contextId,
               entityName,
@@ -788,17 +809,17 @@ export class MessagingService {
           } catch (error) {
             console.error(
               `Error fetching kudos message ${entry.messageId}:`,
-              error,
+              error
             );
             return null;
           }
-        }),
+        })
       );
 
       // Filter out null results and return
       return kudosMessages.filter(Boolean);
     } catch (error) {
-      console.error("Failed to get received kudos:", error);
+      console.error('Failed to get received kudos:', error);
       throw error;
     }
   }
@@ -812,7 +833,7 @@ export class MessagingService {
       contextType?: string;
       limit?: number;
       offset?: number;
-    } = {},
+    } = {}
   ): Promise<MessageWithSender[]> {
     const { contextType, limit = 50, offset = 0 } = options;
 
@@ -835,7 +856,7 @@ export class MessagingService {
         .from(messages)
         .innerJoin(
           messageRecipients,
-          eq(messages.id, messageRecipients.messageId),
+          eq(messages.id, messageRecipients.messageId)
         )
         .leftJoin(users, eq(messages.senderId, users.id))
         .where(eq(messageRecipients.recipientId, userId));
@@ -855,12 +876,12 @@ export class MessagingService {
           msg.senderName ||
           msg.senderEmail ||
           `User ${msg.senderId}` ||
-          "Unknown User",
+          'Unknown User',
         read: !!msg.read,
         readAt: msg.readAt || undefined,
       }));
     } catch (error) {
-      console.error("Failed to get all messages:", error);
+      console.error('Failed to get all messages:', error);
       throw error;
     }
   }
@@ -874,7 +895,7 @@ export class MessagingService {
       contextType?: string;
       limit?: number;
       offset?: number;
-    } = {},
+    } = {}
   ): Promise<MessageWithSender[]> {
     const { contextType, limit = 50, offset = 0 } = options;
 
@@ -896,7 +917,7 @@ export class MessagingService {
         .leftJoin(users, eq(messages.senderId, users.id))
         .where(eq(messages.senderId, userId));
 
-      if (contextType && contextType !== "all") {
+      if (contextType && contextType !== 'all') {
         query = query.where(eq(messages.contextType, contextType));
       }
 
@@ -911,11 +932,11 @@ export class MessagingService {
           msg.senderName ||
           msg.senderEmail ||
           `User ${msg.senderId}` ||
-          "Unknown User",
+          'Unknown User',
         read: true, // All sent messages are "read" from sender's perspective
       }));
     } catch (error) {
-      console.error("Failed to get sent messages:", error);
+      console.error('Failed to get sent messages:', error);
       throw error;
     }
   }
@@ -929,7 +950,7 @@ export class MessagingService {
       contextType?: string;
       limit?: number;
       offset?: number;
-    } = {},
+    } = {}
   ): Promise<MessageWithSender[]> {
     const { contextType, limit = 50, offset = 0 } = options;
 
@@ -952,12 +973,12 @@ export class MessagingService {
         .from(messages)
         .innerJoin(
           messageRecipients,
-          eq(messages.id, messageRecipients.messageId),
+          eq(messages.id, messageRecipients.messageId)
         )
         .leftJoin(users, eq(messages.senderId, users.id))
         .where(eq(messageRecipients.recipientId, userId));
 
-      if (contextType && contextType !== "all") {
+      if (contextType && contextType !== 'all') {
         query = query.where(eq(messages.contextType, contextType));
       }
 
@@ -972,12 +993,12 @@ export class MessagingService {
           msg.senderName ||
           msg.senderEmail ||
           `User ${msg.senderId}` ||
-          "Unknown User",
+          'Unknown User',
         read: !!msg.read,
         readAt: msg.readAt || undefined,
       }));
     } catch (error) {
-      console.error("Failed to get inbox messages:", error);
+      console.error('Failed to get inbox messages:', error);
       throw error;
     }
   }
@@ -1001,7 +1022,7 @@ export class MessagingService {
         .limit(1);
 
       if (!originalMessage) {
-        throw new Error("Original message not found");
+        throw new Error('Original message not found');
       }
 
       // Get all participants in the original message (sender + recipients)
@@ -1021,14 +1042,14 @@ export class MessagingService {
         senderId,
         recipientIds,
         content,
-        contextType: originalMessage.contextType || "direct",
+        contextType: originalMessage.contextType || 'direct',
         contextId: originalMessage.contextId,
         parentMessageId: originalMessageId,
       });
 
       return reply;
     } catch (error) {
-      console.error("Failed to reply to message:", error);
+      console.error('Failed to reply to message:', error);
       throw error;
     }
   }
@@ -1038,13 +1059,13 @@ export class MessagingService {
    */
   private async triggerNotifications(
     message: Message,
-    recipientIds: string[],
+    recipientIds: string[]
   ): Promise<void> {
     try {
       // Send WebSocket notifications
       if ((global as any).broadcastNewMessage) {
         await (global as any).broadcastNewMessage({
-          type: "new_message",
+          type: 'new_message',
           message,
           context: {
             type: message.contextType,
@@ -1054,7 +1075,7 @@ export class MessagingService {
       }
 
       // Send immediate email notifications for direct messages
-      if (message.contextType === "direct") {
+      if (message.contextType === 'direct') {
         await this.sendDirectMessageEmails(message, recipientIds);
       }
 
@@ -1063,7 +1084,7 @@ export class MessagingService {
         await this.scheduleEmailFallback(message.id, recipientId);
       }
     } catch (error) {
-      console.error("Failed to trigger notifications:", error);
+      console.error('Failed to trigger notifications:', error);
     }
   }
 
@@ -1072,14 +1093,14 @@ export class MessagingService {
    */
   private async sendDirectMessageEmails(
     message: Message,
-    recipientIds: string[],
+    recipientIds: string[]
   ): Promise<void> {
     try {
       // Import NotificationService dynamically to avoid circular dependency
-      const { NotificationService } = await import("../notification-service");
+      const { NotificationService } = await import('../notification-service');
 
       // Get sender name
-      const senderName = message.sender || "Unknown User";
+      const senderName = message.sender || 'Unknown User';
 
       // Send email to each recipient
       for (const recipientId of recipientIds) {
@@ -1096,18 +1117,18 @@ export class MessagingService {
               recipient.email,
               senderName,
               message.content,
-              message.contextType,
+              message.contextType
             );
           }
         } catch (error) {
           console.error(
             `Failed to send direct message email to ${recipientId}:`,
-            error,
+            error
           );
         }
       }
     } catch (error) {
-      console.error("Failed to send direct message emails:", error);
+      console.error('Failed to send direct message emails:', error);
     }
   }
 
@@ -1117,7 +1138,7 @@ export class MessagingService {
   private async scheduleEmailFallback(
     messageId: number,
     recipientId: string,
-    delayMinutes: number = 30,
+    delayMinutes: number = 30
   ): Promise<void> {
     // This would integrate with a job queue like Bull or similar
     // For now, we'll use a simple setTimeout
@@ -1133,8 +1154,8 @@ export class MessagingService {
                 eq(messageRecipients.messageId, messageId),
                 eq(messageRecipients.recipientId, recipientId),
                 eq(messageRecipients.read, false),
-                isNull(messageRecipients.emailSentAt),
-              ),
+                isNull(messageRecipients.emailSentAt)
+              )
             )
             .limit(1);
 
@@ -1162,17 +1183,17 @@ export class MessagingService {
                   .where(
                     and(
                       eq(messageRecipients.messageId, messageId),
-                      eq(messageRecipients.recipientId, recipientId),
-                    ),
+                      eq(messageRecipients.recipientId, recipientId)
+                    )
                   );
               }
             }
           }
         } catch (error) {
-          console.error("Failed to send email fallback:", error);
+          console.error('Failed to send email fallback:', error);
         }
       },
-      delayMinutes * 60 * 1000,
+      delayMinutes * 60 * 1000
     );
   }
 
@@ -1184,7 +1205,7 @@ export class MessagingService {
     options?: {
       limit?: number;
       offset?: number;
-    },
+    }
   ): Promise<MessageWithSender[]> {
     const { limit = 50, offset = 0 } = options || {};
 
@@ -1193,7 +1214,7 @@ export class MessagingService {
       // This will prevent the 404 error but still work with the UI
       return [];
     } catch (error) {
-      console.error("Failed to get draft messages:", error);
+      console.error('Failed to get draft messages:', error);
       throw error;
     }
   }
@@ -1218,10 +1239,10 @@ export class MessagingService {
         content: data.content,
         subject: data.subject || '',
         createdAt: new Date(),
-        isDraft: true
+        isDraft: true,
       };
     } catch (error) {
-      console.error("Failed to save draft:", error);
+      console.error('Failed to save draft:', error);
       throw error;
     }
   }
@@ -1248,8 +1269,8 @@ export class MessagingService {
             eq(messageRecipients.read, false),
             eq(messageRecipients.initiallyNotified, false),
             isNull(messages.deletedAt),
-            eq(messageRecipients.contextAccessRevoked, false),
-          ),
+            eq(messageRecipients.contextAccessRevoked, false)
+          )
         )
         .orderBy(desc(messages.createdAt))
         .limit(10);
@@ -1258,12 +1279,12 @@ export class MessagingService {
 
       return results.map((row) => ({
         ...row.message,
-        senderName: row.senderName || "Unknown User",
+        senderName: row.senderName || 'Unknown User',
         senderEmail: row.senderEmail || undefined,
-        entityName: row.entityName || "Unknown Entity",
+        entityName: row.entityName || 'Unknown Entity',
       }));
     } catch (error) {
-      console.error("Failed to get unnotified kudos:", error);
+      console.error('Failed to get unnotified kudos:', error);
       throw error;
     }
   }
@@ -1273,7 +1294,7 @@ export class MessagingService {
    */
   async markKudosInitiallyNotified(
     recipientId: string,
-    kudosIds: number[],
+    kudosIds: number[]
   ): Promise<void> {
     try {
       await db
@@ -1285,11 +1306,11 @@ export class MessagingService {
         .where(
           and(
             eq(messageRecipients.recipientId, recipientId),
-            inArray(messageRecipients.messageId, kudosIds),
-          ),
+            inArray(messageRecipients.messageId, kudosIds)
+          )
         );
     } catch (error) {
-      console.error("Failed to mark kudos as initially notified:", error);
+      console.error('Failed to mark kudos as initially notified:', error);
       throw error;
     }
   }

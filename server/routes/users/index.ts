@@ -1,14 +1,14 @@
-import { Router } from "express";
-import { userService } from "../../services/users";
-import { requirePermission, createErrorHandler } from "../../middleware";
+import { Router } from 'express';
+import { userService } from '../../services/users';
+import { requirePermission, createErrorHandler } from '../../middleware';
 
 const usersRouter = Router();
 
 // Error handling for this module (standard middleware applied at mount level)
-const errorHandler = createErrorHandler("users");
+const errorHandler = createErrorHandler('users');
 
 // User list for project assignments (available to anyone who can create projects)
-usersRouter.get("/for-assignments", async (req, res, next) => {
+usersRouter.get('/for-assignments', async (req, res, next) => {
   try {
     const assignableUsers = await userService.getUsersForAssignments();
     res.json(assignableUsers);
@@ -19,8 +19,8 @@ usersRouter.get("/for-assignments", async (req, res, next) => {
 
 // User management routes requiring USERS_EDIT permission
 usersRouter.get(
-  "/",
-  requirePermission("USERS_EDIT"),
+  '/',
+  requirePermission('USERS_EDIT'),
   async (req, res, next) => {
     try {
       const users = await userService.getAllUsers();
@@ -32,8 +32,8 @@ usersRouter.get(
 );
 
 usersRouter.post(
-  "/",
-  requirePermission("USERS_EDIT"),
+  '/',
+  requirePermission('USERS_EDIT'),
   async (req, res, next) => {
     try {
       const { email, firstName, lastName, role } = req.body;
@@ -48,10 +48,10 @@ usersRouter.post(
       res.status(201).json(newUser);
     } catch (error) {
       if (error instanceof Error) {
-        if (error.message.includes("already exists")) {
+        if (error.message.includes('already exists')) {
           return res.status(409).json({ message: error.message });
         }
-        if (error.message.includes("required")) {
+        if (error.message.includes('required')) {
           return res.status(400).json({ message: error.message });
         }
       }
@@ -61,8 +61,8 @@ usersRouter.post(
 );
 
 usersRouter.patch(
-  "/:id",
-  requirePermission("USERS_EDIT"),
+  '/:id',
+  requirePermission('USERS_EDIT'),
   async (req, res, next) => {
     try {
       const { id } = req.params;
@@ -82,8 +82,8 @@ usersRouter.patch(
 );
 
 usersRouter.patch(
-  "/:id/status",
-  requirePermission("USERS_EDIT"),
+  '/:id/status',
+  requirePermission('USERS_EDIT'),
   async (req, res, next) => {
     try {
       const { id } = req.params;
@@ -98,8 +98,8 @@ usersRouter.patch(
 );
 
 usersRouter.patch(
-  "/:id/profile",
-  requirePermission("USERS_EDIT"),
+  '/:id/profile',
+  requirePermission('USERS_EDIT'),
   async (req, res, next) => {
     try {
       const { id } = req.params;
@@ -119,13 +119,13 @@ usersRouter.patch(
 );
 
 usersRouter.delete(
-  "/:id",
-  requirePermission("USERS_EDIT"),
+  '/:id',
+  requirePermission('USERS_EDIT'),
   async (req, res, next) => {
     try {
       const { id } = req.params;
       await userService.deleteUser(id);
-      res.json({ success: true, message: "User deleted successfully" });
+      res.json({ success: true, message: 'User deleted successfully' });
     } catch (error) {
       next(error);
     }
@@ -133,19 +133,19 @@ usersRouter.delete(
 );
 
 usersRouter.patch(
-  "/:id/password",
-  requirePermission("USERS_EDIT"),
+  '/:id/password',
+  requirePermission('USERS_EDIT'),
   async (req, res, next) => {
     try {
       const { id } = req.params;
       const { password } = req.body;
 
       await userService.setUserPassword(id, password);
-      res.json({ success: true, message: "Password updated successfully" });
+      res.json({ success: true, message: 'Password updated successfully' });
     } catch (error) {
       if (
         error instanceof Error &&
-        error.message.includes("must be at least")
+        error.message.includes('must be at least')
       ) {
         return res.status(400).json({ message: error.message });
       }

@@ -1,4 +1,4 @@
-import { format } from "date-fns";
+import { format } from 'date-fns';
 
 interface Meeting {
   id: number;
@@ -40,23 +40,23 @@ export class MeetingAgendaPDFGenerator {
     agenda?: CompiledAgenda
   ): Promise<Buffer> {
     // Dynamic import for ES modules
-    const PDFKit = (await import("pdfkit")).default;
+    const PDFKit = (await import('pdfkit')).default;
     const doc = new PDFKit({ margin: 50 });
 
     const chunks: Buffer[] = [];
-    doc.on("data", (chunk) => chunks.push(chunk));
+    doc.on('data', (chunk) => chunks.push(chunk));
 
     return new Promise((resolve) => {
-      doc.on("end", () => resolve(Buffer.concat(chunks)));
+      doc.on('end', () => resolve(Buffer.concat(chunks)));
 
       // TSP Brand Colors
       const colors = {
-        orange: "#FBAD3F",
-        navy: "#236383",
-        lightBlue: "#47B3CB",
-        darkGray: "#333333",
-        lightGray: "#666666",
-        white: "#FFFFFF",
+        orange: '#FBAD3F',
+        navy: '#236383',
+        lightBlue: '#47B3CB',
+        darkGray: '#333333',
+        lightGray: '#666666',
+        white: '#FFFFFF',
       };
 
       let yPosition = 50;
@@ -65,16 +65,16 @@ export class MeetingAgendaPDFGenerator {
       doc
         .fontSize(24)
         .fillColor(colors.navy)
-        .text("The Sandwich Project", 50, yPosition);
+        .text('The Sandwich Project', 50, yPosition);
       doc
         .fontSize(18)
         .fillColor(colors.orange)
-        .text("Meeting Agenda", 50, yPosition + 30);
+        .text('Meeting Agenda', 50, yPosition + 30);
 
       // Meeting details
-      const meetingDate = format(new Date(meeting.date), "EEEE, MMMM dd, yyyy");
+      const meetingDate = format(new Date(meeting.date), 'EEEE, MMMM dd, yyyy');
       const meetingTime =
-        meeting.time && meeting.time !== "TBD" ? meeting.time : "TBD";
+        meeting.time && meeting.time !== 'TBD' ? meeting.time : 'TBD';
 
       doc
         .fontSize(14)
@@ -100,10 +100,7 @@ export class MeetingAgendaPDFGenerator {
 
       // If compiled agenda exists, show sections
       if (agenda && agenda.sections && agenda.sections.length > 0) {
-        doc
-          .fontSize(16)
-          .fillColor(colors.navy)
-          .text("AGENDA", 50, yPosition);
+        doc.fontSize(16).fillColor(colors.navy).text('AGENDA', 50, yPosition);
         yPosition += 30;
 
         // Add estimated total time if available
@@ -170,13 +167,13 @@ export class MeetingAgendaPDFGenerator {
               if (item.estimatedTime)
                 metadata.push(`Time: ${item.estimatedTime}`);
               if (item.type)
-                metadata.push(`Type: ${item.type.replace("_", " ")}`);
+                metadata.push(`Type: ${item.type.replace('_', ' ')}`);
 
               if (metadata.length > 0) {
                 doc
                   .fontSize(9)
                   .fillColor(colors.lightGray)
-                  .text(metadata.join(" • "), 90, yPosition);
+                  .text(metadata.join(' • '), 90, yPosition);
                 yPosition += 15;
               }
 
@@ -186,7 +183,7 @@ export class MeetingAgendaPDFGenerator {
             doc
               .fontSize(10)
               .fillColor(colors.lightGray)
-              .text("No items scheduled for this section", 70, yPosition);
+              .text('No items scheduled for this section', 70, yPosition);
             yPosition += 20;
           }
 
@@ -194,18 +191,15 @@ export class MeetingAgendaPDFGenerator {
         });
       } else {
         // No compiled agenda available
-        doc
-          .fontSize(16)
-          .fillColor(colors.navy)
-          .text("AGENDA", 50, yPosition);
+        doc.fontSize(16).fillColor(colors.navy).text('AGENDA', 50, yPosition);
         yPosition += 30;
 
         // Show the standard sections structure
         const standardSections = [
-          "Old Business",
-          "Urgent Items",
-          "Housekeeping",
-          "New Business",
+          'Old Business',
+          'Urgent Items',
+          'Housekeeping',
+          'New Business',
         ];
 
         standardSections.forEach((section, index) => {
@@ -218,7 +212,7 @@ export class MeetingAgendaPDFGenerator {
           doc
             .fontSize(10)
             .fillColor(colors.lightGray)
-            .text("Items to be determined", 70, yPosition);
+            .text('Items to be determined', 70, yPosition);
           yPosition += 30;
         });
       }
@@ -236,7 +230,7 @@ export class MeetingAgendaPDFGenerator {
             }`,
             50,
             doc.page.height - 50,
-            { align: "center", width: doc.page.width - 100 }
+            { align: 'center', width: doc.page.width - 100 }
           );
       }
 

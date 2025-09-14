@@ -1,20 +1,26 @@
-import { useState, useMemo } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useState, useMemo } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from "@/hooks/use-toast";
+} from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useToast } from '@/hooks/use-toast';
 import {
   Car,
   Plus,
@@ -31,11 +37,11 @@ import {
   Search,
   Filter,
   X,
-} from "lucide-react";
-import { apiRequest } from "@/lib/queryClient";
-import { useAuth } from "@/hooks/useAuth";
-import { hasPermission, PERMISSIONS } from "@shared/auth-utils";
-import type { Driver, Host } from "@shared/schema";
+} from 'lucide-react';
+import { apiRequest } from '@/lib/queryClient';
+import { useAuth } from '@/hooks/useAuth';
+import { hasPermission, PERMISSIONS } from '@shared/auth-utils';
+import type { Driver, Host } from '@shared/schema';
 
 export default function DriversManagement() {
   const { toast } = useToast();
@@ -48,19 +54,19 @@ export default function DriversManagement() {
   const [editingDriver, setEditingDriver] = useState<Driver | null>(null);
 
   // Search and filter states
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [agreementFilter, setAgreementFilter] = useState<string>("all");
-  const [vanFilter, setVanFilter] = useState<string>("all");
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [agreementFilter, setAgreementFilter] = useState<string>('all');
+  const [vanFilter, setVanFilter] = useState<string>('all');
   const [showFilters, setShowFilters] = useState(false);
 
   const [newDriver, setNewDriver] = useState({
-    name: "",
-    phone: "",
-    email: "",
-    licenseNumber: "",
-    hostLocation: "",
-    availability: "",
+    name: '',
+    phone: '',
+    email: '',
+    licenseNumber: '',
+    hostLocation: '',
+    availability: '',
     emailAgreementSent: false,
     vanApproved: false,
     isActive: true,
@@ -68,12 +74,12 @@ export default function DriversManagement() {
 
   // Fetch drivers
   const { data: drivers = [], isLoading } = useQuery<Driver[]>({
-    queryKey: ["/api/drivers"],
+    queryKey: ['/api/drivers'],
   });
 
   // Fetch hosts for route assignments
   const { data: hosts = [] } = useQuery<Host[]>({
-    queryKey: ["/api/hosts"],
+    queryKey: ['/api/hosts'],
   });
 
   // Filtered and searched drivers
@@ -83,34 +89,37 @@ export default function DriversManagement() {
     // Apply search filter
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(driver =>
-        driver.name?.toLowerCase().includes(term) ||
-        driver.email?.toLowerCase().includes(term) ||
-        driver.phone?.toLowerCase().includes(term) ||
-        driver.hostLocation?.toLowerCase().includes(term) ||
-        driver.availability?.toLowerCase().includes(term)
+      filtered = filtered.filter(
+        (driver) =>
+          driver.name?.toLowerCase().includes(term) ||
+          driver.email?.toLowerCase().includes(term) ||
+          driver.phone?.toLowerCase().includes(term) ||
+          driver.hostLocation?.toLowerCase().includes(term) ||
+          driver.availability?.toLowerCase().includes(term)
       );
     }
 
     // Apply status filter
-    if (statusFilter === "active") {
-      filtered = filtered.filter(driver => driver.isActive === true);
-    } else if (statusFilter === "inactive") {
-      filtered = filtered.filter(driver => driver.isActive === false);
+    if (statusFilter === 'active') {
+      filtered = filtered.filter((driver) => driver.isActive === true);
+    } else if (statusFilter === 'inactive') {
+      filtered = filtered.filter((driver) => driver.isActive === false);
     }
 
     // Apply agreement filter
-    if (agreementFilter === "sent") {
-      filtered = filtered.filter(driver => driver.emailAgreementSent === true);
-    } else if (agreementFilter === "missing") {
-      filtered = filtered.filter(driver => !driver.emailAgreementSent);
+    if (agreementFilter === 'sent') {
+      filtered = filtered.filter(
+        (driver) => driver.emailAgreementSent === true
+      );
+    } else if (agreementFilter === 'missing') {
+      filtered = filtered.filter((driver) => !driver.emailAgreementSent);
     }
 
     // Apply van filter
-    if (vanFilter === "approved") {
-      filtered = filtered.filter(driver => driver.vanApproved === true);
-    } else if (vanFilter === "not_approved") {
-      filtered = filtered.filter(driver => !driver.vanApproved);
+    if (vanFilter === 'approved') {
+      filtered = filtered.filter((driver) => driver.vanApproved === true);
+    } else if (vanFilter === 'not_approved') {
+      filtered = filtered.filter((driver) => !driver.vanApproved);
     }
 
     return filtered;
@@ -119,16 +128,16 @@ export default function DriversManagement() {
   // Add driver mutation
   const addDriverMutation = useMutation({
     mutationFn: (driverData: any) =>
-      apiRequest("POST", "/api/drivers", driverData),
+      apiRequest('POST', '/api/drivers', driverData),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/drivers"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/drivers'] });
       setIsAddModalOpen(false);
       resetNewDriver();
-      toast({ title: "Driver added successfully" });
+      toast({ title: 'Driver added successfully' });
     },
     onError: (error) => {
-      console.error("Driver addition error:", error);
-      toast({ title: "Error adding driver", variant: "destructive" });
+      console.error('Driver addition error:', error);
+      toast({ title: 'Error adding driver', variant: 'destructive' });
     },
   });
 
@@ -141,40 +150,40 @@ export default function DriversManagement() {
         createdAt: undefined,
         updatedAt: undefined,
       };
-      return apiRequest("PUT", `/api/drivers/${id}`, cleanData);
+      return apiRequest('PUT', `/api/drivers/${id}`, cleanData);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/drivers"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/drivers'] });
       setEditingDriver(null);
-      toast({ title: "Driver updated successfully" });
+      toast({ title: 'Driver updated successfully' });
     },
     onError: (error) => {
-      console.error("Driver update error:", error);
-      toast({ title: "Error updating driver", variant: "destructive" });
+      console.error('Driver update error:', error);
+      toast({ title: 'Error updating driver', variant: 'destructive' });
     },
   });
 
   // Delete driver mutation
   const deleteDriverMutation = useMutation({
-    mutationFn: (id: number) => apiRequest("DELETE", `/api/drivers/${id}`),
+    mutationFn: (id: number) => apiRequest('DELETE', `/api/drivers/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/drivers"] });
-      toast({ title: "Driver deleted successfully" });
+      queryClient.invalidateQueries({ queryKey: ['/api/drivers'] });
+      toast({ title: 'Driver deleted successfully' });
     },
     onError: (error) => {
-      console.error("Driver delete error:", error);
-      toast({ title: "Error deleting driver", variant: "destructive" });
+      console.error('Driver delete error:', error);
+      toast({ title: 'Error deleting driver', variant: 'destructive' });
     },
   });
 
   const resetNewDriver = () => {
     setNewDriver({
-      name: "",
-      phone: "",
-      email: "",
-      licenseNumber: "",
-      hostLocation: "",
-      availability: "",
+      name: '',
+      phone: '',
+      email: '',
+      licenseNumber: '',
+      hostLocation: '',
+      availability: '',
       emailAgreementSent: false,
       vanApproved: false,
       isActive: true,
@@ -184,8 +193,8 @@ export default function DriversManagement() {
   const handleAddDriver = async () => {
     if (!newDriver.name || !newDriver.phone) {
       toast({
-        title: "Please fill in required fields",
-        variant: "destructive",
+        title: 'Please fill in required fields',
+        variant: 'destructive',
       });
       return;
     }
@@ -202,30 +211,34 @@ export default function DriversManagement() {
   };
 
   const handleDeleteDriver = (driver: Driver) => {
-    if (window.confirm(`Are you sure you want to delete ${driver.name}? This action cannot be undone.`)) {
+    if (
+      window.confirm(
+        `Are you sure you want to delete ${driver.name}? This action cannot be undone.`
+      )
+    ) {
       deleteDriverMutation.mutate(driver.id);
     }
   };
 
   const handleExport = async () => {
     try {
-      const response = await fetch("/api/drivers/export", {
-        credentials: "include",
+      const response = await fetch('/api/drivers/export', {
+        credentials: 'include',
       });
-      if (!response.ok) throw new Error("Export failed");
+      if (!response.ok) throw new Error('Export failed');
 
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
+      const a = document.createElement('a');
       a.href = url;
-      a.download = `drivers-export-${new Date().toISOString().split("T")[0]}.csv`;
+      a.download = `drivers-export-${new Date().toISOString().split('T')[0]}.csv`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-      toast({ title: "Export completed successfully" });
+      toast({ title: 'Export completed successfully' });
     } catch (error) {
-      toast({ title: "Export failed", variant: "destructive" });
+      toast({ title: 'Export failed', variant: 'destructive' });
     }
   };
 
@@ -233,8 +246,8 @@ export default function DriversManagement() {
     return <div className="p-6">Loading drivers...</div>;
   }
 
-  const activeDrivers = filteredDrivers.filter(driver => driver.isActive);
-  const inactiveDrivers = filteredDrivers.filter(driver => !driver.isActive);
+  const activeDrivers = filteredDrivers.filter((driver) => driver.isActive);
+  const inactiveDrivers = filteredDrivers.filter((driver) => !driver.isActive);
 
   return (
     <div className="space-y-6">
@@ -306,12 +319,17 @@ export default function DriversManagement() {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="licenseNumber">Driver's License Number</Label>
+                      <Label htmlFor="licenseNumber">
+                        Driver's License Number
+                      </Label>
                       <Input
                         id="licenseNumber"
                         value={newDriver.licenseNumber}
                         onChange={(e) =>
-                          setNewDriver({ ...newDriver, licenseNumber: e.target.value })
+                          setNewDriver({
+                            ...newDriver,
+                            licenseNumber: e.target.value,
+                          })
                         }
                         placeholder="Enter license number (optional)"
                       />
@@ -322,7 +340,10 @@ export default function DriversManagement() {
                         id="hostLocation"
                         value={newDriver.hostLocation}
                         onChange={(e) =>
-                          setNewDriver({ ...newDriver, hostLocation: e.target.value })
+                          setNewDriver({
+                            ...newDriver,
+                            hostLocation: e.target.value,
+                          })
                         }
                         className="w-full px-3 py-2 border rounded-md"
                       >
@@ -340,7 +361,10 @@ export default function DriversManagement() {
                         id="availability"
                         value={newDriver.availability}
                         onChange={(e) =>
-                          setNewDriver({ ...newDriver, availability: e.target.value })
+                          setNewDriver({
+                            ...newDriver,
+                            availability: e.target.value,
+                          })
                         }
                         placeholder="Enter availability notes (e.g., weekends only, mornings, etc.)"
                       />
@@ -351,11 +375,16 @@ export default function DriversManagement() {
                         id="emailAgreementSent"
                         checked={newDriver.emailAgreementSent}
                         onChange={(e) =>
-                          setNewDriver({ ...newDriver, emailAgreementSent: e.target.checked })
+                          setNewDriver({
+                            ...newDriver,
+                            emailAgreementSent: e.target.checked,
+                          })
                         }
                         className="rounded border-gray-300"
                       />
-                      <Label htmlFor="emailAgreementSent">Agreement Signed</Label>
+                      <Label htmlFor="emailAgreementSent">
+                        Agreement Signed
+                      </Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <input
@@ -363,7 +392,10 @@ export default function DriversManagement() {
                         id="vanApproved"
                         checked={newDriver.vanApproved}
                         onChange={(e) =>
-                          setNewDriver({ ...newDriver, vanApproved: e.target.checked })
+                          setNewDriver({
+                            ...newDriver,
+                            vanApproved: e.target.checked,
+                          })
                         }
                         className="rounded border-gray-300"
                       />
@@ -375,7 +407,10 @@ export default function DriversManagement() {
                         id="isActive"
                         checked={newDriver.isActive}
                         onChange={(e) =>
-                          setNewDriver({ ...newDriver, isActive: e.target.checked })
+                          setNewDriver({
+                            ...newDriver,
+                            isActive: e.target.checked,
+                          })
                         }
                         className="rounded border-gray-300"
                       />
@@ -392,7 +427,9 @@ export default function DriversManagement() {
                         onClick={handleAddDriver}
                         disabled={addDriverMutation.isPending}
                       >
-                        {addDriverMutation.isPending ? "Adding..." : "Add Driver"}
+                        {addDriverMutation.isPending
+                          ? 'Adding...'
+                          : 'Add Driver'}
                       </Button>
                     </div>
                   </div>
@@ -401,7 +438,7 @@ export default function DriversManagement() {
             </div>
           </div>
         </div>
-        
+
         {/* Search and Filter Controls */}
         <div className="space-y-3 p-4 bg-slate-50 rounded-lg border-t border-slate-200">
           <div className="flex flex-col md:flex-row gap-3">
@@ -415,7 +452,7 @@ export default function DriversManagement() {
                 className="pl-10"
               />
             </div>
-            
+
             {/* Filter Toggle Button */}
             <Button
               variant="outline"
@@ -424,9 +461,17 @@ export default function DriversManagement() {
             >
               <Filter className="w-4 h-4" />
               Filters
-              {(statusFilter !== "all" || agreementFilter !== "all" || vanFilter !== "all") && (
+              {(statusFilter !== 'all' ||
+                agreementFilter !== 'all' ||
+                vanFilter !== 'all') && (
                 <Badge variant="secondary" className="ml-1">
-                  {[statusFilter !== "all" && "Status", agreementFilter !== "all" && "Agreement", vanFilter !== "all" && "Van"].filter(Boolean).length}
+                  {
+                    [
+                      statusFilter !== 'all' && 'Status',
+                      agreementFilter !== 'all' && 'Agreement',
+                      vanFilter !== 'all' && 'Van',
+                    ].filter(Boolean).length
+                  }
                 </Badge>
               )}
             </Button>
@@ -436,7 +481,9 @@ export default function DriversManagement() {
           {showFilters && (
             <div className="flex flex-col md:flex-row gap-3 pt-3 border-t border-slate-200">
               <div className="flex flex-col space-y-2">
-                <Label className="text-xs font-medium text-slate-600">Status</Label>
+                <Label className="text-xs font-medium text-slate-600">
+                  Status
+                </Label>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
                   <SelectTrigger className="w-[140px]">
                     <SelectValue />
@@ -450,8 +497,13 @@ export default function DriversManagement() {
               </div>
 
               <div className="flex flex-col space-y-2">
-                <Label className="text-xs font-medium text-slate-600">Agreement</Label>
-                <Select value={agreementFilter} onValueChange={setAgreementFilter}>
+                <Label className="text-xs font-medium text-slate-600">
+                  Agreement
+                </Label>
+                <Select
+                  value={agreementFilter}
+                  onValueChange={setAgreementFilter}
+                >
                   <SelectTrigger className="w-[160px]">
                     <SelectValue />
                   </SelectTrigger>
@@ -464,7 +516,9 @@ export default function DriversManagement() {
               </div>
 
               <div className="flex flex-col space-y-2">
-                <Label className="text-xs font-medium text-slate-600">Van Status</Label>
+                <Label className="text-xs font-medium text-slate-600">
+                  Van Status
+                </Label>
                 <Select value={vanFilter} onValueChange={setVanFilter}>
                   <SelectTrigger className="w-[160px]">
                     <SelectValue />
@@ -472,7 +526,9 @@ export default function DriversManagement() {
                   <SelectContent>
                     <SelectItem value="all">All Van Status</SelectItem>
                     <SelectItem value="approved">Van Approved</SelectItem>
-                    <SelectItem value="not_approved">Not Van Approved</SelectItem>
+                    <SelectItem value="not_approved">
+                      Not Van Approved
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -482,10 +538,10 @@ export default function DriversManagement() {
                   variant="ghost"
                   size="sm"
                   onClick={() => {
-                    setSearchTerm("");
-                    setStatusFilter("all");
-                    setAgreementFilter("all");
-                    setVanFilter("all");
+                    setSearchTerm('');
+                    setStatusFilter('all');
+                    setAgreementFilter('all');
+                    setVanFilter('all');
                   }}
                   className="text-slate-500 hover:text-slate-700"
                 >
@@ -495,20 +551,23 @@ export default function DriversManagement() {
               </div>
             </div>
           )}
-          
+
           {/* Results Summary */}
           <div className="text-sm text-slate-600">
             Showing {filteredDrivers.length} of {drivers.length} drivers
             {searchTerm && <span> • Search: "{searchTerm}"</span>}
-            {statusFilter !== "all" && <span> • {statusFilter}</span>}
-            {agreementFilter !== "all" && <span> • {agreementFilter}</span>}
-            {vanFilter !== "all" && <span> • {vanFilter}</span>}
+            {statusFilter !== 'all' && <span> • {statusFilter}</span>}
+            {agreementFilter !== 'all' && <span> • {agreementFilter}</span>}
+            {vanFilter !== 'all' && <span> • {vanFilter}</span>}
           </div>
         </div>
       </div>
 
       {/* Edit Driver Dialog */}
-      <Dialog open={!!editingDriver} onOpenChange={() => setEditingDriver(null)}>
+      <Dialog
+        open={!!editingDriver}
+        onOpenChange={() => setEditingDriver(null)}
+      >
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Edit Driver</DialogTitle>
@@ -530,9 +589,12 @@ export default function DriversManagement() {
                 <Label htmlFor="edit-phone">Phone</Label>
                 <Input
                   id="edit-phone"
-                  value={editingDriver.phone || ""}
+                  value={editingDriver.phone || ''}
                   onChange={(e) =>
-                    setEditingDriver({ ...editingDriver, phone: e.target.value })
+                    setEditingDriver({
+                      ...editingDriver,
+                      phone: e.target.value,
+                    })
                   }
                   placeholder="Enter phone number"
                 />
@@ -542,20 +604,28 @@ export default function DriversManagement() {
                 <Input
                   id="edit-email"
                   type="email"
-                  value={editingDriver.email || ""}
+                  value={editingDriver.email || ''}
                   onChange={(e) =>
-                    setEditingDriver({ ...editingDriver, email: e.target.value })
+                    setEditingDriver({
+                      ...editingDriver,
+                      email: e.target.value,
+                    })
                   }
                   placeholder="Enter email address"
                 />
               </div>
               <div>
-                <Label htmlFor="edit-licenseNumber">Driver's License Number</Label>
+                <Label htmlFor="edit-licenseNumber">
+                  Driver's License Number
+                </Label>
                 <Input
                   id="edit-licenseNumber"
-                  value={editingDriver.licenseNumber || ""}
+                  value={editingDriver.licenseNumber || ''}
                   onChange={(e) =>
-                    setEditingDriver({ ...editingDriver, licenseNumber: e.target.value })
+                    setEditingDriver({
+                      ...editingDriver,
+                      licenseNumber: e.target.value,
+                    })
                   }
                   placeholder="Enter license number (optional)"
                 />
@@ -564,9 +634,12 @@ export default function DriversManagement() {
                 <Label htmlFor="edit-hostLocation">Host Location</Label>
                 <select
                   id="edit-hostLocation"
-                  value={editingDriver.hostLocation || ""}
+                  value={editingDriver.hostLocation || ''}
                   onChange={(e) =>
-                    setEditingDriver({ ...editingDriver, hostLocation: e.target.value })
+                    setEditingDriver({
+                      ...editingDriver,
+                      hostLocation: e.target.value,
+                    })
                   }
                   className="w-full px-3 py-2 border rounded-md"
                 >
@@ -582,9 +655,12 @@ export default function DriversManagement() {
                 <Label htmlFor="edit-availability">Availability Notes</Label>
                 <Input
                   id="edit-availability"
-                  value={editingDriver.availability || ""}
+                  value={editingDriver.availability || ''}
                   onChange={(e) =>
-                    setEditingDriver({ ...editingDriver, availability: e.target.value })
+                    setEditingDriver({
+                      ...editingDriver,
+                      availability: e.target.value,
+                    })
                   }
                   placeholder="Enter availability notes (e.g., weekends only, mornings, etc.)"
                 />
@@ -595,11 +671,16 @@ export default function DriversManagement() {
                   id="edit-emailAgreementSent"
                   checked={editingDriver.emailAgreementSent || false}
                   onChange={(e) =>
-                    setEditingDriver({ ...editingDriver, emailAgreementSent: e.target.checked })
+                    setEditingDriver({
+                      ...editingDriver,
+                      emailAgreementSent: e.target.checked,
+                    })
                   }
                   className="rounded border-gray-300"
                 />
-                <Label htmlFor="edit-emailAgreementSent">Agreement Signed</Label>
+                <Label htmlFor="edit-emailAgreementSent">
+                  Agreement Signed
+                </Label>
               </div>
               <div className="flex items-center space-x-2">
                 <input
@@ -607,7 +688,10 @@ export default function DriversManagement() {
                   id="edit-vanApproved"
                   checked={editingDriver.vanApproved || false}
                   onChange={(e) =>
-                    setEditingDriver({ ...editingDriver, vanApproved: e.target.checked })
+                    setEditingDriver({
+                      ...editingDriver,
+                      vanApproved: e.target.checked,
+                    })
                   }
                   className="rounded border-gray-300"
                 />
@@ -619,7 +703,10 @@ export default function DriversManagement() {
                   id="edit-isActive"
                   checked={editingDriver.isActive}
                   onChange={(e) =>
-                    setEditingDriver({ ...editingDriver, isActive: e.target.checked })
+                    setEditingDriver({
+                      ...editingDriver,
+                      isActive: e.target.checked,
+                    })
                   }
                   className="rounded border-gray-300"
                 />
@@ -636,7 +723,9 @@ export default function DriversManagement() {
                   onClick={handleUpdateDriver}
                   disabled={updateDriverMutation.isPending}
                 >
-                  {updateDriverMutation.isPending ? "Updating..." : "Update Driver"}
+                  {updateDriverMutation.isPending
+                    ? 'Updating...'
+                    : 'Update Driver'}
                 </Button>
               </div>
             </div>
@@ -676,7 +765,7 @@ export default function DriversManagement() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
                         <div className="flex-shrink-0">
-                          {driver.vehicleType?.toLowerCase().includes("van") ? (
+                          {driver.vehicleType?.toLowerCase().includes('van') ? (
                             <Truck className="w-8 h-8 text-blue-500" />
                           ) : (
                             <Car className="w-8 h-8 text-blue-500" />
@@ -692,22 +781,33 @@ export default function DriversManagement() {
                               Active
                             </Badge>
                             {driver.emailAgreementSent ? (
-                              <Badge variant="default" className="bg-green-100 text-green-800 border-green-200">
+                              <Badge
+                                variant="default"
+                                className="bg-green-100 text-green-800 border-green-200"
+                              >
                                 <FileCheck className="w-3 h-3 mr-1" />
                                 Agreement Signed
                               </Badge>
                             ) : (
-                              <Badge variant="outline" className="border-orange-200 text-orange-700 bg-orange-50">
+                              <Badge
+                                variant="outline"
+                                className="border-orange-200 text-orange-700 bg-orange-50"
+                              >
                                 <AlertTriangle className="w-3 h-3 mr-1" />
                                 Missing Agreement
                               </Badge>
                             )}
-                            {driver.licenseNumber && driver.licenseNumber.trim().length > 0 && (
-                              <Badge variant="secondary" className="bg-slate-50 text-slate-700 border-slate-200" data-testid={`badge-dl-on-file-${driver.id}`}>
-                                <FileCheck className="w-3 h-3 mr-1" />
-                                DL# on file
-                              </Badge>
-                            )}
+                            {driver.licenseNumber &&
+                              driver.licenseNumber.trim().length > 0 && (
+                                <Badge
+                                  variant="secondary"
+                                  className="bg-slate-50 text-slate-700 border-slate-200"
+                                  data-testid={`badge-dl-on-file-${driver.id}`}
+                                >
+                                  <FileCheck className="w-3 h-3 mr-1" />
+                                  DL# on file
+                                </Badge>
+                              )}
                           </div>
                           <div className="flex items-center gap-4 mt-1">
                             {driver.phone && (
@@ -734,7 +834,10 @@ export default function DriversManagement() {
                             </div>
                           )}
                           {driver.vanApproved && (
-                            <Badge variant="default" className="bg-blue-100 text-blue-800 border-blue-200 mt-1">
+                            <Badge
+                              variant="default"
+                              className="bg-blue-100 text-blue-800 border-blue-200 mt-1"
+                            >
                               <CheckCircle className="w-3 h-3 mr-1" />
                               Van Approved
                             </Badge>
@@ -801,22 +904,33 @@ export default function DriversManagement() {
                               Inactive
                             </Badge>
                             {driver.emailAgreementSent ? (
-                              <Badge variant="outline" className="border-green-200 text-green-600 bg-green-50">
+                              <Badge
+                                variant="outline"
+                                className="border-green-200 text-green-600 bg-green-50"
+                              >
                                 <FileCheck className="w-3 h-3 mr-1" />
                                 Agreement Signed
                               </Badge>
                             ) : (
-                              <Badge variant="outline" className="border-orange-200 text-orange-600 bg-orange-50">
+                              <Badge
+                                variant="outline"
+                                className="border-orange-200 text-orange-600 bg-orange-50"
+                              >
                                 <AlertTriangle className="w-3 h-3 mr-1" />
                                 Missing Agreement
                               </Badge>
                             )}
-                            {driver.licenseNumber && driver.licenseNumber.trim().length > 0 && (
-                              <Badge variant="outline" className="border-slate-200 text-slate-600 bg-slate-50" data-testid={`badge-dl-on-file-${driver.id}`}>
-                                <FileCheck className="w-3 h-3 mr-1" />
-                                DL# on file
-                              </Badge>
-                            )}
+                            {driver.licenseNumber &&
+                              driver.licenseNumber.trim().length > 0 && (
+                                <Badge
+                                  variant="outline"
+                                  className="border-slate-200 text-slate-600 bg-slate-50"
+                                  data-testid={`badge-dl-on-file-${driver.id}`}
+                                >
+                                  <FileCheck className="w-3 h-3 mr-1" />
+                                  DL# on file
+                                </Badge>
+                              )}
                           </div>
                           <div className="flex items-center gap-4 mt-1">
                             {driver.phone && (

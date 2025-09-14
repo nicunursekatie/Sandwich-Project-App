@@ -5,5 +5,5 @@ export default {
   collectCoverage: false,
   setupFilesAfterEnv: ['<rootDir>/test/setup.js'],
   testTimeout: 30000,
-  transform: {}
+  transform: {},
 };

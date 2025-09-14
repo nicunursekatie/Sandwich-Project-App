@@ -1,9 +1,9 @@
-import React, { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Users, MessageCircle, Shield, Car, Heart, Globe } from "lucide-react";
-import SimpleChat from "./simple-chat";
-import { useAuth } from "@/hooks/useAuth";
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Users, MessageCircle, Shield, Car, Heart, Globe } from 'lucide-react';
+import SimpleChat from './simple-chat';
+import { useAuth } from '@/hooks/useAuth';
 
 interface ChatRoom {
   id: string;
@@ -15,45 +15,45 @@ interface ChatRoom {
 
 const CHAT_ROOMS: ChatRoom[] = [
   {
-    id: "general",
-    name: "General Chat",
-    description: "Open discussion for all team members",
+    id: 'general',
+    name: 'General Chat',
+    description: 'Open discussion for all team members',
     icon: <Globe className="h-5 w-5" />,
   },
   {
-    id: "core-team",
-    name: "Core Team",
-    description: "Private discussions for core team members",
+    id: 'core-team',
+    name: 'Core Team',
+    description: 'Private discussions for core team members',
     icon: <Shield className="h-5 w-5" />,
-    permission: "core_team_chat",
+    permission: 'core_team_chat',
   },
   {
-    id: "committee",
-    name: "Committee Chat",
-    description: "Committee member discussions",
+    id: 'committee',
+    name: 'Committee Chat',
+    description: 'Committee member discussions',
     icon: <Users className="h-5 w-5" />,
-    permission: "committee_chat",
+    permission: 'committee_chat',
   },
   {
-    id: "host",
-    name: "Host Chat",
-    description: "Communication for sandwich collection hosts",
+    id: 'host',
+    name: 'Host Chat',
+    description: 'Communication for sandwich collection hosts',
     icon: <Heart className="h-5 w-5" />,
-    permission: "host_chat",
+    permission: 'host_chat',
   },
   {
-    id: "driver",
-    name: "Driver Chat",
-    description: "Coordination for delivery drivers",
+    id: 'driver',
+    name: 'Driver Chat',
+    description: 'Coordination for delivery drivers',
     icon: <Car className="h-5 w-5" />,
-    permission: "driver_chat",
+    permission: 'driver_chat',
   },
   {
-    id: "recipient",
-    name: "Recipient Chat",
-    description: "Communication for recipient organizations",
+    id: 'recipient',
+    name: 'Recipient Chat',
+    description: 'Communication for recipient organizations',
     icon: <MessageCircle className="h-5 w-5" />,
-    permission: "recipient_chat",
+    permission: 'recipient_chat',
   },
 ];
 

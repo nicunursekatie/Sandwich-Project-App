@@ -1,11 +1,11 @@
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card';
 import {
   Heart,
   Users,
@@ -13,37 +13,37 @@ import {
   MessageSquare,
   TrendingUp,
   MapPin,
-} from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import { DocumentsBrowser } from "@/components/documents-browser";
-import tspLogo from "@assets/CMYK_PRINT_TSP-01_1749585167435.png";
-import tspTransparent from "@assets/LOGOS/Copy of TSP_transparent.png";
+} from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+import { DocumentsBrowser } from '@/components/documents-browser';
+import tspLogo from '@assets/CMYK_PRINT_TSP-01_1749585167435.png';
+import tspTransparent from '@assets/LOGOS/Copy of TSP_transparent.png';
 
 export default function Landing() {
   const [showToolkit, setShowToolkit] = useState(false);
 
   const handleLogin = () => {
     // Redirect to Replit Auth login
-    window.location.href = "/api/login";
+    window.location.href = '/api/login';
   };
 
   // Fetch real statistics for public display
   const { data: statsData } = useQuery({
-    queryKey: ["/api/sandwich-collections/stats"],
+    queryKey: ['/api/sandwich-collections/stats'],
     queryFn: async () => {
-      const response = await fetch("/api/sandwich-collections/stats");
-      if (!response.ok) throw new Error("Failed to fetch stats");
+      const response = await fetch('/api/sandwich-collections/stats');
+      if (!response.ok) throw new Error('Failed to fetch stats');
       return response.json();
     },
     retry: false,
   });
 
   const { data: collectionsResponse } = useQuery({
-    queryKey: ["/api/sandwich-collections"],
+    queryKey: ['/api/sandwich-collections'],
     queryFn: async () => {
-      const response = await fetch("/api/sandwich-collections?limit=1000");
-      if (!response.ok) throw new Error("Failed to fetch collections");
+      const response = await fetch('/api/sandwich-collections?limit=1000');
+      if (!response.ok) throw new Error('Failed to fetch collections');
       return response.json();
     },
     retry: false,
@@ -103,14 +103,14 @@ export default function Landing() {
               size="lg"
               onClick={() => {
                 console.log(
-                  "Toolkit button clicked, current state:",
+                  'Toolkit button clicked, current state:',
                   showToolkit
                 );
                 setShowToolkit(!showToolkit);
               }}
               className="border-2 border-[#236383] text-[#236383] hover:bg-[#236383] hover:text-white px-8 py-4 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg active:scale-95 focus:outline-none focus:ring-4 focus:ring-[#236383]/20"
             >
-              {showToolkit ? "Hide" : "View"} Group Toolkit
+              {showToolkit ? 'Hide' : 'View'} Group Toolkit
             </Button>
           </div>
         </div>
@@ -313,7 +313,7 @@ export default function Landing() {
               Contact us to learn about volunteer opportunities
             </p>
             <p className="text-sm font-medium">
-              Visit:{" "}
+              Visit:{' '}
               <span className="text-blue-600">thesandwichproject.org</span>
             </p>
           </CardContent>

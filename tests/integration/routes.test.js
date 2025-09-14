@@ -11,13 +11,11 @@ describe('Route Integration Tests', () => {
 
   beforeAll(async () => {
     // Set up test authentication
-    const loginResponse = await request(app)
-      .post('/api/auth/login')
-      .send({
-        email: 'admin@sandwich.project',
-        password: 'admin123'
-      });
-    
+    const loginResponse = await request(app).post('/api/auth/login').send({
+      email: 'admin@sandwich.project',
+      password: 'admin123',
+    });
+
     authCookie = loginResponse.headers['set-cookie'];
   });
 
@@ -53,7 +51,7 @@ describe('Route Integration Tests', () => {
         assignedToUserId: 'admin_1756853839752',
         assignedToName: 'Admin User',
         priority: 'high',
-        createdBy: 'admin_1756853839752'
+        createdBy: 'admin_1756853839752',
       };
 
       const response = await request(app)
@@ -65,14 +63,14 @@ describe('Route Integration Tests', () => {
       expect(response.body).toHaveProperty('id');
       expect(response.body.title).toBe(reminderData.title);
       expect(response.body.status).toBe('pending');
-      
+
       reminderId = response.body.id;
     });
 
     test('PUT /api/event-reminders/:id - should update reminder', async () => {
       const updates = {
         status: 'completed',
-        completionNotes: 'Test completion notes'
+        completionNotes: 'Test completion notes',
       };
 
       const response = await request(app)
@@ -122,7 +120,7 @@ describe('Route Integration Tests', () => {
         phone: '555-0123',
         vehicleType: 'sedan',
         agreementSigned: true,
-        notes: 'Integration test driver'
+        notes: 'Integration test driver',
       };
 
       const response = await request(app)
@@ -134,7 +132,7 @@ describe('Route Integration Tests', () => {
       expect(response.body).toHaveProperty('id');
       expect(response.body.name).toBe(driverData.name);
       expect(response.body.email).toBe(driverData.email);
-      
+
       driverId = response.body.id;
     });
 
@@ -152,7 +150,7 @@ describe('Route Integration Tests', () => {
       const updates = {
         phone: '555-9999',
         vehicleType: 'suv',
-        notes: 'Updated notes'
+        notes: 'Updated notes',
       };
 
       const response = await request(app)
@@ -204,7 +202,7 @@ describe('Route Integration Tests', () => {
         email: 'testvolunteer@example.com',
         phone: '555-0456',
         hostId: 1,
-        notes: 'Integration test volunteer'
+        notes: 'Integration test volunteer',
       };
 
       const response = await request(app)
@@ -216,7 +214,7 @@ describe('Route Integration Tests', () => {
       expect(response.body).toHaveProperty('id');
       expect(response.body.name).toBe(volunteerData.name);
       expect(response.body.email).toBe(volunteerData.email);
-      
+
       volunteerId = response.body.id;
     });
 
@@ -233,7 +231,7 @@ describe('Route Integration Tests', () => {
     test('PATCH /api/volunteers/:id - should update volunteer', async () => {
       const updates = {
         phone: '555-7777',
-        notes: 'Updated volunteer notes'
+        notes: 'Updated volunteer notes',
       };
 
       const response = await request(app)
@@ -294,7 +292,7 @@ describe('Route Integration Tests', () => {
         state: 'TX',
         zipCode: '12345',
         isActive: true,
-        notes: 'Integration test host'
+        notes: 'Integration test host',
       };
 
       const response = await request(app)
@@ -305,7 +303,7 @@ describe('Route Integration Tests', () => {
       expect(response.status).toBe(201);
       expect(response.body).toHaveProperty('id');
       expect(response.body.name).toBe(hostData.name);
-      
+
       hostId = response.body.id;
     });
 
@@ -322,7 +320,7 @@ describe('Route Integration Tests', () => {
     test('PATCH /api/hosts/:id - should update host', async () => {
       const updates = {
         city: 'Updated City',
-        notes: 'Updated host notes'
+        notes: 'Updated host notes',
       };
 
       const response = await request(app)
@@ -353,15 +351,18 @@ describe('Route Integration Tests', () => {
         'GET /api/volunteers',
         'POST /api/volunteers',
         'GET /api/hosts',
-        'POST /api/hosts'
+        'POST /api/hosts',
       ];
 
       for (const endpoint of endpoints) {
         const [method, path] = endpoint.split(' ');
         const response = await request(app)[method.toLowerCase()](path);
-        
+
         expect(response.status).toBe(401);
-        expect(response.body).toHaveProperty('message', 'Authentication required');
+        expect(response.body).toHaveProperty(
+          'message',
+          'Authentication required'
+        );
       }
     });
   });

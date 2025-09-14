@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { X, Download, ExternalLink, FileText } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useState } from 'react';
+import { X, Download, ExternalLink, FileText } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface DocumentPreviewProps {
   documentPath: string;
@@ -19,7 +19,7 @@ export function DocumentPreview({
   const [showFallback, setShowFallback] = useState(false);
 
   const handleDownload = () => {
-    const link = document.createElement("a");
+    const link = document.createElement('a');
     link.href = documentPath;
     link.download = documentName;
     document.body.appendChild(link);
@@ -28,12 +28,12 @@ export function DocumentPreview({
   };
 
   const handleOpenInNewTab = () => {
-    window.open(documentPath, "_blank");
+    window.open(documentPath, '_blank');
   };
 
   const renderPreview = () => {
     switch (documentType?.toLowerCase()) {
-      case "pdf":
+      case 'pdf':
         return (
           <div className="h-full flex flex-col">
             {/* Header with buttons - compact */}
@@ -127,15 +127,15 @@ export function DocumentPreview({
                   }}
                   title={documentName}
                   style={{
-                    display: "block",
-                    border: "none",
+                    display: 'block',
+                    border: 'none',
                   }}
                 />
               )}
             </div>
           </div>
         );
-      case "docx":
+      case 'docx':
         // For DOCX files, show a download option since viewing requires conversion
         return (
           <div className="flex flex-col items-center justify-center h-full p-8 text-center">
@@ -166,7 +166,7 @@ export function DocumentPreview({
             </div>
           </div>
         );
-      case "xlsx":
+      case 'xlsx':
         // For Excel files, show a download option since viewing requires conversion
         return (
           <div className="flex flex-col items-center justify-center h-full p-8 text-center">
@@ -240,7 +240,7 @@ export function DocumentPreview({
               {documentName}
             </h2>
             <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-              {documentType?.toUpperCase() || "FILE"}
+              {documentType?.toUpperCase() || 'FILE'}
             </span>
           </div>
           <div className="flex items-center space-x-2">

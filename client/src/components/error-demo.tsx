@@ -1,77 +1,73 @@
-import React from "react";
-import { Button } from "@/components/ui/button";
+import React from 'react';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card';
 import {
   DynamicErrorMessageDisplay,
   useDynamicError,
-} from "./dynamic-error-message";
-import { useErrorHandler } from "@/hooks/useErrorHandler";
-import { Badge } from "@/components/ui/badge";
+} from './dynamic-error-message';
+import { useErrorHandler } from '@/hooks/useErrorHandler';
+import { Badge } from '@/components/ui/badge';
 
 export function ErrorDemoComponent() {
-  const {
-    currentError,
-    showError,
-    clearError,
-    handleErrorAction,
-  } = useDynamicError();
+  const { currentError, showError, clearError, handleErrorAction } =
+    useDynamicError();
   const errorHandler = useErrorHandler();
 
   const demoErrors = [
     {
-      code: "AUTH_EXPIRED",
-      label: "Session Expired",
-      description: "Simulate an expired authentication session",
+      code: 'AUTH_EXPIRED',
+      label: 'Session Expired',
+      description: 'Simulate an expired authentication session',
     },
     {
-      code: "PERMISSION_DENIED",
-      label: "Access Denied",
-      description: "Simulate insufficient permissions",
+      code: 'PERMISSION_DENIED',
+      label: 'Access Denied',
+      description: 'Simulate insufficient permissions',
     },
     {
-      code: "NETWORK_ERROR",
-      label: "Connection Issue",
-      description: "Simulate network connectivity problems",
+      code: 'NETWORK_ERROR',
+      label: 'Connection Issue',
+      description: 'Simulate network connectivity problems',
     },
     {
-      code: "VALIDATION_ERROR",
-      label: "Form Validation",
-      description: "Simulate form validation errors",
+      code: 'VALIDATION_ERROR',
+      label: 'Form Validation',
+      description: 'Simulate form validation errors',
     },
     {
-      code: "DATABASE_ERROR",
-      label: "Save Failed",
-      description: "Simulate database operation failure",
+      code: 'DATABASE_ERROR',
+      label: 'Save Failed',
+      description: 'Simulate database operation failure',
     },
     {
-      code: "FILE_UPLOAD_ERROR",
-      label: "Upload Failed",
-      description: "Simulate file upload problems",
+      code: 'FILE_UPLOAD_ERROR',
+      label: 'Upload Failed',
+      description: 'Simulate file upload problems',
     },
     {
-      code: "DATA_LOADING_ERROR",
-      label: "Loading Failed",
-      description: "Simulate data loading issues",
+      code: 'DATA_LOADING_ERROR',
+      label: 'Loading Failed',
+      description: 'Simulate data loading issues',
     },
     {
-      code: "EXTERNAL_SERVICE_ERROR",
-      label: "Service Down",
-      description: "Simulate external service unavailability",
+      code: 'EXTERNAL_SERVICE_ERROR',
+      label: 'Service Down',
+      description: 'Simulate external service unavailability',
     },
   ];
 
   const triggerError = (errorCode: string) => {
     const context = {
-      userRole: "core_team",
-      currentPage: "/error-demo",
-      attemptedAction: "demo error trigger",
-      userId: "demo-user",
+      userRole: 'core_team',
+      currentPage: '/error-demo',
+      attemptedAction: 'demo error trigger',
+      userId: 'demo-user',
     };
 
     showError(errorCode, context);
@@ -80,7 +76,7 @@ export function ErrorDemoComponent() {
   const triggerRealNetworkError = async () => {
     try {
       // Try to fetch from a non-existent endpoint
-      await fetch("/api/non-existent-endpoint");
+      await fetch('/api/non-existent-endpoint');
     } catch (error) {
       errorHandler.handleNetworkError(error as Error);
     }
@@ -89,12 +85,12 @@ export function ErrorDemoComponent() {
   const triggerFormError = () => {
     // Simulate a form error with validation data
     const mockFormData = {
-      email: "invalid-email",
-      password: "",
-      confirmPassword: "different",
+      email: 'invalid-email',
+      password: '',
+      confirmPassword: 'different',
     };
 
-    errorHandler.handleFormError("VALIDATION_ERROR", mockFormData);
+    errorHandler.handleFormError('VALIDATION_ERROR', mockFormData);
   };
 
   return (
@@ -150,7 +146,7 @@ export function ErrorDemoComponent() {
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  throw new Error("Uncaught JavaScript Error for Testing");
+                  throw new Error('Uncaught JavaScript Error for Testing');
                 }}
               >
                 JavaScript Error

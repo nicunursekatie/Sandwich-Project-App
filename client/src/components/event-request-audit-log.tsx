@@ -1,24 +1,24 @@
-import React, { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import React, { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
+} from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
 import {
   Shield,
   Clock,
@@ -36,9 +36,9 @@ import {
   AlertTriangle,
   CheckCircle,
   XCircle,
-} from "lucide-react";
-import { format } from "date-fns";
-import { useActivityTracker } from "@/hooks/useActivityTracker";
+} from 'lucide-react';
+import { format } from 'date-fns';
+import { useActivityTracker } from '@/hooks/useActivityTracker';
 
 interface AuditLogEntry {
   id: number;
@@ -66,33 +66,33 @@ export function EventRequestAuditLog({
   showFilters = true,
   compact = false,
 }: EventRequestAuditLogProps) {
-  const [timeFilter, setTimeFilter] = useState("24");
-  const [actionFilter, setActionFilter] = useState("all");
-  const [userFilter, setUserFilter] = useState("all");
-  const [searchTerm, setSearchTerm] = useState("");
-  const {
-    trackView,
-    trackClick,
-    trackFilter,
-    trackSearch,
-  } = useActivityTracker();
+  const [timeFilter, setTimeFilter] = useState('24');
+  const [actionFilter, setActionFilter] = useState('all');
+  const [userFilter, setUserFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  const { trackView, trackClick, trackFilter, trackSearch } =
+    useActivityTracker();
 
   // Track component view on mount
   useEffect(() => {
     trackView(
-      "Event Request Audit Log",
-      "Audit",
-      "Event Requests",
+      'Event Request Audit Log',
+      'Audit',
+      'Event Requests',
       eventId
         ? `Viewing audit log for event ${eventId}`
-        : "Viewing general event request audit log"
+        : 'Viewing general event request audit log'
     );
   }, [trackView, eventId]);
 
   // Fetch audit logs
-  const { data: auditLogs, isLoading, refetch } = useQuery<AuditLogEntry[]>({
+  const {
+    data: auditLogs,
+    isLoading,
+    refetch,
+  } = useQuery<AuditLogEntry[]>({
     queryKey: [
-      "/api/event-requests/audit-logs",
+      '/api/event-requests/audit-logs',
       timeFilter,
       actionFilter,
       userFilter,
@@ -101,16 +101,16 @@ export function EventRequestAuditLog({
     queryFn: async () => {
       const params = new URLSearchParams({
         hours: timeFilter,
-        limit: "100",
-        offset: "0",
+        limit: '100',
+        offset: '0',
       });
 
-      if (actionFilter !== "all") params.append("action", actionFilter);
-      if (userFilter !== "all") params.append("userId", userFilter);
-      if (eventId) params.append("eventId", eventId);
+      if (actionFilter !== 'all') params.append('action', actionFilter);
+      if (userFilter !== 'all') params.append('userId', userFilter);
+      if (eventId) params.append('eventId', eventId);
 
       const response = await fetch(`/api/event-requests/audit-logs?${params}`);
-      if (!response.ok) throw new Error("Failed to fetch audit logs");
+      if (!response.ok) throw new Error('Failed to fetch audit logs');
       return response.json();
     },
     refetchInterval: eventId ? undefined : 30000, // Auto-refresh every 30 seconds for general view
@@ -145,19 +145,19 @@ export function EventRequestAuditLog({
 
   const getActionIcon = (action: string) => {
     switch (action) {
-      case "CREATE":
+      case 'CREATE':
         return <Plus className="h-4 w-4" />;
-      case "PRIMARY_CONTACT_COMPLETED":
+      case 'PRIMARY_CONTACT_COMPLETED':
         return <UserCheck className="h-4 w-4" />;
-      case "EVENT_DETAILS_UPDATED":
+      case 'EVENT_DETAILS_UPDATED':
         return <Edit className="h-4 w-4" />;
-      case "STATUS_CHANGED":
+      case 'STATUS_CHANGED':
         return <RefreshCw className="h-4 w-4" />;
-      case "FOLLOW_UP_RECORDED":
+      case 'FOLLOW_UP_RECORDED':
         return <Mail className="h-4 w-4" />;
-      case "MARKED_UNRESPONSIVE":
+      case 'MARKED_UNRESPONSIVE':
         return <AlertTriangle className="h-4 w-4" />;
-      case "DELETE":
+      case 'DELETE':
         return <Trash2 className="h-4 w-4" />;
       default:
         return <FileText className="h-4 w-4" />;
@@ -166,48 +166,48 @@ export function EventRequestAuditLog({
 
   const getActionColor = (action: string) => {
     switch (action) {
-      case "CREATE":
-        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
-      case "PRIMARY_CONTACT_COMPLETED":
-        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
-      case "EVENT_DETAILS_UPDATED":
-        return "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200";
-      case "STATUS_CHANGED":
-        return "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200";
-      case "FOLLOW_UP_RECORDED":
-        return "bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-200";
-      case "MARKED_UNRESPONSIVE":
-        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
-      case "DELETE":
-        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
+      case 'CREATE':
+        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      case 'PRIMARY_CONTACT_COMPLETED':
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+      case 'EVENT_DETAILS_UPDATED':
+        return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
+      case 'STATUS_CHANGED':
+        return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
+      case 'FOLLOW_UP_RECORDED':
+        return 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-200';
+      case 'MARKED_UNRESPONSIVE':
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+      case 'DELETE':
+        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
       default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
     }
   };
 
   const handleRefresh = () => {
     trackClick(
-      "Refresh Audit Log",
-      "Audit",
-      "Event Requests",
-      "Manual refresh of audit log data"
+      'Refresh Audit Log',
+      'Audit',
+      'Event Requests',
+      'Manual refresh of audit log data'
     );
     refetch();
   };
 
   const handleFilterChange = (type: string, value: string) => {
     switch (type) {
-      case "time":
+      case 'time':
         setTimeFilter(value);
-        trackFilter("Time Filter", value, "Audit", "Event Requests");
+        trackFilter('Time Filter', value, 'Audit', 'Event Requests');
         break;
-      case "action":
+      case 'action':
         setActionFilter(value);
-        trackFilter("Action Filter", value, "Audit", "Event Requests");
+        trackFilter('Action Filter', value, 'Audit', 'Event Requests');
         break;
-      case "user":
+      case 'user':
         setUserFilter(value);
-        trackFilter("User Filter", value, "Audit", "Event Requests");
+        trackFilter('User Filter', value, 'Audit', 'Event Requests');
         break;
     }
   };
@@ -215,7 +215,7 @@ export function EventRequestAuditLog({
   const handleSearch = (value: string) => {
     setSearchTerm(value);
     if (value) {
-      trackSearch("Audit Log Search", value, "Audit", "Event Requests");
+      trackSearch('Audit Log Search', value, 'Audit', 'Event Requests');
     }
   };
 
@@ -279,7 +279,7 @@ export function EventRequestAuditLog({
                 <Clock className="h-4 w-4" />
                 <Select
                   value={timeFilter}
-                  onValueChange={(value) => handleFilterChange("time", value)}
+                  onValueChange={(value) => handleFilterChange('time', value)}
                 >
                   <SelectTrigger className="w-32">
                     <SelectValue />
@@ -298,7 +298,7 @@ export function EventRequestAuditLog({
                 <Filter className="h-4 w-4" />
                 <Select
                   value={actionFilter}
-                  onValueChange={(value) => handleFilterChange("action", value)}
+                  onValueChange={(value) => handleFilterChange('action', value)}
                 >
                   <SelectTrigger className="w-48">
                     <SelectValue />
@@ -331,7 +331,7 @@ export function EventRequestAuditLog({
                   <User className="h-4 w-4" />
                   <Select
                     value={userFilter}
-                    onValueChange={(value) => handleFilterChange("user", value)}
+                    onValueChange={(value) => handleFilterChange('user', value)}
                   >
                     <SelectTrigger className="w-48">
                       <SelectValue />
@@ -354,14 +354,14 @@ export function EventRequestAuditLog({
         {/* Results Summary */}
         <div className="flex items-center justify-between text-sm text-gray-600">
           <span>
-            {filteredLogs.length}{" "}
-            {filteredLogs.length === 1 ? "entry" : "entries"} found
+            {filteredLogs.length}{' '}
+            {filteredLogs.length === 1 ? 'entry' : 'entries'} found
           </span>
           {searchTerm && (
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => handleSearch("")}
+              onClick={() => handleSearch('')}
               className="h-6 px-2"
             >
               Clear search
@@ -370,7 +370,7 @@ export function EventRequestAuditLog({
         </div>
 
         {/* Audit Log Entries */}
-        <ScrollArea className={compact ? "h-96" : "h-[600px]"}>
+        <ScrollArea className={compact ? 'h-96' : 'h-[600px]'}>
           <div className="space-y-3">
             {filteredLogs.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
@@ -387,7 +387,7 @@ export function EventRequestAuditLog({
                     >
                       {getActionIcon(log.action)}
                       <span className="ml-1 text-xs">
-                        {log.action.replace("_", " ")}
+                        {log.action.replace('_', ' ')}
                       </span>
                     </Badge>
 
@@ -403,7 +403,7 @@ export function EventRequestAuditLog({
                           <span>
                             {format(
                               new Date(log.timestamp),
-                              "MMM d, yyyy h:mm a"
+                              'MMM d, yyyy h:mm a'
                             )}
                           </span>
                         </div>
@@ -426,7 +426,7 @@ export function EventRequestAuditLog({
                           )}
                           {log.followUpMethod && (
                             <div className="flex items-center text-green-600 dark:text-green-400">
-                              {log.followUpMethod === "email" ? (
+                              {log.followUpMethod === 'email' ? (
                                 <Mail className="h-3 w-3 mr-1" />
                               ) : (
                                 <Phone className="h-3 w-3 mr-1" />
@@ -437,7 +437,7 @@ export function EventRequestAuditLog({
                           {log.details?.updatedFields && (
                             <div className="flex items-center text-gray-500">
                               <Edit className="h-3 w-3 mr-1" />
-                              Updated: {log.details.updatedFields.join(", ")}
+                              Updated: {log.details.updatedFields.join(', ')}
                             </div>
                           )}
                         </div>

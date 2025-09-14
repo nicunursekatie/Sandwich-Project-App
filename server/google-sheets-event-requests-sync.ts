@@ -1,4 +1,7 @@
-import { GoogleSheetsService, GoogleSheetsConfig } from './google-sheets-service';
+import {
+  GoogleSheetsService,
+  GoogleSheetsConfig,
+} from './google-sheets-service';
 import type { IStorage } from './storage';
 import { EventRequest, Organization } from '@shared/schema';
 
@@ -24,7 +27,7 @@ export class EventRequestsGoogleSheetsService extends GoogleSheetsService {
   constructor(private storage: IStorage) {
     const config: GoogleSheetsConfig = {
       spreadsheetId: process.env.EVENT_REQUESTS_SHEET_ID!,
-      worksheetName: 'Sheet1'
+      worksheetName: 'Sheet1',
     };
     super(config);
   }
@@ -37,42 +40,67 @@ export class EventRequestsGoogleSheetsService extends GoogleSheetsService {
   /**
    * Convert EventRequest to Google Sheets row format
    */
-  private eventRequestToSheetRow(eventRequest: EventRequest): EventRequestSheetRow {
+  private eventRequestToSheetRow(
+    eventRequest: EventRequest
+  ): EventRequestSheetRow {
     return {
-      submittedOn: eventRequest.createdAt ? (() => {
-        const date = eventRequest.createdAt instanceof Date ? eventRequest.createdAt : new Date(eventRequest.createdAt);
-        return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
-      })() : '',
+      submittedOn: eventRequest.createdAt
+        ? (() => {
+            const date =
+              eventRequest.createdAt instanceof Date
+                ? eventRequest.createdAt
+                : new Date(eventRequest.createdAt);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+          })()
+        : '',
       organizationName: eventRequest.organizationName || '',
-      contactName: `${eventRequest.firstName || ''} ${eventRequest.lastName || ''}`.trim(),
+      contactName:
+        `${eventRequest.firstName || ''} ${eventRequest.lastName || ''}`.trim(),
       email: eventRequest.email || '',
       phone: eventRequest.phone || '',
       department: eventRequest.department || '',
-      desiredEventDate: eventRequest.desiredEventDate ? (() => {
-        // Timezone-safe date formatting for Google Sheets
-        const date = eventRequest.desiredEventDate instanceof Date ? eventRequest.desiredEventDate : new Date(eventRequest.desiredEventDate);
-        return date.toLocaleDateString();
-      })() : '',
+      desiredEventDate: eventRequest.desiredEventDate
+        ? (() => {
+            // Timezone-safe date formatting for Google Sheets
+            const date =
+              eventRequest.desiredEventDate instanceof Date
+                ? eventRequest.desiredEventDate
+                : new Date(eventRequest.desiredEventDate);
+            return date.toLocaleDateString();
+          })()
+        : '',
       status: eventRequest.status || 'new',
       message: eventRequest.message || '',
       previouslyHosted: eventRequest.previouslyHosted || '',
-      createdDate: eventRequest.createdAt ? (() => {
-        const date = eventRequest.createdAt instanceof Date ? eventRequest.createdAt : new Date(eventRequest.createdAt);
-        return date.toLocaleDateString();
-      })() : '',
-      lastUpdated: eventRequest.updatedAt ? (() => {
-        const date = eventRequest.updatedAt instanceof Date ? eventRequest.updatedAt : new Date(eventRequest.updatedAt);
-        return date.toLocaleDateString();
-      })() : '',
+      createdDate: eventRequest.createdAt
+        ? (() => {
+            const date =
+              eventRequest.createdAt instanceof Date
+                ? eventRequest.createdAt
+                : new Date(eventRequest.createdAt);
+            return date.toLocaleDateString();
+          })()
+        : '',
+      lastUpdated: eventRequest.updatedAt
+        ? (() => {
+            const date =
+              eventRequest.updatedAt instanceof Date
+                ? eventRequest.updatedAt
+                : new Date(eventRequest.updatedAt);
+            return date.toLocaleDateString();
+          })()
+        : '',
       duplicateCheck: eventRequest.organizationExists ? 'Yes' : 'No',
-      notes: eventRequest.duplicateNotes || ''
+      notes: eventRequest.duplicateNotes || '',
     };
   }
 
   /**
    * Convert Google Sheets row to EventRequest format
    */
-  private sheetRowToEventRequest(row: EventRequestSheetRow): Partial<EventRequest> {
+  private sheetRowToEventRequest(
+    row: EventRequestSheetRow
+  ): Partial<EventRequest> {
     const nameParts = row.contactName.split(' ');
     const firstName = nameParts[0] || '';
     const lastName = nameParts.slice(1).join(' ') || '';
@@ -83,16 +111,24 @@ export class EventRequestsGoogleSheetsService extends GoogleSheetsService {
       try {
         const dateStr = row.submittedOn.trim();
         submissionDate = new Date(dateStr);
-        
+
         // Validate the parsed date
         if (isNaN(submissionDate.getTime())) {
-          console.warn(`Invalid submission date format in Google Sheets: ${row.submittedOn}`);
+          console.warn(
+            `Invalid submission date format in Google Sheets: ${row.submittedOn}`
+          );
           submissionDate = new Date(); // Fallback to current date
         } else {
-          console.log(`✅ Parsed submission date "${row.submittedOn}" to:`, submissionDate.toISOString());
+          console.log(
+            `✅ Parsed submission date "${row.submittedOn}" to:`,
+            submissionDate.toISOString()
+          );
         }
       } catch (error) {
-        console.warn(`Error parsing submission date format in Google Sheets: ${row.submittedOn}`, error);
+        console.warn(
+          `Error parsing submission date format in Google Sheets: ${row.submittedOn}`,
+          error
+        );
         submissionDate = new Date(); // Fallback to current date
       }
     } else {
@@ -107,69 +143,89 @@ export class EventRequestsGoogleSheetsService extends GoogleSheetsService {
       email: row.email,
       phone: row.phone,
       department: row.department,
-      desiredEventDate: row.desiredEventDate ? (() => {
-        // Timezone-safe date parsing from Google Sheets
-        const dateStr = row.desiredEventDate.trim();
-        if (!dateStr) return null;
-        
-        try {
-          if (dateStr.match(/^\d{1,2}\/\d{1,2}\/\d{4}$/)) {
-            // Handle MM/DD/YYYY format from Google Sheets
-            const [month, day, year] = dateStr.split('/');
-            const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), 12, 0, 0);
-            return isNaN(date.getTime()) ? null : date;
-          } else if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
-            // Handle YYYY-MM-DD format
-            const date = new Date(dateStr + 'T12:00:00.000Z');
-            return isNaN(date.getTime()) ? null : date;
-          } else {
-            // Try parsing as-is with noon time to avoid timezone issues
-            const date = new Date(dateStr + 'T12:00:00.000Z');
-            return isNaN(date.getTime()) ? null : date;
-          }
-        } catch (error) {
-          console.warn(`Failed to parse date "${dateStr}":`, error);
-          return null;
-        }
-      })() : null,
+      desiredEventDate: row.desiredEventDate
+        ? (() => {
+            // Timezone-safe date parsing from Google Sheets
+            const dateStr = row.desiredEventDate.trim();
+            if (!dateStr) return null;
+
+            try {
+              if (dateStr.match(/^\d{1,2}\/\d{1,2}\/\d{4}$/)) {
+                // Handle MM/DD/YYYY format from Google Sheets
+                const [month, day, year] = dateStr.split('/');
+                const date = new Date(
+                  parseInt(year),
+                  parseInt(month) - 1,
+                  parseInt(day),
+                  12,
+                  0,
+                  0
+                );
+                return isNaN(date.getTime()) ? null : date;
+              } else if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                // Handle YYYY-MM-DD format
+                const date = new Date(dateStr + 'T12:00:00.000Z');
+                return isNaN(date.getTime()) ? null : date;
+              } else {
+                // Try parsing as-is with noon time to avoid timezone issues
+                const date = new Date(dateStr + 'T12:00:00.000Z');
+                return isNaN(date.getTime()) ? null : date;
+              }
+            } catch (error) {
+              console.warn(`Failed to parse date "${dateStr}":`, error);
+              return null;
+            }
+          })()
+        : null,
       status: (() => {
         // Smart status assignment: preserve existing status or determine based on event date
-        if (row.status && row.status.trim() && row.status.trim().toLowerCase() !== 'new') {
+        if (
+          row.status &&
+          row.status.trim() &&
+          row.status.trim().toLowerCase() !== 'new'
+        ) {
           return row.status.trim();
         }
-        
+
         // For events without status, check if it's a past event
         if (row.desiredEventDate && row.desiredEventDate.trim()) {
           try {
             const eventDate = new Date(row.desiredEventDate.trim());
             const today = new Date();
             today.setHours(0, 0, 0, 0);
-            
+
             if (!isNaN(eventDate.getTime()) && eventDate < today) {
               return 'completed'; // Past events are marked as completed
             }
           } catch (error) {
-            console.warn('Error parsing event date for status determination:', row.desiredEventDate);
+            console.warn(
+              'Error parsing event date for status determination:',
+              row.desiredEventDate
+            );
           }
         }
-        
+
         return 'new'; // Default for future events or unclear dates
       })(),
       message: row.message,
       previouslyHosted: row.previouslyHosted,
       organizationExists: row.duplicateCheck === 'Yes',
       duplicateNotes: row.notes,
-      createdAt: submissionDate // Map Google Sheet submission date to createdAt
+      createdAt: submissionDate, // Map Google Sheet submission date to createdAt
     };
   }
 
   /**
    * Update a specific event request's status in Google Sheets
    */
-  async updateEventRequestStatus(organizationName: string, contactName: string, newStatus: string): Promise<{ success: boolean; message: string }> {
+  async updateEventRequestStatus(
+    organizationName: string,
+    contactName: string,
+    newStatus: string
+  ): Promise<{ success: boolean; message: string }> {
     try {
       await this.ensureInitialized();
-      
+
       // Read current sheet to find the row
       const response = await this.sheets.spreadsheets.values.get({
         spreadsheetId: (this as any).config.spreadsheetId,
@@ -177,20 +233,22 @@ export class EventRequestsGoogleSheetsService extends GoogleSheetsService {
       });
 
       const rows = response.data.values || [];
-      
+
       // Find the matching row (case-insensitive)
-      const rowIndex = rows.findIndex(row => {
+      const rowIndex = rows.findIndex((row) => {
         const sheetOrgName = row[3] || ''; // Organization Name is column D (index 3)
         const sheetContactName = row[1] || ''; // Contact Name is column B (index 1)
-        
-        return sheetOrgName.toLowerCase() === organizationName.toLowerCase() && 
-               sheetContactName.toLowerCase() === contactName.toLowerCase();
+
+        return (
+          sheetOrgName.toLowerCase() === organizationName.toLowerCase() &&
+          sheetContactName.toLowerCase() === contactName.toLowerCase()
+        );
       });
 
       if (rowIndex === -1) {
-        return { 
-          success: false, 
-          message: `Event request not found in Google Sheets: ${organizationName} - ${contactName}`
+        return {
+          success: false,
+          message: `Event request not found in Google Sheets: ${organizationName} - ${contactName}`,
         };
       }
 
@@ -203,16 +261,18 @@ export class EventRequestsGoogleSheetsService extends GoogleSheetsService {
         resource: { values: [[newStatus]] },
       });
 
-      console.log(`✅ Updated Google Sheets status for ${organizationName} - ${contactName} to: ${newStatus}`);
-      return { 
-        success: true, 
-        message: `Updated status to ${newStatus} in Google Sheets`
+      console.log(
+        `✅ Updated Google Sheets status for ${organizationName} - ${contactName} to: ${newStatus}`
+      );
+      return {
+        success: true,
+        message: `Updated status to ${newStatus} in Google Sheets`,
       };
     } catch (error) {
       console.error('Error updating Google Sheets status:', error);
-      return { 
-        success: false, 
-        message: `Failed to update Google Sheets: ${error instanceof Error ? error.message : 'Unknown error'}`
+      return {
+        success: false,
+        message: `Failed to update Google Sheets: ${error instanceof Error ? error.message : 'Unknown error'}`,
       };
     }
   }
@@ -221,110 +281,151 @@ export class EventRequestsGoogleSheetsService extends GoogleSheetsService {
    * Sync event requests from database to Google Sheets
    * DISABLED TO PREVENT DATA LOSS - This function was clearing the user's sheet
    */
-  async syncToGoogleSheets(): Promise<{ success: boolean; message: string; synced?: number }> {
-    return { 
-      success: false, 
-      message: "TO-SHEETS sync is DISABLED to prevent data loss. Use FROM-SHEETS sync only."
+  async syncToGoogleSheets(): Promise<{
+    success: boolean;
+    message: string;
+    synced?: number;
+  }> {
+    return {
+      success: false,
+      message:
+        'TO-SHEETS sync is DISABLED to prevent data loss. Use FROM-SHEETS sync only.',
     };
   }
 
   /**
    * Sync from Google Sheets to database
    */
-  async syncFromGoogleSheets(): Promise<{ success: boolean; message: string; updated?: number; created?: number }> {
+  async syncFromGoogleSheets(): Promise<{
+    success: boolean;
+    message: string;
+    updated?: number;
+    created?: number;
+  }> {
     try {
       await this.ensureInitialized();
-      
+
       // Read from Google Sheets
       const sheetRows = await this.readEventRequestsSheet();
-      
+
       let updatedCount = 0;
       let createdCount = 0;
-      
+
       for (const row of sheetRows) {
         if (!row.organizationName) continue; // Skip empty rows
-        
+
         // Convert row to event request data first to access parsed submission date
         const eventRequestData = this.sheetRowToEventRequest(row);
-        
+
         // Try to find existing event request by organization name and contact name (case-insensitive)
         const existingRequests = await this.storage.getAllEventRequests();
         const nameParts = row.contactName.split(' ');
         const firstName = nameParts[0] || '';
         const lastName = nameParts.slice(1).join(' ') || '';
-        
-        const existingRequest = existingRequests.find(r => {
+
+        const existingRequest = existingRequests.find((r) => {
           // Match by organization name and contact name (case-insensitive)
-          const orgMatch = r.organizationName?.toLowerCase().trim() === row.organizationName?.toLowerCase().trim();
-          
+          const orgMatch =
+            r.organizationName?.toLowerCase().trim() ===
+            row.organizationName?.toLowerCase().trim();
+
           // Require both first AND last name to match (not just one)
-          const fullNameMatch = (
-            r.firstName?.toLowerCase().trim() === firstName.toLowerCase().trim() && 
-            r.lastName?.toLowerCase().trim() === lastName.toLowerCase().trim() &&
-            firstName.trim() && lastName.trim() // Both names must exist
-          );
-          
+          const fullNameMatch =
+            r.firstName?.toLowerCase().trim() ===
+              firstName.toLowerCase().trim() &&
+            r.lastName?.toLowerCase().trim() ===
+              lastName.toLowerCase().trim() &&
+            firstName.trim() &&
+            lastName.trim(); // Both names must exist
+
           // Email match (both must exist and match)
-          const emailMatch = r.email && row.email && 
+          const emailMatch =
+            r.email &&
+            row.email &&
             r.email.toLowerCase().trim() === row.email.toLowerCase().trim();
-          
+
           // Phone match (both must exist and match)
-          const phoneMatch = r.phone && row.phone &&
+          const phoneMatch =
+            r.phone &&
+            row.phone &&
             r.phone.replace(/\D/g, '') === row.phone.replace(/\D/g, ''); // Compare digits only
-          
+
           // Since submission timestamp is not available in this spreadsheet,
           // use more precise matching without time dependency
           const hasStrongIdentifier = emailMatch || phoneMatch;
           const hasFullNameAndOrg = fullNameMatch && orgMatch;
-          
+
           // Only consider duplicate if we have either:
           // 1. Strong identifier match (email or phone) + org match, OR
           // 2. Full name + org match AND neither email nor phone exists in either record
           if (hasStrongIdentifier && orgMatch) {
             return true; // Strong match via email/phone + org
           }
-          
+
           if (hasFullNameAndOrg) {
             // Only match on name if both records lack email/phone (to avoid false positives)
             const bothLackEmail = !r.email && !row.email;
             const bothLackPhone = !r.phone && !row.phone;
             return bothLackEmail && bothLackPhone;
           }
-          
+
           return false;
         });
-        
+
         if (existingRequest) {
           // SKIP updating existing requests - let the app be the authoritative source
-          console.log(`⏭️ Skipping existing event request (app is authoritative): ${row.organizationName} - ${row.contactName}`);
+          console.log(
+            `⏭️ Skipping existing event request (app is authoritative): ${row.organizationName} - ${row.contactName}`
+          );
           // Do not update existing requests to preserve user changes
         } else {
           // Create new
-          console.log(`✨ Creating new event request: ${eventRequestData.phone} - ${eventRequestData.firstName} ${eventRequestData.lastName} ${eventRequestData.email}`);
-          
+          console.log(
+            `✨ Creating new event request: ${eventRequestData.phone} - ${eventRequestData.firstName} ${eventRequestData.lastName} ${eventRequestData.email}`
+          );
+
           // Ensure dates are valid before saving to database
           const sanitizedData = {
             ...eventRequestData,
             createdBy: 'google_sheets_sync',
             // Ensure all date fields are either valid Date objects or null
-            desiredEventDate: eventRequestData.desiredEventDate && !isNaN(new Date(eventRequestData.desiredEventDate).getTime()) ? eventRequestData.desiredEventDate : null,
-            createdAt: eventRequestData.createdAt && !isNaN(new Date(eventRequestData.createdAt).getTime()) ? eventRequestData.createdAt : new Date(),
-            updatedAt: new Date()
+            desiredEventDate:
+              eventRequestData.desiredEventDate &&
+              !isNaN(new Date(eventRequestData.desiredEventDate).getTime())
+                ? eventRequestData.desiredEventDate
+                : null,
+            createdAt:
+              eventRequestData.createdAt &&
+              !isNaN(new Date(eventRequestData.createdAt).getTime())
+                ? eventRequestData.createdAt
+                : new Date(),
+            updatedAt: new Date(),
           };
-          
+
           try {
-            console.log(`🔍 Attempting to create event request with data:`, JSON.stringify(sanitizedData, null, 2));
-            const result = await this.storage.createEventRequest(sanitizedData as any);
-            console.log(`✅ Successfully created event request with ID: ${result.id}`);
+            console.log(
+              `🔍 Attempting to create event request with data:`,
+              JSON.stringify(sanitizedData, null, 2)
+            );
+            const result = await this.storage.createEventRequest(
+              sanitizedData as any
+            );
+            console.log(
+              `✅ Successfully created event request with ID: ${result.id}`
+            );
             createdCount++;
           } catch (error) {
             console.error('❌ Primary storage operation failed:', error);
-            console.error('❌ Failed data was:', JSON.stringify(sanitizedData, null, 2));
-            
+            console.error(
+              '❌ Failed data was:',
+              JSON.stringify(sanitizedData, null, 2)
+            );
+
             try {
               // Fallback: try with minimal required fields only
               const fallbackData = {
-                organizationName: eventRequestData.organizationName || 'Unknown Organization',
+                organizationName:
+                  eventRequestData.organizationName || 'Unknown Organization',
                 firstName: eventRequestData.firstName || '',
                 lastName: eventRequestData.lastName || '',
                 email: eventRequestData.email || '',
@@ -332,32 +433,44 @@ export class EventRequestsGoogleSheetsService extends GoogleSheetsService {
                 status: eventRequestData.status || 'new',
                 createdBy: 'google_sheets_sync',
                 createdAt: new Date(),
-                updatedAt: new Date()
+                updatedAt: new Date(),
               };
-              console.log(`🔄 Attempting fallback creation with minimal data:`, JSON.stringify(fallbackData, null, 2));
-              const fallbackResult = await this.storage.createEventRequest(fallbackData as any);
-              console.log(`✅ Fallback creation succeeded with ID: ${fallbackResult.id}`);
+              console.log(
+                `🔄 Attempting fallback creation with minimal data:`,
+                JSON.stringify(fallbackData, null, 2)
+              );
+              const fallbackResult = await this.storage.createEventRequest(
+                fallbackData as any
+              );
+              console.log(
+                `✅ Fallback creation succeeded with ID: ${fallbackResult.id}`
+              );
               createdCount++;
             } catch (fallbackError) {
-              console.error('❌ Fallback storage operation also failed:', fallbackError);
-              console.error('❌ Skipping this record - unable to create event request');
+              console.error(
+                '❌ Fallback storage operation also failed:',
+                fallbackError
+              );
+              console.error(
+                '❌ Skipping this record - unable to create event request'
+              );
               // Do NOT increment createdCount if both attempts failed
             }
           }
         }
       }
-      
-      return { 
-        success: true, 
+
+      return {
+        success: true,
         message: `Successfully synced from Google Sheets: ${createdCount} created, ${updatedCount} updated`,
         created: createdCount,
-        updated: updatedCount
+        updated: updatedCount,
       };
     } catch (error) {
       console.error('Error syncing from Google Sheets:', error);
-      return { 
-        success: false, 
-        message: `Failed to sync: ${error instanceof Error ? error.message : 'Unknown error'}`
+      return {
+        success: false,
+        message: `Failed to sync: ${error instanceof Error ? error.message : 'Unknown error'}`,
       };
     }
   }
@@ -365,7 +478,9 @@ export class EventRequestsGoogleSheetsService extends GoogleSheetsService {
   /**
    * Smart sync: Update Google Sheets with event requests data while preserving manual edits
    */
-  private async updateEventRequestsSheet(eventRequests: EventRequestSheetRow[]): Promise<void> {
+  private async updateEventRequestsSheet(
+    eventRequests: EventRequestSheetRow[]
+  ): Promise<void> {
     if (!this.sheets) {
       throw new Error('Google Sheets service not initialized');
     }
@@ -384,28 +499,35 @@ export class EventRequestsGoogleSheetsService extends GoogleSheetsService {
       });
       existingData = response.data.values || [];
     } catch (error) {
-      console.warn('Could not read existing event requests sheet data, proceeding with full overwrite:', error);
+      console.warn(
+        'Could not read existing event requests sheet data, proceeding with full overwrite:',
+        error
+      );
     }
 
     // Prepare app-managed headers (columns A-M)
     const appManagedHeaders = [
-      'Organization Name',    // A
-      'Contact Name',         // B
-      'Email',               // C
-      'Phone',               // D
-      'Desired Event Date',   // E
-      'Message',             // F
-      'Department',          // G
-      'Previously Hosted',    // H
-      'Status',              // I
-      'Created Date',        // J
-      'Last Updated',        // K
-      'Duplicate Check',     // L
-      'Notes'                // M
+      'Organization Name', // A
+      'Contact Name', // B
+      'Email', // C
+      'Phone', // D
+      'Desired Event Date', // E
+      'Message', // F
+      'Department', // G
+      'Previously Hosted', // H
+      'Status', // I
+      'Created Date', // J
+      'Last Updated', // K
+      'Duplicate Check', // L
+      'Notes', // M
     ];
 
     // Smart merge: preserve manual columns beyond M (columns N, O, P, etc.)
-    const mergedData = this.mergeEventRequestsSheetData(eventRequests, existingData, appManagedHeaders);
+    const mergedData = this.mergeEventRequestsSheetData(
+      eventRequests,
+      existingData,
+      appManagedHeaders
+    );
 
     // Update the sheet with merged data
     await this.sheets.spreadsheets.values.update({
@@ -415,7 +537,9 @@ export class EventRequestsGoogleSheetsService extends GoogleSheetsService {
       resource: { values: mergedData },
     });
 
-    console.log(`✅ Smart-synced Google Sheets with ${eventRequests.length} event requests (preserving manual columns N+)`);
+    console.log(
+      `✅ Smart-synced Google Sheets with ${eventRequests.length} event requests (preserving manual columns N+)`
+    );
   }
 
   /**
@@ -424,16 +548,16 @@ export class EventRequestsGoogleSheetsService extends GoogleSheetsService {
    * Updates columns A-M (app-managed data)
    */
   private mergeEventRequestsSheetData(
-    eventRequests: EventRequestSheetRow[], 
-    existingData: any[][], 
+    eventRequests: EventRequestSheetRow[],
+    existingData: any[][],
     appHeaders: string[]
   ): any[][] {
     const merged: any[][] = [];
-    
+
     // Handle headers row
     const existingHeaders = existingData[0] || [];
     const mergedHeaders = [...appHeaders];
-    
+
     // Preserve any manual headers beyond column M (index 12)
     for (let i = appHeaders.length; i < existingHeaders.length; i++) {
       if (existingHeaders[i] && existingHeaders[i].trim()) {
@@ -458,36 +582,40 @@ export class EventRequestsGoogleSheetsService extends GoogleSheetsService {
     eventRequests.forEach((request) => {
       const key = `${(request.organizationName || '').toLowerCase().trim()}|${(request.contactName || '').toLowerCase().trim()}`;
       const existingRow = existingRowMap.get(key) || [];
-      
+
       // Create merged row: app data (A-M) + preserved manual data (N+)
       const newRow = [
-        request.organizationName,    // A
-        request.contactName,         // B
-        request.email,              // C
-        request.phone,              // D
-        request.desiredEventDate,   // E
-        request.message,            // F
-        request.department,         // G
-        request.previouslyHosted,   // H
-        request.status,             // I
-        request.createdDate,        // J
-        request.lastUpdated,        // K
-        request.duplicateCheck,     // L
-        request.notes               // M
+        request.organizationName, // A
+        request.contactName, // B
+        request.email, // C
+        request.phone, // D
+        request.desiredEventDate, // E
+        request.message, // F
+        request.department, // G
+        request.previouslyHosted, // H
+        request.status, // I
+        request.createdDate, // J
+        request.lastUpdated, // K
+        request.duplicateCheck, // L
+        request.notes, // M
       ];
-      
+
       // Preserve manual columns (N, O, P, etc.) from existing data
-      for (let i = appHeaders.length; i < Math.max(mergedHeaders.length, existingRow.length); i++) {
+      for (
+        let i = appHeaders.length;
+        i < Math.max(mergedHeaders.length, existingRow.length);
+        i++
+      ) {
         newRow[i] = existingRow[i] || '';
       }
-      
+
       merged.push(newRow);
       existingRowMap.delete(key); // Mark as processed
     });
 
     // Add any remaining existing rows that weren't in the new data
     existingRowMap.forEach((existingRow) => {
-      if (existingRow.some(cell => cell && cell.toString().trim())) {
+      if (existingRow.some((cell) => cell && cell.toString().trim())) {
         merged.push(existingRow);
       }
     });
@@ -516,7 +644,7 @@ export class EventRequestsGoogleSheetsService extends GoogleSheetsService {
         console.log('📋 Second row (sample data):', rows[1]);
       }
     }
-    
+
     return rows.map((row: string[], index: number) => ({
       // Match the corrected Google Sheet structure based on actual layout
       submittedOn: row[0] || '', // Submission Date/Time (A)
@@ -533,24 +661,28 @@ export class EventRequestsGoogleSheetsService extends GoogleSheetsService {
       lastUpdated: new Date().toISOString(),
       duplicateCheck: 'No',
       notes: '',
-      rowIndex: index + 2
+      rowIndex: index + 2,
     }));
   }
 
   /**
    * Analyze the sheet structure
    */
-  async analyzeSheetStructure(): Promise<{ headers: string[]; rowCount: number; lastUpdate: string }> {
+  async analyzeSheetStructure(): Promise<{
+    headers: string[];
+    rowCount: number;
+    lastUpdate: string;
+  }> {
     try {
       await this.ensureInitialized();
-      
+
       const response = await this.sheets.spreadsheets.values.get({
         spreadsheetId: (this as any).config.spreadsheetId,
         range: `${(this as any).config.worksheetName}!A1:Z1`,
       });
 
       const headers = response.data.values?.[0] || [];
-      
+
       const dataResponse = await this.sheets.spreadsheets.values.get({
         spreadsheetId: (this as any).config.spreadsheetId,
         range: `${(this as any).config.worksheetName}!A2:Z1000`,
@@ -561,7 +693,7 @@ export class EventRequestsGoogleSheetsService extends GoogleSheetsService {
       return {
         headers,
         rowCount,
-        lastUpdate: new Date().toISOString()
+        lastUpdate: new Date().toISOString(),
       };
     } catch (error) {
       console.error('Error analyzing event requests sheet structure:', error);
@@ -573,23 +705,36 @@ export class EventRequestsGoogleSheetsService extends GoogleSheetsService {
 /**
  * Get the Event Requests Google Sheets service instance
  */
-export function getEventRequestsGoogleSheetsService(storage: IStorage): EventRequestsGoogleSheetsService | null {
+export function getEventRequestsGoogleSheetsService(
+  storage: IStorage
+): EventRequestsGoogleSheetsService | null {
   try {
     // Validate all required environment variables for Google Sheets authentication
-    if (!process.env.GOOGLE_PROJECT_ID || !process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || !process.env.GOOGLE_PRIVATE_KEY) {
-      console.warn('Google Sheets authentication not configured - missing GOOGLE_PROJECT_ID, GOOGLE_SERVICE_ACCOUNT_EMAIL, or GOOGLE_PRIVATE_KEY');
+    if (
+      !process.env.GOOGLE_PROJECT_ID ||
+      !process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL ||
+      !process.env.GOOGLE_PRIVATE_KEY
+    ) {
+      console.warn(
+        'Google Sheets authentication not configured - missing GOOGLE_PROJECT_ID, GOOGLE_SERVICE_ACCOUNT_EMAIL, or GOOGLE_PRIVATE_KEY'
+      );
       return null;
     }
-    
+
     if (!process.env.EVENT_REQUESTS_SHEET_ID) {
       console.warn('EVENT_REQUESTS_SHEET_ID not configured');
       return null;
     }
-    
-    console.log('✅ All Event Requests Google Sheets environment variables validated');
+
+    console.log(
+      '✅ All Event Requests Google Sheets environment variables validated'
+    );
     return new EventRequestsGoogleSheetsService(storage);
   } catch (error) {
-    console.error('Failed to create Event Requests Google Sheets service:', error);
+    console.error(
+      'Failed to create Event Requests Google Sheets service:',
+      error
+    );
     return null;
   }
 }

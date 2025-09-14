@@ -1,49 +1,49 @@
-import { Router } from "express";
-import { parse } from "csv-parse/sync";
-import fs from "fs/promises";
-import { storage } from "../storage-wrapper";
-import { logger } from "../middleware/logger";
-import { upload } from "../middleware/uploads";
+import { Router } from 'express';
+import { parse } from 'csv-parse/sync';
+import fs from 'fs/promises';
+import { storage } from '../storage-wrapper';
+import { logger } from '../middleware/logger';
+import { upload } from '../middleware/uploads';
 
 const importCollectionsRouter = Router();
 
 // CSV Import for Sandwich Collections
 importCollectionsRouter.post(
-  "/",
-  upload.single("csvFile"),
+  '/',
+  upload.single('csvFile'),
   async (req, res) => {
     try {
       if (!req.file) {
-        return res.status(400).json({ message: "No CSV file uploaded" });
+        return res.status(400).json({ message: 'No CSV file uploaded' });
       }
 
-      const csvContent = await fs.readFile(req.file.path, "utf-8");
+      const csvContent = await fs.readFile(req.file.path, 'utf-8');
       logger.info(`CSV content preview: ${csvContent.substring(0, 200)}...`);
 
       // Detect CSV format type
-      const lines = csvContent.split("\n");
-      let formatType = "standard";
+      const lines = csvContent.split('\n');
+      let formatType = 'standard';
 
       // Check for complex weekly totals format
-      if (lines[0].includes("WEEK #") || lines[0].includes("Hosts:")) {
-        formatType = "complex";
+      if (lines[0].includes('WEEK #') || lines[0].includes('Hosts:')) {
+        formatType = 'complex';
       }
       // Check for structured weekly data format
       else if (
-        lines[0].includes("Week_Number") &&
-        lines[0].includes("Total_Sandwiches")
+        lines[0].includes('Week_Number') &&
+        lines[0].includes('Total_Sandwiches')
       ) {
-        formatType = "structured";
+        formatType = 'structured';
       }
 
       let records = [];
 
-      if (formatType === "complex") {
-        logger.info("Complex weekly totals format detected");
+      if (formatType === 'complex') {
+        logger.info('Complex weekly totals format detected');
         // Find the row with actual data (skip header rows)
         let startRow = 0;
         for (let i = 0; i < lines.length; i++) {
-          if (lines[i].match(/^\d+,/) && lines[i].includes("TRUE")) {
+          if (lines[i].match(/^\d+,/) && lines[i].includes('TRUE')) {
             startRow = i;
             break;
           }
@@ -52,34 +52,34 @@ importCollectionsRouter.post(
         // Parse the complex format manually
         for (let i = startRow; i < lines.length; i++) {
           const line = lines[i].trim();
-          if (!line || !line.includes("TRUE")) continue;
+          if (!line || !line.includes('TRUE')) continue;
 
-          const parts = line.split(",");
+          const parts = line.split(',');
           if (parts.length >= 5 && parts[4]) {
             const weekNum = parts[0];
             const date = parts[3];
-            const totalSandwiches = parts[4].replace(/[",]/g, "");
+            const totalSandwiches = parts[4].replace(/[",]/g, '');
 
             if (date && totalSandwiches && !isNaN(parseInt(totalSandwiches))) {
               records.push({
-                "Host Name": `Week ${weekNum} Total`,
-                "Sandwich Count": totalSandwiches,
+                'Host Name': `Week ${weekNum} Total`,
+                'Sandwich Count': totalSandwiches,
                 Date: date,
-                "Logged By": "CSV Import",
+                'Logged By': 'CSV Import',
                 Notes: `Weekly total import from complex spreadsheet`,
-                "Created At": new Date().toISOString(),
+                'Created At': new Date().toISOString(),
               });
             }
           }
         }
-      } else if (formatType === "structured") {
-        logger.info("Structured weekly data format detected");
+      } else if (formatType === 'structured') {
+        logger.info('Structured weekly data format detected');
         // Parse the structured format
         const parsedData = parse(csvContent, {
           columns: true,
           skip_empty_lines: true,
           trim: true,
-          delimiter: ",",
+          delimiter: ',',
           quote: '"',
         });
 
@@ -93,26 +93,26 @@ importCollectionsRouter.post(
           ) {
             // Parse the date to a more readable format
             const date = new Date(row.Date);
-            const formattedDate = date.toISOString().split("T")[0]; // YYYY-MM-DD format
+            const formattedDate = date.toISOString().split('T')[0]; // YYYY-MM-DD format
 
             records.push({
-              "Host Name": `Week ${row.Week_Number} Complete Data`,
-              "Sandwich Count": row.Total_Sandwiches,
+              'Host Name': `Week ${row.Week_Number} Complete Data`,
+              'Sandwich Count': row.Total_Sandwiches,
               Date: formattedDate,
-              "Logged By": "CSV Import",
+              'Logged By': 'CSV Import',
               Notes: `Structured weekly data import with location and group details`,
-              "Created At": new Date().toISOString(),
+              'Created At': new Date().toISOString(),
             });
           }
         }
       } else {
-        logger.info("Standard CSV format detected");
+        logger.info('Standard CSV format detected');
         // Parse normal CSV format
         records = parse(csvContent, {
           columns: true,
           skip_empty_lines: true,
           trim: true,
-          delimiter: ",",
+          delimiter: ',',
           quote: '"',
         });
       }
@@ -138,43 +138,46 @@ importCollectionsRouter.post(
 
           // Check for alternative column names
           const hostName =
-            record["Host Name"] ||
-            record["Host"] ||
-            record["host_name"] ||
-            record["HostName"];
+            record['Host Name'] ||
+            record['Host'] ||
+            record['host_name'] ||
+            record['HostName'];
           const sandwichCountStr =
-            record["Individual Sandwiches"] ||
-            record["Sandwich Count"] ||
-            record["Count"] ||
-            record["sandwich_count"] ||
-            record["SandwichCount"] ||
-            record["Sandwiches"];
+            record['Individual Sandwiches'] ||
+            record['Sandwich Count'] ||
+            record['Count'] ||
+            record['sandwich_count'] ||
+            record['SandwichCount'] ||
+            record['Sandwiches'];
           const date =
-            record["Collection Date"] ||
-            record["Date"] ||
-            record["date"] ||
-            record["CollectionDate"];
+            record['Collection Date'] ||
+            record['Date'] ||
+            record['date'] ||
+            record['CollectionDate'];
 
           // Validate required fields with more detailed error reporting
           if (!hostName) {
-            const availableKeys = Object.keys(record).join(", ");
+            const availableKeys = Object.keys(record).join(', ');
             throw new Error(
-              `Missing Host Name (available columns: ${availableKeys}) in row ${i +
-                1}`
+              `Missing Host Name (available columns: ${availableKeys}) in row ${
+                i + 1
+              }`
             );
           }
           if (!sandwichCountStr) {
-            const availableKeys = Object.keys(record).join(", ");
+            const availableKeys = Object.keys(record).join(', ');
             throw new Error(
-              `Missing Individual Sandwiches (available columns: ${availableKeys}) in row ${i +
-                1}`
+              `Missing Individual Sandwiches (available columns: ${availableKeys}) in row ${
+                i + 1
+              }`
             );
           }
           if (!date) {
-            const availableKeys = Object.keys(record).join(", ");
+            const availableKeys = Object.keys(record).join(', ');
             throw new Error(
-              `Missing Collection Date (available columns: ${availableKeys}) in row ${i +
-                1}`
+              `Missing Collection Date (available columns: ${availableKeys}) in row ${
+                i + 1
+              }`
             );
           }
 
@@ -192,7 +195,7 @@ importCollectionsRouter.post(
 
           // Try to parse Created At if provided
           const createdAt =
-            record["Created At"] || record["created_at"] || record["CreatedAt"];
+            record['Created At'] || record['created_at'] || record['CreatedAt'];
           if (createdAt) {
             const parsedDate = new Date(createdAt);
             if (!isNaN(parsedDate.getTime())) {
@@ -201,14 +204,14 @@ importCollectionsRouter.post(
           }
 
           // Handle Group Collections data
-          const groupCollectionsStr = record["Group Collections"] || "";
-          let groupCollections = "[]";
-          if (groupCollectionsStr && groupCollectionsStr.trim() !== "") {
+          const groupCollectionsStr = record['Group Collections'] || '';
+          let groupCollections = '[]';
+          if (groupCollectionsStr && groupCollectionsStr.trim() !== '') {
             // If it's a number, convert to simple array format
             const groupCount = parseInt(groupCollectionsStr.trim());
             if (!isNaN(groupCount) && groupCount > 0) {
               groupCollections = JSON.stringify([
-                { count: groupCount, description: "Group Collection" },
+                { count: groupCount, description: 'Group Collection' },
               ]);
             }
           }
@@ -226,7 +229,7 @@ importCollectionsRouter.post(
         } catch (error) {
           errorCount++;
           const errorMsg = `Row ${i + 1}: ${
-            error instanceof Error ? error.message : "Unknown error"
+            error instanceof Error ? error.message : 'Unknown error'
           }`;
           errors.push(errorMsg);
           logger.error(errorMsg);
@@ -253,14 +256,14 @@ importCollectionsRouter.post(
         try {
           await fs.unlink(req.file.path);
         } catch (cleanupError) {
-          logger.error("Failed to clean up uploaded file", cleanupError);
+          logger.error('Failed to clean up uploaded file', cleanupError);
         }
       }
 
-      logger.error("CSV import failed", error);
+      logger.error('CSV import failed', error);
       res.status(500).json({
-        message: "Failed to import CSV file",
-        error: error instanceof Error ? error.message : "Unknown error",
+        message: 'Failed to import CSV file',
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   }

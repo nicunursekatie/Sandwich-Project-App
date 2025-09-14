@@ -1,218 +1,218 @@
 export const USER_ROLES = {
-  SUPER_ADMIN: "super_admin",
-  ADMIN: "admin",
-  COMMITTEE_MEMBER: "committee_member",
-  CORE_TEAM: "core_team",
-  HOST: "host",
-  DRIVER: "driver",
-  VOLUNTEER: "volunteer",
-  RECIPIENT: "recipient",
-  VIEWER: "viewer",
-  WORK_LOGGER: "work_logger",
-  DEMO_USER: "demo_user",
+  SUPER_ADMIN: 'super_admin',
+  ADMIN: 'admin',
+  COMMITTEE_MEMBER: 'committee_member',
+  CORE_TEAM: 'core_team',
+  HOST: 'host',
+  DRIVER: 'driver',
+  VOLUNTEER: 'volunteer',
+  RECIPIENT: 'recipient',
+  VIEWER: 'viewer',
+  WORK_LOGGER: 'work_logger',
+  DEMO_USER: 'demo_user',
 } as const;
 
 // Clean Resource-Action Permission System
 export const PERMISSIONS = {
   // ADMINISTRATIVE PERMISSIONS
-  ADMIN_ACCESS: "ADMIN_ACCESS",
-  MANAGE_ANNOUNCEMENTS: "MANAGE_ANNOUNCEMENTS",
+  ADMIN_ACCESS: 'ADMIN_ACCESS',
+  MANAGE_ANNOUNCEMENTS: 'MANAGE_ANNOUNCEMENTS',
 
-  // HOSTS - Host location management  
-  HOSTS_VIEW: "HOSTS_VIEW",
-  HOSTS_ADD: "HOSTS_ADD", 
-  HOSTS_EDIT: "HOSTS_EDIT",
-  HOSTS_DELETE: "HOSTS_DELETE",
+  // HOSTS - Host location management
+  HOSTS_VIEW: 'HOSTS_VIEW',
+  HOSTS_ADD: 'HOSTS_ADD',
+  HOSTS_EDIT: 'HOSTS_EDIT',
+  HOSTS_DELETE: 'HOSTS_DELETE',
 
   // RECIPIENTS - Recipient organization management
-  RECIPIENTS_VIEW: "RECIPIENTS_VIEW",
-  RECIPIENTS_ADD: "RECIPIENTS_ADD",
-  RECIPIENTS_EDIT: "RECIPIENTS_EDIT", 
-  RECIPIENTS_DELETE: "RECIPIENTS_DELETE",
+  RECIPIENTS_VIEW: 'RECIPIENTS_VIEW',
+  RECIPIENTS_ADD: 'RECIPIENTS_ADD',
+  RECIPIENTS_EDIT: 'RECIPIENTS_EDIT',
+  RECIPIENTS_DELETE: 'RECIPIENTS_DELETE',
 
   // DRIVERS - Driver management
-  DRIVERS_VIEW: "DRIVERS_VIEW",
-  DRIVERS_ADD: "DRIVERS_ADD",
-  DRIVERS_EDIT: "DRIVERS_EDIT",
-  DRIVERS_DELETE: "DRIVERS_DELETE",
+  DRIVERS_VIEW: 'DRIVERS_VIEW',
+  DRIVERS_ADD: 'DRIVERS_ADD',
+  DRIVERS_EDIT: 'DRIVERS_EDIT',
+  DRIVERS_DELETE: 'DRIVERS_DELETE',
 
   // USERS - User account management
-  USERS_VIEW: "USERS_VIEW",
-  USERS_ADD: "USERS_ADD", 
-  USERS_EDIT: "USERS_EDIT",
-  USERS_DELETE: "USERS_DELETE",
+  USERS_VIEW: 'USERS_VIEW',
+  USERS_ADD: 'USERS_ADD',
+  USERS_EDIT: 'USERS_EDIT',
+  USERS_DELETE: 'USERS_DELETE',
 
   // COLLECTIONS - Sandwich collection data
-  COLLECTIONS_VIEW: "COLLECTIONS_VIEW",
-  COLLECTIONS_ADD: "COLLECTIONS_ADD",
-  COLLECTIONS_EDIT_OWN: "COLLECTIONS_EDIT_OWN", // Edit own collection logs
-  COLLECTIONS_EDIT_ALL: "COLLECTIONS_EDIT_ALL", // Edit any collection logs
-  COLLECTIONS_DELETE_OWN: "COLLECTIONS_DELETE_OWN", // Delete own collection logs
-  COLLECTIONS_DELETE_ALL: "COLLECTIONS_DELETE_ALL", // Delete any collection logs
-  COLLECTIONS_WALKTHROUGH: "COLLECTIONS_WALKTHROUGH", // Simplified entry form
+  COLLECTIONS_VIEW: 'COLLECTIONS_VIEW',
+  COLLECTIONS_ADD: 'COLLECTIONS_ADD',
+  COLLECTIONS_EDIT_OWN: 'COLLECTIONS_EDIT_OWN', // Edit own collection logs
+  COLLECTIONS_EDIT_ALL: 'COLLECTIONS_EDIT_ALL', // Edit any collection logs
+  COLLECTIONS_DELETE_OWN: 'COLLECTIONS_DELETE_OWN', // Delete own collection logs
+  COLLECTIONS_DELETE_ALL: 'COLLECTIONS_DELETE_ALL', // Delete any collection logs
+  COLLECTIONS_WALKTHROUGH: 'COLLECTIONS_WALKTHROUGH', // Simplified entry form
 
   // PROJECTS - Project management
-  PROJECTS_VIEW: "PROJECTS_VIEW",
-  PROJECTS_ADD: "PROJECTS_ADD",
-  PROJECTS_EDIT_OWN: "PROJECTS_EDIT_OWN", // Edit assigned/owned projects
-  PROJECTS_EDIT_ALL: "PROJECTS_EDIT_ALL", // Edit any projects
-  PROJECTS_DELETE_OWN: "PROJECTS_DELETE_OWN", // Delete assigned/owned projects
-  PROJECTS_DELETE_ALL: "PROJECTS_DELETE_ALL", // Delete any projects
+  PROJECTS_VIEW: 'PROJECTS_VIEW',
+  PROJECTS_ADD: 'PROJECTS_ADD',
+  PROJECTS_EDIT_OWN: 'PROJECTS_EDIT_OWN', // Edit assigned/owned projects
+  PROJECTS_EDIT_ALL: 'PROJECTS_EDIT_ALL', // Edit any projects
+  PROJECTS_DELETE_OWN: 'PROJECTS_DELETE_OWN', // Delete assigned/owned projects
+  PROJECTS_DELETE_ALL: 'PROJECTS_DELETE_ALL', // Delete any projects
 
-  // DISTRIBUTIONS - Sandwich distribution tracking 
-  DISTRIBUTIONS_VIEW: "DISTRIBUTIONS_VIEW", 
-  DISTRIBUTIONS_ADD: "DISTRIBUTIONS_ADD",
-  DISTRIBUTIONS_EDIT: "DISTRIBUTIONS_EDIT",
-  DISTRIBUTIONS_DELETE: "DISTRIBUTIONS_DELETE",
+  // DISTRIBUTIONS - Sandwich distribution tracking
+  DISTRIBUTIONS_VIEW: 'DISTRIBUTIONS_VIEW',
+  DISTRIBUTIONS_ADD: 'DISTRIBUTIONS_ADD',
+  DISTRIBUTIONS_EDIT: 'DISTRIBUTIONS_EDIT',
+  DISTRIBUTIONS_DELETE: 'DISTRIBUTIONS_DELETE',
 
   // EVENT_REQUESTS - Event planning and requests
-  EVENT_REQUESTS_VIEW: "EVENT_REQUESTS_VIEW",
-  EVENT_REQUESTS_ADD: "EVENT_REQUESTS_ADD", 
-  EVENT_REQUESTS_EDIT: "EVENT_REQUESTS_EDIT",
-  EVENT_REQUESTS_DELETE: "EVENT_REQUESTS_DELETE",
-  EVENT_REQUESTS_DELETE_CARD: "EVENT_REQUESTS_DELETE_CARD", // Delete via card delete buttons
-  EVENT_REQUESTS_SYNC: "EVENT_REQUESTS_SYNC", // Google Sheets sync
-  EVENT_REQUESTS_COMPLETE_CONTACT: "EVENT_REQUESTS_COMPLETE_CONTACT", // Mark primary contact as completed
+  EVENT_REQUESTS_VIEW: 'EVENT_REQUESTS_VIEW',
+  EVENT_REQUESTS_ADD: 'EVENT_REQUESTS_ADD',
+  EVENT_REQUESTS_EDIT: 'EVENT_REQUESTS_EDIT',
+  EVENT_REQUESTS_DELETE: 'EVENT_REQUESTS_DELETE',
+  EVENT_REQUESTS_DELETE_CARD: 'EVENT_REQUESTS_DELETE_CARD', // Delete via card delete buttons
+  EVENT_REQUESTS_SYNC: 'EVENT_REQUESTS_SYNC', // Google Sheets sync
+  EVENT_REQUESTS_COMPLETE_CONTACT: 'EVENT_REQUESTS_COMPLETE_CONTACT', // Mark primary contact as completed
 
   // MESSAGES - Messaging system
-  MESSAGES_VIEW: "MESSAGES_VIEW",
-  MESSAGES_SEND: "MESSAGES_SEND",
-  MESSAGES_EDIT: "MESSAGES_EDIT",
-  MESSAGES_DELETE: "MESSAGES_DELETE",
-  MESSAGES_MODERATE: "MESSAGES_MODERATE",
+  MESSAGES_VIEW: 'MESSAGES_VIEW',
+  MESSAGES_SEND: 'MESSAGES_SEND',
+  MESSAGES_EDIT: 'MESSAGES_EDIT',
+  MESSAGES_DELETE: 'MESSAGES_DELETE',
+  MESSAGES_MODERATE: 'MESSAGES_MODERATE',
 
   // WORK_LOGS - Work time logging
-  WORK_LOGS_VIEW: "WORK_LOGS_VIEW", // View own work logs
-  WORK_LOGS_VIEW_ALL: "WORK_LOGS_VIEW_ALL", // View all users' logs
-  WORK_LOGS_ADD: "WORK_LOGS_ADD", 
-  WORK_LOGS_EDIT_OWN: "WORK_LOGS_EDIT_OWN", // Edit own work logs
-  WORK_LOGS_EDIT_ALL: "WORK_LOGS_EDIT_ALL", // Edit any work logs
-  WORK_LOGS_DELETE_OWN: "WORK_LOGS_DELETE_OWN", // Delete own work logs
-  WORK_LOGS_DELETE_ALL: "WORK_LOGS_DELETE_ALL", // Delete any work logs
+  WORK_LOGS_VIEW: 'WORK_LOGS_VIEW', // View own work logs
+  WORK_LOGS_VIEW_ALL: 'WORK_LOGS_VIEW_ALL', // View all users' logs
+  WORK_LOGS_ADD: 'WORK_LOGS_ADD',
+  WORK_LOGS_EDIT_OWN: 'WORK_LOGS_EDIT_OWN', // Edit own work logs
+  WORK_LOGS_EDIT_ALL: 'WORK_LOGS_EDIT_ALL', // Edit any work logs
+  WORK_LOGS_DELETE_OWN: 'WORK_LOGS_DELETE_OWN', // Delete own work logs
+  WORK_LOGS_DELETE_ALL: 'WORK_LOGS_DELETE_ALL', // Delete any work logs
 
-  // SUGGESTIONS - Suggestion system  
-  SUGGESTIONS_VIEW: "SUGGESTIONS_VIEW",
-  SUGGESTIONS_ADD: "SUGGESTIONS_ADD",
-  SUGGESTIONS_EDIT_OWN: "SUGGESTIONS_EDIT_OWN", // Edit own suggestions
-  SUGGESTIONS_EDIT_ALL: "SUGGESTIONS_EDIT_ALL", // Edit any suggestions
-  SUGGESTIONS_DELETE_OWN: "SUGGESTIONS_DELETE_OWN", // Delete own suggestions
-  SUGGESTIONS_DELETE_ALL: "SUGGESTIONS_DELETE_ALL", // Delete any suggestions
-  SUGGESTIONS_MANAGE: "SUGGESTIONS_MANAGE", // Respond to suggestions
+  // SUGGESTIONS - Suggestion system
+  SUGGESTIONS_VIEW: 'SUGGESTIONS_VIEW',
+  SUGGESTIONS_ADD: 'SUGGESTIONS_ADD',
+  SUGGESTIONS_EDIT_OWN: 'SUGGESTIONS_EDIT_OWN', // Edit own suggestions
+  SUGGESTIONS_EDIT_ALL: 'SUGGESTIONS_EDIT_ALL', // Edit any suggestions
+  SUGGESTIONS_DELETE_OWN: 'SUGGESTIONS_DELETE_OWN', // Delete own suggestions
+  SUGGESTIONS_DELETE_ALL: 'SUGGESTIONS_DELETE_ALL', // Delete any suggestions
+  SUGGESTIONS_MANAGE: 'SUGGESTIONS_MANAGE', // Respond to suggestions
 
   // CHAT - Chat room access
-  CHAT_GENERAL: "CHAT_GENERAL",
-  CHAT_GRANTS_COMMITTEE: "CHAT_GRANTS_COMMITTEE",
-  CHAT_EVENTS_COMMITTEE: "CHAT_EVENTS_COMMITTEE",
-  CHAT_BOARD: "CHAT_BOARD",
-  CHAT_WEB_COMMITTEE: "CHAT_WEB_COMMITTEE",
-  CHAT_VOLUNTEER_MANAGEMENT: "CHAT_VOLUNTEER_MANAGEMENT",
-  CHAT_HOST: "CHAT_HOST",
-  CHAT_DRIVER: "CHAT_DRIVER",
-  CHAT_RECIPIENT: "CHAT_RECIPIENT",
-  CHAT_CORE_TEAM: "CHAT_CORE_TEAM",
-  CHAT_DIRECT: "CHAT_DIRECT",
-  CHAT_GROUP: "CHAT_GROUP",
+  CHAT_GENERAL: 'CHAT_GENERAL',
+  CHAT_GRANTS_COMMITTEE: 'CHAT_GRANTS_COMMITTEE',
+  CHAT_EVENTS_COMMITTEE: 'CHAT_EVENTS_COMMITTEE',
+  CHAT_BOARD: 'CHAT_BOARD',
+  CHAT_WEB_COMMITTEE: 'CHAT_WEB_COMMITTEE',
+  CHAT_VOLUNTEER_MANAGEMENT: 'CHAT_VOLUNTEER_MANAGEMENT',
+  CHAT_HOST: 'CHAT_HOST',
+  CHAT_DRIVER: 'CHAT_DRIVER',
+  CHAT_RECIPIENT: 'CHAT_RECIPIENT',
+  CHAT_CORE_TEAM: 'CHAT_CORE_TEAM',
+  CHAT_DIRECT: 'CHAT_DIRECT',
+  CHAT_GROUP: 'CHAT_GROUP',
 
   // KUDOS - Kudos system
-  KUDOS_SEND: "KUDOS_SEND",
-  KUDOS_RECEIVE: "KUDOS_RECEIVE",
-  KUDOS_VIEW: "KUDOS_VIEW",
-  KUDOS_MANAGE: "KUDOS_MANAGE", // Admin management
+  KUDOS_SEND: 'KUDOS_SEND',
+  KUDOS_RECEIVE: 'KUDOS_RECEIVE',
+  KUDOS_VIEW: 'KUDOS_VIEW',
+  KUDOS_MANAGE: 'KUDOS_MANAGE', // Admin management
 
   // ANALYTICS - Dashboard analytics
-  ANALYTICS_VIEW: "ANALYTICS_VIEW",
+  ANALYTICS_VIEW: 'ANALYTICS_VIEW',
 
   // MEETINGS - Meeting management
-  MEETINGS_VIEW: "MEETINGS_VIEW",
-  MEETINGS_MANAGE: "MEETINGS_MANAGE",
+  MEETINGS_VIEW: 'MEETINGS_VIEW',
+  MEETINGS_MANAGE: 'MEETINGS_MANAGE',
 
   // DOCUMENTS - Document management
-  DOCUMENTS_VIEW: "DOCUMENTS_VIEW", 
-  DOCUMENTS_MANAGE: "DOCUMENTS_MANAGE",
-  DOCUMENTS_CONFIDENTIAL: "DOCUMENTS_CONFIDENTIAL", // Access to confidential documents
+  DOCUMENTS_VIEW: 'DOCUMENTS_VIEW',
+  DOCUMENTS_MANAGE: 'DOCUMENTS_MANAGE',
+  DOCUMENTS_CONFIDENTIAL: 'DOCUMENTS_CONFIDENTIAL', // Access to confidential documents
 
   // DATA - Data import/export
-  DATA_EXPORT: "DATA_EXPORT",
-  DATA_IMPORT: "DATA_IMPORT",
+  DATA_EXPORT: 'DATA_EXPORT',
+  DATA_IMPORT: 'DATA_IMPORT',
 
-  // ORGANIZATIONS - Organizations catalog  
-  ORGANIZATIONS_VIEW: "ORGANIZATIONS_VIEW",
+  // ORGANIZATIONS - Organizations catalog
+  ORGANIZATIONS_VIEW: 'ORGANIZATIONS_VIEW',
 
   // TOOLKIT - General toolkit access
-  TOOLKIT_ACCESS: "TOOLKIT_ACCESS",
+  TOOLKIT_ACCESS: 'TOOLKIT_ACCESS',
 
   // Legacy support for backwards compatibility
-  ACCESS_HOSTS: "HOSTS_VIEW", // Legacy
-  ACCESS_RECIPIENTS: "RECIPIENTS_VIEW", // Legacy
-  ACCESS_DRIVERS: "DRIVERS_VIEW", // Legacy
-  ACCESS_COLLECTIONS: "COLLECTIONS_VIEW", // Legacy
-  ACCESS_CHAT: "CHAT_GENERAL", // Legacy
-  ACCESS_MESSAGES: "MESSAGES_VIEW", // Legacy
-  ACCESS_PROJECTS: "PROJECTS_VIEW", // Legacy
-  ACCESS_ANALYTICS: "ANALYTICS_VIEW", // Legacy
-  ACCESS_MEETINGS: "MEETINGS_VIEW", // Legacy
-  ACCESS_SUGGESTIONS: "SUGGESTIONS_VIEW", // Legacy
-  ACCESS_WORK_LOGS: "WORK_LOGS_VIEW", // Legacy
-  ACCESS_TOOLKIT: "TOOLKIT_ACCESS", // Legacy
-  MANAGE_USERS: "USERS_EDIT", // Legacy
-  MANAGE_HOSTS: "HOSTS_EDIT", // Legacy
-  MANAGE_RECIPIENTS: "RECIPIENTS_EDIT", // Legacy
-  MANAGE_DRIVERS: "DRIVERS_EDIT", // Legacy
-  MANAGE_COLLECTIONS: "COLLECTIONS_EDIT", // Legacy
-  CREATE_COLLECTIONS: "COLLECTIONS_ADD", // Legacy
-  EDIT_ALL_COLLECTIONS: "COLLECTIONS_EDIT_ALL", // Legacy
-  DELETE_ALL_COLLECTIONS: "COLLECTIONS_DELETE_ALL", // Legacy
-  USE_COLLECTION_WALKTHROUGH: "COLLECTIONS_WALKTHROUGH", // Legacy
-  CREATE_PROJECTS: "PROJECTS_ADD", // Legacy
-  EDIT_ALL_PROJECTS: "PROJECTS_EDIT_ALL", // Legacy
-  DELETE_ALL_PROJECTS: "PROJECTS_DELETE_ALL", // Legacy
-  CREATE_SUGGESTIONS: "SUGGESTIONS_ADD", // Legacy
-  EDIT_ALL_SUGGESTIONS: "SUGGESTIONS_EDIT_ALL", // Legacy
-  DELETE_ALL_SUGGESTIONS: "SUGGESTIONS_DELETE_ALL", // Legacy
-  CREATE_WORK_LOGS: "WORK_LOGS_ADD", // Legacy
-  VIEW_ALL_WORK_LOGS: "WORK_LOGS_VIEW_ALL", // Legacy
-  EDIT_ALL_WORK_LOGS: "WORK_LOGS_EDIT_ALL", // Legacy
-  DELETE_ALL_WORK_LOGS: "WORK_LOGS_DELETE_ALL", // Legacy
-  SEND_MESSAGES: "MESSAGES_SEND", // Legacy
-  MODERATE_MESSAGES: "MESSAGES_MODERATE", // Legacy
-  DIRECT_MESSAGES: "CHAT_DIRECT", // Legacy
-  GROUP_MESSAGES: "CHAT_GROUP", // Legacy
-  GENERAL_CHAT: "CHAT_GENERAL", // Legacy
-  COMMITTEE_CHAT: "CHAT_GRANTS_COMMITTEE", // Legacy - defaults to grants committee
-  HOST_CHAT: "CHAT_HOST", // Legacy
-  DRIVER_CHAT: "CHAT_DRIVER", // Legacy
-  RECIPIENT_CHAT: "CHAT_RECIPIENT", // Legacy
-  CORE_TEAM_CHAT: "CHAT_CORE_TEAM", // Legacy
-  SEND_KUDOS: "KUDOS_SEND", // Legacy
-  RECEIVE_KUDOS: "KUDOS_RECEIVE", // Legacy
-  VIEW_KUDOS: "KUDOS_VIEW", // Legacy
-  MANAGE_ALL_KUDOS: "KUDOS_MANAGE", // Legacy
-  EXPORT_DATA: "DATA_EXPORT", // Legacy
-  IMPORT_DATA: "DATA_IMPORT", // Legacy
-  EDIT_DATA: "DATA_EXPORT", // Legacy (data editing is export functionality)
-  VIEW_ORGANIZATIONS_CATALOG: "ORGANIZATIONS_VIEW", // Legacy
-  VIEW_EVENT_REQUESTS: "EVENT_REQUESTS_VIEW", // Legacy
-  ADD_EVENT_REQUESTS: "EVENT_REQUESTS_ADD", // Legacy
-  EDIT_EVENT_REQUESTS: "EVENT_REQUESTS_EDIT", // Legacy
-  DELETE_EVENT_REQUESTS: "EVENT_REQUESTS_DELETE", // Legacy
-  MANAGE_EVENT_REQUESTS: "EVENT_REQUESTS_EDIT", // Legacy
-  ASSIGN_EVENT_REQUESTS: "EVENT_REQUESTS_EDIT", // Legacy
-  VIEW_DONATION_TRACKING: "DISTRIBUTIONS_VIEW", // Legacy
-  ADD_DONATION_TRACKING: "DISTRIBUTIONS_ADD", // Legacy
-  EDIT_DONATION_TRACKING: "DISTRIBUTIONS_EDIT", // Legacy
-  DELETE_DONATION_TRACKING: "DISTRIBUTIONS_DELETE", // Legacy
-  MANAGE_DONATION_TRACKING: "DISTRIBUTIONS_EDIT", // Legacy
-  VIEW_DOCUMENTS: "DOCUMENTS_VIEW", // Legacy
-  MANAGE_DOCUMENTS: "DOCUMENTS_MANAGE", // Legacy
-  ACCESS_DOCUMENTS: "DOCUMENTS_VIEW", // Legacy
-  MANAGE_MEETINGS: "MEETINGS_MANAGE", // Legacy
-  MANAGE_SUGGESTIONS: "SUGGESTIONS_MANAGE", // Legacy
-  
+  ACCESS_HOSTS: 'HOSTS_VIEW', // Legacy
+  ACCESS_RECIPIENTS: 'RECIPIENTS_VIEW', // Legacy
+  ACCESS_DRIVERS: 'DRIVERS_VIEW', // Legacy
+  ACCESS_COLLECTIONS: 'COLLECTIONS_VIEW', // Legacy
+  ACCESS_CHAT: 'CHAT_GENERAL', // Legacy
+  ACCESS_MESSAGES: 'MESSAGES_VIEW', // Legacy
+  ACCESS_PROJECTS: 'PROJECTS_VIEW', // Legacy
+  ACCESS_ANALYTICS: 'ANALYTICS_VIEW', // Legacy
+  ACCESS_MEETINGS: 'MEETINGS_VIEW', // Legacy
+  ACCESS_SUGGESTIONS: 'SUGGESTIONS_VIEW', // Legacy
+  ACCESS_WORK_LOGS: 'WORK_LOGS_VIEW', // Legacy
+  ACCESS_TOOLKIT: 'TOOLKIT_ACCESS', // Legacy
+  MANAGE_USERS: 'USERS_EDIT', // Legacy
+  MANAGE_HOSTS: 'HOSTS_EDIT', // Legacy
+  MANAGE_RECIPIENTS: 'RECIPIENTS_EDIT', // Legacy
+  MANAGE_DRIVERS: 'DRIVERS_EDIT', // Legacy
+  MANAGE_COLLECTIONS: 'COLLECTIONS_EDIT', // Legacy
+  CREATE_COLLECTIONS: 'COLLECTIONS_ADD', // Legacy
+  EDIT_ALL_COLLECTIONS: 'COLLECTIONS_EDIT_ALL', // Legacy
+  DELETE_ALL_COLLECTIONS: 'COLLECTIONS_DELETE_ALL', // Legacy
+  USE_COLLECTION_WALKTHROUGH: 'COLLECTIONS_WALKTHROUGH', // Legacy
+  CREATE_PROJECTS: 'PROJECTS_ADD', // Legacy
+  EDIT_ALL_PROJECTS: 'PROJECTS_EDIT_ALL', // Legacy
+  DELETE_ALL_PROJECTS: 'PROJECTS_DELETE_ALL', // Legacy
+  CREATE_SUGGESTIONS: 'SUGGESTIONS_ADD', // Legacy
+  EDIT_ALL_SUGGESTIONS: 'SUGGESTIONS_EDIT_ALL', // Legacy
+  DELETE_ALL_SUGGESTIONS: 'SUGGESTIONS_DELETE_ALL', // Legacy
+  CREATE_WORK_LOGS: 'WORK_LOGS_ADD', // Legacy
+  VIEW_ALL_WORK_LOGS: 'WORK_LOGS_VIEW_ALL', // Legacy
+  EDIT_ALL_WORK_LOGS: 'WORK_LOGS_EDIT_ALL', // Legacy
+  DELETE_ALL_WORK_LOGS: 'WORK_LOGS_DELETE_ALL', // Legacy
+  SEND_MESSAGES: 'MESSAGES_SEND', // Legacy
+  MODERATE_MESSAGES: 'MESSAGES_MODERATE', // Legacy
+  DIRECT_MESSAGES: 'CHAT_DIRECT', // Legacy
+  GROUP_MESSAGES: 'CHAT_GROUP', // Legacy
+  GENERAL_CHAT: 'CHAT_GENERAL', // Legacy
+  COMMITTEE_CHAT: 'CHAT_GRANTS_COMMITTEE', // Legacy - defaults to grants committee
+  HOST_CHAT: 'CHAT_HOST', // Legacy
+  DRIVER_CHAT: 'CHAT_DRIVER', // Legacy
+  RECIPIENT_CHAT: 'CHAT_RECIPIENT', // Legacy
+  CORE_TEAM_CHAT: 'CHAT_CORE_TEAM', // Legacy
+  SEND_KUDOS: 'KUDOS_SEND', // Legacy
+  RECEIVE_KUDOS: 'KUDOS_RECEIVE', // Legacy
+  VIEW_KUDOS: 'KUDOS_VIEW', // Legacy
+  MANAGE_ALL_KUDOS: 'KUDOS_MANAGE', // Legacy
+  EXPORT_DATA: 'DATA_EXPORT', // Legacy
+  IMPORT_DATA: 'DATA_IMPORT', // Legacy
+  EDIT_DATA: 'DATA_EXPORT', // Legacy (data editing is export functionality)
+  VIEW_ORGANIZATIONS_CATALOG: 'ORGANIZATIONS_VIEW', // Legacy
+  VIEW_EVENT_REQUESTS: 'EVENT_REQUESTS_VIEW', // Legacy
+  ADD_EVENT_REQUESTS: 'EVENT_REQUESTS_ADD', // Legacy
+  EDIT_EVENT_REQUESTS: 'EVENT_REQUESTS_EDIT', // Legacy
+  DELETE_EVENT_REQUESTS: 'EVENT_REQUESTS_DELETE', // Legacy
+  MANAGE_EVENT_REQUESTS: 'EVENT_REQUESTS_EDIT', // Legacy
+  ASSIGN_EVENT_REQUESTS: 'EVENT_REQUESTS_EDIT', // Legacy
+  VIEW_DONATION_TRACKING: 'DISTRIBUTIONS_VIEW', // Legacy
+  ADD_DONATION_TRACKING: 'DISTRIBUTIONS_ADD', // Legacy
+  EDIT_DONATION_TRACKING: 'DISTRIBUTIONS_EDIT', // Legacy
+  DELETE_DONATION_TRACKING: 'DISTRIBUTIONS_DELETE', // Legacy
+  MANAGE_DONATION_TRACKING: 'DISTRIBUTIONS_EDIT', // Legacy
+  VIEW_DOCUMENTS: 'DOCUMENTS_VIEW', // Legacy
+  MANAGE_DOCUMENTS: 'DOCUMENTS_MANAGE', // Legacy
+  ACCESS_DOCUMENTS: 'DOCUMENTS_VIEW', // Legacy
+  MANAGE_MEETINGS: 'MEETINGS_MANAGE', // Legacy
+  MANAGE_SUGGESTIONS: 'SUGGESTIONS_MANAGE', // Legacy
+
   // Missing legacy mappings that navigation uses
-  VIEW_VOLUNTEERS: "USERS_VIEW", // Legacy
-  VIEW_WEEKLY_MONITORING: "ANALYTICS_VIEW", // Legacy  
-  ACCESS_WEEKLY_MONITORING: "ANALYTICS_VIEW", // Legacy
-  VIEW_GOVERNANCE: "DOCUMENTS_VIEW", // Legacy
+  VIEW_VOLUNTEERS: 'USERS_VIEW', // Legacy
+  VIEW_WEEKLY_MONITORING: 'ANALYTICS_VIEW', // Legacy
+  ACCESS_WEEKLY_MONITORING: 'ANALYTICS_VIEW', // Legacy
+  VIEW_GOVERNANCE: 'DOCUMENTS_VIEW', // Legacy
 } as const;
 
 // Note: This application uses individual permission assignment, not role-based defaults
@@ -225,7 +225,7 @@ export function getDefaultPermissionsForRole(role: string): string[] {
 
     case USER_ROLES.ADMIN:
       return Object.values(PERMISSIONS).filter(
-        (p) => p !== PERMISSIONS.MESSAGES_MODERATE,
+        (p) => p !== PERMISSIONS.MESSAGES_MODERATE
       );
 
     case USER_ROLES.COMMITTEE_MEMBER:
@@ -237,7 +237,7 @@ export function getDefaultPermissionsForRole(role: string): string[] {
         PERMISSIONS.MEETINGS_VIEW,
         PERMISSIONS.SUGGESTIONS_VIEW,
         PERMISSIONS.TOOLKIT_ACCESS,
-        
+
         // Basic messaging and chat
         PERMISSIONS.MESSAGES_VIEW,
         PERMISSIONS.CHAT_GENERAL,
@@ -245,15 +245,15 @@ export function getDefaultPermissionsForRole(role: string): string[] {
         PERMISSIONS.CHAT_EVENTS_COMMITTEE,
         PERMISSIONS.CHAT_WEB_COMMITTEE,
         PERMISSIONS.CHAT_VOLUNTEER_MANAGEMENT,
-        
+
         // Can create content
         PERMISSIONS.SUGGESTIONS_ADD, // Can create suggestions + edit/delete own
         PERMISSIONS.DATA_EXPORT,
-        
+
         // Kudos system
         PERMISSIONS.KUDOS_SEND,
         PERMISSIONS.KUDOS_RECEIVE,
-        PERMISSIONS.KUDOS_VIEW
+        PERMISSIONS.KUDOS_VIEW,
       ];
 
     case USER_ROLES.HOST:
@@ -261,18 +261,18 @@ export function getDefaultPermissionsForRole(role: string): string[] {
         // Directory access
         PERMISSIONS.HOSTS_VIEW,
         PERMISSIONS.RECIPIENTS_VIEW,
-        
+
         // Collections capability
         PERMISSIONS.COLLECTIONS_VIEW,
         PERMISSIONS.COLLECTIONS_ADD, // Can create collections (automatically can edit/delete own)
         PERMISSIONS.COLLECTIONS_WALKTHROUGH, // Can use simplified walkthrough for collections
-        
+
         // Chat permissions
         PERMISSIONS.MESSAGES_VIEW,
         PERMISSIONS.CHAT_GENERAL,
         PERMISSIONS.CHAT_HOST,
         PERMISSIONS.CHAT_DIRECT,
-        
+
         // Analytics and other access
         PERMISSIONS.ANALYTICS_VIEW,
         PERMISSIONS.SUGGESTIONS_VIEW,
@@ -281,11 +281,11 @@ export function getDefaultPermissionsForRole(role: string): string[] {
         PERMISSIONS.EVENT_REQUESTS_VIEW,
         PERMISSIONS.EVENT_REQUESTS_COMPLETE_CONTACT,
         PERMISSIONS.ORGANIZATIONS_VIEW,
-        
+
         // Kudos system
         PERMISSIONS.KUDOS_SEND,
         PERMISSIONS.KUDOS_RECEIVE,
-        PERMISSIONS.KUDOS_VIEW
+        PERMISSIONS.KUDOS_VIEW,
       ];
 
     case USER_ROLES.CORE_TEAM:
@@ -300,7 +300,7 @@ export function getDefaultPermissionsForRole(role: string): string[] {
         PERMISSIONS.MEETINGS_VIEW,
         PERMISSIONS.SUGGESTIONS_VIEW,
         PERMISSIONS.TOOLKIT_ACCESS,
-        
+
         // Management permissions
         PERMISSIONS.HOSTS_EDIT,
         PERMISSIONS.RECIPIENTS_EDIT,
@@ -312,14 +312,14 @@ export function getDefaultPermissionsForRole(role: string): string[] {
         PERMISSIONS.EVENT_REQUESTS_COMPLETE_CONTACT,
         PERMISSIONS.ORGANIZATIONS_VIEW,
         PERMISSIONS.SUGGESTIONS_MANAGE,
-        
+
         // Collection permissions
         PERMISSIONS.COLLECTIONS_ADD,
         PERMISSIONS.COLLECTIONS_WALKTHROUGH,
-        
-        // Project permissions  
+
+        // Project permissions
         PERMISSIONS.PROJECTS_ADD,
-        
+
         // Communication
         PERMISSIONS.MESSAGES_VIEW,
         PERMISSIONS.MESSAGES_SEND,
@@ -332,14 +332,14 @@ export function getDefaultPermissionsForRole(role: string): string[] {
         PERMISSIONS.CHAT_WEB_COMMITTEE,
         PERMISSIONS.CHAT_VOLUNTEER_MANAGEMENT,
         PERMISSIONS.CHAT_BOARD,
-        
+
         // Data and analytics
         PERMISSIONS.DATA_EXPORT,
-        
+
         // Kudos system
         PERMISSIONS.KUDOS_SEND,
         PERMISSIONS.KUDOS_RECEIVE,
-        PERMISSIONS.KUDOS_VIEW
+        PERMISSIONS.KUDOS_VIEW,
       ];
 
     case USER_ROLES.DRIVER:
@@ -356,7 +356,7 @@ export function getDefaultPermissionsForRole(role: string): string[] {
         PERMISSIONS.ORGANIZATIONS_VIEW,
         PERMISSIONS.KUDOS_SEND,
         PERMISSIONS.KUDOS_RECEIVE,
-        PERMISSIONS.KUDOS_VIEW
+        PERMISSIONS.KUDOS_VIEW,
       ];
 
     case USER_ROLES.VOLUNTEER:
@@ -375,7 +375,7 @@ export function getDefaultPermissionsForRole(role: string): string[] {
         PERMISSIONS.ORGANIZATIONS_VIEW,
         PERMISSIONS.KUDOS_SEND,
         PERMISSIONS.KUDOS_RECEIVE,
-        PERMISSIONS.KUDOS_VIEW
+        PERMISSIONS.KUDOS_VIEW,
       ];
 
     case USER_ROLES.RECIPIENT:
@@ -390,7 +390,7 @@ export function getDefaultPermissionsForRole(role: string): string[] {
         PERMISSIONS.EVENT_REQUESTS_VIEW,
         PERMISSIONS.ORGANIZATIONS_VIEW,
         PERMISSIONS.KUDOS_RECEIVE, // Recipients can receive kudos but not send them by default
-        PERMISSIONS.KUDOS_VIEW
+        PERMISSIONS.KUDOS_VIEW,
       ];
 
     case USER_ROLES.DEMO_USER:
@@ -414,7 +414,7 @@ export function getDefaultPermissionsForRole(role: string): string[] {
         PERMISSIONS.TOOLKIT_ACCESS,
         PERMISSIONS.ADMIN_ACCESS,
         PERMISSIONS.TOOLKIT_ACCESS,
-        
+
         // Chat permissions (read-only)
         PERMISSIONS.GENERAL_CHAT,
         PERMISSIONS.COMMITTEE_CHAT,
@@ -422,11 +422,11 @@ export function getDefaultPermissionsForRole(role: string): string[] {
         PERMISSIONS.DRIVER_CHAT,
         PERMISSIONS.RECIPIENT_CHAT,
         PERMISSIONS.CORE_TEAM_CHAT,
-        
+
         // Can receive kudos but cannot send
         PERMISSIONS.RECEIVE_KUDOS,
         PERMISSIONS.VIEW_KUDOS,
-        
+
         // Export data for reporting
         PERMISSIONS.EXPORT_DATA,
       ];
@@ -441,7 +441,7 @@ export function getDefaultPermissionsForRole(role: string): string[] {
         PERMISSIONS.CREATE_SUGGESTIONS, // Can create suggestions (automatically can edit/delete own)
         PERMISSIONS.VIEW_KUDOS, // Viewers can only view kudos, not send or receive
         PERMISSIONS.EVENT_REQUESTS_VIEW,
-        PERMISSIONS.ORGANIZATIONS_VIEW
+        PERMISSIONS.ORGANIZATIONS_VIEW,
       ];
 
     case USER_ROLES.WORK_LOGGER:
@@ -452,7 +452,7 @@ export function getDefaultPermissionsForRole(role: string): string[] {
         PERMISSIONS.ACCESS_TOOLKIT,
         PERMISSIONS.ACCESS_PROJECTS,
         PERMISSIONS.GENERAL_CHAT,
-        "log_work",
+        'log_work',
       ];
 
     default:
@@ -464,14 +464,14 @@ export function getDefaultPermissionsForRole(role: string): string[] {
 export const CHAT_PERMISSIONS = {
   general: PERMISSIONS.GENERAL_CHAT,
   committee: PERMISSIONS.COMMITTEE_CHAT,
-  host: PERMISSIONS.HOST_CHAT,        // Fixed: singular to match frontend
-  hosts: PERMISSIONS.HOST_CHAT,       // Keep plural for backwards compatibility
-  driver: PERMISSIONS.DRIVER_CHAT,    // Fixed: singular to match frontend  
-  drivers: PERMISSIONS.DRIVER_CHAT,   // Keep plural for backwards compatibility
+  host: PERMISSIONS.HOST_CHAT, // Fixed: singular to match frontend
+  hosts: PERMISSIONS.HOST_CHAT, // Keep plural for backwards compatibility
+  driver: PERMISSIONS.DRIVER_CHAT, // Fixed: singular to match frontend
+  drivers: PERMISSIONS.DRIVER_CHAT, // Keep plural for backwards compatibility
   recipient: PERMISSIONS.RECIPIENT_CHAT,
   recipients: PERMISSIONS.RECIPIENT_CHAT,
   core_team: PERMISSIONS.CORE_TEAM_CHAT,
-  "core-team": PERMISSIONS.CORE_TEAM_CHAT, // Also support kebab-case from frontend
+  'core-team': PERMISSIONS.CORE_TEAM_CHAT, // Also support kebab-case from frontend
   direct: PERMISSIONS.DIRECT_MESSAGES,
   groups: PERMISSIONS.GROUP_MESSAGES,
 } as const;
@@ -490,35 +490,44 @@ export function hasAccessToChat(user: any, chatRoom: string): boolean {
 
 // Function to check if user has a specific permission
 export function hasPermission(user: any, permission: string): boolean {
-  if (!user || user.permissions === null || user.permissions === undefined || !permission) return false;
-  
+  if (
+    !user ||
+    user.permissions === null ||
+    user.permissions === undefined ||
+    !permission
+  )
+    return false;
+
   // Super admins get all permissions automatically
-  if (user.role === "super_admin" || user.role === USER_ROLES.SUPER_ADMIN) return true;
-  
+  if (user.role === 'super_admin' || user.role === USER_ROLES.SUPER_ADMIN)
+    return true;
+
   // Handle both array and number (bitmask) formats for permissions
   let userPermissions: string[] = [];
-  
+
   if (Array.isArray(user.permissions)) {
     userPermissions = user.permissions;
   } else if (typeof user.permissions === 'number') {
     // Convert permission bitmask to array using PERMISSION_LIST order
     const PERMISSION_LIST = Object.values(PERMISSIONS);
-    userPermissions = PERMISSION_LIST.filter((_, index) => 
-      (user.permissions as number) & (1 << index)
+    userPermissions = PERMISSION_LIST.filter(
+      (_, index) => (user.permissions as number) & (1 << index)
     );
   } else {
     return false;
   }
-  
+
   // Check for exact match first
   if (userPermissions.includes(permission)) return true;
-  
+
   // Check for case variations to handle mixed case permissions
   const lowerPermission = permission.toLowerCase();
   const upperPermission = permission.toUpperCase();
-  
-  return userPermissions.includes(lowerPermission) || 
-         userPermissions.includes(upperPermission);
+
+  return (
+    userPermissions.includes(lowerPermission) ||
+    userPermissions.includes(upperPermission)
+  );
 }
 
 // Function to check if user can edit a specific collection entry
@@ -527,7 +536,7 @@ export function canEditCollection(user: any, collection: any): boolean {
 
   // Super admins and users with EDIT_ALL_COLLECTIONS can edit all collections
   if (
-    user.role === "super_admin" ||
+    user.role === 'super_admin' ||
     user.permissions.includes(PERMISSIONS.EDIT_ALL_COLLECTIONS)
   )
     return true;
@@ -548,7 +557,7 @@ export function canDeleteCollection(user: any, collection: any): boolean {
 
   // Super admins and users with DELETE_ALL_COLLECTIONS can delete all collections
   if (
-    user.role === "super_admin" ||
+    user.role === 'super_admin' ||
     user.permissions.includes(PERMISSIONS.DELETE_ALL_COLLECTIONS)
   )
     return true;
@@ -569,9 +578,9 @@ export function canEditProject(user: any, project: any): boolean {
 
   // Super admins and users with EDIT_ALL_PROJECTS or MANAGE_ALL_PROJECTS can edit all projects
   if (
-    user.role === "super_admin" ||
+    user.role === 'super_admin' ||
     user.permissions.includes(PERMISSIONS.EDIT_ALL_PROJECTS) ||
-    user.permissions.includes("MANAGE_ALL_PROJECTS")
+    user.permissions.includes('MANAGE_ALL_PROJECTS')
   )
     return true;
 
@@ -615,7 +624,7 @@ export function canDeleteProject(user: any, project: any): boolean {
 
   // Super admins and users with DELETE_ALL_PROJECTS can delete all projects
   if (
-    user.role === "super_admin" ||
+    user.role === 'super_admin' ||
     user.permissions.includes(PERMISSIONS.DELETE_ALL_PROJECTS)
   )
     return true;
@@ -636,7 +645,7 @@ export function canEditSuggestion(user: any, suggestion: any): boolean {
 
   // Super admins and users with EDIT_ALL_SUGGESTIONS can edit all suggestions
   if (
-    user.role === "super_admin" ||
+    user.role === 'super_admin' ||
     user.permissions.includes(PERMISSIONS.EDIT_ALL_SUGGESTIONS)
   )
     return true;
@@ -659,7 +668,7 @@ export function canDeleteSuggestion(user: any, suggestion: any): boolean {
 
   // Super admins and users with DELETE_ALL_SUGGESTIONS can delete all suggestions
   if (
-    user.role === "super_admin" ||
+    user.role === 'super_admin' ||
     user.permissions.includes(PERMISSIONS.DELETE_ALL_SUGGESTIONS)
   )
     return true;
@@ -682,7 +691,7 @@ export function canEditWorkLog(user: any, workLog: any): boolean {
 
   // Super admins and users with EDIT_ALL_WORK_LOGS can edit all work logs
   if (
-    user.role === "super_admin" ||
+    user.role === 'super_admin' ||
     user.permissions.includes(PERMISSIONS.EDIT_ALL_WORK_LOGS)
   )
     return true;
@@ -705,7 +714,7 @@ export function canDeleteWorkLog(user: any, workLog: any): boolean {
 
   // Super admins and users with DELETE_ALL_WORK_LOGS can delete all work logs
   if (
-    user.role === "super_admin" ||
+    user.role === 'super_admin' ||
     user.permissions.includes(PERMISSIONS.DELETE_ALL_WORK_LOGS)
   )
     return true;
@@ -726,28 +735,28 @@ export function canDeleteWorkLog(user: any, workLog: any): boolean {
 export function getRoleDisplayName(role: string): string {
   switch (role) {
     case USER_ROLES.SUPER_ADMIN:
-      return "Super Administrator";
+      return 'Super Administrator';
     case USER_ROLES.ADMIN:
-      return "Administrator";
+      return 'Administrator';
     case USER_ROLES.COMMITTEE_MEMBER:
-      return "Committee Member";
+      return 'Committee Member';
     case USER_ROLES.CORE_TEAM:
-      return "Core Team";
+      return 'Core Team';
     case USER_ROLES.HOST:
-      return "Host Location";
+      return 'Host Location';
     case USER_ROLES.DRIVER:
-      return "Delivery Driver";
+      return 'Delivery Driver';
     case USER_ROLES.VOLUNTEER:
-      return "Volunteer";
+      return 'Volunteer';
     case USER_ROLES.RECIPIENT:
-      return "Recipient Organization";
+      return 'Recipient Organization';
     case USER_ROLES.VIEWER:
-      return "Viewer";
+      return 'Viewer';
     case USER_ROLES.WORK_LOGGER:
-      return "Work Logger";
+      return 'Work Logger';
     case USER_ROLES.DEMO_USER:
-      return "Demo User";
+      return 'Demo User';
     default:
-      return role.charAt(0).toUpperCase() + role.slice(1).replace("_", " ");
+      return role.charAt(0).toUpperCase() + role.slice(1).replace('_', ' ');
   }
 }

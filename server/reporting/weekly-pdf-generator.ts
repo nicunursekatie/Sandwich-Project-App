@@ -1,4 +1,4 @@
-import { format } from "date-fns";
+import { format } from 'date-fns';
 
 interface WeeklyReportData {
   report_date: string;
@@ -53,23 +53,23 @@ interface WeeklyReportData {
 export class WeeklyPDFGenerator {
   static async generatePDF(data: WeeklyReportData): Promise<Buffer> {
     // Dynamic import for ES modules
-    const PDFKit = (await import("pdfkit")).default;
+    const PDFKit = (await import('pdfkit')).default;
     const doc = new PDFKit({ margin: 50 });
 
     const chunks: Buffer[] = [];
-    doc.on("data", (chunk) => chunks.push(chunk));
+    doc.on('data', (chunk) => chunks.push(chunk));
 
     return new Promise((resolve) => {
-      doc.on("end", () => resolve(Buffer.concat(chunks)));
+      doc.on('end', () => resolve(Buffer.concat(chunks)));
 
       // TSP Brand Colors
       const colors = {
-        orange: "#FBAD3F",
-        navy: "#236383",
-        lightBlue: "#47B3CB",
-        darkGray: "#333333",
-        lightGray: "#666666",
-        white: "#FFFFFF",
+        orange: '#FBAD3F',
+        navy: '#236383',
+        lightBlue: '#47B3CB',
+        darkGray: '#333333',
+        lightGray: '#666666',
+        white: '#FFFFFF',
       };
 
       let yPosition = 50;
@@ -78,24 +78,24 @@ export class WeeklyPDFGenerator {
       doc
         .fontSize(24)
         .fillColor(colors.navy)
-        .text("The Sandwich Project", 50, yPosition);
+        .text('The Sandwich Project', 50, yPosition);
       doc
         .fontSize(18)
         .fillColor(colors.orange)
-        .text("Weekly Impact Report", 50, yPosition + 30);
+        .text('Weekly Impact Report', 50, yPosition + 30);
 
       // Report period
-      const weekStart = format(new Date(data.collection_week.start), "MMM dd");
+      const weekStart = format(new Date(data.collection_week.start), 'MMM dd');
       const weekEnd = format(
         new Date(data.collection_week.end),
-        "MMM dd, yyyy"
+        'MMM dd, yyyy'
       );
       doc
         .fontSize(12)
         .fillColor(colors.darkGray)
         .text(`Collection Week: ${weekStart} - ${weekEnd}`, 50, yPosition + 60)
         .text(
-          `Generated: ${format(new Date(data.report_date), "MMM dd, yyyy")}`,
+          `Generated: ${format(new Date(data.report_date), 'MMM dd, yyyy')}`,
           50,
           yPosition + 75
         );
@@ -106,7 +106,7 @@ export class WeeklyPDFGenerator {
       doc
         .fontSize(16)
         .fillColor(colors.navy)
-        .text("EXECUTIVE SUMMARY", 50, yPosition);
+        .text('EXECUTIVE SUMMARY', 50, yPosition);
       yPosition += 25;
 
       // Summary box with background
@@ -130,7 +130,7 @@ export class WeeklyPDFGenerator {
       );
       doc.text(
         `Week-over-Week: ${
-          summary.week_over_week_change >= 0 ? "+" : ""
+          summary.week_over_week_change >= 0 ? '+' : ''
         }${Math.round(summary.week_over_week_change * 100)}%`,
         60,
         yPosition + 50
@@ -149,42 +149,42 @@ export class WeeklyPDFGenerator {
       doc
         .fontSize(16)
         .fillColor(colors.navy)
-        .text("KEY METRICS", 50, yPosition);
+        .text('KEY METRICS', 50, yPosition);
       yPosition += 30;
 
       const tableData = [
-        ["Metric", "This Week", "Last Week", "Change", "4-Week Avg"],
+        ['Metric', 'This Week', 'Last Week', 'Change', '4-Week Avg'],
         [
-          "Total Sandwiches",
+          'Total Sandwiches',
           data.metrics_table.total_sandwiches.this_week.toLocaleString(),
           data.metrics_table.total_sandwiches.last_week.toLocaleString(),
-          (data.metrics_table.total_sandwiches.change >= 0 ? "+" : "") +
+          (data.metrics_table.total_sandwiches.change >= 0 ? '+' : '') +
             data.metrics_table.total_sandwiches.change.toLocaleString(),
           data.metrics_table.total_sandwiches.four_week_avg.toLocaleString(),
         ],
         [
-          "Locations Participating",
+          'Locations Participating',
           data.metrics_table.locations_participating.this_week.toString(),
           data.metrics_table.locations_participating.last_week.toString(),
-          (data.metrics_table.locations_participating.change >= 0 ? "+" : "") +
+          (data.metrics_table.locations_participating.change >= 0 ? '+' : '') +
             data.metrics_table.locations_participating.change.toString(),
           data.metrics_table.locations_participating.four_week_avg.toString(),
         ],
         [
-          "Avg per Location",
+          'Avg per Location',
           Math.round(data.metrics_table.avg_per_location.this_week).toString(),
           Math.round(data.metrics_table.avg_per_location.last_week).toString(),
-          (data.metrics_table.avg_per_location.change >= 0 ? "+" : "") +
+          (data.metrics_table.avg_per_location.change >= 0 ? '+' : '') +
             Math.round(data.metrics_table.avg_per_location.change).toString(),
           Math.round(
             data.metrics_table.avg_per_location.four_week_avg
           ).toString(),
         ],
         [
-          "Group Collections",
+          'Group Collections',
           data.metrics_table.group_collections.this_week.toString(),
           data.metrics_table.group_collections.last_week.toString(),
-          (data.metrics_table.group_collections.change >= 0 ? "+" : "") +
+          (data.metrics_table.group_collections.change >= 0 ? '+' : '') +
             data.metrics_table.group_collections.change.toString(),
           data.metrics_table.group_collections.four_week_avg.toString(),
         ],
@@ -202,7 +202,7 @@ export class WeeklyPDFGenerator {
       doc
         .fontSize(16)
         .fillColor(colors.navy)
-        .text("LOCATION PERFORMANCE", 50, yPosition);
+        .text('LOCATION PERFORMANCE', 50, yPosition);
       yPosition += 25;
 
       // High Performers
@@ -210,16 +210,16 @@ export class WeeklyPDFGenerator {
         doc
           .fontSize(14)
           .fillColor(colors.orange)
-          .text("HIGH PERFORMERS (>800 sandwiches):", 50, yPosition);
+          .text('HIGH PERFORMERS (>800 sandwiches):', 50, yPosition);
         yPosition += 20;
 
         data.location_performance.high_performers.forEach((location: any) => {
           const trendSymbol =
-            location.trend === "up"
-              ? "↗"
-              : location.trend === "down"
-              ? "↘"
-              : "→";
+            location.trend === 'up'
+              ? '↗'
+              : location.trend === 'down'
+                ? '↘'
+                : '→';
           doc
             .fontSize(11)
             .fillColor(colors.darkGray)
@@ -239,8 +239,8 @@ export class WeeklyPDFGenerator {
       if (data.location_performance.needs_attention.length > 0) {
         doc
           .fontSize(14)
-          .fillColor("#CC0000")
-          .text("NEEDS ATTENTION:", 50, yPosition);
+          .fillColor('#CC0000')
+          .text('NEEDS ATTENTION:', 50, yPosition);
         yPosition += 20;
 
         data.location_performance.needs_attention.forEach((location: any) => {
@@ -254,7 +254,7 @@ export class WeeklyPDFGenerator {
             );
           if (location.issues.length > 0) {
             doc.text(
-              `  Issues: ${location.issues.join(", ")}`,
+              `  Issues: ${location.issues.join(', ')}`,
               70,
               yPosition + 12
             );
@@ -270,13 +270,11 @@ export class WeeklyPDFGenerator {
         doc
           .fontSize(14)
           .fillColor(colors.lightBlue)
-          .text("STEADY CONTRIBUTORS:", 50, yPosition);
+          .text('STEADY CONTRIBUTORS:', 50, yPosition);
         yPosition += 20;
 
-        const contributors = data.location_performance.steady_contributors.slice(
-          0,
-          10
-        ); // Limit for space
+        const contributors =
+          data.location_performance.steady_contributors.slice(0, 10); // Limit for space
         contributors.forEach((location: any) => {
           doc
             .fontSize(10)
@@ -291,8 +289,9 @@ export class WeeklyPDFGenerator {
 
         if (data.location_performance.steady_contributors.length > 10) {
           doc.text(
-            `... and ${data.location_performance.steady_contributors.length -
-              10} more locations`,
+            `... and ${
+              data.location_performance.steady_contributors.length - 10
+            } more locations`,
             60,
             yPosition
           );
@@ -311,7 +310,7 @@ export class WeeklyPDFGenerator {
       doc
         .fontSize(16)
         .fillColor(colors.navy)
-        .text("NEXT WEEK PREPARATION", 50, yPosition);
+        .text('NEXT WEEK PREPARATION', 50, yPosition);
       yPosition += 25;
 
       // Host Confirmations
@@ -332,7 +331,7 @@ export class WeeklyPDFGenerator {
       doc
         .fontSize(12)
         .fillColor(colors.orange)
-        .text("Before Wednesday:", 50, yPosition);
+        .text('Before Wednesday:', 50, yPosition);
       yPosition += 15;
       data.next_week_prep.pending_actions
         .slice(0, 4)
@@ -350,7 +349,7 @@ export class WeeklyPDFGenerator {
       doc
         .fontSize(12)
         .fillColor(colors.orange)
-        .text("Collection Day Prep:", 50, yPosition);
+        .text('Collection Day Prep:', 50, yPosition);
       yPosition += 15;
       doc
         .fontSize(10)
@@ -371,14 +370,14 @@ export class WeeklyPDFGenerator {
       doc
         .fontSize(16)
         .fillColor(colors.navy)
-        .text("CELEBRATING SUCCESS", 50, yPosition);
+        .text('CELEBRATING SUCCESS', 50, yPosition);
       yPosition += 25;
 
       if (data.celebrating_success.milestones.length > 0) {
         doc
           .fontSize(12)
           .fillColor(colors.orange)
-          .text("Milestones Reached:", 50, yPosition);
+          .text('Milestones Reached:', 50, yPosition);
         yPosition += 15;
         data.celebrating_success.milestones.forEach((milestone: string) => {
           doc
@@ -394,7 +393,7 @@ export class WeeklyPDFGenerator {
         doc
           .fontSize(12)
           .fillColor(colors.orange)
-          .text("Volunteer Spotlight:", 50, yPosition);
+          .text('Volunteer Spotlight:', 50, yPosition);
         yPosition += 15;
         doc
           .fontSize(10)
@@ -416,7 +415,7 @@ export class WeeklyPDFGenerator {
         doc
           .fontSize(12)
           .fillColor(colors.orange)
-          .text("Impact Story:", 50, yPosition);
+          .text('Impact Story:', 50, yPosition);
         yPosition += 15;
         doc
           .fontSize(10)
@@ -439,11 +438,11 @@ export class WeeklyPDFGenerator {
       doc
         .fontSize(8)
         .fillColor(colors.lightGray)
-        .text("Generated by The Sandwich Project Management System", 50, 750)
+        .text('Generated by The Sandwich Project Management System', 50, 750)
         .text(
           `Next report: ${format(
             new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-            "MMM dd, yyyy"
+            'MMM dd, yyyy'
           )}`,
           400,
           750

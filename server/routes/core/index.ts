@@ -1,101 +1,101 @@
-import { Router } from "express";
-import { CoreService } from "../../services/core";
-import { runWeeklyMonitoring } from "../../weekly-monitoring";
+import { Router } from 'express';
+import { CoreService } from '../../services/core';
+import { runWeeklyMonitoring } from '../../weekly-monitoring';
 import {
   createPublicMiddleware,
   createStandardMiddleware,
   createErrorHandler,
-} from "../../middleware";
+} from '../../middleware';
 
 const router = Router();
 
 // Apply error handling for this module
-const errorHandler = createErrorHandler("core");
+const errorHandler = createErrorHandler('core');
 
 /**
  * Core Routes - Health checks and system monitoring
  */
 
 // Basic health check endpoint for deployment monitoring (public - no auth required)
-router.get("/health", ...createPublicMiddleware(), (req, res) => {
+router.get('/health', ...createPublicMiddleware(), (req, res) => {
   try {
     const healthData = CoreService.getBasicHealth();
     res.status(200).json(healthData);
   } catch (error) {
-    res.status(500).json({ status: "error", message: "Health check failed" });
+    res.status(500).json({ status: 'error', message: 'Health check failed' });
   }
 });
 
 // System health check with performance stats (authenticated)
 router.get(
-  "/system/health",
+  '/system/health',
   ...createStandardMiddleware(),
   async (req, res) => {
     try {
       const healthData = CoreService.getSystemHealth();
       res.json(healthData);
     } catch (error) {
-      res.status(500).json({ status: "error", message: "Health check failed" });
+      res.status(500).json({ status: 'error', message: 'Health check failed' });
     }
   }
 );
 
 // Weekly monitoring endpoints (all require authentication)
 router.get(
-  "/monitoring/weekly-status",
+  '/monitoring/weekly-status',
   ...createStandardMiddleware(),
   async (req, res) => {
     try {
       const submissionStatus = await CoreService.getWeeklyMonitoringStatus();
       res.json(submissionStatus);
     } catch (error) {
-      console.error("Error checking weekly submissions:", error);
-      res.status(500).json({ error: "Failed to check weekly submissions" });
+      console.error('Error checking weekly submissions:', error);
+      res.status(500).json({ error: 'Failed to check weekly submissions' });
     }
   }
 );
 
 router.get(
-  "/monitoring/stats",
+  '/monitoring/stats',
   ...createStandardMiddleware(),
   async (req, res) => {
     try {
       const stats = await CoreService.getMonitoringStats();
       res.json(stats);
     } catch (error) {
-      console.error("Error getting monitoring stats:", error);
-      res.status(500).json({ error: "Failed to get monitoring stats" });
+      console.error('Error getting monitoring stats:', error);
+      res.status(500).json({ error: 'Failed to get monitoring stats' });
     }
   }
 );
 
 router.post(
-  "/monitoring/check-now",
+  '/monitoring/check-now',
   ...createStandardMiddleware(),
   async (req, res) => {
     try {
       await runWeeklyMonitoring();
-      res.json({ success: true, message: "Weekly monitoring check completed" });
+      res.json({ success: true, message: 'Weekly monitoring check completed' });
     } catch (error) {
-      console.error("Error running weekly monitoring:", error);
-      res.status(500).json({ error: "Failed to run weekly monitoring" });
+      console.error('Error running weekly monitoring:', error);
+      res.status(500).json({ error: 'Failed to run weekly monitoring' });
     }
   }
 );
 
 // Project data status check (authenticated)
 router.get(
-  "/project-data/status",
+  '/project-data/status',
   ...createStandardMiddleware(),
   async (req, res) => {
     try {
       const status = await CoreService.getProjectDataStatus();
       res.json(status);
     } catch (error) {
-      console.error("Error getting project data status:", error);
+      console.error('Error getting project data status:', error);
       res.status(500).json({
-        status: "error",
-        message: "Failed to get project data status",
+        status: 'error',
+        message: 'Failed to get project data status',
         error: error.message,
       });
     }

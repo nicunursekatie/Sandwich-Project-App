@@ -1,14 +1,14 @@
-import { useState } from "react";
+import { useState } from 'react';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   FileText,
   Download,
@@ -19,16 +19,16 @@ import {
   ImageIcon,
   Share2,
   Copy,
-} from "lucide-react";
-import { DocumentPreview } from "@/components/document-preview";
-import { useToast } from "@/hooks/use-toast";
+} from 'lucide-react';
+import { DocumentPreview } from '@/components/document-preview';
+import { useToast } from '@/hooks/use-toast';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 
 interface AdminDocument {
   id: string;
@@ -36,139 +36,138 @@ interface AdminDocument {
   description: string;
   category: string;
   path: string;
-  type: "pdf" | "docx" | "xlsx";
+  type: 'pdf' | 'docx' | 'xlsx';
   size?: string;
   lastModified?: string;
-  importance: "critical" | "high" | "normal";
+  importance: 'critical' | 'high' | 'normal';
 }
 
 const adminDocuments: AdminDocument[] = [
   {
-    id: "tax-exempt-letter",
-    name: "IRS Tax Exempt Letter",
-    description: "Our 501(c)(3) letter",
-    category: "Legal & Tax",
-    path: "/attached_assets/IRS Tax Exempt Letter (Contains EIN).pdf",
-    type: "pdf",
-    importance: "critical",
+    id: 'tax-exempt-letter',
+    name: 'IRS Tax Exempt Letter',
+    description: 'Our 501(c)(3) letter',
+    category: 'Legal & Tax',
+    path: '/attached_assets/IRS Tax Exempt Letter (Contains EIN).pdf',
+    type: 'pdf',
+    importance: 'critical',
   },
   {
-    id: "articles-incorporation",
-    name: "Articles of Incorporation",
-    description: "Articles of Incorporation",
-    category: "Legal & Tax",
-    path: "/attached_assets/Articles of Incorporation.pdf",
-    type: "pdf",
-    importance: "critical",
+    id: 'articles-incorporation',
+    name: 'Articles of Incorporation',
+    description: 'Articles of Incorporation',
+    category: 'Legal & Tax',
+    path: '/attached_assets/Articles of Incorporation.pdf',
+    type: 'pdf',
+    importance: 'critical',
   },
   {
-    id: "georgia-code",
-    name: "2020 Georgia Code Title 51",
-    description: "Georgia state legal code reference for nonprofit operations",
-    category: "Legal & Tax",
-    path: "/attached_assets/2020 Georgia Code Title 51.pdf",
-    type: "pdf",
-    importance: "high",
+    id: 'georgia-code',
+    name: '2020 Georgia Code Title 51',
+    description: 'Georgia state legal code reference for nonprofit operations',
+    category: 'Legal & Tax',
+    path: '/attached_assets/2020 Georgia Code Title 51.pdf',
+    type: 'pdf',
+    importance: 'high',
   },
   {
-    id: "bylaws-2024",
-    name: "TSP Bylaws 2024",
-    description: "Current organizational bylaws and governance structure",
-    category: "Governance",
-    path:
-      "/attached_assets/The Sandwich Project Bylaws 2024(1)_1750871081277.pdf",
-    type: "pdf",
-    importance: "critical",
+    id: 'bylaws-2024',
+    name: 'TSP Bylaws 2024',
+    description: 'Current organizational bylaws and governance structure',
+    category: 'Governance',
+    path: '/attached_assets/The Sandwich Project Bylaws 2024(1)_1750871081277.pdf',
+    type: 'pdf',
+    importance: 'critical',
   },
   {
-    id: "volunteer-driver-agreement",
-    name: "TSP Volunteer Driver Agreement",
-    description: "Required agreement form for volunteer drivers",
-    category: "Forms",
-    path: "/attached_assets/TSP Volunteer Driver Agreement (1).pdf",
-    type: "pdf",
-    importance: "critical",
+    id: 'volunteer-driver-agreement',
+    name: 'TSP Volunteer Driver Agreement',
+    description: 'Required agreement form for volunteer drivers',
+    category: 'Forms',
+    path: '/attached_assets/TSP Volunteer Driver Agreement (1).pdf',
+    type: 'pdf',
+    importance: 'critical',
   },
   {
-    id: "community-service-hours",
-    name: "TSP Community Service Hours",
-    description: "Form for tracking and documenting community service hours",
-    category: "Forms",
-    path: "/attached_assets/TSP COMMUNITY SERVICE HOURS (1) (1) (1).pdf",
-    type: "pdf",
-    importance: "high",
+    id: 'community-service-hours',
+    name: 'TSP Community Service Hours',
+    description: 'Form for tracking and documenting community service hours',
+    category: 'Forms',
+    path: '/attached_assets/TSP COMMUNITY SERVICE HOURS (1) (1) (1).pdf',
+    type: 'pdf',
+    importance: 'high',
   },
 ];
 
-const categories = ["All", "Legal & Tax", "Governance", "Forms"];
+const categories = ['All', 'Legal & Tax', 'Governance', 'Forms'];
 
 // Logo files information
 const logoFiles = [
   {
     id: 1,
-    name: "CMYK Print Logo",
-    filename: "CMYK_PRINT_TSP-01-01.jpg",
-    description: "High-quality CMYK version for professional printing",
-    type: "JPEG",
-    usage: "Print materials, brochures, professional documents",
-    bgColor: "white",
+    name: 'CMYK Print Logo',
+    filename: 'CMYK_PRINT_TSP-01-01.jpg',
+    description: 'High-quality CMYK version for professional printing',
+    type: 'JPEG',
+    usage: 'Print materials, brochures, professional documents',
+    bgColor: 'white',
     icon: <Palette className="h-5 w-5" />,
   },
   {
     id: 2,
-    name: "Main Transparent Logo",
-    filename: "TSP_transparent.png",
-    description: "Primary logo with transparent background",
-    type: "PNG",
-    usage: "Web, presentations, overlays on any background",
-    bgColor: "#f8f9fa",
+    name: 'Main Transparent Logo',
+    filename: 'TSP_transparent.png',
+    description: 'Primary logo with transparent background',
+    type: 'PNG',
+    usage: 'Web, presentations, overlays on any background',
+    bgColor: '#f8f9fa',
     icon: <ImageIcon className="h-5 w-5" />,
   },
   {
     id: 3,
-    name: "Reverse Transparent Logo",
-    filename: "TSP_reverse_transparent.png",
-    description: "Inverted colors for dark backgrounds",
-    type: "PNG",
-    usage: "Dark backgrounds, night mode interfaces",
-    bgColor: "#2d3748",
+    name: 'Reverse Transparent Logo',
+    filename: 'TSP_reverse_transparent.png',
+    description: 'Inverted colors for dark backgrounds',
+    type: 'PNG',
+    usage: 'Dark backgrounds, night mode interfaces',
+    bgColor: '#2d3748',
     icon: <Eye className="h-5 w-5" />,
   },
   {
     id: 4,
-    name: "Sandwich Logo",
-    filename: "sandwich logo.png",
-    description: "Simple sandwich icon logo",
-    type: "PNG",
-    usage: "Icons, favicons, small applications",
-    bgColor: "white",
+    name: 'Sandwich Logo',
+    filename: 'sandwich logo.png',
+    description: 'Simple sandwich icon logo',
+    type: 'PNG',
+    usage: 'Icons, favicons, small applications',
+    bgColor: 'white',
     icon: <FileImage className="h-5 w-5" />,
   },
   {
     id: 5,
-    name: "Transparent Logo (Copy)",
-    filename: "Copy of TSP_transparent.png",
-    description: "Backup copy of transparent logo",
-    type: "PNG",
-    usage: "Backup version for web and digital use",
-    bgColor: "#f8f9fa",
+    name: 'Transparent Logo (Copy)',
+    filename: 'Copy of TSP_transparent.png',
+    description: 'Backup copy of transparent logo',
+    type: 'PNG',
+    usage: 'Backup version for web and digital use',
+    bgColor: '#f8f9fa',
     icon: <ImageIcon className="h-5 w-5" />,
   },
 ];
 
 export default function ImportantDocuments() {
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedCategory, setSelectedCategory] = useState('All');
   const { toast } = useToast();
   const [previewDocument, setPreviewDocument] = useState<AdminDocument | null>(
     null
   );
 
   const filteredDocuments = adminDocuments.filter(
-    (doc) => selectedCategory === "All" || doc.category === selectedCategory
+    (doc) => selectedCategory === 'All' || doc.category === selectedCategory
   );
 
   const handleDownload = (doc: AdminDocument) => {
-    const link = document.createElement("a");
+    const link = document.createElement('a');
     link.href = doc.path;
     link.download = doc.name;
     document.body.appendChild(link);
@@ -183,12 +182,12 @@ export default function ImportantDocuments() {
   const handleLogoDownload = async (filename: string, displayName: string) => {
     try {
       const response = await fetch(`/attached_assets/LOGOS/${filename}`);
-      if (!response.ok) throw new Error("Logo not found");
+      if (!response.ok) throw new Error('Logo not found');
 
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.style.display = "none";
+      const a = document.createElement('a');
+      a.style.display = 'none';
       a.href = url;
       a.download = filename;
       document.body.appendChild(a);
@@ -197,15 +196,15 @@ export default function ImportantDocuments() {
       document.body.removeChild(a);
 
       toast({
-        title: "Download Complete",
+        title: 'Download Complete',
         description: `${displayName} has been downloaded successfully.`,
       });
     } catch (error) {
-      console.error("Download failed:", error);
+      console.error('Download failed:', error);
       toast({
-        title: "Download Failed",
-        description: "Failed to download logo. Please try again.",
-        variant: "destructive",
+        title: 'Download Failed',
+        description: 'Failed to download logo. Please try again.',
+        variant: 'destructive',
       });
     }
   };
@@ -221,17 +220,17 @@ export default function ImportantDocuments() {
           url: logoUrl,
         });
         toast({
-          title: "Shared Successfully",
+          title: 'Shared Successfully',
           description: `${displayName} has been shared.`,
         });
       } catch (error) {
-        if (error.name !== "AbortError") {
-          console.error("Share failed:", error);
+        if (error.name !== 'AbortError') {
+          console.error('Share failed:', error);
           toast({
-            title: "Share Failed",
+            title: 'Share Failed',
             description:
-              "Failed to share logo. The link has been copied instead.",
-            variant: "destructive",
+              'Failed to share logo. The link has been copied instead.',
+            variant: 'destructive',
           });
           await navigator.clipboard.writeText(logoUrl);
         }
@@ -239,7 +238,7 @@ export default function ImportantDocuments() {
     } else {
       await navigator.clipboard.writeText(logoUrl);
       toast({
-        title: "Link Copied",
+        title: 'Link Copied',
         description: `Link to ${displayName} has been copied to clipboard.`,
       });
     }
@@ -248,23 +247,23 @@ export default function ImportantDocuments() {
   const handleLogoCopy = async (filename: string, displayName: string) => {
     try {
       const response = await fetch(`/attached_assets/LOGOS/${filename}`);
-      if (!response.ok) throw new Error("Logo not found");
+      if (!response.ok) throw new Error('Logo not found');
 
       const blob = await response.blob();
       const item = new ClipboardItem({ [blob.type]: blob });
       await navigator.clipboard.write([item]);
 
       toast({
-        title: "Image Copied",
+        title: 'Image Copied',
         description: `${displayName} has been copied to clipboard.`,
       });
     } catch (error) {
-      console.error("Copy failed:", error);
+      console.error('Copy failed:', error);
       // Fallback to copying the URL
       const logoUrl = `${window.location.origin}/attached_assets/LOGOS/${filename}`;
       await navigator.clipboard.writeText(logoUrl);
       toast({
-        title: "Link Copied",
+        title: 'Link Copied',
         description: `Link to ${displayName} has been copied to clipboard instead.`,
       });
     }
@@ -272,7 +271,7 @@ export default function ImportantDocuments() {
 
   const getImportanceBadge = (importance: string) => {
     switch (importance) {
-      case "critical":
+      case 'critical':
         return (
           <Badge
             variant="secondary"
@@ -281,7 +280,7 @@ export default function ImportantDocuments() {
             Important
           </Badge>
         );
-      case "high":
+      case 'high':
         return (
           <Badge variant="outline" className="text-xs">
             Reference
@@ -349,13 +348,13 @@ export default function ImportantDocuments() {
                   <Button
                     key={category}
                     variant={
-                      selectedCategory === category ? "default" : "outline"
+                      selectedCategory === category ? 'default' : 'outline'
                     }
                     onClick={() => setSelectedCategory(category)}
                     className={
                       selectedCategory === category
-                        ? "px-6 py-3 text-sm font-medium bg-gradient-to-r from-[#236383] to-[#1a4e66] text-white border-0 shadow-[0_4px_12px_rgba(35,99,131,0.25),0_2px_4px_rgba(35,99,131,0.1)] transform hover:scale-[1.02] hover:shadow-[0_6px_20px_rgba(35,99,131,0.3),0_4px_8px_rgba(35,99,131,0.15)] transition-all duration-200 ease-in-out rounded-lg"
-                        : "px-6 py-3 text-sm font-medium border-2 border-[#236383] text-[#236383] hover:bg-[#236383] hover:text-white bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] transform hover:scale-[1.02] hover:shadow-[0_4px_12px_rgba(35,99,131,0.15)] transition-all duration-200 ease-in-out rounded-lg"
+                        ? 'px-6 py-3 text-sm font-medium bg-gradient-to-r from-[#236383] to-[#1a4e66] text-white border-0 shadow-[0_4px_12px_rgba(35,99,131,0.25),0_2px_4px_rgba(35,99,131,0.1)] transform hover:scale-[1.02] hover:shadow-[0_6px_20px_rgba(35,99,131,0.3),0_4px_8px_rgba(35,99,131,0.15)] transition-all duration-200 ease-in-out rounded-lg'
+                        : 'px-6 py-3 text-sm font-medium border-2 border-[#236383] text-[#236383] hover:bg-[#236383] hover:text-white bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] transform hover:scale-[1.02] hover:shadow-[0_4px_12px_rgba(35,99,131,0.15)] transition-all duration-200 ease-in-out rounded-lg'
                     }
                   >
                     {category}
@@ -462,7 +461,7 @@ export default function ImportantDocuments() {
                         className="max-w-full max-h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300 ease-in-out"
                         onError={(e) => {
                           e.currentTarget.src =
-                            "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiBmaWxsPSIjZjNmNGY2Ii8+CjxwYXRoIGQ9Ik0yMCAyMEg0NFY0NEgyMFYyMFoiIGZpbGw9IiNkMWQ1ZGIiLz4KPC9zdmc+";
+                            'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiBmaWxsPSIjZjNmNGY2Ii8+CjxwYXRoIGQ9Ik0yMCAyMEg0NFY0NEgyMFYyMFoiIGZpbGw9IiNkMWQ1ZGIiLz4KPC9zdmc+';
                         }}
                       />
                     </div>
@@ -510,19 +509,19 @@ export default function ImportantDocuments() {
                               <div>
                                 <strong className="text-[#236383]">
                                   File Type:
-                                </strong>{" "}
+                                </strong>{' '}
                                 {logo.type}
                               </div>
                               <div>
                                 <strong className="text-[#236383]">
                                   Filename:
-                                </strong>{" "}
+                                </strong>{' '}
                                 {logo.filename}
                               </div>
                               <div className="col-span-2">
                                 <strong className="text-[#236383]">
                                   Usage:
-                                </strong>{" "}
+                                </strong>{' '}
                                 {logo.usage}
                               </div>
                             </div>
@@ -605,7 +604,7 @@ export default function ImportantDocuments() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => window.open(previewDocument.path, "_blank")}
+                    onClick={() => window.open(previewDocument.path, '_blank')}
                   >
                     <ExternalLink className="h-4 w-4 mr-1" />
                     Open
@@ -621,7 +620,7 @@ export default function ImportantDocuments() {
 
               <div
                 className="p-4 overflow-auto"
-                style={{ maxHeight: "calc(90vh - 120px)" }}
+                style={{ maxHeight: 'calc(90vh - 120px)' }}
               >
                 <DocumentPreview
                   documentName={previewDocument.name}

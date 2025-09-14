@@ -1,45 +1,140 @@
-import { 
-  users, projects, archivedProjects, projectTasks, projectComments, projectAssignments, taskCompletions, messages, messageLikes, conversations, conversationParticipants, weeklyReports, meetingMinutes, driveLinks, sandwichCollections, agendaItems, meetings, compiledAgendas, agendaSections, driverAgreements, drivers, volunteers, hosts, hostContacts, recipients, contacts, committees, committeeMemberships, notifications, suggestions, suggestionResponses, chatMessages, chatMessageLikes, userActivityLogs, announcements, sandwichDistributions, wishlistSuggestions, documents, documentPermissions, documentAccessLogs, eventRequests, organizations, eventVolunteers,
-  type User, type InsertUser, type UpsertUser,
-  type Project, type InsertProject,
-  type ProjectTask, type InsertProjectTask,
-  type ProjectComment, type InsertProjectComment,
-  type ProjectAssignment, type InsertProjectAssignment,
-  type TaskCompletion, type InsertTaskCompletion,
-  type Message, type InsertMessage,
-  type MessageLike, type InsertMessageLike,
-  type WeeklyReport, type InsertWeeklyReport,
-  type SandwichCollection, type InsertSandwichCollection,
-  type MeetingMinutes, type InsertMeetingMinutes,
-  type DriveLink, type InsertDriveLink,
-  type AgendaItem, type InsertAgendaItem,
-  type Meeting, type InsertMeeting,
-  type DriverAgreement, type InsertDriverAgreement,
-  type Driver, type InsertDriver,
-  type Volunteer, type InsertVolunteer,
-  type Host, type InsertHost,
-  type HostContact, type InsertHostContact,
-  type Recipient, type InsertRecipient,
-  type Contact, type InsertContact,
-  type Committee, type InsertCommittee,
-  type CommitteeMembership, type InsertCommitteeMembership,
-  type Notification, type InsertNotification,
-  type Suggestion, type InsertSuggestion,
-  type SuggestionResponse, type InsertSuggestionResponse,
-  type ChatMessageLike, type InsertChatMessageLike,
-  type UserActivityLog, type InsertUserActivityLog,
-  type SandwichDistribution, type InsertSandwichDistribution,
-  type WishlistSuggestion, type InsertWishlistSuggestion,
-  type Document, type InsertDocument,
-  type DocumentPermission, type InsertDocumentPermission,
-  type DocumentAccessLog, type InsertDocumentAccessLog,
-  type EventRequest, type InsertEventRequest,
-  type Organization, type InsertOrganization,
-  type EventVolunteer, type InsertEventVolunteer
-} from "@shared/schema";
-import { db } from "./db";
-import { eq, desc, asc, sql, and, or, isNull, ne, isNotNull, gt, gte, lte, inArray, like, ilike } from "drizzle-orm";
-import type { IStorage } from "./storage";
+import {
+  users,
+  projects,
+  archivedProjects,
+  projectTasks,
+  projectComments,
+  projectAssignments,
+  taskCompletions,
+  messages,
+  messageLikes,
+  conversations,
+  conversationParticipants,
+  weeklyReports,
+  meetingMinutes,
+  driveLinks,
+  sandwichCollections,
+  agendaItems,
+  meetings,
+  compiledAgendas,
+  agendaSections,
+  driverAgreements,
+  drivers,
+  volunteers,
+  hosts,
+  hostContacts,
+  recipients,
+  contacts,
+  committees,
+  committeeMemberships,
+  notifications,
+  suggestions,
+  suggestionResponses,
+  chatMessages,
+  chatMessageLikes,
+  userActivityLogs,
+  announcements,
+  sandwichDistributions,
+  wishlistSuggestions,
+  documents,
+  documentPermissions,
+  documentAccessLogs,
+  eventRequests,
+  organizations,
+  eventVolunteers,
+  type User,
+  type InsertUser,
+  type UpsertUser,
+  type Project,
+  type InsertProject,
+  type ProjectTask,
+  type InsertProjectTask,
+  type ProjectComment,
+  type InsertProjectComment,
+  type ProjectAssignment,
+  type InsertProjectAssignment,
+  type TaskCompletion,
+  type InsertTaskCompletion,
+  type Message,
+  type InsertMessage,
+  type MessageLike,
+  type InsertMessageLike,
+  type WeeklyReport,
+  type InsertWeeklyReport,
+  type SandwichCollection,
+  type InsertSandwichCollection,
+  type MeetingMinutes,
+  type InsertMeetingMinutes,
+  type DriveLink,
+  type InsertDriveLink,
+  type AgendaItem,
+  type InsertAgendaItem,
+  type Meeting,
+  type InsertMeeting,
+  type DriverAgreement,
+  type InsertDriverAgreement,
+  type Driver,
+  type InsertDriver,
+  type Volunteer,
+  type InsertVolunteer,
+  type Host,
+  type InsertHost,
+  type HostContact,
+  type InsertHostContact,
+  type Recipient,
+  type InsertRecipient,
+  type Contact,
+  type InsertContact,
+  type Committee,
+  type InsertCommittee,
+  type CommitteeMembership,
+  type InsertCommitteeMembership,
+  type Notification,
+  type InsertNotification,
+  type Suggestion,
+  type InsertSuggestion,
+  type SuggestionResponse,
+  type InsertSuggestionResponse,
+  type ChatMessageLike,
+  type InsertChatMessageLike,
+  type UserActivityLog,
+  type InsertUserActivityLog,
+  type SandwichDistribution,
+  type InsertSandwichDistribution,
+  type WishlistSuggestion,
+  type InsertWishlistSuggestion,
+  type Document,
+  type InsertDocument,
+  type DocumentPermission,
+  type InsertDocumentPermission,
+  type DocumentAccessLog,
+  type InsertDocumentAccessLog,
+  type EventRequest,
+  type InsertEventRequest,
+  type Organization,
+  type InsertOrganization,
+  type EventVolunteer,
+  type InsertEventVolunteer,
+} from '@shared/schema';
+import { db } from './db';
+import {
+  eq,
+  desc,
+  asc,
+  sql,
+  and,
+  or,
+  isNull,
+  ne,
+  isNotNull,
+  gt,
+  gte,
+  lte,
+  inArray,
+  like,
+  ilike,
+} from 'drizzle-orm';
+import type { IStorage } from './storage';
 
 export class DatabaseStorage implements IStorage {
   // Users (required for authentication)
@@ -59,10 +154,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createUser(userData: InsertUser): Promise<User> {
-    const [user] = await db
-      .insert(users)
-      .values(userData)
-      .returning();
+    const [user] = await db.insert(users).values(userData).returning();
     return user;
   }
 
@@ -85,7 +177,10 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(users).orderBy(users.createdAt);
   }
 
-  async updateUser(id: string, updates: Partial<User>): Promise<User | undefined> {
+  async updateUser(
+    id: string,
+    updates: Partial<User>
+  ): Promise<User | undefined> {
     const [user] = await db
       .update(users)
       .set({ ...updates, updatedAt: new Date() })
@@ -108,60 +203,85 @@ export class DatabaseStorage implements IStorage {
 
   // Legacy user methods (for backwards compatibility)
   async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.email, username));
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, username));
     return user || undefined;
   }
 
   // Projects
   async getAllProjects(): Promise<Project[]> {
-    const projectsFromDb = await db.select().from(projects).orderBy(desc(projects.createdAt));
-    
+    const projectsFromDb = await db
+      .select()
+      .from(projects)
+      .orderBy(desc(projects.createdAt));
+
     // Populate missing assignee names
     const projectsWithNames = await Promise.all(
       projectsFromDb.map(async (project) => {
         // If assigneeIds exist but assigneeNames is missing or empty, populate them
-        if (project.assigneeIds && project.assigneeIds.length > 0 && (!project.assigneeNames || !project.assigneeNames.trim())) {
+        if (
+          project.assigneeIds &&
+          project.assigneeIds.length > 0 &&
+          (!project.assigneeNames || !project.assigneeNames.trim())
+        ) {
           const names = [];
           for (const assigneeId of project.assigneeIds) {
             if (assigneeId && assigneeId.trim()) {
               const user = await this.getUser(assigneeId);
               if (user) {
-                names.push(user.displayName || user.firstName || user.email || 'Unknown User');
+                names.push(
+                  user.displayName ||
+                    user.firstName ||
+                    user.email ||
+                    'Unknown User'
+                );
               } else {
                 names.push('Unknown User');
               }
             }
           }
-          
+
           // Update the database with the resolved names
           if (names.length > 0) {
             const assigneeNames = names.join(', ');
-            await db.update(projects)
+            await db
+              .update(projects)
               .set({ assigneeNames })
               .where(eq(projects.id, project.id));
-            
+
             return { ...project, assigneeNames };
           }
         }
-        
+
         return project;
       })
     );
-    
+
     return projectsWithNames;
   }
 
   async getProject(id: number): Promise<Project | undefined> {
-    const [project] = await db.select().from(projects).where(eq(projects.id, id));
+    const [project] = await db
+      .select()
+      .from(projects)
+      .where(eq(projects.id, id));
     return project || undefined;
   }
 
   async createProject(insertProject: InsertProject): Promise<Project> {
-    const [project] = await db.insert(projects).values(insertProject).returning();
+    const [project] = await db
+      .insert(projects)
+      .values(insertProject)
+      .returning();
     return project;
   }
 
-  async updateProject(id: number, updates: Partial<Project>): Promise<Project | undefined> {
+  async updateProject(
+    id: number,
+    updates: Partial<Project>
+  ): Promise<Project | undefined> {
     // Get the current project to check its current state
     const currentProject = await this.getProject(id);
     if (!currentProject) return undefined;
@@ -170,15 +290,26 @@ export class DatabaseStorage implements IStorage {
     const updateData = { ...updates, updatedAt: new Date() };
 
     // If assigneeName is being set and project is currently available, change to in_progress
-    if (updateData.assigneeName && updateData.assigneeName.trim() && currentProject.status === "available") {
-      updateData.status = "in_progress";
+    if (
+      updateData.assigneeName &&
+      updateData.assigneeName.trim() &&
+      currentProject.status === 'available'
+    ) {
+      updateData.status = 'in_progress';
     }
     // If assigneeName is being removed and project is currently in_progress, change to available
-    else if (updateData.assigneeName === "" && currentProject.status === "in_progress") {
-      updateData.status = "available";
+    else if (
+      updateData.assigneeName === '' &&
+      currentProject.status === 'in_progress'
+    ) {
+      updateData.status = 'available';
     }
 
-    const [project] = await db.update(projects).set(updateData).where(eq(projects.id, id)).returning();
+    const [project] = await db
+      .update(projects)
+      .set(updateData)
+      .where(eq(projects.id, id))
+      .returning();
     return project || undefined;
   }
 
@@ -188,7 +319,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Archive functionality for completed projects
-  async archiveProject(id: number, userId?: string, userName?: string): Promise<boolean> {
+  async archiveProject(
+    id: number,
+    userId?: string,
+    userName?: string
+  ): Promise<boolean> {
     const project = await this.getProject(id);
     if (!project) return false;
 
@@ -227,29 +362,42 @@ export class DatabaseStorage implements IStorage {
 
     // Insert into archived table
     await db.insert(archivedProjects).values(archiveData);
-    
+
     // Delete from active projects
     await this.deleteProject(id);
-    
+
     return true;
   }
 
   async getArchivedProjects(): Promise<any[]> {
-    return await db.select().from(archivedProjects).orderBy(desc(archivedProjects.createdAt));
+    return await db
+      .select()
+      .from(archivedProjects)
+      .orderBy(desc(archivedProjects.createdAt));
   }
 
   async getArchivedProject(id: number): Promise<any | undefined> {
-    const [project] = await db.select().from(archivedProjects).where(eq(archivedProjects.id, id));
+    const [project] = await db
+      .select()
+      .from(archivedProjects)
+      .where(eq(archivedProjects.id, id));
     return project || undefined;
   }
 
   // Project Tasks
   async getProjectTasks(projectId: number): Promise<ProjectTask[]> {
-    return await db.select().from(projectTasks).where(eq(projectTasks.projectId, projectId)).orderBy(projectTasks.order);
+    return await db
+      .select()
+      .from(projectTasks)
+      .where(eq(projectTasks.projectId, projectId))
+      .orderBy(projectTasks.order);
   }
 
   async getProjectTask(taskId: number): Promise<ProjectTask | undefined> {
-    const [task] = await db.select().from(projectTasks).where(eq(projectTasks.id, taskId));
+    const [task] = await db
+      .select()
+      .from(projectTasks)
+      .where(eq(projectTasks.id, taskId));
     return task || undefined;
   }
 
@@ -258,7 +406,10 @@ export class DatabaseStorage implements IStorage {
     return task;
   }
 
-  async updateProjectTask(id: number, updates: Partial<ProjectTask>): Promise<ProjectTask | undefined> {
+  async updateProjectTask(
+    id: number,
+    updates: Partial<ProjectTask>
+  ): Promise<ProjectTask | undefined> {
     // Log for debugging
     console.log(`Updating task ${id} with updates:`, updates);
 
@@ -270,10 +421,16 @@ export class DatabaseStorage implements IStorage {
     delete processedUpdates.projectId;
     delete processedUpdates.createdAt;
 
-    if (processedUpdates.completedAt && typeof processedUpdates.completedAt === 'string') {
+    if (
+      processedUpdates.completedAt &&
+      typeof processedUpdates.completedAt === 'string'
+    ) {
       processedUpdates.completedAt = new Date(processedUpdates.completedAt);
     }
-    if (processedUpdates.dueDate && typeof processedUpdates.dueDate === 'string') {
+    if (
+      processedUpdates.dueDate &&
+      typeof processedUpdates.dueDate === 'string'
+    ) {
       processedUpdates.dueDate = new Date(processedUpdates.dueDate);
     }
 
@@ -283,7 +440,11 @@ export class DatabaseStorage implements IStorage {
     console.log(`Processed updates for task ${id}:`, processedUpdates);
 
     try {
-      const [task] = await db.update(projectTasks).set(processedUpdates).where(eq(projectTasks.id, id)).returning();
+      const [task] = await db
+        .update(projectTasks)
+        .set(processedUpdates)
+        .where(eq(projectTasks.id, id))
+        .returning();
       console.log(`Task ${id} updated successfully:`, task);
       return task || undefined;
     } catch (error) {
@@ -298,7 +459,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getProjectCongratulations(projectId: number): Promise<any[]> {
-    const result = await db.select().from(notifications)
+    const result = await db
+      .select()
+      .from(notifications)
       .where(
         and(
           eq(notifications.relatedType, 'project'),
@@ -311,52 +474,76 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getTaskById(id: number): Promise<ProjectTask | undefined> {
-    const result = await db.select().from(projectTasks)
+    const result = await db
+      .select()
+      .from(projectTasks)
       .where(eq(projectTasks.id, id))
       .limit(1);
     return result[0];
   }
 
   async updateTaskStatus(id: number, status: string): Promise<boolean> {
-    const result = await db.update(projectTasks)
+    const result = await db
+      .update(projectTasks)
       .set({ status: status })
       .where(eq(projectTasks.id, id));
     return (result.rowCount ?? 0) > 0;
   }
 
   // Task completion methods
-  async createTaskCompletion(completion: InsertTaskCompletion): Promise<TaskCompletion> {
-    const [result] = await db.insert(taskCompletions).values(completion).returning();
+  async createTaskCompletion(
+    completion: InsertTaskCompletion
+  ): Promise<TaskCompletion> {
+    const [result] = await db
+      .insert(taskCompletions)
+      .values(completion)
+      .returning();
     return result;
   }
 
   async getTaskCompletions(taskId: number): Promise<TaskCompletion[]> {
-    return await db.select().from(taskCompletions)
+    return await db
+      .select()
+      .from(taskCompletions)
       .where(eq(taskCompletions.taskId, taskId))
       .orderBy(taskCompletions.completedAt);
   }
 
   async removeTaskCompletion(taskId: number, userId: string): Promise<boolean> {
-    const result = await db.delete(taskCompletions)
-      .where(and(
-        eq(taskCompletions.taskId, taskId),
-        eq(taskCompletions.userId, userId)
-      ));
+    const result = await db
+      .delete(taskCompletions)
+      .where(
+        and(
+          eq(taskCompletions.taskId, taskId),
+          eq(taskCompletions.userId, userId)
+        )
+      );
     return (result.rowCount ?? 0) > 0;
   }
 
   // Project Comments
   async getProjectComments(projectId: number): Promise<ProjectComment[]> {
-    return await db.select().from(projectComments).where(eq(projectComments.projectId, projectId)).orderBy(desc(projectComments.createdAt));
+    return await db
+      .select()
+      .from(projectComments)
+      .where(eq(projectComments.projectId, projectId))
+      .orderBy(desc(projectComments.createdAt));
   }
 
-  async createProjectComment(insertComment: InsertProjectComment): Promise<ProjectComment> {
-    const [comment] = await db.insert(projectComments).values(insertComment).returning();
+  async createProjectComment(
+    insertComment: InsertProjectComment
+  ): Promise<ProjectComment> {
+    const [comment] = await db
+      .insert(projectComments)
+      .values(insertComment)
+      .returning();
     return comment;
   }
 
   async deleteProjectComment(id: number): Promise<boolean> {
-    const result = await db.delete(projectComments).where(eq(projectComments.id, id));
+    const result = await db
+      .delete(projectComments)
+      .where(eq(projectComments.id, id));
     return (result.rowCount ?? 0) > 0;
   }
 
@@ -370,7 +557,7 @@ export class DatabaseStorage implements IStorage {
           sender: messages.sender,
           timestamp: messages.createdAt,
           userId: messages.userId,
-          conversationId: messages.conversationId
+          conversationId: messages.conversationId,
         })
         .from(messages)
         .orderBy(messages.createdAt);
@@ -385,15 +572,15 @@ export class DatabaseStorage implements IStorage {
           content: messages.content,
           timestamp: messages.createdAt,
           userId: messages.userId,
-          conversationId: messages.conversationId
+          conversationId: messages.conversationId,
         })
         .from(messages)
         .orderBy(messages.createdAt);
 
       // Add default sender for compatibility
-      return result.map(msg => ({
+      return result.map((msg) => ({
         ...msg,
-        sender: 'Unknown User'
+        sender: 'Unknown User',
       }));
     }
   }
@@ -405,7 +592,9 @@ export class DatabaseStorage implements IStorage {
   // REMOVED: getMessagesByCommittee - no longer needed with new conversation system
 
   // UPDATED: Get messages by conversationId (preferred method)
-  async getMessagesByConversationId(conversationId: number): Promise<Message[]> {
+  async getMessagesByConversationId(
+    conversationId: number
+  ): Promise<Message[]> {
     const results = await db
       .select({
         id: messages.id,
@@ -427,21 +616,23 @@ export class DatabaseStorage implements IStorage {
       .leftJoin(users, eq(users.id, messages.senderId))
       .where(eq(messages.conversationId, conversationId))
       .orderBy(messages.createdAt);
-    
-    return results.map(row => ({
+
+    return results.map((row) => ({
       ...row,
-      sender: row.sender || 'Member'
+      sender: row.sender || 'Member',
     }));
   }
 
   // Get participants for a conversation
-  async getConversationParticipants(conversationId: number): Promise<Array<{
-    userId: string;
-    role: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-  }>> {
+  async getConversationParticipants(conversationId: number): Promise<
+    Array<{
+      userId: string;
+      role: string;
+      firstName: string;
+      lastName: string;
+      email: string;
+    }>
+  > {
     // Note: conversationParticipants table doesn't have role column, so we'll default to 'member'
     const results = await db
       .select({
@@ -453,9 +644,11 @@ export class DatabaseStorage implements IStorage {
       .from(conversationParticipants)
       .leftJoin(users, eq(users.id, conversationParticipants.userId))
       .where(eq(conversationParticipants.conversationId, conversationId));
-    
-    console.log(`[DB] Found ${results.length} participants for conversation ${conversationId}`);
-    return results.map(row => ({
+
+    console.log(
+      `[DB] Found ${results.length} participants for conversation ${conversationId}`
+    );
+    return results.map((row) => ({
       userId: row.userId,
       role: 'member', // Default role since table doesn't have role column
       firstName: row.firstName || '',
@@ -470,7 +663,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   // ALIAS: getMessages for backwards compatibility
-  async getMessages(messageContext: string, limit?: number): Promise<Message[]> {
+  async getMessages(
+    messageContext: string,
+    limit?: number
+  ): Promise<Message[]> {
     if (limit) {
       return await this.getRecentMessages(limit);
     } else {
@@ -480,69 +676,104 @@ export class DatabaseStorage implements IStorage {
   }
 
   // NEW: Get or create conversation for specific conversation types
-  async getOrCreateThreadId(type: string, referenceId?: string): Promise<number> {
+  async getOrCreateThreadId(
+    type: string,
+    referenceId?: string
+  ): Promise<number> {
     try {
       // For the new simple system, we'll use conversation IDs as thread IDs
       // Check if conversation already exists
-      const [existing] = await db.select()
+      const [existing] = await db
+        .select()
         .from(conversations)
-        .where(and(
-          eq(conversations.type, type),
-          referenceId ? eq(conversations.name, referenceId) : isNull(conversations.name)
-        ));
+        .where(
+          and(
+            eq(conversations.type, type),
+            referenceId
+              ? eq(conversations.name, referenceId)
+              : isNull(conversations.name)
+          )
+        );
 
       if (existing) {
         return existing.id;
       }
 
       // Create new conversation
-      const [newConversation] = await db.insert(conversations).values({
-        type,
-        name: referenceId || this.generateThreadTitle(type, referenceId),
-      }).returning();
+      const [newConversation] = await db
+        .insert(conversations)
+        .values({
+          type,
+          name: referenceId || this.generateThreadTitle(type, referenceId),
+        })
+        .returning();
 
       return newConversation.id;
     } catch (error) {
-      console.error("Error getting/creating conversation:", error);
+      console.error('Error getting/creating conversation:', error);
       throw error;
     }
   }
 
   private generateThreadTitle(type: string, referenceId?: string): string {
     switch (type) {
-      case 'general': return 'General Chat';
-      case 'committee': return `Committee Chat - ${referenceId}`;
-      case 'host': return 'Host Chat';
-      case 'driver': return 'Driver Chat';
-      case 'recipient': return 'Recipient Chat';
-      case 'core_team': return 'Core Team';
-      case 'direct': return `Direct Messages - ${referenceId}`;
-      case 'group': return `Group Chat - ${referenceId}`;
-      default: return `${type} Chat`;
+      case 'general':
+        return 'General Chat';
+      case 'committee':
+        return `Committee Chat - ${referenceId}`;
+      case 'host':
+        return 'Host Chat';
+      case 'driver':
+        return 'Driver Chat';
+      case 'recipient':
+        return 'Recipient Chat';
+      case 'core_team':
+        return 'Core Team';
+      case 'direct':
+        return `Direct Messages - ${referenceId}`;
+      case 'group':
+        return `Group Chat - ${referenceId}`;
+      default:
+        return `${type} Chat`;
     }
   }
 
   // FIXED: Direct messages must use conversationId for proper isolation
-  async getDirectMessages(userId1: string, userId2: string): Promise<Message[]> {
+  async getDirectMessages(
+    userId1: string,
+    userId2: string
+  ): Promise<Message[]> {
     // Create consistent reference ID for direct message conversation
     const userIds = [userId1, userId2].sort();
     const referenceId = userIds.join('_');
-    const conversationId = await this.getOrCreateThreadId('direct', referenceId);
+    const conversationId = await this.getOrCreateThreadId(
+      'direct',
+      referenceId
+    );
 
-    console.log(`🔍 QUERY: getDirectMessages - conversationId: ${conversationId}, users: ${userId1} <-> ${userId2}, referenceId: ${referenceId}`);
+    console.log(
+      `🔍 QUERY: getDirectMessages - conversationId: ${conversationId}, users: ${userId1} <-> ${userId2}, referenceId: ${referenceId}`
+    );
 
-    const messageResults = await db.select().from(messages)
+    const messageResults = await db
+      .select()
+      .from(messages)
       .where(eq(messages.conversationId, conversationId))
       .orderBy(messages.createdAt);
 
-    console.log(`🔍 RESULT: Found ${messageResults.length} direct messages for conversationId ${conversationId}`);
+    console.log(
+      `🔍 RESULT: Found ${messageResults.length} direct messages for conversationId ${conversationId}`
+    );
     return messageResults;
   }
 
   async getMessageById(id: number): Promise<Message | undefined> {
     console.log(`[DEBUG] getMessageById called with id: ${id}`);
     try {
-      const [message] = await db.select().from(messages).where(eq(messages.id, id));
+      const [message] = await db
+        .select()
+        .from(messages)
+        .where(eq(messages.id, id));
       console.log(`[DEBUG] getMessageById result:`, message);
       return message || undefined;
     } catch (error) {
@@ -559,9 +790,14 @@ export class DatabaseStorage implements IStorage {
         .update(messages)
         .set({ read: true })
         .where(eq(messages.id, parseInt(messageId)));
-      console.log(`[DB] Message ${messageId} marked as read for user ${userId}`);
+      console.log(
+        `[DB] Message ${messageId} marked as read for user ${userId}`
+      );
     } catch (error) {
-      console.error(`[ERROR] Failed to mark message ${messageId} as read for user ${userId}:`, error);
+      console.error(
+        `[ERROR] Failed to mark message ${messageId} as read for user ${userId}:`,
+        error
+      );
       throw error;
     }
   }
@@ -587,38 +823,55 @@ export class DatabaseStorage implements IStorage {
 
       if (conversation) {
         insertMessage.conversationId = conversation.id;
-        console.log(`✅ SEND: Using existing conversationId ${conversation.id} for general message from ${insertMessage.userId}`);
+        console.log(
+          `✅ SEND: Using existing conversationId ${conversation.id} for general message from ${insertMessage.userId}`
+        );
       } else {
         // Create new general conversation
         const [newConversation] = await db
           .insert(conversations)
           .values({
             type: 'channel',
-            name: 'general'
+            name: 'general',
           })
           .returning();
-        
+
         insertMessage.conversationId = newConversation.id;
-        console.log(`✅ SEND: Created new conversationId ${newConversation.id} for general message from ${insertMessage.userId}`);
+        console.log(
+          `✅ SEND: Created new conversationId ${newConversation.id} for general message from ${insertMessage.userId}`
+        );
       }
     } else {
-      console.log(`🔄 SEND: Using existing conversationId ${insertMessage.conversationId} for message from ${insertMessage.userId}`);
+      console.log(
+        `🔄 SEND: Using existing conversationId ${insertMessage.conversationId} for message from ${insertMessage.userId}`
+      );
     }
 
-    const [message] = await db.insert(messages).values(insertMessage).returning();
-    console.log(`📤 MESSAGE SENT: id=${message.id}, conversationId=${message.conversationId}, sender=${message.userId}`);
+    const [message] = await db
+      .insert(messages)
+      .values(insertMessage)
+      .returning();
+    console.log(
+      `📤 MESSAGE SENT: id=${message.id}, conversationId=${message.conversationId}, sender=${message.userId}`
+    );
     return message;
   }
 
-
-  async createReply(insertMessage: InsertMessage, parentId: number): Promise<Message> {
-    const [message] = await db.insert(messages).values(insertMessage).returning();
+  async createReply(
+    insertMessage: InsertMessage,
+    parentId: number
+  ): Promise<Message> {
+    const [message] = await db
+      .insert(messages)
+      .values(insertMessage)
+      .returning();
     await this.updateReplyCount(parentId);
     return message;
   }
 
   async updateReplyCount(messageId: number): Promise<void> {
-    await db.update(messages)
+    await db
+      .update(messages)
       .set({ replyCount: sql`${messages.replyCount} + 1` })
       .where(eq(messages.id, messageId));
   }
@@ -638,69 +891,101 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getMessagesBySender(senderId: string): Promise<Message[]> {
-    console.log(`[DEBUG] getMessagesBySender called with senderId: ${senderId}`);
+    console.log(
+      `[DEBUG] getMessagesBySender called with senderId: ${senderId}`
+    );
     try {
-      const result = await db.select()
+      const result = await db
+        .select()
         .from(messages)
         .where(eq(messages.senderId, senderId))
         .orderBy(desc(messages.createdAt));
-      console.log(`[DEBUG] Found ${result.length} messages sent by ${senderId}`);
+      console.log(
+        `[DEBUG] Found ${result.length} messages sent by ${senderId}`
+      );
       return result;
     } catch (error) {
-      console.error(`[ERROR] getMessagesBySender failed for senderId ${senderId}:`, error);
+      console.error(
+        `[ERROR] getMessagesBySender failed for senderId ${senderId}:`,
+        error
+      );
       return [];
     }
   }
 
   async getMessagesBySenderWithReadStatus(senderId: string): Promise<any[]> {
-    console.log(`[DEBUG] getMessagesBySenderWithReadStatus called with senderId: ${senderId}`);
+    console.log(
+      `[DEBUG] getMessagesBySenderWithReadStatus called with senderId: ${senderId}`
+    );
     try {
-      const { messageRecipients } = await import("@shared/schema");
-      
+      const { messageRecipients } = await import('@shared/schema');
+
       // Get messages with recipient read status
       const result = await db
         .select({
           message: messages,
           recipientRead: messageRecipients.read,
           recipientReadAt: messageRecipients.readAt,
-          recipientId: messageRecipients.recipientId
+          recipientId: messageRecipients.recipientId,
         })
         .from(messages)
-        .leftJoin(messageRecipients, eq(messages.id, messageRecipients.messageId))
+        .leftJoin(
+          messageRecipients,
+          eq(messages.id, messageRecipients.messageId)
+        )
         .where(eq(messages.senderId, senderId))
         .orderBy(desc(messages.createdAt));
-      
-      console.log(`[DEBUG] Found ${result.length} message-recipient pairs for sender ${senderId}`);
+
+      console.log(
+        `[DEBUG] Found ${result.length} message-recipient pairs for sender ${senderId}`
+      );
       return result;
     } catch (error) {
-      console.error(`[ERROR] getMessagesBySenderWithReadStatus failed for senderId ${senderId}:`, error);
+      console.error(
+        `[ERROR] getMessagesBySenderWithReadStatus failed for senderId ${senderId}:`,
+        error
+      );
       return [];
     }
   }
 
   async getMessagesForRecipient(recipientId: string): Promise<Message[]> {
-    console.log(`[DEBUG] getMessagesForRecipient called with recipientId: ${recipientId}`);
+    console.log(
+      `[DEBUG] getMessagesForRecipient called with recipientId: ${recipientId}`
+    );
     try {
-      const result = await db.select()
+      const result = await db
+        .select()
         .from(messages)
         .where(eq(messages.contextId, recipientId))
         .orderBy(desc(messages.createdAt));
-      console.log(`[DEBUG] Found ${result.length} messages for recipient ${recipientId}`);
+      console.log(
+        `[DEBUG] Found ${result.length} messages for recipient ${recipientId}`
+      );
       return result;
     } catch (error) {
-      console.error(`[ERROR] getMessagesForRecipient failed for recipientId ${recipientId}:`, error);
+      console.error(
+        `[ERROR] getMessagesForRecipient failed for recipientId ${recipientId}:`,
+        error
+      );
       return [];
     }
   }
 
   // Conversation management methods
-  async getDirectConversation(userId1: string, userId2: string): Promise<any | undefined> {
+  async getDirectConversation(
+    userId1: string,
+    userId2: string
+  ): Promise<any | undefined> {
     try {
       // Find direct conversations where both users are participants
       const directConversations = await db
         .select({ conversation: conversations })
         .from(conversations)
-        .innerJoin(conversationParticipants, eq(conversations.id, conversationParticipants.conversationId))
+        .innerJoin(
+          conversationParticipants,
+          eq(conversations.id, conversationParticipants.conversationId)
+        )
         .where(
           and(
             eq(conversations.type, 'direct'),
@@ -733,8 +1018,6 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-
-
   async addConversationParticipant(participantData: any): Promise<any> {
     const [participant] = await db
       .insert(conversationParticipants)
@@ -752,62 +1035,107 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(weeklyReports).orderBy(weeklyReports.id);
   }
 
-  async createWeeklyReport(insertReport: InsertWeeklyReport): Promise<WeeklyReport> {
-    const [report] = await db.insert(weeklyReports).values(insertReport).returning();
+  async createWeeklyReport(
+    insertReport: InsertWeeklyReport
+  ): Promise<WeeklyReport> {
+    const [report] = await db
+      .insert(weeklyReports)
+      .values(insertReport)
+      .returning();
     return report;
   }
 
   // Sandwich Collections
   async getAllSandwichCollections(): Promise<SandwichCollection[]> {
-    return await db.select().from(sandwichCollections).orderBy(desc(sandwichCollections.collectionDate));
+    return await db
+      .select()
+      .from(sandwichCollections)
+      .orderBy(desc(sandwichCollections.collectionDate));
   }
 
-  async getSandwichCollections(limit: number, offset: number, sortField = 'collectionDate', sortOrder = 'desc'): Promise<SandwichCollection[]> {
-    const orderByClause = sortOrder === 'asc' ? 
-      asc(sandwichCollections[sortField as keyof typeof sandwichCollections]) :
-      desc(sandwichCollections[sortField as keyof typeof sandwichCollections]);
-      
-    return await db.select()
+  async getSandwichCollections(
+    limit: number,
+    offset: number,
+    sortField = 'collectionDate',
+    sortOrder = 'desc'
+  ): Promise<SandwichCollection[]> {
+    const orderByClause =
+      sortOrder === 'asc'
+        ? asc(
+            sandwichCollections[sortField as keyof typeof sandwichCollections]
+          )
+        : desc(
+            sandwichCollections[sortField as keyof typeof sandwichCollections]
+          );
+
+    return await db
+      .select()
       .from(sandwichCollections)
       .orderBy(orderByClause)
       .limit(limit)
       .offset(offset);
   }
 
-  async getSandwichCollectionById(id: number): Promise<SandwichCollection | null> {
-    const result = await db.select().from(sandwichCollections).where(eq(sandwichCollections.id, id));
+  async getSandwichCollectionById(
+    id: number
+  ): Promise<SandwichCollection | null> {
+    const result = await db
+      .select()
+      .from(sandwichCollections)
+      .where(eq(sandwichCollections.id, id));
     return result[0] || null;
   }
 
   async getSandwichCollectionsCount(): Promise<number> {
-    const result = await db.select({ count: sql<number>`count(*)::int` }).from(sandwichCollections);
+    const result = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(sandwichCollections);
     return Number(result[0].count);
   }
 
-  async getCollectionStats(): Promise<{ totalEntries: number; totalSandwiches: number; }> {
-    const result = await db.select({ 
-      totalEntries: sql<number>`count(*)::int`,
-      totalSandwiches: sql<number>`coalesce(sum(individual_sandwiches), 0)::int + coalesce(sum(group1_count), 0)::int + coalesce(sum(group2_count), 0)::int`
-    }).from(sandwichCollections);
+  async getCollectionStats(): Promise<{
+    totalEntries: number;
+    totalSandwiches: number;
+  }> {
+    const result = await db
+      .select({
+        totalEntries: sql<number>`count(*)::int`,
+        totalSandwiches: sql<number>`coalesce(sum(individual_sandwiches), 0)::int + coalesce(sum(group1_count), 0)::int + coalesce(sum(group2_count), 0)::int`,
+      })
+      .from(sandwichCollections);
 
     return {
       totalEntries: Number(result[0].totalEntries),
-      totalSandwiches: Number(result[0].totalSandwiches)
+      totalSandwiches: Number(result[0].totalSandwiches),
     };
   }
 
-  async createSandwichCollection(insertCollection: InsertSandwichCollection): Promise<SandwichCollection> {
-    const [collection] = await db.insert(sandwichCollections).values(insertCollection).returning();
+  async createSandwichCollection(
+    insertCollection: InsertSandwichCollection
+  ): Promise<SandwichCollection> {
+    const [collection] = await db
+      .insert(sandwichCollections)
+      .values(insertCollection)
+      .returning();
     return collection;
   }
 
-  async updateSandwichCollection(id: number, updates: Partial<SandwichCollection>): Promise<SandwichCollection | undefined> {
-    const [collection] = await db.update(sandwichCollections).set(updates).where(eq(sandwichCollections.id, id)).returning();
+  async updateSandwichCollection(
+    id: number,
+    updates: Partial<SandwichCollection>
+  ): Promise<SandwichCollection | undefined> {
+    const [collection] = await db
+      .update(sandwichCollections)
+      .set(updates)
+      .where(eq(sandwichCollections.id, id))
+      .returning();
     return collection || undefined;
   }
 
   async deleteSandwichCollection(id: number): Promise<boolean> {
-    const result = await db.delete(sandwichCollections).where(eq(sandwichCollections.id, id));
+    const result = await db
+      .delete(sandwichCollections)
+      .where(eq(sandwichCollections.id, id));
     return (result.rowCount ?? 0) > 0;
   }
 
@@ -817,16 +1145,27 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getRecentMeetingMinutes(limit: number): Promise<MeetingMinutes[]> {
-    return await db.select().from(meetingMinutes).orderBy(meetingMinutes.id).limit(limit);
+    return await db
+      .select()
+      .from(meetingMinutes)
+      .orderBy(meetingMinutes.id)
+      .limit(limit);
   }
 
-  async createMeetingMinutes(insertMinutes: InsertMeetingMinutes): Promise<MeetingMinutes> {
-    const [minutes] = await db.insert(meetingMinutes).values(insertMinutes).returning();
+  async createMeetingMinutes(
+    insertMinutes: InsertMeetingMinutes
+  ): Promise<MeetingMinutes> {
+    const [minutes] = await db
+      .insert(meetingMinutes)
+      .values(insertMinutes)
+      .returning();
     return minutes;
   }
 
   async deleteMeetingMinutes(id: number): Promise<boolean> {
-    const result = await db.delete(meetingMinutes).where(eq(meetingMinutes.id, id));
+    const result = await db
+      .delete(meetingMinutes)
+      .where(eq(meetingMinutes.id, id));
     return (result.rowCount ?? 0) > 0;
   }
 
@@ -850,13 +1189,27 @@ export class DatabaseStorage implements IStorage {
     return item;
   }
 
-  async updateAgendaItemStatus(id: number, status: string): Promise<AgendaItem | undefined> {
-    const [item] = await db.update(agendaItems).set({ status }).where(eq(agendaItems.id, id)).returning();
+  async updateAgendaItemStatus(
+    id: number,
+    status: string
+  ): Promise<AgendaItem | undefined> {
+    const [item] = await db
+      .update(agendaItems)
+      .set({ status })
+      .where(eq(agendaItems.id, id))
+      .returning();
     return item || undefined;
   }
 
-  async updateAgendaItem(id: number, updates: Partial<AgendaItem>): Promise<AgendaItem | undefined> {
-    const [item] = await db.update(agendaItems).set(updates).where(eq(agendaItems.id, id)).returning();
+  async updateAgendaItem(
+    id: number,
+    updates: Partial<AgendaItem>
+  ): Promise<AgendaItem | undefined> {
+    const [item] = await db
+      .update(agendaItems)
+      .set(updates)
+      .where(eq(agendaItems.id, id))
+      .returning();
     return item || undefined;
   }
 
@@ -867,7 +1220,11 @@ export class DatabaseStorage implements IStorage {
 
   // Meetings
   async getCurrentMeeting(): Promise<Meeting | undefined> {
-    const [meeting] = await db.select().from(meetings).where(eq(meetings.status, 'active')).limit(1);
+    const [meeting] = await db
+      .select()
+      .from(meetings)
+      .where(eq(meetings.status, 'active'))
+      .limit(1);
     return meeting || undefined;
   }
 
@@ -876,21 +1233,42 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getMeetingsByType(type: string): Promise<Meeting[]> {
-    return await db.select().from(meetings).where(eq(meetings.type, type)).orderBy(desc(meetings.date));
+    return await db
+      .select()
+      .from(meetings)
+      .where(eq(meetings.type, type))
+      .orderBy(desc(meetings.date));
   }
 
   async createMeeting(insertMeeting: InsertMeeting): Promise<Meeting> {
-    const [meeting] = await db.insert(meetings).values(insertMeeting).returning();
+    const [meeting] = await db
+      .insert(meetings)
+      .values(insertMeeting)
+      .returning();
     return meeting;
   }
 
-  async updateMeetingAgenda(id: number, agenda: string): Promise<Meeting | undefined> {
-    const [meeting] = await db.update(meetings).set({ finalAgenda: agenda }).where(eq(meetings.id, id)).returning();
+  async updateMeetingAgenda(
+    id: number,
+    agenda: string
+  ): Promise<Meeting | undefined> {
+    const [meeting] = await db
+      .update(meetings)
+      .set({ finalAgenda: agenda })
+      .where(eq(meetings.id, id))
+      .returning();
     return meeting || undefined;
   }
 
-  async updateMeeting(id: number, updates: Partial<Meeting>): Promise<Meeting | undefined> {
-    const [meeting] = await db.update(meetings).set(updates).where(eq(meetings.id, id)).returning();
+  async updateMeeting(
+    id: number,
+    updates: Partial<Meeting>
+  ): Promise<Meeting | undefined> {
+    const [meeting] = await db
+      .update(meetings)
+      .set(updates)
+      .where(eq(meetings.id, id))
+      .returning();
     return meeting || undefined;
   }
 
@@ -900,8 +1278,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Driver Agreements
-  async createDriverAgreement(insertAgreement: InsertDriverAgreement): Promise<DriverAgreement> {
-    const [agreement] = await db.insert(driverAgreements).values(insertAgreement).returning();
+  async createDriverAgreement(
+    insertAgreement: InsertDriverAgreement
+  ): Promise<DriverAgreement> {
+    const [agreement] = await db
+      .insert(driverAgreements)
+      .values(insertAgreement)
+      .returning();
     return agreement;
   }
 
@@ -920,8 +1303,15 @@ export class DatabaseStorage implements IStorage {
     return driver;
   }
 
-  async updateDriver(id: number, updates: Partial<Driver>): Promise<Driver | undefined> {
-    const [driver] = await db.update(drivers).set(updates).where(eq(drivers.id, id)).returning();
+  async updateDriver(
+    id: number,
+    updates: Partial<Driver>
+  ): Promise<Driver | undefined> {
+    const [driver] = await db
+      .update(drivers)
+      .set(updates)
+      .where(eq(drivers.id, id))
+      .returning();
     return driver || undefined;
   }
 
@@ -936,17 +1326,27 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getVolunteer(id: number): Promise<Volunteer | undefined> {
-    const [volunteer] = await db.select().from(volunteers).where(eq(volunteers.id, id));
+    const [volunteer] = await db
+      .select()
+      .from(volunteers)
+      .where(eq(volunteers.id, id));
     return volunteer || undefined;
   }
 
   async createVolunteer(insertVolunteer: InsertVolunteer): Promise<Volunteer> {
-    const [volunteer] = await db.insert(volunteers).values(insertVolunteer).returning();
+    const [volunteer] = await db
+      .insert(volunteers)
+      .values(insertVolunteer)
+      .returning();
     return volunteer;
   }
 
-  async updateVolunteer(id: number, updates: Partial<Volunteer>): Promise<Volunteer | undefined> {
-    const [volunteer] = await db.update(volunteers)
+  async updateVolunteer(
+    id: number,
+    updates: Partial<Volunteer>
+  ): Promise<Volunteer | undefined> {
+    const [volunteer] = await db
+      .update(volunteers)
       .set({ ...updates, updatedAt: new Date() })
       .where(eq(volunteers.id, id))
       .returning();
@@ -973,8 +1373,12 @@ export class DatabaseStorage implements IStorage {
     return host;
   }
 
-  async updateHost(id: number, updates: Partial<Host>): Promise<Host | undefined> {
-    const [host] = await db.update(hosts)
+  async updateHost(
+    id: number,
+    updates: Partial<Host>
+  ): Promise<Host | undefined> {
+    const [host] = await db
+      .update(hosts)
       .set({ ...updates, updatedAt: new Date() })
       .where(eq(hosts.id, id))
       .returning();
@@ -995,7 +1399,9 @@ export class DatabaseStorage implements IStorage {
       .where(eq(sandwichCollections.hostName, hostName));
 
     if (Number(collectionCount.count) > 0) {
-      throw new Error(`Cannot delete host "${hostName}" because it has ${collectionCount.count} associated collection records. Please update or remove these records first.`);
+      throw new Error(
+        `Cannot delete host "${hostName}" because it has ${collectionCount.count} associated collection records. Please update or remove these records first.`
+      );
     }
 
     // Also delete any host contacts first
@@ -1006,7 +1412,10 @@ export class DatabaseStorage implements IStorage {
     return (result.rowCount ?? 0) > 0;
   }
 
-  async updateCollectionHostNames(oldHostName: string, newHostName: string): Promise<number> {
+  async updateCollectionHostNames(
+    oldHostName: string,
+    newHostName: string
+  ): Promise<number> {
     const result = await db
       .update(sandwichCollections)
       .set({ hostName: newHostName })
@@ -1020,17 +1429,30 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getRecipient(id: number): Promise<Recipient | undefined> {
-    const [recipient] = await db.select().from(recipients).where(eq(recipients.id, id));
+    const [recipient] = await db
+      .select()
+      .from(recipients)
+      .where(eq(recipients.id, id));
     return recipient || undefined;
   }
 
   async createRecipient(insertRecipient: InsertRecipient): Promise<Recipient> {
-    const [recipient] = await db.insert(recipients).values(insertRecipient).returning();
+    const [recipient] = await db
+      .insert(recipients)
+      .values(insertRecipient)
+      .returning();
     return recipient;
   }
 
-  async updateRecipient(id: number, updates: Partial<Recipient>): Promise<Recipient | undefined> {
-    const [recipient] = await db.update(recipients).set(updates).where(eq(recipients.id, id)).returning();
+  async updateRecipient(
+    id: number,
+    updates: Partial<Recipient>
+  ): Promise<Recipient | undefined> {
+    const [recipient] = await db
+      .update(recipients)
+      .set(updates)
+      .where(eq(recipients.id, id))
+      .returning();
     return recipient || undefined;
   }
 
@@ -1041,21 +1463,38 @@ export class DatabaseStorage implements IStorage {
 
   // Sandwich Distributions
   async getAllSandwichDistributions(): Promise<SandwichDistribution[]> {
-    return await db.select().from(sandwichDistributions).orderBy(desc(sandwichDistributions.distributionDate));
+    return await db
+      .select()
+      .from(sandwichDistributions)
+      .orderBy(desc(sandwichDistributions.distributionDate));
   }
 
-  async getSandwichDistribution(id: number): Promise<SandwichDistribution | undefined> {
-    const [distribution] = await db.select().from(sandwichDistributions).where(eq(sandwichDistributions.id, id));
+  async getSandwichDistribution(
+    id: number
+  ): Promise<SandwichDistribution | undefined> {
+    const [distribution] = await db
+      .select()
+      .from(sandwichDistributions)
+      .where(eq(sandwichDistributions.id, id));
     return distribution || undefined;
   }
 
-  async createSandwichDistribution(insertDistribution: InsertSandwichDistribution): Promise<SandwichDistribution> {
-    const [distribution] = await db.insert(sandwichDistributions).values(insertDistribution).returning();
+  async createSandwichDistribution(
+    insertDistribution: InsertSandwichDistribution
+  ): Promise<SandwichDistribution> {
+    const [distribution] = await db
+      .insert(sandwichDistributions)
+      .values(insertDistribution)
+      .returning();
     return distribution;
   }
 
-  async updateSandwichDistribution(id: number, updates: Partial<SandwichDistribution>): Promise<SandwichDistribution | undefined> {
-    const [distribution] = await db.update(sandwichDistributions)
+  async updateSandwichDistribution(
+    id: number,
+    updates: Partial<SandwichDistribution>
+  ): Promise<SandwichDistribution | undefined> {
+    const [distribution] = await db
+      .update(sandwichDistributions)
       .set({ ...updates, updatedAt: new Date() })
       .where(eq(sandwichDistributions.id, id))
       .returning();
@@ -1063,24 +1502,41 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteSandwichDistribution(id: number): Promise<boolean> {
-    const result = await db.delete(sandwichDistributions).where(eq(sandwichDistributions.id, id));
+    const result = await db
+      .delete(sandwichDistributions)
+      .where(eq(sandwichDistributions.id, id));
     return (result.rowCount ?? 0) > 0;
   }
 
-  async getSandwichDistributionsByWeek(weekEnding: string): Promise<SandwichDistribution[]> {
-    return await db.select().from(sandwichDistributions)
+  async getSandwichDistributionsByWeek(
+    weekEnding: string
+  ): Promise<SandwichDistribution[]> {
+    return await db
+      .select()
+      .from(sandwichDistributions)
       .where(eq(sandwichDistributions.weekEnding, weekEnding))
-      .orderBy(sandwichDistributions.hostName, sandwichDistributions.recipientName);
+      .orderBy(
+        sandwichDistributions.hostName,
+        sandwichDistributions.recipientName
+      );
   }
 
-  async getSandwichDistributionsByHost(hostId: number): Promise<SandwichDistribution[]> {
-    return await db.select().from(sandwichDistributions)
+  async getSandwichDistributionsByHost(
+    hostId: number
+  ): Promise<SandwichDistribution[]> {
+    return await db
+      .select()
+      .from(sandwichDistributions)
       .where(eq(sandwichDistributions.hostId, hostId))
       .orderBy(desc(sandwichDistributions.distributionDate));
   }
 
-  async getSandwichDistributionsByRecipient(recipientId: number): Promise<SandwichDistribution[]> {
-    return await db.select().from(sandwichDistributions)
+  async getSandwichDistributionsByRecipient(
+    recipientId: number
+  ): Promise<SandwichDistribution[]> {
+    return await db
+      .select()
+      .from(sandwichDistributions)
       .where(eq(sandwichDistributions.recipientId, recipientId))
       .orderBy(desc(sandwichDistributions.distributionDate));
   }
@@ -1091,17 +1547,30 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getContact(id: number): Promise<Contact | undefined> {
-    const [contact] = await db.select().from(contacts).where(eq(contacts.id, id));
+    const [contact] = await db
+      .select()
+      .from(contacts)
+      .where(eq(contacts.id, id));
     return contact || undefined;
   }
 
   async createContact(insertContact: InsertContact): Promise<Contact> {
-    const [contact] = await db.insert(contacts).values(insertContact).returning();
+    const [contact] = await db
+      .insert(contacts)
+      .values(insertContact)
+      .returning();
     return contact;
   }
 
-  async updateContact(id: number, updates: Partial<Contact>): Promise<Contact | undefined> {
-    const [contact] = await db.update(contacts).set(updates).where(eq(contacts.id, id)).returning();
+  async updateContact(
+    id: number,
+    updates: Partial<Contact>
+  ): Promise<Contact | undefined> {
+    const [contact] = await db
+      .update(contacts)
+      .set(updates)
+      .where(eq(contacts.id, id))
+      .returning();
     return contact || undefined;
   }
 
@@ -1111,35 +1580,41 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Cross-table duplicate checking helper
-  private async checkCrossTableDuplicate(name: string, email?: string, phone?: string): Promise<{
-    exists: boolean,
-    source: string,
-    contactId?: number
+  private async checkCrossTableDuplicate(
+    name: string,
+    email?: string,
+    phone?: string
+  ): Promise<{
+    exists: boolean;
+    source: string;
+    contactId?: number;
   }> {
     // Normalize phone for comparison (remove non-digits)
-    const normalizePhone = (phoneStr?: string) => phoneStr?.replace(/\D/g, '') || '';
+    const normalizePhone = (phoneStr?: string) =>
+      phoneStr?.replace(/\D/g, '') || '';
     const normalizedPhone = normalizePhone(phone);
 
     // Check volunteers table
     if (email) {
-      const volunteerMatch = await db.select()
+      const volunteerMatch = await db
+        .select()
         .from(volunteers)
-        .where(
-          and(
-            eq(volunteers.name, name),
-            eq(volunteers.email, email)
-          )
-        )
+        .where(and(eq(volunteers.name, name), eq(volunteers.email, email)))
         .limit(1);
-      
+
       if (volunteerMatch.length > 0) {
-        return { exists: true, source: 'volunteers', contactId: volunteerMatch[0].id };
+        return {
+          exists: true,
+          source: 'volunteers',
+          contactId: volunteerMatch[0].id,
+        };
       }
     }
 
     // Check by phone across tables if provided
     if (normalizedPhone) {
-      const volunteerPhoneMatch = await db.select()
+      const volunteerPhoneMatch = await db
+        .select()
         .from(volunteers)
         .where(
           and(
@@ -1147,31 +1622,38 @@ export class DatabaseStorage implements IStorage {
             or(
               eq(volunteers.phone, phone || ''),
               eq(volunteers.phone, normalizedPhone),
-              eq(sql`REGEXP_REPLACE(${volunteers.phone}, '[^0-9]', '', 'g')`, normalizedPhone)
+              eq(
+                sql`REGEXP_REPLACE(${volunteers.phone}, '[^0-9]', '', 'g')`,
+                normalizedPhone
+              )
             )
           )
         )
         .limit(1);
-      
+
       if (volunteerPhoneMatch.length > 0) {
-        return { exists: true, source: 'volunteers', contactId: volunteerPhoneMatch[0].id };
+        return {
+          exists: true,
+          source: 'volunteers',
+          contactId: volunteerPhoneMatch[0].id,
+        };
       }
     }
 
     // Check general contacts table
     if (email) {
-      const contactMatch = await db.select()
+      const contactMatch = await db
+        .select()
         .from(contacts)
-        .where(
-          and(
-            eq(contacts.name, name),
-            eq(contacts.email, email)
-          )
-        )
+        .where(and(eq(contacts.name, name), eq(contacts.email, email)))
         .limit(1);
-      
+
       if (contactMatch.length > 0) {
-        return { exists: true, source: 'contacts', contactId: contactMatch[0].id };
+        return {
+          exists: true,
+          source: 'contacts',
+          contactId: contactMatch[0].id,
+        };
       }
     }
 
@@ -1179,10 +1661,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Host Contact methods
-  async createHostContact(insertContact: InsertHostContact): Promise<HostContact> {
+  async createHostContact(
+    insertContact: InsertHostContact
+  ): Promise<HostContact> {
     // Check for existing contact within host_contacts table
     if (insertContact.name && insertContact.email) {
-      const existingContact = await db.select()
+      const existingContact = await db
+        .select()
         .from(hostContacts)
         .where(
           and(
@@ -1191,46 +1676,70 @@ export class DatabaseStorage implements IStorage {
           )
         )
         .limit(1);
-      
+
       if (existingContact.length > 0) {
-        console.log(`Duplicate host contact prevented: ${insertContact.name} (${insertContact.email})`);
-        throw new Error(`Contact "${insertContact.name}" with email "${insertContact.email}" already exists for this host. Each contact must have a unique name and email combination.`);
+        console.log(
+          `Duplicate host contact prevented: ${insertContact.name} (${insertContact.email})`
+        );
+        throw new Error(
+          `Contact "${insertContact.name}" with email "${insertContact.email}" already exists for this host. Each contact must have a unique name and email combination.`
+        );
       }
     }
 
     // Check for cross-table duplicates
     const crossTableCheck = await this.checkCrossTableDuplicate(
-      insertContact.name, 
-      insertContact.email, 
+      insertContact.name,
+      insertContact.email,
       insertContact.phone
     );
-    
+
     if (crossTableCheck.exists) {
-      console.log(`❌ CROSS-TABLE DUPLICATE DETECTED: ${insertContact.name} already exists in ${crossTableCheck.source} table (ID: ${crossTableCheck.contactId})`);
-      console.log(`   - Attempted to create in host_contacts: ${insertContact.email}, ${insertContact.phone}`);
-      console.log(`   - Use contact assignment/linking instead of creating duplicate records`);
-      
+      console.log(
+        `❌ CROSS-TABLE DUPLICATE DETECTED: ${insertContact.name} already exists in ${crossTableCheck.source} table (ID: ${crossTableCheck.contactId})`
+      );
+      console.log(
+        `   - Attempted to create in host_contacts: ${insertContact.email}, ${insertContact.phone}`
+      );
+      console.log(
+        `   - Use contact assignment/linking instead of creating duplicate records`
+      );
+
       // Instead of creating a duplicate, throw an error or return a special response
-      throw new Error(`Contact "${insertContact.name}" already exists in ${crossTableCheck.source} table. Use contact assignment instead of creating duplicates.`);
+      throw new Error(
+        `Contact "${insertContact.name}" already exists in ${crossTableCheck.source} table. Use contact assignment instead of creating duplicates.`
+      );
     }
-    
-    const [contact] = await db.insert(hostContacts).values(insertContact).returning();
-    console.log(`✅ New host contact created: ${contact.name} (${contact.email})`);
+
+    const [contact] = await db
+      .insert(hostContacts)
+      .values(insertContact)
+      .returning();
+    console.log(
+      `✅ New host contact created: ${contact.name} (${contact.email})`
+    );
     return contact;
   }
 
   async getHostContacts(hostId: number): Promise<HostContact[]> {
-    return await db.select().from(hostContacts).where(eq(hostContacts.hostId, hostId));
+    return await db
+      .select()
+      .from(hostContacts)
+      .where(eq(hostContacts.hostId, hostId));
   }
 
-  async updateHostContact(id: number, updates: Partial<HostContact>): Promise<HostContact | undefined> {
+  async updateHostContact(
+    id: number,
+    updates: Partial<HostContact>
+  ): Promise<HostContact | undefined> {
     // Ensure updatedAt is properly formatted as a Date object
     const updateData = {
       ...updates,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
-    
-    const [contact] = await db.update(hostContacts)
+
+    const [contact] = await db
+      .update(hostContacts)
       .set(updateData)
       .where(eq(hostContacts.id, id))
       .returning();
@@ -1243,37 +1752,58 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Optimized query to get all hosts with their contacts in one call
-  async getAllHostsWithContacts(): Promise<Array<Host & { contacts: HostContact[] }>> {
+  async getAllHostsWithContacts(): Promise<
+    Array<Host & { contacts: HostContact[] }>
+  > {
     const hostsData = await db.select().from(hosts).orderBy(hosts.name);
     const contactsData = await db.select().from(hostContacts);
 
-    return hostsData.map(host => ({
+    return hostsData.map((host) => ({
       ...host,
-      contacts: contactsData.filter(contact => contact.hostId === host.id)
+      contacts: contactsData.filter((contact) => contact.hostId === host.id),
     }));
   }
 
   // Project Assignments
   async getProjectAssignments(projectId: number): Promise<ProjectAssignment[]> {
-    return await db.select().from(projectAssignments).where(eq(projectAssignments.projectId, projectId));
+    return await db
+      .select()
+      .from(projectAssignments)
+      .where(eq(projectAssignments.projectId, projectId));
   }
 
-  async createProjectAssignment(assignment: InsertProjectAssignment): Promise<ProjectAssignment> {
-    const [created] = await db.insert(projectAssignments).values(assignment).returning();
+  async createProjectAssignment(
+    assignment: InsertProjectAssignment
+  ): Promise<ProjectAssignment> {
+    const [created] = await db
+      .insert(projectAssignments)
+      .values(assignment)
+      .returning();
     return created;
   }
 
-  async deleteProjectAssignment(projectId: number, userId: string): Promise<boolean> {
-    const result = await db.delete(projectAssignments)
-      .where(and(
-        eq(projectAssignments.projectId, projectId),
-        eq(projectAssignments.userId, userId)
-      ));
+  async deleteProjectAssignment(
+    projectId: number,
+    userId: string
+  ): Promise<boolean> {
+    const result = await db
+      .delete(projectAssignments)
+      .where(
+        and(
+          eq(projectAssignments.projectId, projectId),
+          eq(projectAssignments.userId, userId)
+        )
+      );
     return (result.rowCount ?? 0) > 0;
   }
 
-  async getUserProjectAssignments(userId: string): Promise<ProjectAssignment[]> {
-    return await db.select().from(projectAssignments).where(eq(projectAssignments.userId, userId));
+  async getUserProjectAssignments(
+    userId: string
+  ): Promise<ProjectAssignment[]> {
+    return await db
+      .select()
+      .from(projectAssignments)
+      .where(eq(projectAssignments.userId, userId));
   }
 
   // Modified project methods to support user-specific visibility
@@ -1282,19 +1812,29 @@ export class DatabaseStorage implements IStorage {
     const assignedProjects = await db
       .select()
       .from(projects)
-      .innerJoin(projectAssignments, eq(projects.id, projectAssignments.projectId))
+      .innerJoin(
+        projectAssignments,
+        eq(projects.id, projectAssignments.projectId)
+      )
       .where(eq(projectAssignments.userId, userId));
 
-    return assignedProjects.map(result => result.projects);
+    return assignedProjects.map((result) => result.projects);
   }
 
-  async getAllProjectsWithAssignments(): Promise<Array<Project & { assignments: ProjectAssignment[] }>> {
-    const projectsData = await db.select().from(projects).orderBy(projects.createdAt);
+  async getAllProjectsWithAssignments(): Promise<
+    Array<Project & { assignments: ProjectAssignment[] }>
+  > {
+    const projectsData = await db
+      .select()
+      .from(projects)
+      .orderBy(projects.createdAt);
     const assignmentsData = await db.select().from(projectAssignments);
 
-    return projectsData.map(project => ({
+    return projectsData.map((project) => ({
       ...project,
-      assignments: assignmentsData.filter(assignment => assignment.projectId === project.id)
+      assignments: assignmentsData.filter(
+        (assignment) => assignment.projectId === project.id
+      ),
     }));
   }
 
@@ -1304,16 +1844,25 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getCommittee(id: number): Promise<Committee | undefined> {
-    const [committee] = await db.select().from(committees).where(eq(committees.id, id));
+    const [committee] = await db
+      .select()
+      .from(committees)
+      .where(eq(committees.id, id));
     return committee || undefined;
   }
 
   async createCommittee(committee: InsertCommittee): Promise<Committee> {
-    const [newCommittee] = await db.insert(committees).values(committee).returning();
+    const [newCommittee] = await db
+      .insert(committees)
+      .values(committee)
+      .returning();
     return newCommittee;
   }
 
-  async updateCommittee(id: number, updates: Partial<Committee>): Promise<Committee | undefined> {
+  async updateCommittee(
+    id: number,
+    updates: Partial<Committee>
+  ): Promise<Committee | undefined> {
     const [committee] = await db
       .update(committees)
       .set({ ...updates, updatedAt: new Date() })
@@ -1328,38 +1877,53 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Committee membership management
-  async getUserCommittees(userId: string): Promise<Array<Committee & { membership: CommitteeMembership }>> {
+  async getUserCommittees(
+    userId: string
+  ): Promise<Array<Committee & { membership: CommitteeMembership }>> {
     const userCommittees = await db
       .select()
       .from(committeeMemberships)
-      .innerJoin(committees, eq(committeeMemberships.committeeId, committees.id))
+      .innerJoin(
+        committees,
+        eq(committeeMemberships.committeeId, committees.id)
+      )
       .where(eq(committeeMemberships.userId, userId));
 
-    return userCommittees.map(result => ({
+    return userCommittees.map((result) => ({
       ...result.committees,
-      membership: result.committee_memberships
+      membership: result.committee_memberships,
     }));
   }
 
-  async getCommitteeMembers(committeeId: number): Promise<Array<User & { membership: CommitteeMembership }>> {
+  async getCommitteeMembers(
+    committeeId: number
+  ): Promise<Array<User & { membership: CommitteeMembership }>> {
     const members = await db
       .select()
       .from(committeeMemberships)
       .innerJoin(users, eq(committeeMemberships.userId, users.id))
       .where(eq(committeeMemberships.committeeId, committeeId));
 
-    return members.map(result => ({
+    return members.map((result) => ({
       ...result.users,
-      membership: result.committee_memberships
+      membership: result.committee_memberships,
     }));
   }
 
-  async addUserToCommittee(membership: InsertCommitteeMembership): Promise<CommitteeMembership> {
-    const [newMembership] = await db.insert(committeeMemberships).values(membership).returning();
+  async addUserToCommittee(
+    membership: InsertCommitteeMembership
+  ): Promise<CommitteeMembership> {
+    const [newMembership] = await db
+      .insert(committeeMemberships)
+      .values(membership)
+      .returning();
     return newMembership;
   }
 
-  async updateCommitteeMembership(id: number, updates: Partial<CommitteeMembership>): Promise<CommitteeMembership | undefined> {
+  async updateCommitteeMembership(
+    id: number,
+    updates: Partial<CommitteeMembership>
+  ): Promise<CommitteeMembership | undefined> {
     const [membership] = await db
       .update(committeeMemberships)
       .set(updates)
@@ -1368,32 +1932,54 @@ export class DatabaseStorage implements IStorage {
     return membership || undefined;
   }
 
-  async removeUserFromCommittee(userId: string, committeeId: number): Promise<boolean> {
+  async removeUserFromCommittee(
+    userId: string,
+    committeeId: number
+  ): Promise<boolean> {
     const result = await db
       .delete(committeeMemberships)
-      .where(and(eq(committeeMemberships.userId, userId), eq(committeeMemberships.committeeId, committeeId)));
+      .where(
+        and(
+          eq(committeeMemberships.userId, userId),
+          eq(committeeMemberships.committeeId, committeeId)
+        )
+      );
     return (result.rowCount ?? 0) > 0;
   }
 
-  async isUserCommitteeMember(userId: string, committeeId: number): Promise<boolean> {
+  async isUserCommitteeMember(
+    userId: string,
+    committeeId: number
+  ): Promise<boolean> {
     const [membership] = await db
       .select()
       .from(committeeMemberships)
-      .where(and(eq(committeeMemberships.userId, userId), eq(committeeMemberships.committeeId, committeeId)));
+      .where(
+        and(
+          eq(committeeMemberships.userId, userId),
+          eq(committeeMemberships.committeeId, committeeId)
+        )
+      );
     return !!membership;
   }
 
   // Notifications & Celebrations
   async getUserNotifications(userId: string): Promise<Notification[]> {
     try {
-      return await db.select().from(notifications).where(eq(notifications.userId, userId)).orderBy(desc(notifications.createdAt));
+      return await db
+        .select()
+        .from(notifications)
+        .where(eq(notifications.userId, userId))
+        .orderBy(desc(notifications.createdAt));
     } catch (error) {
       console.error('Failed to get user notifications:', error);
       return [];
     }
   }
 
-  async createNotification(notification: InsertNotification): Promise<Notification> {
+  async createNotification(
+    notification: InsertNotification
+  ): Promise<Notification> {
     try {
       const [createdNotification] = await db
         .insert(notifications)
@@ -1431,40 +2017,52 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async createCelebration(userId: string, taskId: number, message: string): Promise<Notification> {
-    const celebrationEmojis = ["🎉", "🌟", "🎊", "🥳", "🏆", "✨", "👏", "💪"];
-    const randomEmoji = celebrationEmojis[Math.floor(Math.random() * celebrationEmojis.length)];
-    
+  async createCelebration(
+    userId: string,
+    taskId: number,
+    message: string
+  ): Promise<Notification> {
+    const celebrationEmojis = ['🎉', '🌟', '🎊', '🥳', '🏆', '✨', '👏', '💪'];
+    const randomEmoji =
+      celebrationEmojis[Math.floor(Math.random() * celebrationEmojis.length)];
+
     return this.createNotification({
       userId,
-      type: "celebration",
+      type: 'celebration',
       title: `${randomEmoji} Task Completed!`,
       message: `Thanks for completing your task! ${message}`,
       isRead: false,
-      relatedType: "task",
+      relatedType: 'task',
       relatedId: taskId,
       celebrationData: {
         emoji: randomEmoji,
-        achievementType: "task_completion",
+        achievementType: 'task_completion',
         taskId,
-        completedAt: new Date().toISOString()
-      }
+        completedAt: new Date().toISOString(),
+      },
     });
   }
 
   // Announcements
   async getAllAnnouncements(): Promise<any[]> {
-    const result = await db.select().from(announcements).orderBy(desc(announcements.createdAt));
+    const result = await db
+      .select()
+      .from(announcements)
+      .orderBy(desc(announcements.createdAt));
     return result;
   }
 
   async createAnnouncement(announcement: any): Promise<any> {
-    const [result] = await db.insert(announcements).values(announcement).returning();
+    const [result] = await db
+      .insert(announcements)
+      .values(announcement)
+      .returning();
     return result;
   }
 
   async updateAnnouncement(id: number, updates: any): Promise<any | undefined> {
-    const [result] = await db.update(announcements)
+    const [result] = await db
+      .update(announcements)
       .set({ ...updates, updatedAt: new Date() })
       .where(eq(announcements.id, id))
       .returning();
@@ -1472,7 +2070,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteAnnouncement(id: number): Promise<boolean> {
-    const result = await db.delete(announcements).where(eq(announcements.id, id));
+    const result = await db
+      .delete(announcements)
+      .where(eq(announcements.id, id));
     return result.rowCount! > 0;
   }
 
@@ -1485,7 +2085,7 @@ export class DatabaseStorage implements IStorage {
         .where(eq(notifications.id, notificationId));
       return (result.rowCount ?? 0) > 0;
     } catch (error) {
-      console.error("Error marking notification as read:", error);
+      console.error('Error marking notification as read:', error);
       return false;
     }
   }
@@ -1495,17 +2095,21 @@ export class DatabaseStorage implements IStorage {
       const result = await db
         .update(notifications)
         .set({ isRead: true })
-        .where(and(eq(notifications.userId, userId), eq(notifications.isRead, false)));
+        .where(
+          and(eq(notifications.userId, userId), eq(notifications.isRead, false))
+        );
       return (result.rowCount ?? 0) > 0;
     } catch (error) {
-      console.error("Error marking all notifications as read:", error);
+      console.error('Error marking all notifications as read:', error);
       return false;
     }
   }
 
-
-
-  async addProjectAssignment(assignment: { projectId: number; userId: string; role: string }): Promise<any> {
+  async addProjectAssignment(assignment: {
+    projectId: number;
+    userId: string;
+    role: string;
+  }): Promise<any> {
     try {
       const [newAssignment] = await db
         .insert(projectAssignments)
@@ -1513,10 +2117,10 @@ export class DatabaseStorage implements IStorage {
           projectId: assignment.projectId,
           userId: assignment.userId,
           role: assignment.role,
-          assignedAt: new Date()
+          assignedAt: new Date(),
         })
         .returning();
-      
+
       return newAssignment;
     } catch (error) {
       console.error('Error adding project assignment:', error);
@@ -1524,15 +2128,20 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async removeProjectAssignment(projectId: number, userId: string): Promise<boolean> {
+  async removeProjectAssignment(
+    projectId: number,
+    userId: string
+  ): Promise<boolean> {
     try {
       const result = await db
         .delete(projectAssignments)
-        .where(and(
-          eq(projectAssignments.projectId, projectId),
-          eq(projectAssignments.userId, userId)
-        ));
-      
+        .where(
+          and(
+            eq(projectAssignments.projectId, projectId),
+            eq(projectAssignments.userId, userId)
+          )
+        );
+
       return (result.rowCount ?? 0) > 0;
     } catch (error) {
       console.error('Error removing project assignment:', error);
@@ -1540,17 +2149,23 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async updateProjectAssignment(projectId: number, userId: string, updates: { role: string }): Promise<any> {
+  async updateProjectAssignment(
+    projectId: number,
+    userId: string,
+    updates: { role: string }
+  ): Promise<any> {
     try {
       const [updatedAssignment] = await db
         .update(projectAssignments)
         .set({ role: updates.role })
-        .where(and(
-          eq(projectAssignments.projectId, projectId),
-          eq(projectAssignments.userId, userId)
-        ))
+        .where(
+          and(
+            eq(projectAssignments.projectId, projectId),
+            eq(projectAssignments.userId, userId)
+          )
+        )
         .returning();
-      
+
       return updatedAssignment;
     } catch (error) {
       console.error('Error updating project assignment:', error);
@@ -1572,7 +2187,9 @@ export class DatabaseStorage implements IStorage {
       } catch (error) {
         console.log('Adding missing sender column to messages table...');
         try {
-          await db.execute(sql`ALTER TABLE messages ADD COLUMN sender TEXT DEFAULT 'Unknown User'`);
+          await db.execute(
+            sql`ALTER TABLE messages ADD COLUMN sender TEXT DEFAULT 'Unknown User'`
+          );
           console.log('Sender column added successfully');
         } catch (alterError) {
           console.log('Could not add sender column, will use fallback queries');
@@ -1589,7 +2206,10 @@ export class DatabaseStorage implements IStorage {
   // Suggestions Portal methods
   async getAllSuggestions(): Promise<Suggestion[]> {
     try {
-      const result = await db.select().from(suggestions).orderBy(suggestions.createdAt);
+      const result = await db
+        .select()
+        .from(suggestions)
+        .orderBy(suggestions.createdAt);
       return result as Suggestion[];
     } catch (error) {
       console.error('Error fetching suggestions:', error);
@@ -1599,7 +2219,11 @@ export class DatabaseStorage implements IStorage {
 
   async getSuggestion(id: number): Promise<Suggestion | undefined> {
     try {
-      const result = await db.select().from(suggestions).where(eq(suggestions.id, id)).limit(1);
+      const result = await db
+        .select()
+        .from(suggestions)
+        .where(eq(suggestions.id, id))
+        .limit(1);
       return result[0] as Suggestion | undefined;
     } catch (error) {
       console.error('Error fetching suggestion:', error);
@@ -1609,7 +2233,10 @@ export class DatabaseStorage implements IStorage {
 
   async createSuggestion(suggestion: InsertSuggestion): Promise<Suggestion> {
     try {
-      const result = await db.insert(suggestions).values(suggestion).returning();
+      const result = await db
+        .insert(suggestions)
+        .values(suggestion)
+        .returning();
       return result[0] as Suggestion;
     } catch (error) {
       console.error('Error creating suggestion:', error);
@@ -1617,9 +2244,13 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async updateSuggestion(id: number, updates: Partial<Suggestion>): Promise<Suggestion | undefined> {
+  async updateSuggestion(
+    id: number,
+    updates: Partial<Suggestion>
+  ): Promise<Suggestion | undefined> {
     try {
-      const result = await db.update(suggestions)
+      const result = await db
+        .update(suggestions)
         .set({ ...updates, updatedAt: new Date() })
         .where(eq(suggestions.id, id))
         .returning();
@@ -1633,7 +2264,9 @@ export class DatabaseStorage implements IStorage {
   async deleteSuggestion(id: number): Promise<boolean> {
     try {
       // First delete all responses
-      await db.delete(suggestionResponses).where(eq(suggestionResponses.suggestionId, id));
+      await db
+        .delete(suggestionResponses)
+        .where(eq(suggestionResponses.suggestionId, id));
       // Then delete the suggestion
       const result = await db.delete(suggestions).where(eq(suggestions.id, id));
       return true;
@@ -1645,7 +2278,8 @@ export class DatabaseStorage implements IStorage {
 
   async upvoteSuggestion(id: number): Promise<boolean> {
     try {
-      await db.update(suggestions)
+      await db
+        .update(suggestions)
         .set({ upvotes: sql`${suggestions.upvotes} + 1` })
         .where(eq(suggestions.id, id));
       return true;
@@ -1656,9 +2290,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Suggestion responses
-  async getSuggestionResponses(suggestionId: number): Promise<SuggestionResponse[]> {
+  async getSuggestionResponses(
+    suggestionId: number
+  ): Promise<SuggestionResponse[]> {
     try {
-      const result = await db.select().from(suggestionResponses)
+      const result = await db
+        .select()
+        .from(suggestionResponses)
         .where(eq(suggestionResponses.suggestionId, suggestionId))
         .orderBy(suggestionResponses.createdAt);
       return result as SuggestionResponse[];
@@ -1668,9 +2306,14 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async createSuggestionResponse(response: InsertSuggestionResponse): Promise<SuggestionResponse> {
+  async createSuggestionResponse(
+    response: InsertSuggestionResponse
+  ): Promise<SuggestionResponse> {
     try {
-      const result = await db.insert(suggestionResponses).values(response).returning();
+      const result = await db
+        .insert(suggestionResponses)
+        .values(response)
+        .returning();
       return result[0] as SuggestionResponse;
     } catch (error) {
       console.error('Error creating suggestion response:', error);
@@ -1680,7 +2323,9 @@ export class DatabaseStorage implements IStorage {
 
   async deleteSuggestionResponse(id: number): Promise<boolean> {
     try {
-      await db.delete(suggestionResponses).where(eq(suggestionResponses.id, id));
+      await db
+        .delete(suggestionResponses)
+        .where(eq(suggestionResponses.id, id));
       return true;
     } catch (error) {
       console.error('Error deleting suggestion response:', error);
@@ -1692,7 +2337,7 @@ export class DatabaseStorage implements IStorage {
   async getUserConversations(userId: string): Promise<any[]> {
     try {
       console.log(`[DB] Getting conversations for user: ${userId}`);
-      
+
       // Get all conversations where the user is a participant
       const userConversations = await db
         .select({
@@ -1704,11 +2349,16 @@ export class DatabaseStorage implements IStorage {
           joinedAt: conversationParticipants.joinedAt,
         })
         .from(conversations)
-        .innerJoin(conversationParticipants, eq(conversations.id, conversationParticipants.conversationId))
+        .innerJoin(
+          conversationParticipants,
+          eq(conversations.id, conversationParticipants.conversationId)
+        )
         .where(eq(conversationParticipants.userId, userId))
         .orderBy(conversations.createdAt);
 
-      console.log(`[DB] Found ${userConversations.length} conversations for user ${userId}`);
+      console.log(
+        `[DB] Found ${userConversations.length} conversations for user ${userId}`
+      );
 
       // For each conversation, get additional metadata
       const enrichedConversations = await Promise.all(
@@ -1748,14 +2398,17 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async createConversation(conversationData: {
-    type: string;
-    name?: string;
-    createdBy: string;
-  }, participants: string[]): Promise<any> {
+  async createConversation(
+    conversationData: {
+      type: string;
+      name?: string;
+      createdBy: string;
+    },
+    participants: string[]
+  ): Promise<any> {
     try {
       console.log(`[DB] Creating conversation:`, conversationData);
-      
+
       // Create the conversation
       const [newConversation] = await db
         .insert(conversations)
@@ -1768,14 +2421,16 @@ export class DatabaseStorage implements IStorage {
       console.log(`[DB] Created conversation with ID: ${newConversation.id}`);
 
       // Add participants
-      const participantData = participants.map(userId => ({
+      const participantData = participants.map((userId) => ({
         conversationId: newConversation.id,
         userId: userId,
       }));
 
       await db.insert(conversationParticipants).values(participantData);
 
-      console.log(`[DB] Added ${participants.length} participants to conversation ${newConversation.id}`);
+      console.log(
+        `[DB] Added ${participants.length} participants to conversation ${newConversation.id}`
+      );
 
       return {
         ...newConversation,
@@ -1787,22 +2442,31 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async getConversationMessages(conversationId: number, userId: string): Promise<any[]> {
+  async getConversationMessages(
+    conversationId: number,
+    userId: string
+  ): Promise<any[]> {
     try {
-      console.log(`[DB] Getting messages for conversation ${conversationId} and user ${userId}`);
-      
+      console.log(
+        `[DB] Getting messages for conversation ${conversationId} and user ${userId}`
+      );
+
       // First verify user has access to this conversation
       const hasAccess = await db
         .select()
         .from(conversationParticipants)
-        .where(and(
-          eq(conversationParticipants.conversationId, conversationId),
-          eq(conversationParticipants.userId, userId)
-        ))
+        .where(
+          and(
+            eq(conversationParticipants.conversationId, conversationId),
+            eq(conversationParticipants.userId, userId)
+          )
+        )
         .limit(1);
 
       if (hasAccess.length === 0) {
-        console.log(`[DB] User ${userId} does not have access to conversation ${conversationId}`);
+        console.log(
+          `[DB] User ${userId} does not have access to conversation ${conversationId}`
+        );
         return [];
       }
 
@@ -1823,13 +2487,17 @@ export class DatabaseStorage implements IStorage {
           deletedAt: messages.deletedAt,
         })
         .from(messages)
-        .where(and(
-          eq(messages.conversationId, conversationId),
-          isNull(messages.deletedAt)
-        ))
+        .where(
+          and(
+            eq(messages.conversationId, conversationId),
+            isNull(messages.deletedAt)
+          )
+        )
         .orderBy(messages.createdAt);
 
-      console.log(`[DB] Found ${messages.length} messages for conversation ${conversationId}`);
+      console.log(
+        `[DB] Found ${messages.length} messages for conversation ${conversationId}`
+      );
       return messages;
     } catch (error) {
       console.error('Error getting conversation messages:', error);
@@ -1849,8 +2517,10 @@ export class DatabaseStorage implements IStorage {
     replyToSender?: string | null;
   }): Promise<any> {
     try {
-      console.log(`[DB] Adding message to conversation ${messageData.conversationId}`);
-      
+      console.log(
+        `[DB] Adding message to conversation ${messageData.conversationId}`
+      );
+
       const [newMessage] = await db
         .insert(messages)
         .values({
@@ -1875,23 +2545,24 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async updateConversationMessage(messageId: number, userId: string, updates: {
-    content?: string;
-    editedAt?: Date;
-  }): Promise<any> {
+  async updateConversationMessage(
+    messageId: number,
+    userId: string,
+    updates: {
+      content?: string;
+      editedAt?: Date;
+    }
+  ): Promise<any> {
     try {
       console.log(`[DB] Updating message ${messageId} by user ${userId}`);
-      
+
       const [updatedMessage] = await db
         .update(messages)
         .set({
           ...updates,
           editedAt: new Date(),
         })
-        .where(and(
-          eq(messages.id, messageId),
-          eq(messages.userId, userId)
-        ))
+        .where(and(eq(messages.id, messageId), eq(messages.userId, userId)))
         .returning();
 
       return updatedMessage;
@@ -1901,20 +2572,20 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async deleteConversationMessage(messageId: number, userId: string): Promise<boolean> {
+  async deleteConversationMessage(
+    messageId: number,
+    userId: string
+  ): Promise<boolean> {
     try {
       console.log(`[DB] Deleting message ${messageId} by user ${userId}`);
-      
+
       const result = await db
         .update(messages)
         .set({
           deletedAt: new Date(),
           deletedBy: userId,
         })
-        .where(and(
-          eq(messages.id, messageId),
-          eq(messages.userId, userId)
-        ));
+        .where(and(eq(messages.id, messageId), eq(messages.userId, userId)));
 
       return (result.rowCount ?? 0) > 0;
     } catch (error) {
@@ -1924,7 +2595,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Message Like methods
-  async likeMessage(messageId: number, userId: string, userName: string): Promise<MessageLike | null> {
+  async likeMessage(
+    messageId: number,
+    userId: string,
+    userName: string
+  ): Promise<MessageLike | null> {
     try {
       const [like] = await db
         .insert(messageLikes)
@@ -1934,10 +2609,11 @@ export class DatabaseStorage implements IStorage {
           userName,
         })
         .returning();
-      
+
       return like;
     } catch (error: any) {
-      if (error.code === '23505') { // Unique constraint violation
+      if (error.code === '23505') {
+        // Unique constraint violation
         return null; // Already liked
       }
       console.error('Error liking message:', error);
@@ -1949,11 +2625,13 @@ export class DatabaseStorage implements IStorage {
     try {
       const result = await db
         .delete(messageLikes)
-        .where(and(
-          eq(messageLikes.messageId, messageId),
-          eq(messageLikes.userId, userId)
-        ));
-      
+        .where(
+          and(
+            eq(messageLikes.messageId, messageId),
+            eq(messageLikes.userId, userId)
+          )
+        );
+
       return (result.rowCount ?? 0) > 0;
     } catch (error) {
       console.error('Error unliking message:', error);
@@ -1968,7 +2646,7 @@ export class DatabaseStorage implements IStorage {
         .from(messageLikes)
         .where(eq(messageLikes.messageId, messageId))
         .orderBy(messageLikes.likedAt);
-      
+
       return likes;
     } catch (error) {
       console.error('Error getting message likes:', error);
@@ -1976,17 +2654,22 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async hasUserLikedMessage(messageId: number, userId: string): Promise<boolean> {
+  async hasUserLikedMessage(
+    messageId: number,
+    userId: string
+  ): Promise<boolean> {
     try {
       const [like] = await db
         .select()
         .from(messageLikes)
-        .where(and(
-          eq(messageLikes.messageId, messageId),
-          eq(messageLikes.userId, userId)
-        ))
+        .where(
+          and(
+            eq(messageLikes.messageId, messageId),
+            eq(messageLikes.userId, userId)
+          )
+        )
         .limit(1);
-      
+
       return !!like;
     } catch (error) {
       console.error('Error checking if user liked message:', error);
@@ -1995,7 +2678,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Chat Message Like methods
-  async likeChatMessage(messageId: number, userId: string, userName: string): Promise<ChatMessageLike | null> {
+  async likeChatMessage(
+    messageId: number,
+    userId: string,
+    userName: string
+  ): Promise<ChatMessageLike | null> {
     try {
       const [like] = await db
         .insert(chatMessageLikes)
@@ -2005,10 +2692,11 @@ export class DatabaseStorage implements IStorage {
           userName,
         })
         .returning();
-      
+
       return like;
     } catch (error: any) {
-      if (error.code === '23505') { // Unique constraint violation
+      if (error.code === '23505') {
+        // Unique constraint violation
         return null; // Already liked
       }
       console.error('Error liking chat message:', error);
@@ -2020,11 +2708,13 @@ export class DatabaseStorage implements IStorage {
     try {
       const result = await db
         .delete(chatMessageLikes)
-        .where(and(
-          eq(chatMessageLikes.messageId, messageId),
-          eq(chatMessageLikes.userId, userId)
-        ));
-      
+        .where(
+          and(
+            eq(chatMessageLikes.messageId, messageId),
+            eq(chatMessageLikes.userId, userId)
+          )
+        );
+
       return (result.rowCount ?? 0) > 0;
     } catch (error) {
       console.error('Error unliking chat message:', error);
@@ -2039,7 +2729,7 @@ export class DatabaseStorage implements IStorage {
         .from(chatMessageLikes)
         .where(eq(chatMessageLikes.messageId, messageId))
         .orderBy(chatMessageLikes.likedAt);
-      
+
       return likes;
     } catch (error) {
       console.error('Error getting chat message likes:', error);
@@ -2047,17 +2737,22 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async hasUserLikedChatMessage(messageId: number, userId: string): Promise<boolean> {
+  async hasUserLikedChatMessage(
+    messageId: number,
+    userId: string
+  ): Promise<boolean> {
     try {
       const [like] = await db
         .select()
         .from(chatMessageLikes)
-        .where(and(
-          eq(chatMessageLikes.messageId, messageId),
-          eq(chatMessageLikes.userId, userId)
-        ))
+        .where(
+          and(
+            eq(chatMessageLikes.messageId, messageId),
+            eq(chatMessageLikes.userId, userId)
+          )
+        )
         .limit(1);
-      
+
       return !!like;
     } catch (error) {
       console.error('Error checking if user liked chat message:', error);
@@ -2066,7 +2761,12 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Chat message methods for Socket.IO
-  async createChatMessage(data: { channel: string; userId: string; userName: string; content: string }): Promise<any> {
+  async createChatMessage(data: {
+    channel: string;
+    userId: string;
+    userName: string;
+    content: string;
+  }): Promise<any> {
     try {
       const [message] = await db
         .insert(chatMessages)
@@ -2075,14 +2775,14 @@ export class DatabaseStorage implements IStorage {
           userId: data.userId,
           userName: data.userName,
           content: data.content,
-          createdAt: new Date()
+          createdAt: new Date(),
         })
         .returning();
       return message;
     } catch (error: any) {
       if (error.code === '23505') {
         // Retry with a small delay to avoid ID collision
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await new Promise((resolve) => setTimeout(resolve, 10));
         const [message] = await db
           .insert(chatMessages)
           .values({
@@ -2090,7 +2790,7 @@ export class DatabaseStorage implements IStorage {
             userId: data.userId,
             userName: data.userName,
             content: data.content,
-            createdAt: new Date()
+            createdAt: new Date(),
           })
           .returning();
         return message;
@@ -2103,17 +2803,20 @@ export class DatabaseStorage implements IStorage {
     return await db
       .select()
       .from(chatMessages)
-      .where(eq(chatMessages.channel, channel))  // CRITICAL: Filter by channel field in chatMessages table
+      .where(eq(chatMessages.channel, channel)) // CRITICAL: Filter by channel field in chatMessages table
       .orderBy(desc(chatMessages.createdAt))
       .limit(limit);
   }
 
-  async updateChatMessage(id: number, updates: { content: string }): Promise<void> {
+  async updateChatMessage(
+    id: number,
+    updates: { content: string }
+  ): Promise<void> {
     await db
       .update(chatMessages)
-      .set({ 
+      .set({
         content: updates.content,
-        editedAt: new Date()
+        editedAt: new Date(),
       })
       .where(eq(chatMessages.id, id));
   }
@@ -2122,15 +2825,19 @@ export class DatabaseStorage implements IStorage {
     await db.delete(chatMessages).where(eq(chatMessages.id, id));
   }
 
-  async markChannelMessagesAsRead(userId: string, channel: string): Promise<void> {
+  async markChannelMessagesAsRead(
+    userId: string,
+    channel: string
+  ): Promise<void> {
     try {
-      const { chatMessages, chatMessageReads } = await import("@shared/schema");
-      
+      const { chatMessages, chatMessageReads } = await import('@shared/schema');
+
       // Get all messages in this channel that the user hasn't already marked as read
       const unreadMessages = await db
         .select({ id: chatMessages.id })
         .from(chatMessages)
-        .leftJoin(chatMessageReads, 
+        .leftJoin(
+          chatMessageReads,
           and(
             eq(chatMessageReads.messageId, chatMessages.id),
             eq(chatMessageReads.userId, userId)
@@ -2145,18 +2852,23 @@ export class DatabaseStorage implements IStorage {
 
       // Mark all unread messages as read
       if (unreadMessages.length > 0) {
-        const readEntries = unreadMessages.map(msg => ({
+        const readEntries = unreadMessages.map((msg) => ({
           messageId: msg.id,
           userId,
           channel,
-          readAt: new Date()
+          readAt: new Date(),
         }));
 
         await db.insert(chatMessageReads).values(readEntries);
-        console.log(`Marked ${unreadMessages.length} messages as read for user ${userId} in channel ${channel}`);
+        console.log(
+          `Marked ${unreadMessages.length} messages as read for user ${userId} in channel ${channel}`
+        );
       }
     } catch (error) {
-      console.error(`Error marking channel messages as read for user ${userId} in channel ${channel}:`, error);
+      console.error(
+        `Error marking channel messages as read for user ${userId} in channel ${channel}:`,
+        error
+      );
     }
   }
 
@@ -2174,25 +2886,30 @@ export class DatabaseStorage implements IStorage {
   }): Promise<any> {
     // Store in memory as a simple fallback since there's no shoutout_logs table
     // This will work with the fallback storage system
-    throw new Error('Database shoutout logging not implemented - using memory storage');
+    throw new Error(
+      'Database shoutout logging not implemented - using memory storage'
+    );
   }
 
   async getShoutoutHistory(): Promise<any[]> {
     // Fallback to memory storage for shoutout history
-    throw new Error('Database shoutout history not implemented - using memory storage');
+    throw new Error(
+      'Database shoutout history not implemented - using memory storage'
+    );
   }
 
-
-  async getAllUsersActivitySummary(days: number = 30): Promise<{
-    userId: string;
-    email: string;
-    firstName: string;
-    lastName: string;
-    totalActions: number;
-    lastActive: Date | null;
-    topSection: string;
-  }[]> {
-    const { userActivityLogs, users } = await import("@shared/schema");
+  async getAllUsersActivitySummary(days: number = 30): Promise<
+    {
+      userId: string;
+      email: string;
+      firstName: string;
+      lastName: string;
+      totalActions: number;
+      lastActive: Date | null;
+      topSection: string;
+    }[]
+  > {
+    const { userActivityLogs, users } = await import('@shared/schema');
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
 
@@ -2216,28 +2933,33 @@ export class DatabaseStorage implements IStorage {
              LIMIT 1), 
             'none'
           )
-        `
+        `,
       })
       .from(users)
-      .leftJoin(userActivityLogs, and(
-        eq(users.id, userActivityLogs.userId),
-        sql`${userActivityLogs.createdAt} >= ${startDate}`
-      ))
+      .leftJoin(
+        userActivityLogs,
+        and(
+          eq(users.id, userActivityLogs.userId),
+          sql`${userActivityLogs.createdAt} >= ${startDate}`
+        )
+      )
       .groupBy(users.id, users.email, users.firstName, users.lastName);
 
-    return userActivities.map(user => ({
+    return userActivities.map((user) => ({
       userId: user.userId || '',
       email: user.email || '',
       firstName: user.firstName || '',
       lastName: user.lastName || '',
       totalActions: user.activityCount || 0,
       lastActive: user.lastActive,
-      topSection: user.topSection || 'none'
+      topSection: user.topSection || 'none',
     }));
   }
 
   // User Activity Tracking methods
-  async logUserActivity(activity: InsertUserActivityLog): Promise<UserActivityLog> {
+  async logUserActivity(
+    activity: InsertUserActivityLog
+  ): Promise<UserActivityLog> {
     const [log] = await db
       .insert(userActivityLogs)
       .values(activity)
@@ -2245,7 +2967,10 @@ export class DatabaseStorage implements IStorage {
     return log;
   }
 
-  async getUserActivityStats(userId: string, days: number = 30): Promise<{
+  async getUserActivityStats(
+    userId: string,
+    days: number = 30
+  ): Promise<{
     totalActions: number;
     sectionsUsed: string[];
     topActions: { action: string; count: number }[];
@@ -2258,32 +2983,38 @@ export class DatabaseStorage implements IStorage {
     const totalResult = await db
       .select({ count: sql<number>`count(*)` })
       .from(userActivityLogs)
-      .where(and(
-        eq(userActivityLogs.userId, userId),
-        gte(userActivityLogs.createdAt, sinceDate)
-      ));
+      .where(
+        and(
+          eq(userActivityLogs.userId, userId),
+          gte(userActivityLogs.createdAt, sinceDate)
+        )
+      );
 
     // Get sections used
     const sectionsResult = await db
       .select({ section: userActivityLogs.section })
       .from(userActivityLogs)
-      .where(and(
-        eq(userActivityLogs.userId, userId),
-        gte(userActivityLogs.createdAt, sinceDate)
-      ))
+      .where(
+        and(
+          eq(userActivityLogs.userId, userId),
+          gte(userActivityLogs.createdAt, sinceDate)
+        )
+      )
       .groupBy(userActivityLogs.section);
 
     // Get top actions
     const actionsResult = await db
       .select({
         action: userActivityLogs.action,
-        count: sql<number>`count(*)`
+        count: sql<number>`count(*)`,
       })
       .from(userActivityLogs)
-      .where(and(
-        eq(userActivityLogs.userId, userId),
-        gte(userActivityLogs.createdAt, sinceDate)
-      ))
+      .where(
+        and(
+          eq(userActivityLogs.userId, userId),
+          gte(userActivityLogs.createdAt, sinceDate)
+        )
+      )
       .groupBy(userActivityLogs.action)
       .orderBy(desc(sql`count(*)`))
       .limit(5);
@@ -2292,50 +3023,64 @@ export class DatabaseStorage implements IStorage {
     const dailyResult = await db
       .select({
         date: sql<string>`date(created_at)`,
-        count: sql<number>`count(*)`
+        count: sql<number>`count(*)`,
       })
       .from(userActivityLogs)
-      .where(and(
-        eq(userActivityLogs.userId, userId),
-        gte(userActivityLogs.createdAt, sinceDate)
-      ))
+      .where(
+        and(
+          eq(userActivityLogs.userId, userId),
+          gte(userActivityLogs.createdAt, sinceDate)
+        )
+      )
       .groupBy(sql`date(created_at)`)
       .orderBy(sql`date(created_at)`);
 
     return {
       totalActions: totalResult[0]?.count || 0,
-      sectionsUsed: sectionsResult.map(r => r.section),
-      topActions: actionsResult.map(r => ({ action: r.action, count: r.count })),
-      dailyActivity: dailyResult.map(r => ({ date: r.date, count: r.count }))
+      sectionsUsed: sectionsResult.map((r) => r.section),
+      topActions: actionsResult.map((r) => ({
+        action: r.action,
+        count: r.count,
+      })),
+      dailyActivity: dailyResult.map((r) => ({ date: r.date, count: r.count })),
     };
   }
 
-
-
   // Wishlist Suggestions
   async getAllWishlistSuggestions(): Promise<WishlistSuggestion[]> {
-    const results = await db.select()
+    const results = await db
+      .select()
       .from(wishlistSuggestions)
       .orderBy(desc(wishlistSuggestions.createdAt));
     return results;
   }
 
-  async getWishlistSuggestion(id: number): Promise<WishlistSuggestion | undefined> {
-    const [result] = await db.select()
+  async getWishlistSuggestion(
+    id: number
+  ): Promise<WishlistSuggestion | undefined> {
+    const [result] = await db
+      .select()
       .from(wishlistSuggestions)
       .where(eq(wishlistSuggestions.id, id));
     return result || undefined;
   }
 
-  async createWishlistSuggestion(suggestion: InsertWishlistSuggestion): Promise<WishlistSuggestion> {
-    const [result] = await db.insert(wishlistSuggestions)
+  async createWishlistSuggestion(
+    suggestion: InsertWishlistSuggestion
+  ): Promise<WishlistSuggestion> {
+    const [result] = await db
+      .insert(wishlistSuggestions)
       .values(suggestion)
       .returning();
     return result;
   }
 
-  async updateWishlistSuggestion(id: number, updates: Partial<WishlistSuggestion>): Promise<WishlistSuggestion | undefined> {
-    const [result] = await db.update(wishlistSuggestions)
+  async updateWishlistSuggestion(
+    id: number,
+    updates: Partial<WishlistSuggestion>
+  ): Promise<WishlistSuggestion | undefined> {
+    const [result] = await db
+      .update(wishlistSuggestions)
       .set({ ...updates, updatedAt: new Date() })
       .where(eq(wishlistSuggestions.id, id))
       .returning();
@@ -2343,18 +3088,24 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteWishlistSuggestion(id: number): Promise<boolean> {
-    const result = await db.delete(wishlistSuggestions)
+    const result = await db
+      .delete(wishlistSuggestions)
       .where(eq(wishlistSuggestions.id, id));
     return result.rowCount > 0;
   }
 
-  async getRecentWishlistActivity(limit: number = 10): Promise<WishlistSuggestion[]> {
-    const results = await db.select()
+  async getRecentWishlistActivity(
+    limit: number = 10
+  ): Promise<WishlistSuggestion[]> {
+    const results = await db
+      .select()
       .from(wishlistSuggestions)
-      .where(or(
-        eq(wishlistSuggestions.status, 'approved'),
-        eq(wishlistSuggestions.status, 'added')
-      ))
+      .where(
+        or(
+          eq(wishlistSuggestions.status, 'approved'),
+          eq(wishlistSuggestions.status, 'added')
+        )
+      )
       .orderBy(desc(wishlistSuggestions.updatedAt))
       .limit(limit);
     return results;
@@ -2362,14 +3113,16 @@ export class DatabaseStorage implements IStorage {
 
   // Meeting Management - Enhanced methods for comprehensive meeting workflow
   async getMeeting(id: number): Promise<Meeting | undefined> {
-    const [result] = await db.select()
+    const [result] = await db
+      .select()
       .from(meetings)
       .where(eq(meetings.id, id));
     return result || undefined;
   }
 
   async getAgendaItemsByMeeting(meetingId: number): Promise<AgendaItem[]> {
-    const results = await db.select()
+    const results = await db
+      .select()
       .from(agendaItems)
       .where(eq(agendaItems.meetingId, meetingId))
       .orderBy(agendaItems.submittedAt);
@@ -2377,59 +3130,76 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getProjectsForReview(): Promise<Project[]> {
-    const results = await db.select()
+    const results = await db
+      .select()
       .from(projects)
-      .where(and(
-        eq(projects.reviewInNextMeeting, true),
-        ne(projects.status, 'completed'),
-        ne(projects.status, 'archived')
-      ))
+      .where(
+        and(
+          eq(projects.reviewInNextMeeting, true),
+          ne(projects.status, 'completed'),
+          ne(projects.status, 'archived')
+        )
+      )
       .orderBy(desc(projects.priority), desc(projects.createdAt));
     return results;
   }
 
   async createCompiledAgenda(agenda: any): Promise<number> {
-    const [result] = await db.insert(compiledAgendas)
+    const [result] = await db
+      .insert(compiledAgendas)
       .values(agenda)
       .returning({ id: compiledAgendas.id });
     return result.id;
   }
 
   async getCompiledAgenda(id: number): Promise<any | undefined> {
-    const [result] = await db.select()
+    const [result] = await db
+      .select()
       .from(compiledAgendas)
       .where(eq(compiledAgendas.id, id));
     return result || undefined;
   }
 
   async createAgendaSection(section: any): Promise<number> {
-    const [result] = await db.insert(agendaSections)
+    const [result] = await db
+      .insert(agendaSections)
       .values(section)
       .returning({ id: agendaSections.id });
     return result.id;
   }
 
-  async getAgendaSectionsByCompiledAgenda(compiledAgendaId: number): Promise<any[]> {
-    const results = await db.select()
+  async getAgendaSectionsByCompiledAgenda(
+    compiledAgendaId: number
+  ): Promise<any[]> {
+    const results = await db
+      .select()
       .from(agendaSections)
       .where(eq(agendaSections.compiledAgendaId, compiledAgendaId))
       .orderBy(agendaSections.orderIndex);
     return results;
   }
 
-  async updateMeetingStatus(id: number, status: string): Promise<Meeting | undefined> {
-    const [result] = await db.update(meetings)
+  async updateMeetingStatus(
+    id: number,
+    status: string
+  ): Promise<Meeting | undefined> {
+    const [result] = await db
+      .update(meetings)
       .set({ status })
       .where(eq(meetings.id, id))
       .returning();
     return result || undefined;
   }
 
-  async finalizeCompiledAgenda(id: number, finalizedBy: string): Promise<any | undefined> {
-    const [result] = await db.update(compiledAgendas)
-      .set({ 
+  async finalizeCompiledAgenda(
+    id: number,
+    finalizedBy: string
+  ): Promise<any | undefined> {
+    const [result] = await db
+      .update(compiledAgendas)
+      .set({
         status: 'finalized',
-        finalizedAt: new Date()
+        finalizedAt: new Date(),
       })
       .where(eq(compiledAgendas.id, id))
       .returning();
@@ -2437,7 +3207,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getCompiledAgendasByMeeting(meetingId: number): Promise<any[]> {
-    const results = await db.select()
+    const results = await db
+      .select()
       .from(compiledAgendas)
       .where(eq(compiledAgendas.meetingId, meetingId))
       .orderBy(desc(compiledAgendas.compiledAt));
@@ -2446,14 +3217,16 @@ export class DatabaseStorage implements IStorage {
 
   // Document Management Methods
   async getAllDocuments(): Promise<Document[]> {
-    return await db.select()
+    return await db
+      .select()
       .from(documents)
       .where(eq(documents.isActive, true))
       .orderBy(desc(documents.createdAt));
   }
 
   async getDocument(id: number): Promise<Document | undefined> {
-    const [result] = await db.select()
+    const [result] = await db
+      .select()
       .from(documents)
       .where(and(eq(documents.id, id), eq(documents.isActive, true)));
     return result || undefined;
@@ -2462,54 +3235,68 @@ export class DatabaseStorage implements IStorage {
   async getDocumentsForUser(userId: string): Promise<Document[]> {
     // Check if user has confidential documents access
     const user = await this.getUserById(userId);
-    const hasConfidentialAccess = user?.permissions?.includes("DOCUMENTS_CONFIDENTIAL") || false;
+    const hasConfidentialAccess =
+      user?.permissions?.includes('DOCUMENTS_CONFIDENTIAL') || false;
 
     // Get documents that the user has permissions for or that they uploaded
-    const results = await db.select({
-      id: documents.id,
-      title: documents.title,
-      description: documents.description,
-      fileName: documents.fileName,
-      originalName: documents.originalName,
-      filePath: documents.filePath,
-      fileSize: documents.fileSize,
-      mimeType: documents.mimeType,
-      category: documents.category,
-      isActive: documents.isActive,
-      uploadedBy: documents.uploadedBy,
-      uploadedByName: documents.uploadedByName,
-      createdAt: documents.createdAt,
-      updatedAt: documents.updatedAt
-    })
-    .from(documents)
-    .leftJoin(documentPermissions, and(
-      eq(documentPermissions.documentId, documents.id),
-      eq(documentPermissions.userId, userId),
-      eq(documentPermissions.isActive, true)
-    ))
-    .where(and(
-      eq(documents.isActive, true),
-      // Exclude confidential documents unless user has special permission
-      hasConfidentialAccess ? undefined : ne(documents.category, "confidential"),
-      or(
-        eq(documents.uploadedBy, userId), // User uploaded this document
-        isNotNull(documentPermissions.id) // User has explicit permission
+    const results = await db
+      .select({
+        id: documents.id,
+        title: documents.title,
+        description: documents.description,
+        fileName: documents.fileName,
+        originalName: documents.originalName,
+        filePath: documents.filePath,
+        fileSize: documents.fileSize,
+        mimeType: documents.mimeType,
+        category: documents.category,
+        isActive: documents.isActive,
+        uploadedBy: documents.uploadedBy,
+        uploadedByName: documents.uploadedByName,
+        createdAt: documents.createdAt,
+        updatedAt: documents.updatedAt,
+      })
+      .from(documents)
+      .leftJoin(
+        documentPermissions,
+        and(
+          eq(documentPermissions.documentId, documents.id),
+          eq(documentPermissions.userId, userId),
+          eq(documentPermissions.isActive, true)
+        )
       )
-    ))
-    .orderBy(desc(documents.createdAt));
+      .where(
+        and(
+          eq(documents.isActive, true),
+          // Exclude confidential documents unless user has special permission
+          hasConfidentialAccess
+            ? undefined
+            : ne(documents.category, 'confidential'),
+          or(
+            eq(documents.uploadedBy, userId), // User uploaded this document
+            isNotNull(documentPermissions.id) // User has explicit permission
+          )
+        )
+      )
+      .orderBy(desc(documents.createdAt));
 
     return results;
   }
 
   async createDocument(insertDocument: InsertDocument): Promise<Document> {
-    const [result] = await db.insert(documents)
+    const [result] = await db
+      .insert(documents)
       .values(insertDocument)
       .returning();
     return result;
   }
 
-  async updateDocument(id: number, updates: Partial<Document>): Promise<Document | undefined> {
-    const [result] = await db.update(documents)
+  async updateDocument(
+    id: number,
+    updates: Partial<Document>
+  ): Promise<Document | undefined> {
+    const [result] = await db
+      .update(documents)
       .set({ ...updates, updatedAt: new Date() })
       .where(eq(documents.id, id))
       .returning();
@@ -2518,84 +3305,120 @@ export class DatabaseStorage implements IStorage {
 
   async deleteDocument(id: number): Promise<boolean> {
     // Soft delete
-    const result = await db.update(documents)
+    const result = await db
+      .update(documents)
       .set({ isActive: false, updatedAt: new Date() })
       .where(eq(documents.id, id));
     return (result.rowCount ?? 0) > 0;
   }
 
   // Document Permissions Methods
-  async getDocumentPermissions(documentId: number): Promise<DocumentPermission[]> {
-    return await db.select()
+  async getDocumentPermissions(
+    documentId: number
+  ): Promise<DocumentPermission[]> {
+    return await db
+      .select()
       .from(documentPermissions)
-      .where(and(
-        eq(documentPermissions.documentId, documentId),
-        eq(documentPermissions.isActive, true)
-      ))
+      .where(
+        and(
+          eq(documentPermissions.documentId, documentId),
+          eq(documentPermissions.isActive, true)
+        )
+      )
       .orderBy(documentPermissions.grantedAt);
   }
 
-  async getUserDocumentPermission(documentId: number, userId: string): Promise<DocumentPermission | undefined> {
-    const [result] = await db.select()
+  async getUserDocumentPermission(
+    documentId: number,
+    userId: string
+  ): Promise<DocumentPermission | undefined> {
+    const [result] = await db
+      .select()
       .from(documentPermissions)
-      .where(and(
-        eq(documentPermissions.documentId, documentId),
-        eq(documentPermissions.userId, userId),
-        eq(documentPermissions.isActive, true)
-      ));
+      .where(
+        and(
+          eq(documentPermissions.documentId, documentId),
+          eq(documentPermissions.userId, userId),
+          eq(documentPermissions.isActive, true)
+        )
+      );
     return result || undefined;
   }
 
-  async checkUserDocumentAccess(documentId: number, userId: string, permission: string): Promise<boolean> {
+  async checkUserDocumentAccess(
+    documentId: number,
+    userId: string,
+    permission: string
+  ): Promise<boolean> {
     // Check if user is the uploader
-    const [document] = await db.select()
+    const [document] = await db
+      .select()
       .from(documents)
       .where(eq(documents.id, documentId));
-    
+
     if (document && document.uploadedBy === userId) {
       return true; // Uploaders have full access
     }
 
     // Check explicit permissions
-    const [userPermission] = await db.select()
+    const [userPermission] = await db
+      .select()
       .from(documentPermissions)
-      .where(and(
-        eq(documentPermissions.documentId, documentId),
-        eq(documentPermissions.userId, userId),
-        eq(documentPermissions.isActive, true)
-      ));
+      .where(
+        and(
+          eq(documentPermissions.documentId, documentId),
+          eq(documentPermissions.userId, userId),
+          eq(documentPermissions.isActive, true)
+        )
+      );
 
     if (!userPermission) return false;
 
     // Check if permission type allows the requested action
     const permissionHierarchy = ['view', 'download', 'edit', 'admin'];
-    const userLevel = permissionHierarchy.indexOf(userPermission.permissionType);
+    const userLevel = permissionHierarchy.indexOf(
+      userPermission.permissionType
+    );
     const requiredLevel = permissionHierarchy.indexOf(permission);
-    
+
     return userLevel >= requiredLevel;
   }
 
-  async grantDocumentPermission(insertPermission: InsertDocumentPermission): Promise<DocumentPermission> {
-    const [result] = await db.insert(documentPermissions)
+  async grantDocumentPermission(
+    insertPermission: InsertDocumentPermission
+  ): Promise<DocumentPermission> {
+    const [result] = await db
+      .insert(documentPermissions)
       .values(insertPermission)
       .returning();
     return result;
   }
 
-  async revokeDocumentPermission(documentId: number, userId: string, permissionType: string): Promise<boolean> {
-    const result = await db.update(documentPermissions)
+  async revokeDocumentPermission(
+    documentId: number,
+    userId: string,
+    permissionType: string
+  ): Promise<boolean> {
+    const result = await db
+      .update(documentPermissions)
       .set({ isActive: false })
-      .where(and(
-        eq(documentPermissions.documentId, documentId),
-        eq(documentPermissions.userId, userId),
-        eq(documentPermissions.permissionType, permissionType),
-        eq(documentPermissions.isActive, true)
-      ));
+      .where(
+        and(
+          eq(documentPermissions.documentId, documentId),
+          eq(documentPermissions.userId, userId),
+          eq(documentPermissions.permissionType, permissionType),
+          eq(documentPermissions.isActive, true)
+        )
+      );
     return (result.rowCount ?? 0) > 0;
   }
 
-  async updateDocumentPermission(id: number, updates: Partial<DocumentPermission>): Promise<DocumentPermission | undefined> {
-    const [result] = await db.update(documentPermissions)
+  async updateDocumentPermission(
+    id: number,
+    updates: Partial<DocumentPermission>
+  ): Promise<DocumentPermission | undefined> {
+    const [result] = await db
+      .update(documentPermissions)
       .set(updates)
       .where(eq(documentPermissions.id, id))
       .returning();
@@ -2603,15 +3426,21 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Document Access Logging Methods
-  async logDocumentAccess(insertAccess: InsertDocumentAccessLog): Promise<DocumentAccessLog> {
-    const [result] = await db.insert(documentAccessLogs)
+  async logDocumentAccess(
+    insertAccess: InsertDocumentAccessLog
+  ): Promise<DocumentAccessLog> {
+    const [result] = await db
+      .insert(documentAccessLogs)
       .values(insertAccess)
       .returning();
     return result;
   }
 
-  async getDocumentAccessLogs(documentId: number): Promise<DocumentAccessLog[]> {
-    return await db.select()
+  async getDocumentAccessLogs(
+    documentId: number
+  ): Promise<DocumentAccessLog[]> {
+    return await db
+      .select()
       .from(documentAccessLogs)
       .where(eq(documentAccessLogs.documentId, documentId))
       .orderBy(desc(documentAccessLogs.accessedAt));
@@ -2619,31 +3448,42 @@ export class DatabaseStorage implements IStorage {
 
   // Event Request Management Methods
   async getAllEventRequests(): Promise<EventRequest[]> {
-    return await db.select().from(eventRequests).orderBy(desc(eventRequests.createdAt));
+    return await db
+      .select()
+      .from(eventRequests)
+      .orderBy(desc(eventRequests.createdAt));
   }
 
   async getEventRequest(id: number): Promise<EventRequest | undefined> {
-    const [result] = await db.select()
+    const [result] = await db
+      .select()
       .from(eventRequests)
       .where(eq(eventRequests.id, id));
     return result || undefined;
   }
 
-  async createEventRequest(insertEventRequest: InsertEventRequest): Promise<EventRequest> {
-    const [result] = await db.insert(eventRequests)
+  async createEventRequest(
+    insertEventRequest: InsertEventRequest
+  ): Promise<EventRequest> {
+    const [result] = await db
+      .insert(eventRequests)
       .values({
         ...insertEventRequest,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
       .returning();
     return result;
   }
 
-  async updateEventRequest(id: number, updates: Partial<EventRequest>): Promise<EventRequest | undefined> {
-    const [result] = await db.update(eventRequests)
+  async updateEventRequest(
+    id: number,
+    updates: Partial<EventRequest>
+  ): Promise<EventRequest | undefined> {
+    const [result] = await db
+      .update(eventRequests)
       .set({
         ...updates,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
       .where(eq(eventRequests.id, id))
       .returning();
@@ -2651,20 +3491,25 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteEventRequest(id: number): Promise<boolean> {
-    const result = await db.delete(eventRequests)
+    const result = await db
+      .delete(eventRequests)
       .where(eq(eventRequests.id, id));
     return (result.rowCount ?? 0) > 0;
   }
 
   async getEventRequestsByStatus(status: string): Promise<EventRequest[]> {
-    return await db.select()
+    return await db
+      .select()
       .from(eventRequests)
       .where(eq(eventRequests.status, status))
       .orderBy(desc(eventRequests.createdAt));
   }
 
-  async getEventRequestsByOrganization(organizationName: string): Promise<EventRequest[]> {
-    return await db.select()
+  async getEventRequestsByOrganization(
+    organizationName: string
+  ): Promise<EventRequest[]> {
+    return await db
+      .select()
       .from(eventRequests)
       .where(ilike(eventRequests.organizationName, `%${organizationName}%`))
       .orderBy(desc(eventRequests.createdAt));
@@ -2677,17 +3522,22 @@ export class DatabaseStorage implements IStorage {
     return 0;
   }
 
-  async checkOrganizationDuplicates(organizationName: string): Promise<{ exists: boolean; matches: Organization[] }> {
-    const matches = await db.select()
+  async checkOrganizationDuplicates(
+    organizationName: string
+  ): Promise<{ exists: boolean; matches: Organization[] }> {
+    const matches = await db
+      .select()
       .from(organizations)
-      .where(or(
-        ilike(organizations.name, `%${organizationName}%`),
-        sql`${organizations.alternateNames} && ARRAY[${organizationName}]::text[]`
-      ));
-    
+      .where(
+        or(
+          ilike(organizations.name, `%${organizationName}%`),
+          sql`${organizations.alternateNames} && ARRAY[${organizationName}]::text[]`
+        )
+      );
+
     return {
       exists: matches.length > 0,
-      matches
+      matches,
     };
   }
 
@@ -2697,27 +3547,35 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getOrganization(id: number): Promise<Organization | undefined> {
-    const [result] = await db.select()
+    const [result] = await db
+      .select()
       .from(organizations)
       .where(eq(organizations.id, id));
     return result || undefined;
   }
 
-  async createOrganization(insertOrganization: InsertOrganization): Promise<Organization> {
-    const [result] = await db.insert(organizations)
+  async createOrganization(
+    insertOrganization: InsertOrganization
+  ): Promise<Organization> {
+    const [result] = await db
+      .insert(organizations)
       .values({
         ...insertOrganization,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
       .returning();
     return result;
   }
 
-  async updateOrganization(id: number, updates: Partial<Organization>): Promise<Organization | undefined> {
-    const [result] = await db.update(organizations)
+  async updateOrganization(
+    id: number,
+    updates: Partial<Organization>
+  ): Promise<Organization | undefined> {
+    const [result] = await db
+      .update(organizations)
       .set({
         ...updates,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
       .where(eq(organizations.id, id))
       .returning();
@@ -2725,57 +3583,73 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteOrganization(id: number): Promise<boolean> {
-    const result = await db.delete(organizations)
+    const result = await db
+      .delete(organizations)
       .where(eq(organizations.id, id));
     return (result.rowCount ?? 0) > 0;
   }
 
   async searchOrganizations(query: string): Promise<Organization[]> {
-    return await db.select()
+    return await db
+      .select()
       .from(organizations)
-      .where(or(
-        ilike(organizations.name, `%${query}%`),
-        sql`${organizations.alternateNames} && ARRAY[${query}]::text[]`
-      ))
+      .where(
+        or(
+          ilike(organizations.name, `%${query}%`),
+          sql`${organizations.alternateNames} && ARRAY[${query}]::text[]`
+        )
+      )
       .orderBy(organizations.name);
   }
 
   // Event volunteers methods
   async getAllEventVolunteers(): Promise<EventVolunteer[]> {
-    return await db.select()
+    return await db
+      .select()
       .from(eventVolunteers)
       .orderBy(desc(eventVolunteers.signedUpAt));
   }
 
-  async getEventVolunteersByEventId(eventRequestId: number): Promise<EventVolunteer[]> {
-    return await db.select()
+  async getEventVolunteersByEventId(
+    eventRequestId: number
+  ): Promise<EventVolunteer[]> {
+    return await db
+      .select()
       .from(eventVolunteers)
       .where(eq(eventVolunteers.eventRequestId, eventRequestId))
       .orderBy(eventVolunteers.role, eventVolunteers.signedUpAt);
   }
 
   async getEventVolunteersByUserId(userId: string): Promise<EventVolunteer[]> {
-    return await db.select()
+    return await db
+      .select()
       .from(eventVolunteers)
       .where(eq(eventVolunteers.volunteerUserId, userId))
       .orderBy(desc(eventVolunteers.signedUpAt));
   }
 
-  async createEventVolunteer(volunteer: InsertEventVolunteer): Promise<EventVolunteer> {
-    const [result] = await db.insert(eventVolunteers)
+  async createEventVolunteer(
+    volunteer: InsertEventVolunteer
+  ): Promise<EventVolunteer> {
+    const [result] = await db
+      .insert(eventVolunteers)
       .values({
         ...volunteer,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
       .returning();
     return result;
   }
 
-  async updateEventVolunteer(id: number, updates: Partial<EventVolunteer>): Promise<EventVolunteer | undefined> {
-    const [result] = await db.update(eventVolunteers)
+  async updateEventVolunteer(
+    id: number,
+    updates: Partial<EventVolunteer>
+  ): Promise<EventVolunteer | undefined> {
+    const [result] = await db
+      .update(eventVolunteers)
       .set({
         ...updates,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
       .where(eq(eventVolunteers.id, id))
       .returning();
@@ -2783,7 +3657,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteEventVolunteer(id: number): Promise<boolean> {
-    const result = await db.delete(eventVolunteers)
+    const result = await db
+      .delete(eventVolunteers)
       .where(eq(eventVolunteers.id, id));
     return (result.rowCount ?? 0) > 0;
   }

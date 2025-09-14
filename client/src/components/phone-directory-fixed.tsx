@@ -1,15 +1,15 @@
-import React, { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import React, { useState } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -17,13 +17,13 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogDescription,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
-import { useAuth } from "@/hooks/useAuth";
-import { hasPermission, PERMISSIONS } from "@shared/auth-utils";
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
+import { useAuth } from '@/hooks/useAuth';
+import { hasPermission, PERMISSIONS } from '@shared/auth-utils';
 import {
   Phone,
   User,
@@ -41,16 +41,16 @@ import {
   Copy,
   Truck,
   Heart,
-} from "lucide-react";
+} from 'lucide-react';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+} from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest, queryClient } from '@/lib/queryClient';
 
 /* =========================
    Types
@@ -60,7 +60,7 @@ interface Host {
   id: number;
   name: string;
   address: string | null;
-  status: "active" | "inactive";
+  status: 'active' | 'inactive';
   notes: string | null;
 }
 
@@ -88,7 +88,7 @@ interface Recipient {
   address: string | null;
   region: string | null;
   preferences: string | null;
-  status: "active" | "inactive";
+  status: 'active' | 'inactive';
 }
 
 interface Driver {
@@ -151,34 +151,34 @@ interface Volunteer {
    ========================= */
 
 function PhoneDirectoryFixed() {
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
 
   // Contact management states
   const [editingContact, setEditingContact] = useState<any>(null);
   const [isAddingContact, setIsAddingContact] = useState(false);
   const [newContact, setNewContact] = useState({
-    name: "",
-    organization: "",
-    role: "",
-    phone: "",
-    email: "",
-    address: "",
-    notes: "",
-    category: "general",
-    status: "active",
+    name: '',
+    organization: '',
+    role: '',
+    phone: '',
+    email: '',
+    address: '',
+    notes: '',
+    category: 'general',
+    status: 'active',
   });
 
   // Driver management states
   const [editingDriver, setEditingDriver] = useState<any>(null);
   const [isAddingDriver, setIsAddingDriver] = useState(false);
   const [newDriver, setNewDriver] = useState({
-    name: "",
-    phone: "",
-    email: "",
-    zone: "",
-    homeAddress: "",
-    notes: "",
-    availabilityNotes: "",
+    name: '',
+    phone: '',
+    email: '',
+    zone: '',
+    homeAddress: '',
+    notes: '',
+    availabilityNotes: '',
     isActive: true,
     vanApproved: false,
   });
@@ -187,13 +187,13 @@ function PhoneDirectoryFixed() {
   const [editingVolunteer, setEditingVolunteer] = useState<any>(null);
   const [isAddingVolunteer, setIsAddingVolunteer] = useState(false);
   const [newVolunteer, setNewVolunteer] = useState({
-    name: "",
-    phone: "",
-    email: "",
-    zone: "",
-    homeAddress: "",
-    notes: "",
-    volunteerType: "General",
+    name: '',
+    phone: '',
+    email: '',
+    zone: '',
+    homeAddress: '',
+    notes: '',
+    volunteerType: 'General',
     isActive: true,
   });
 
@@ -201,22 +201,22 @@ function PhoneDirectoryFixed() {
   const [editingRecipient, setEditingRecipient] = useState<any>(null);
   const [isAddingRecipient, setIsAddingRecipient] = useState(false);
   const [newRecipient, setNewRecipient] = useState({
-    name: "",
-    phone: "",
-    email: "",
-    contactName: "",
-    address: "",
-    region: "",
-    preferences: "",
-    status: "active",
+    name: '',
+    phone: '',
+    email: '',
+    contactName: '',
+    address: '',
+    region: '',
+    preferences: '',
+    status: 'active',
   });
 
   // Contact assignment states
   const [showAssignDialog, setShowAssignDialog] = useState(false);
   const [assigningContact, setAssigningContact] = useState<any>(null);
   const [assignmentTarget, setAssignmentTarget] = useState({
-    type: "",
-    id: "",
+    type: '',
+    id: '',
   });
 
   const { user } = useAuth();
@@ -236,51 +236,51 @@ function PhoneDirectoryFixed() {
     hasPermission(user, PERMISSIONS.VIEW_HOSTS);
 
   // Tabs
-  const [activeTab, setActiveTab] = useState<string>("hosts");
+  const [activeTab, setActiveTab] = useState<string>('hosts');
 
   // Data queries
   const { data: hosts = [] } = useQuery<HostWithContacts[]>({
-    queryKey: ["/api/hosts-with-contacts"],
+    queryKey: ['/api/hosts-with-contacts'],
   });
 
   const { data: recipients = [] } = useQuery<Recipient[]>({
-    queryKey: ["/api/recipients"],
+    queryKey: ['/api/recipients'],
   });
 
   const { data: contacts = [] } = useQuery<GeneralContact[]>({
-    queryKey: ["/api/contacts"],
+    queryKey: ['/api/contacts'],
   });
 
   const { data: drivers = [] } = useQuery<Driver[]>({
-    queryKey: ["/api/drivers"],
+    queryKey: ['/api/drivers'],
   });
 
   const { data: volunteers = [] } = useQuery<Volunteer[]>({
-    queryKey: ["/api/volunteers"],
+    queryKey: ['/api/volunteers'],
   });
 
   // Available tabs
   const availableTabs = [
-    { id: "hosts", label: "Hosts", icon: Users, enabled: canViewHosts },
+    { id: 'hosts', label: 'Hosts', icon: Users, enabled: canViewHosts },
     {
-      id: "recipients",
-      label: "Recipients",
+      id: 'recipients',
+      label: 'Recipients',
       icon: User,
       enabled: canViewRecipients,
     },
     {
-      id: "volunteers",
-      label: "Volunteers",
+      id: 'volunteers',
+      label: 'Volunteers',
       icon: User,
       enabled: canViewVolunteers,
     },
-    { id: "drivers", label: "Drivers", icon: User, enabled: canViewDrivers },
+    { id: 'drivers', label: 'Drivers', icon: User, enabled: canViewDrivers },
   ].filter((tab) => tab.enabled);
 
   // Keep activeTab valid if permissions change
   React.useEffect(() => {
     if (!availableTabs.find((t) => t.id === activeTab))
-      setActiveTab("directory");
+      setActiveTab('directory');
   }, [availableTabs, activeTab]);
 
   // Filters
@@ -344,11 +344,11 @@ function PhoneDirectoryFixed() {
           email: contact.email,
           organization: host.name,
           role: contact.role,
-          type: "Host Contact",
+          type: 'Host Contact',
           address: host.address,
           notes: contact.notes,
           isPrimary: contact.isPrimary,
-          source: "host_contacts",
+          source: 'host_contacts',
           hostId: host.id,
           assignedHostId: host.id.toString(),
         });
@@ -362,11 +362,11 @@ function PhoneDirectoryFixed() {
         phone: recipient.phone,
         email: recipient.email,
         organization: recipient.name,
-        role: "Recipient Organization",
-        type: "Recipient",
+        role: 'Recipient Organization',
+        type: 'Recipient',
         address: recipient.address,
         notes: recipient.preferences,
-        source: "recipients",
+        source: 'recipients',
         recipientId: recipient.id,
         assignedRecipientId: recipient.id.toString(),
       });
@@ -378,14 +378,14 @@ function PhoneDirectoryFixed() {
         name: driver.name,
         phone: driver.phone,
         email: driver.email,
-        organization: "",
-        role: "Driver",
-        type: "Driver",
+        organization: '',
+        role: 'Driver',
+        type: 'Driver',
         address: driver.homeAddress,
         notes: driver.notes, // Remove zone from notes since it's now a badge
         zone: driver.zone,
         vanApproved: driver.vanApproved,
-        source: "drivers",
+        source: 'drivers',
       });
     });
 
@@ -395,29 +395,29 @@ function PhoneDirectoryFixed() {
         name: volunteer.name,
         phone: volunteer.phone,
         email: volunteer.email,
-        organization: "",
-        role: volunteer.volunteerType || "Volunteer",
-        type: "Volunteer",
+        organization: '',
+        role: volunteer.volunteerType || 'Volunteer',
+        type: 'Volunteer',
         address: volunteer.homeAddress,
         notes: `Zone: ${volunteer.zone}${
-          volunteer.notes ? ` - ${volunteer.notes}` : ""
+          volunteer.notes ? ` - ${volunteer.notes}` : ''
         }`,
         zone: volunteer.zone,
         volunteerType: volunteer.volunteerType,
-        source: "volunteers",
+        source: 'volunteers',
       });
     });
 
     // Remove duplicates based on normalized phone number
     const normalizePhone = (phone: string): string => {
-      return phone.replace(/\D/g, ""); // Remove all non-digits
+      return phone.replace(/\D/g, ''); // Remove all non-digits
     };
 
     const deduplicatedAll: any[] = [];
     const seenPhones = new Set<string>();
 
     all.forEach((contact) => {
-      const normalizedPhone = normalizePhone(contact.phone || "");
+      const normalizedPhone = normalizePhone(contact.phone || '');
 
       if (!normalizedPhone || !seenPhones.has(normalizedPhone)) {
         if (normalizedPhone) seenPhones.add(normalizedPhone);
@@ -452,324 +452,324 @@ function PhoneDirectoryFixed() {
 
   const createContactMutation = useMutation({
     mutationFn: async (contactData: any) =>
-      apiRequest("POST", "/api/contacts", contactData),
+      apiRequest('POST', '/api/contacts', contactData),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/contacts"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/contacts'] });
       setIsAddingContact(false);
       setNewContact({
-        name: "",
-        organization: "",
-        role: "",
-        phone: "",
-        email: "",
-        address: "",
-        notes: "",
-        category: "general",
-        status: "active",
+        name: '',
+        organization: '',
+        role: '',
+        phone: '',
+        email: '',
+        address: '',
+        notes: '',
+        category: 'general',
+        status: 'active',
       });
       toast({
-        title: "Contact Added",
-        description: "New contact has been successfully created.",
+        title: 'Contact Added',
+        description: 'New contact has been successfully created.',
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to create contact.",
-        variant: "destructive",
+        title: 'Error',
+        description: error.message || 'Failed to create contact.',
+        variant: 'destructive',
       });
     },
   });
 
   const updateContactMutation = useMutation({
     mutationFn: async ({ id, ...contactData }: any) =>
-      apiRequest("PUT", `/api/contacts/${id}`, contactData),
+      apiRequest('PUT', `/api/contacts/${id}`, contactData),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/contacts"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/contacts'] });
       setEditingContact(null);
       toast({
-        title: "Contact Updated",
-        description: "Contact information has been successfully updated.",
+        title: 'Contact Updated',
+        description: 'Contact information has been successfully updated.',
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to update contact.",
-        variant: "destructive",
+        title: 'Error',
+        description: error.message || 'Failed to update contact.',
+        variant: 'destructive',
       });
     },
   });
 
   const deleteContactMutation = useMutation({
     mutationFn: async (contactId: number) =>
-      apiRequest("DELETE", `/api/contacts/${contactId}`),
+      apiRequest('DELETE', `/api/contacts/${contactId}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/contacts"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/contacts'] });
       toast({
-        title: "Contact Deleted",
-        description: "Contact has been successfully deleted.",
+        title: 'Contact Deleted',
+        description: 'Contact has been successfully deleted.',
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to delete contact.",
-        variant: "destructive",
+        title: 'Error',
+        description: error.message || 'Failed to delete contact.',
+        variant: 'destructive',
       });
     },
   });
 
   const createDriverMutation = useMutation({
     mutationFn: async (driverData: any) =>
-      apiRequest("POST", "/api/drivers", driverData),
+      apiRequest('POST', '/api/drivers', driverData),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/drivers"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/drivers'] });
       setIsAddingDriver(false);
       setNewDriver({
-        name: "",
-        phone: "",
-        email: "",
-        zone: "",
-        homeAddress: "",
-        notes: "",
-        availabilityNotes: "",
+        name: '',
+        phone: '',
+        email: '',
+        zone: '',
+        homeAddress: '',
+        notes: '',
+        availabilityNotes: '',
         isActive: true,
         vanApproved: false,
       });
       toast({
-        title: "Driver Added",
-        description: "New driver has been successfully created.",
+        title: 'Driver Added',
+        description: 'New driver has been successfully created.',
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to create driver.",
-        variant: "destructive",
+        title: 'Error',
+        description: error.message || 'Failed to create driver.',
+        variant: 'destructive',
       });
     },
   });
 
   const updateDriverMutation = useMutation({
     mutationFn: async ({ id, ...driverData }: any) =>
-      apiRequest("PUT", `/api/drivers/${id}`, driverData),
+      apiRequest('PUT', `/api/drivers/${id}`, driverData),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/drivers"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/drivers'] });
       setEditingDriver(null);
       toast({
-        title: "Driver Updated",
-        description: "Driver information has been successfully updated.",
+        title: 'Driver Updated',
+        description: 'Driver information has been successfully updated.',
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to update driver.",
-        variant: "destructive",
+        title: 'Error',
+        description: error.message || 'Failed to update driver.',
+        variant: 'destructive',
       });
     },
   });
 
   const deleteDriverMutation = useMutation({
     mutationFn: async (driverId: number) =>
-      apiRequest("DELETE", `/api/drivers/${driverId}`),
+      apiRequest('DELETE', `/api/drivers/${driverId}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/drivers"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/drivers'] });
       toast({
-        title: "Driver Deleted",
-        description: "Driver has been successfully deleted.",
+        title: 'Driver Deleted',
+        description: 'Driver has been successfully deleted.',
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to delete driver.",
-        variant: "destructive",
+        title: 'Error',
+        description: error.message || 'Failed to delete driver.',
+        variant: 'destructive',
       });
     },
   });
 
   const createVolunteerMutation = useMutation({
     mutationFn: async (volunteerData: any) =>
-      apiRequest("POST", "/api/volunteers", volunteerData),
+      apiRequest('POST', '/api/volunteers', volunteerData),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/volunteers"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/volunteers'] });
       setIsAddingVolunteer(false);
       setNewVolunteer({
-        name: "",
-        phone: "",
-        email: "",
-        zone: "",
-        homeAddress: "",
-        notes: "",
-        volunteerType: "General",
+        name: '',
+        phone: '',
+        email: '',
+        zone: '',
+        homeAddress: '',
+        notes: '',
+        volunteerType: 'General',
         isActive: true,
       });
       toast({
-        title: "Volunteer Added",
-        description: "New volunteer has been successfully created.",
+        title: 'Volunteer Added',
+        description: 'New volunteer has been successfully created.',
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to create volunteer.",
-        variant: "destructive",
+        title: 'Error',
+        description: error.message || 'Failed to create volunteer.',
+        variant: 'destructive',
       });
     },
   });
 
   const updateVolunteerMutation = useMutation({
     mutationFn: async ({ id, ...volunteerData }: any) =>
-      apiRequest("PUT", `/api/volunteers/${id}`, volunteerData),
+      apiRequest('PUT', `/api/volunteers/${id}`, volunteerData),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/volunteers"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/volunteers'] });
       setEditingVolunteer(null);
       toast({
-        title: "Volunteer Updated",
-        description: "Volunteer information has been successfully updated.",
+        title: 'Volunteer Updated',
+        description: 'Volunteer information has been successfully updated.',
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to update volunteer.",
-        variant: "destructive",
+        title: 'Error',
+        description: error.message || 'Failed to update volunteer.',
+        variant: 'destructive',
       });
     },
   });
 
   const deleteVolunteerMutation = useMutation({
     mutationFn: async (volunteerId: number) =>
-      apiRequest("DELETE", `/api/volunteers/${volunteerId}`),
+      apiRequest('DELETE', `/api/volunteers/${volunteerId}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/volunteers"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/volunteers'] });
       toast({
-        title: "Volunteer Deleted",
-        description: "Volunteer has been successfully deleted.",
+        title: 'Volunteer Deleted',
+        description: 'Volunteer has been successfully deleted.',
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to delete volunteer.",
-        variant: "destructive",
+        title: 'Error',
+        description: error.message || 'Failed to delete volunteer.',
+        variant: 'destructive',
       });
     },
   });
 
   const createRecipientMutation = useMutation({
     mutationFn: async (recipientData: any) =>
-      apiRequest("POST", "/api/recipients", recipientData),
+      apiRequest('POST', '/api/recipients', recipientData),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/recipients"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/recipients'] });
       setIsAddingRecipient(false);
       setNewRecipient({
-        name: "",
-        phone: "",
-        email: "",
-        contactName: "",
-        address: "",
-        region: "",
-        preferences: "",
-        status: "active",
+        name: '',
+        phone: '',
+        email: '',
+        contactName: '',
+        address: '',
+        region: '',
+        preferences: '',
+        status: 'active',
       });
       toast({
-        title: "Recipient Added",
-        description: "New recipient has been successfully created.",
+        title: 'Recipient Added',
+        description: 'New recipient has been successfully created.',
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to create recipient.",
-        variant: "destructive",
+        title: 'Error',
+        description: error.message || 'Failed to create recipient.',
+        variant: 'destructive',
       });
     },
   });
 
   const updateRecipientMutation = useMutation({
     mutationFn: async ({ id, ...recipientData }: any) =>
-      apiRequest("PUT", `/api/recipients/${id}`, recipientData),
+      apiRequest('PUT', `/api/recipients/${id}`, recipientData),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/recipients"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/recipients'] });
       setEditingRecipient(null);
       toast({
-        title: "Recipient Updated",
-        description: "Recipient information has been successfully updated.",
+        title: 'Recipient Updated',
+        description: 'Recipient information has been successfully updated.',
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to update recipient.",
-        variant: "destructive",
+        title: 'Error',
+        description: error.message || 'Failed to update recipient.',
+        variant: 'destructive',
       });
     },
   });
 
   const deleteRecipientMutation = useMutation({
     mutationFn: async (recipientId: number) =>
-      apiRequest("DELETE", `/api/recipients/${recipientId}`),
+      apiRequest('DELETE', `/api/recipients/${recipientId}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/recipients"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/recipients'] });
       toast({
-        title: "Recipient Deleted",
-        description: "Recipient has been successfully deleted.",
+        title: 'Recipient Deleted',
+        description: 'Recipient has been successfully deleted.',
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to delete recipient.",
-        variant: "destructive",
+        title: 'Error',
+        description: error.message || 'Failed to delete recipient.',
+        variant: 'destructive',
       });
     },
   });
 
   const assignContactMutation = useMutation({
     mutationFn: async ({ contactId, targetType, targetId }: any) =>
-      apiRequest("POST", "/api/contact-assignments", {
+      apiRequest('POST', '/api/contact-assignments', {
         contactId,
         targetType,
         targetId,
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/hosts-with-contacts"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/recipients"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/hosts-with-contacts'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/recipients'] });
       setShowAssignDialog(false);
       setAssigningContact(null);
-      setAssignmentTarget({ type: "", id: "" });
+      setAssignmentTarget({ type: '', id: '' });
       toast({
-        title: "Contact Assigned",
-        description: "Contact has been successfully assigned.",
+        title: 'Contact Assigned',
+        description: 'Contact has been successfully assigned.',
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to assign contact.",
-        variant: "destructive",
+        title: 'Error',
+        description: error.message || 'Failed to assign contact.',
+        variant: 'destructive',
       });
     },
   });
 
   const updateHostMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: number; updates: any }) =>
-      apiRequest("PATCH", `/api/hosts/${id}`, updates),
+      apiRequest('PATCH', `/api/hosts/${id}`, updates),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/hosts-with-contacts"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/hosts-with-contacts'] });
       toast({
-        title: "Host Updated",
-        description: "Host information has been successfully updated.",
+        title: 'Host Updated',
+        description: 'Host information has been successfully updated.',
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to update host.",
-        variant: "destructive",
+        title: 'Error',
+        description: error.message || 'Failed to update host.',
+        variant: 'destructive',
       });
     },
   });
@@ -787,7 +787,7 @@ function PhoneDirectoryFixed() {
     updateContactMutation.mutate(editingContact);
   };
   const handleDeleteContact = (id: number) => {
-    if (confirm("Delete this contact?")) deleteContactMutation.mutate(id);
+    if (confirm('Delete this contact?')) deleteContactMutation.mutate(id);
   };
 
   const handleAddDriver = () => {
@@ -799,7 +799,7 @@ function PhoneDirectoryFixed() {
     updateDriverMutation.mutate(editingDriver);
   };
   const handleDeleteDriver = (id: number) => {
-    if (confirm("Delete this driver?")) deleteDriverMutation.mutate(id);
+    if (confirm('Delete this driver?')) deleteDriverMutation.mutate(id);
   };
 
   const handleAddVolunteer = () => {
@@ -811,7 +811,7 @@ function PhoneDirectoryFixed() {
     updateVolunteerMutation.mutate(editingVolunteer);
   };
   const handleDeleteVolunteer = (id: number) => {
-    if (confirm("Delete this volunteer?")) deleteVolunteerMutation.mutate(id);
+    if (confirm('Delete this volunteer?')) deleteVolunteerMutation.mutate(id);
   };
 
   const handleAddRecipient = () => {
@@ -823,7 +823,7 @@ function PhoneDirectoryFixed() {
     updateRecipientMutation.mutate(editingRecipient);
   };
   const handleDeleteRecipient = (id: number) => {
-    if (confirm("Delete this recipient?")) deleteRecipientMutation.mutate(id);
+    if (confirm('Delete this recipient?')) deleteRecipientMutation.mutate(id);
   };
 
   const handleAssignContact = (contact: any) => {
@@ -858,29 +858,29 @@ function PhoneDirectoryFixed() {
       };
 
       await apiRequest(
-        "PUT",
+        'PUT',
         `/api/contacts/universal/${editingContact.id.replace(
           /^(host|recipient|driver|volunteer)-/,
-          ""
+          ''
         )}`,
         { ...updateData, originalSource: editingContact.source }
       );
 
-      queryClient.invalidateQueries({ queryKey: ["/api/hosts-with-contacts"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/recipients"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/drivers"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/volunteers"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/hosts-with-contacts'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/recipients'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/drivers'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/volunteers'] });
 
       toast({
-        title: "Contact Updated",
+        title: 'Contact Updated',
         description: `${editingContact.name} has been updated and their role changed successfully.`,
       });
       setEditingContact(null);
     } catch (error) {
       toast({
-        title: "Update Failed",
-        description: "Failed to update contact. Please try again.",
-        variant: "destructive",
+        title: 'Update Failed',
+        description: 'Failed to update contact. Please try again.',
+        variant: 'destructive',
       });
     }
   };
@@ -923,16 +923,16 @@ function PhoneDirectoryFixed() {
         <div className="w-full overflow-x-auto">
           <TabsList
             className="flex w-max min-w-full h-14 p-1 rounded-lg space-x-1"
-            style={{ backgroundColor: "#FBAD3F" }}
+            style={{ backgroundColor: '#FBAD3F' }}
           >
             {availableTabs.map((tab) => {
               const Icon = tab.icon;
               let count = 0;
-              if (tab.id === "hosts") count = filteredHosts.length;
-              else if (tab.id === "recipients")
+              if (tab.id === 'hosts') count = filteredHosts.length;
+              else if (tab.id === 'recipients')
                 count = filteredRecipients.length;
-              else if (tab.id === "drivers") count = filteredDrivers.length;
-              else if (tab.id === "volunteers")
+              else if (tab.id === 'drivers') count = filteredDrivers.length;
+              else if (tab.id === 'volunteers')
                 count = filteredVolunteers.length;
 
               return (
@@ -979,8 +979,8 @@ function PhoneDirectoryFixed() {
                 {filteredHosts.length === 0 ? (
                   <div className="text-center py-12 text-base text-muted-foreground font-['Roboto',sans-serif]">
                     {searchTerm
-                      ? "No hosts found matching your search."
-                      : "No hosts found."}
+                      ? 'No hosts found matching your search.'
+                      : 'No hosts found.'}
                   </div>
                 ) : (
                   <div className="space-y-6">
@@ -1015,9 +1015,9 @@ function PhoneDirectoryFixed() {
                               onClick={() => {
                                 navigator.clipboard.writeText(host.address!);
                                 toast({
-                                  title: "Address Copied",
+                                  title: 'Address Copied',
                                   description:
-                                    "Location address has been copied to clipboard.",
+                                    'Location address has been copied to clipboard.',
                                 });
                               }}
                               className="ml-2 text-muted-foreground hover:text-primary"
@@ -1036,7 +1036,7 @@ function PhoneDirectoryFixed() {
                                 placeholder="Add location address..."
                                 className="text-sm"
                                 onKeyDown={(e) => {
-                                  if (e.key === "Enter") {
+                                  if (e.key === 'Enter') {
                                     const target = e.target as HTMLInputElement;
                                     if (target.value.trim()) {
                                       // Update host address
@@ -1083,8 +1083,8 @@ function PhoneDirectoryFixed() {
                                       {contact.isPrimary && (
                                         <Star className="w-4 h-4 text-yellow-500 fill-current" />
                                       )}
-                                      {(contact.role === "Lead" ||
-                                        contact.role === "lead") && (
+                                      {(contact.role === 'Lead' ||
+                                        contact.role === 'lead') && (
                                         <Crown className="w-4 h-4 text-yellow-500 fill-current" />
                                       )}
                                     </div>
@@ -1130,7 +1130,7 @@ function PhoneDirectoryFixed() {
                                         variant="outline"
                                         size="sm"
                                         onClick={() =>
-                                          console.log("Edit contact:", contact)
+                                          console.log('Edit contact:', contact)
                                         }
                                       >
                                         <Edit className="w-4 h-4" />
@@ -1145,7 +1145,7 @@ function PhoneDirectoryFixed() {
                                             )
                                           ) {
                                             console.log(
-                                              "Delete contact:",
+                                              'Delete contact:',
                                               contact
                                             );
                                           }
@@ -1353,8 +1353,8 @@ function PhoneDirectoryFixed() {
                               className="flex-1"
                             >
                               {createRecipientMutation.isPending
-                                ? "Adding..."
-                                : "Add Recipient"}
+                                ? 'Adding...'
+                                : 'Add Recipient'}
                             </Button>
                             <Button
                               variant="outline"
@@ -1374,8 +1374,8 @@ function PhoneDirectoryFixed() {
                 {filteredRecipients.length === 0 ? (
                   <div className="text-center py-12 text-base text-muted-foreground font-['Roboto',sans-serif]">
                     {searchTerm
-                      ? "No recipients found matching your search."
-                      : "No recipients found."}
+                      ? 'No recipients found matching your search.'
+                      : 'No recipients found.'}
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -1389,7 +1389,7 @@ function PhoneDirectoryFixed() {
                             <h3 className="font-bold text-lg text-primary font-['Roboto',sans-serif]">
                               {recipient.name}
                             </h3>
-                            {recipient.status === "active" && (
+                            {recipient.status === 'active' && (
                               <Badge
                                 variant="default"
                                 className="bg-green-100 text-green-800"
@@ -1456,7 +1456,7 @@ function PhoneDirectoryFixed() {
                                           <Input
                                             id="edit-recipient-contact"
                                             value={
-                                              editingRecipient.contactName || ""
+                                              editingRecipient.contactName || ''
                                             }
                                             onChange={(e) =>
                                               setEditingRecipient({
@@ -1492,7 +1492,7 @@ function PhoneDirectoryFixed() {
                                           <Input
                                             id="edit-recipient-email"
                                             type="email"
-                                            value={editingRecipient.email || ""}
+                                            value={editingRecipient.email || ''}
                                             onChange={(e) =>
                                               setEditingRecipient({
                                                 ...editingRecipient,
@@ -1509,7 +1509,7 @@ function PhoneDirectoryFixed() {
                                         </Label>
                                         <Textarea
                                           id="edit-recipient-address"
-                                          value={editingRecipient.address || ""}
+                                          value={editingRecipient.address || ''}
                                           onChange={(e) =>
                                             setEditingRecipient({
                                               ...editingRecipient,
@@ -1528,7 +1528,7 @@ function PhoneDirectoryFixed() {
                                           <Input
                                             id="edit-recipient-region"
                                             value={
-                                              editingRecipient.region || ""
+                                              editingRecipient.region || ''
                                             }
                                             onChange={(e) =>
                                               setEditingRecipient({
@@ -1573,7 +1573,7 @@ function PhoneDirectoryFixed() {
                                         <Textarea
                                           id="edit-recipient-preferences"
                                           value={
-                                            editingRecipient.preferences || ""
+                                            editingRecipient.preferences || ''
                                           }
                                           onChange={(e) =>
                                             setEditingRecipient({
@@ -1594,8 +1594,8 @@ function PhoneDirectoryFixed() {
                                           className="flex-1"
                                         >
                                           {updateRecipientMutation.isPending
-                                            ? "Updating..."
-                                            : "Update Recipient"}
+                                            ? 'Updating...'
+                                            : 'Update Recipient'}
                                         </Button>
                                         <Button
                                           variant="outline"
@@ -1655,7 +1655,7 @@ function PhoneDirectoryFixed() {
                         {recipient.preferences && (
                           <div className="mt-3 p-3 bg-muted/50 rounded-md">
                             <p className="text-sm text-muted-foreground">
-                              <span className="font-medium">Preferences:</span>{" "}
+                              <span className="font-medium">Preferences:</span>{' '}
                               {recipient.preferences}
                             </p>
                           </div>
@@ -1828,8 +1828,8 @@ function PhoneDirectoryFixed() {
                               className="flex-1"
                             >
                               {createVolunteerMutation.isPending
-                                ? "Adding..."
-                                : "Add Volunteer"}
+                                ? 'Adding...'
+                                : 'Add Volunteer'}
                             </Button>
                             <Button
                               variant="outline"
@@ -1849,8 +1849,8 @@ function PhoneDirectoryFixed() {
                 {filteredVolunteers.length === 0 ? (
                   <div className="text-center py-12 text-base text-muted-foreground font-['Roboto',sans-serif]">
                     {searchTerm
-                      ? "No volunteers found matching your search."
-                      : "No volunteers found."}
+                      ? 'No volunteers found matching your search.'
+                      : 'No volunteers found.'}
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -1865,7 +1865,7 @@ function PhoneDirectoryFixed() {
                               {volunteer.name}
                             </h3>
                             <Badge variant="outline" className="text-xs">
-                              {volunteer.volunteerType || "General"}
+                              {volunteer.volunteerType || 'General'}
                             </Badge>
                             {volunteer.isActive && (
                               <Badge
@@ -1890,8 +1890,8 @@ function PhoneDirectoryFixed() {
                                     notes: volunteer.notes,
                                     zone: volunteer.zone,
                                     volunteerType: volunteer.volunteerType,
-                                    type: "Volunteer",
-                                    source: "volunteers",
+                                    type: 'Volunteer',
+                                    source: 'volunteers',
                                   };
                                   setEditingContact(contactData);
                                 }}
@@ -2078,8 +2078,8 @@ function PhoneDirectoryFixed() {
                               className="flex-1"
                             >
                               {createDriverMutation.isPending
-                                ? "Adding..."
-                                : "Add Driver"}
+                                ? 'Adding...'
+                                : 'Add Driver'}
                             </Button>
                             <Button
                               variant="outline"
@@ -2100,13 +2100,13 @@ function PhoneDirectoryFixed() {
                   <div
                     className="text-center py-12 text-base"
                     style={{
-                      color: "#646464",
-                      fontFamily: "Roboto, sans-serif",
+                      color: '#646464',
+                      fontFamily: 'Roboto, sans-serif',
                     }}
                   >
                     {searchTerm
-                      ? "No drivers found matching your search."
-                      : "No drivers found."}
+                      ? 'No drivers found matching your search.'
+                      : 'No drivers found.'}
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -2202,7 +2202,7 @@ function PhoneDirectoryFixed() {
                                           <Input
                                             id="edit-driver-email"
                                             type="email"
-                                            value={editingDriver.email || ""}
+                                            value={editingDriver.email || ''}
                                             onChange={(e) =>
                                               setEditingDriver({
                                                 ...editingDriver,
@@ -2218,7 +2218,7 @@ function PhoneDirectoryFixed() {
                                           </Label>
                                           <Input
                                             id="edit-driver-zone"
-                                            value={editingDriver.zone || ""}
+                                            value={editingDriver.zone || ''}
                                             onChange={(e) =>
                                               setEditingDriver({
                                                 ...editingDriver,
@@ -2236,7 +2236,7 @@ function PhoneDirectoryFixed() {
                                         <Textarea
                                           id="edit-driver-address"
                                           value={
-                                            editingDriver.homeAddress || ""
+                                            editingDriver.homeAddress || ''
                                           }
                                           onChange={(e) =>
                                             setEditingDriver({
@@ -2254,7 +2254,7 @@ function PhoneDirectoryFixed() {
                                         </Label>
                                         <Textarea
                                           id="edit-driver-notes"
-                                          value={editingDriver.notes || ""}
+                                          value={editingDriver.notes || ''}
                                           onChange={(e) =>
                                             setEditingDriver({
                                               ...editingDriver,
@@ -2330,8 +2330,8 @@ function PhoneDirectoryFixed() {
                                           className="flex-1"
                                         >
                                           {updateDriverMutation.isPending
-                                            ? "Updating..."
-                                            : "Update Driver"}
+                                            ? 'Updating...'
+                                            : 'Update Driver'}
                                         </Button>
                                         <Button
                                           variant="outline"
@@ -2389,7 +2389,7 @@ function PhoneDirectoryFixed() {
                             {driver.notes && (
                               <div className="p-3 bg-muted/50 rounded-md">
                                 <p className="text-sm text-muted-foreground">
-                                  <span className="font-medium">Notes:</span>{" "}
+                                  <span className="font-medium">Notes:</span>{' '}
                                   {driver.notes}
                                 </p>
                               </div>
@@ -2399,7 +2399,7 @@ function PhoneDirectoryFixed() {
                                 <p className="text-sm text-blue-700">
                                   <span className="font-medium">
                                     Availability:
-                                  </span>{" "}
+                                  </span>{' '}
                                   {driver.availabilityNotes}
                                 </p>
                               </div>
@@ -2440,12 +2440,12 @@ function PhoneDirectoryFixed() {
                   <span className="font-medium">Current Status:</span>
                   <Badge variant="outline">{editingContact.type}</Badge>
                   <Badge variant="secondary">
-                    {editingContact.source.replace("_", " ")}
+                    {editingContact.source.replace('_', ' ')}
                   </Badge>
                 </div>
                 {editingContact.organization && (
                   <p className="text-sm text-muted-foreground">
-                    Role Type - Location Designation: {editingContact.type} -{" "}
+                    Role Type - Location Designation: {editingContact.type} -{' '}
                     {editingContact.organization}
                   </p>
                 )}
@@ -2476,7 +2476,7 @@ function PhoneDirectoryFixed() {
                   <Label htmlFor="edit-phone">Phone</Label>
                   <Input
                     id="edit-phone"
-                    value={editingContact.phone || ""}
+                    value={editingContact.phone || ''}
                     onChange={(e) =>
                       setEditingContact({
                         ...editingContact,
@@ -2493,7 +2493,7 @@ function PhoneDirectoryFixed() {
                 <Input
                   id="edit-email"
                   type="email"
-                  value={editingContact.email || ""}
+                  value={editingContact.email || ''}
                   onChange={(e) =>
                     setEditingContact({
                       ...editingContact,
@@ -2508,7 +2508,7 @@ function PhoneDirectoryFixed() {
                 <Label htmlFor="edit-address">Address</Label>
                 <Textarea
                   id="edit-address"
-                  value={editingContact.address || ""}
+                  value={editingContact.address || ''}
                   onChange={(e) =>
                     setEditingContact({
                       ...editingContact,
@@ -2524,7 +2524,7 @@ function PhoneDirectoryFixed() {
                 <Label htmlFor="edit-notes">Notes</Label>
                 <Textarea
                   id="edit-notes"
-                  value={editingContact.notes || ""}
+                  value={editingContact.notes || ''}
                   onChange={(e) =>
                     setEditingContact({
                       ...editingContact,
@@ -2573,11 +2573,11 @@ function PhoneDirectoryFixed() {
                   </div>
 
                   {/* Host Assignment */}
-                  {editingContact.newRoleType === "host_contacts" && (
+                  {editingContact.newRoleType === 'host_contacts' && (
                     <div>
                       <Label>Assign to Host Location</Label>
                       <Select
-                        value={editingContact.assignedHostId || ""}
+                        value={editingContact.assignedHostId || ''}
                         onValueChange={(value) =>
                           setEditingContact({
                             ...editingContact,
@@ -2607,11 +2607,11 @@ function PhoneDirectoryFixed() {
                   )}
 
                   {/* Recipient Organization Assignment */}
-                  {editingContact.newRoleType === "recipients" && (
+                  {editingContact.newRoleType === 'recipients' && (
                     <div>
                       <Label>Assign to Recipient Organization</Label>
                       <Select
-                        value={editingContact.assignedRecipientId || ""}
+                        value={editingContact.assignedRecipientId || ''}
                         onValueChange={(value) =>
                           setEditingContact({
                             ...editingContact,
@@ -2641,12 +2641,12 @@ function PhoneDirectoryFixed() {
                   )}
 
                   {/* Volunteer Assignment */}
-                  {editingContact.newRoleType === "volunteers" && (
+                  {editingContact.newRoleType === 'volunteers' && (
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <Label>Volunteer Type</Label>
                         <Select
-                          value={editingContact.volunteerType || ""}
+                          value={editingContact.volunteerType || ''}
                           onValueChange={(value) =>
                             setEditingContact({
                               ...editingContact,
@@ -2670,7 +2670,7 @@ function PhoneDirectoryFixed() {
                       <div>
                         <Label>Zone</Label>
                         <Input
-                          value={editingContact.zone || ""}
+                          value={editingContact.zone || ''}
                           onChange={(e) =>
                             setEditingContact({
                               ...editingContact,
@@ -2684,13 +2684,13 @@ function PhoneDirectoryFixed() {
                   )}
 
                   {/* Driver Specific */}
-                  {editingContact.newRoleType === "drivers" && (
+                  {editingContact.newRoleType === 'drivers' && (
                     <div className="space-y-4">
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <Label>Zone</Label>
                           <Input
-                            value={editingContact.zone || ""}
+                            value={editingContact.zone || ''}
                             onChange={(e) =>
                               setEditingContact({
                                 ...editingContact,

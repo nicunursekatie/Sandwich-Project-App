@@ -1,21 +1,21 @@
-import { useState, useEffect } from "react";
-import * as React from "react";
-import { useParams, useLocation } from "wouter";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useState, useEffect } from 'react';
+import * as React from 'react';
+import { useParams, useLocation } from 'wouter';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
-import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Separator } from '@/components/ui/separator';
+import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Dialog,
   DialogContent,
@@ -23,17 +23,17 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { formatDistanceToNow } from "date-fns";
+} from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest, queryClient } from '@/lib/queryClient';
+import { formatDistanceToNow } from 'date-fns';
 import {
   ArrowLeft,
   Calendar,
@@ -48,13 +48,13 @@ import {
   Users,
   MessageSquare,
   Award,
-} from "lucide-react";
-import { TaskAssigneeSelector } from "@/components/task-assignee-selector";
-import { ProjectAssigneeSelector } from "@/components/project-assignee-selector";
-import { MultiUserTaskCompletion } from "@/components/multi-user-task-completion";
-import SendKudosButton from "@/components/send-kudos-button";
-import { useAuth } from "@/hooks/useAuth";
-import { canEditProject, canDeleteProject } from "@shared/auth-utils";
+} from 'lucide-react';
+import { TaskAssigneeSelector } from '@/components/task-assignee-selector';
+import { ProjectAssigneeSelector } from '@/components/project-assignee-selector';
+import { MultiUserTaskCompletion } from '@/components/multi-user-task-completion';
+import SendKudosButton from '@/components/send-kudos-button';
+import { useAuth } from '@/hooks/useAuth';
+import { canEditProject, canDeleteProject } from '@shared/auth-utils';
 
 interface Project {
   id: number;
@@ -104,29 +104,29 @@ export default function ProjectDetailClean({
   const [isEditingProject, setIsEditingProject] = useState(false);
   const [isEditingTask, setIsEditingTask] = useState<Task | null>(null);
   const [newTask, setNewTask] = useState({
-    title: "",
-    description: "",
-    priority: "medium",
-    dueDate: "",
-    assigneeId: "",
-    assigneeName: "",
+    title: '',
+    description: '',
+    priority: 'medium',
+    dueDate: '',
+    assigneeId: '',
+    assigneeName: '',
     estimatedHours: 0,
   });
   const [editingProject, setEditingProject] = useState<Project | null>(null);
 
   // Meeting discussion state
-  const [meetingDiscussionPoints, setMeetingDiscussionPoints] = useState("");
-  const [meetingDecisionItems, setMeetingDecisionItems] = useState("");
+  const [meetingDiscussionPoints, setMeetingDiscussionPoints] = useState('');
+  const [meetingDecisionItems, setMeetingDecisionItems] = useState('');
 
   // Milestone editing state
   const [isEditingMilestone, setIsEditingMilestone] = useState(false);
-  const [editingMilestone, setEditingMilestone] = useState("");
+  const [editingMilestone, setEditingMilestone] = useState('');
 
   // Meeting discussion mutations
   const saveMeetingNotesMutation = useMutation({
     mutationFn: async () => {
       return apiRequest(`/api/projects/${id}`, {
-        method: "PATCH",
+        method: 'PATCH',
         body: JSON.stringify({
           meetingDiscussionPoints,
           meetingDecisionItems,
@@ -134,18 +134,18 @@ export default function ProjectDetailClean({
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/projects", id] });
+      queryClient.invalidateQueries({ queryKey: ['/api/projects', id] });
       toast({
-        title: "Success",
-        description: "Meeting discussion notes saved successfully",
+        title: 'Success',
+        description: 'Meeting discussion notes saved successfully',
       });
     },
     onError: (error) => {
-      console.error("Error saving meeting notes:", error);
+      console.error('Error saving meeting notes:', error);
       toast({
-        title: "Error",
-        description: "Failed to save meeting notes",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to save meeting notes',
+        variant: 'destructive',
       });
     },
   });
@@ -154,35 +154,35 @@ export default function ProjectDetailClean({
   const saveMilestoneMutation = useMutation({
     mutationFn: async () => {
       return apiRequest(`/api/projects/${id}`, {
-        method: "PATCH",
+        method: 'PATCH',
         body: JSON.stringify({
           milestone: editingMilestone,
         }),
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/projects", id] });
+      queryClient.invalidateQueries({ queryKey: ['/api/projects', id] });
       setIsEditingMilestone(false);
       toast({
-        title: "Success",
-        description: "Project milestone updated successfully",
+        title: 'Success',
+        description: 'Project milestone updated successfully',
       });
     },
     onError: (error) => {
-      console.error("Error saving milestone:", error);
+      console.error('Error saving milestone:', error);
       toast({
-        title: "Error",
-        description: "Failed to update milestone",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to update milestone',
+        variant: 'destructive',
       });
     },
   });
 
   // Fetch project details
   const { data: project, isLoading: isProjectLoading } = useQuery<Project>({
-    queryKey: ["/api/projects", id],
+    queryKey: ['/api/projects', id],
     queryFn: async () => {
-      const response = await apiRequest("GET", `/api/projects/${id}`);
+      const response = await apiRequest('GET', `/api/projects/${id}`);
       return response;
     },
     enabled: !!id,
@@ -196,9 +196,9 @@ export default function ProjectDetailClean({
     isLoading: isTasksLoading,
     refetch: refetchTasks,
   } = useQuery<Task[]>({
-    queryKey: ["/api/projects", id, "tasks"],
+    queryKey: ['/api/projects', id, 'tasks'],
     queryFn: async () => {
-      const response = await apiRequest("GET", `/api/projects/${id}/tasks`);
+      const response = await apiRequest('GET', `/api/projects/${id}/tasks`);
       return Array.isArray(response) ? response : [];
     },
     enabled: !!id,
@@ -207,9 +207,9 @@ export default function ProjectDetailClean({
   // Initialize meeting discussion fields when project loads
   React.useEffect(() => {
     if (project) {
-      setMeetingDiscussionPoints(project.meetingDiscussionPoints || "");
-      setMeetingDecisionItems(project.meetingDecisionItems || "");
-      setEditingMilestone(project.milestone || "");
+      setMeetingDiscussionPoints(project.meetingDiscussionPoints || '');
+      setMeetingDecisionItems(project.meetingDecisionItems || '');
+      setEditingMilestone(project.milestone || '');
     }
   }, [project]);
 
@@ -220,22 +220,22 @@ export default function ProjectDetailClean({
     const checked = e.target.checked;
     try {
       await apiRequest(`/api/projects/${id}`, {
-        method: "PATCH",
+        method: 'PATCH',
         body: JSON.stringify({ reviewInNextMeeting: checked }),
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/projects", id] });
+      queryClient.invalidateQueries({ queryKey: ['/api/projects', id] });
       toast({
-        title: "Success",
+        title: 'Success',
         description: checked
-          ? "Project marked for meeting discussion"
-          : "Project removed from meeting agenda",
+          ? 'Project marked for meeting discussion'
+          : 'Project removed from meeting agenda',
       });
     } catch (error) {
-      console.error("Error updating meeting review status:", error);
+      console.error('Error updating meeting review status:', error);
       toast({
-        title: "Error",
-        description: "Failed to update meeting review status",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to update meeting review status',
+        variant: 'destructive',
       });
     }
   };
@@ -248,7 +248,7 @@ export default function ProjectDetailClean({
   // Handler for milestone editing
   const handleEditMilestone = () => {
     setIsEditingMilestone(true);
-    setEditingMilestone(project?.milestone || "");
+    setEditingMilestone(project?.milestone || '');
   };
 
   const handleSaveMilestone = () => {
@@ -257,7 +257,7 @@ export default function ProjectDetailClean({
 
   const handleCancelMilestone = () => {
     setIsEditingMilestone(false);
-    setEditingMilestone(project?.milestone || "");
+    setEditingMilestone(project?.milestone || '');
   };
 
   // Function to send kudos to all project assignees when project is completed
@@ -311,10 +311,10 @@ export default function ProjectDetailClean({
             continue;
           }
 
-          await apiRequest("POST", "/api/messaging/kudos", {
+          await apiRequest('POST', '/api/messaging/kudos', {
             recipientId: assignee.id,
             recipientName: assignee.name,
-            contextType: "project",
+            contextType: 'project',
             contextId: project.id.toString(),
             entityName: projectTitle,
             customMessage: `🎉 Congratulations on completing "${projectTitle}"! Amazing work!`,
@@ -328,41 +328,41 @@ export default function ProjectDetailClean({
 
       if (assigneesToNotify.length > 0) {
         toast({
-          title: "🎉 Kudos sent!",
+          title: '🎉 Kudos sent!',
           description: `Congratulations sent to ${
             assigneesToNotify.length
           } team member${
-            assigneesToNotify.length > 1 ? "s" : ""
+            assigneesToNotify.length > 1 ? 's' : ''
           } for completing "${projectTitle}"`,
         });
       }
     } catch (error) {
-      console.error("Failed to send project completion kudos:", error);
+      console.error('Failed to send project completion kudos:', error);
     }
   };
 
   // Project edit mutation
   const editProjectMutation = useMutation({
     mutationFn: async (projectData: Partial<Project>) => {
-      return await apiRequest("PATCH", `/api/projects/${id}`, projectData);
+      return await apiRequest('PATCH', `/api/projects/${id}`, projectData);
     },
     onSuccess: async (data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/projects", id] });
-      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/projects', id] });
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
       setIsEditingProject(false);
       setEditingProject(null);
-      toast({ description: "Project updated successfully" });
+      toast({ description: 'Project updated successfully' });
 
       // If project was marked as completed, send kudos to all assignees
-      if (variables.status === "completed" && project) {
+      if (variables.status === 'completed' && project) {
         await sendKudosForProjectCompletion(project, project.title);
       }
     },
     onError: (error: any) => {
       toast({
-        title: "Error updating project",
-        description: error.message || "Failed to update project",
-        variant: "destructive",
+        title: 'Error updating project',
+        description: error.message || 'Failed to update project',
+        variant: 'destructive',
       });
     },
   });
@@ -370,30 +370,30 @@ export default function ProjectDetailClean({
   // Add task mutation
   const addTaskMutation = useMutation({
     mutationFn: async (taskData: any) => {
-      return await apiRequest("POST", `/api/projects/${id}/tasks`, taskData);
+      return await apiRequest('POST', `/api/projects/${id}/tasks`, taskData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["/api/projects", id, "tasks"],
+        queryKey: ['/api/projects', id, 'tasks'],
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/projects", id] });
+      queryClient.invalidateQueries({ queryKey: ['/api/projects', id] });
       setIsAddingTask(false);
       setNewTask({
-        title: "",
-        description: "",
-        priority: "medium",
-        dueDate: "",
-        assigneeId: "",
-        assigneeName: "",
+        title: '',
+        description: '',
+        priority: 'medium',
+        dueDate: '',
+        assigneeId: '',
+        assigneeName: '',
         estimatedHours: 0,
       });
-      toast({ description: "Task added successfully" });
+      toast({ description: 'Task added successfully' });
     },
     onError: (error: any) => {
-      console.error("Task creation failed:", error);
+      console.error('Task creation failed:', error);
       toast({
-        description: "Failed to add task",
-        variant: "destructive",
+        description: 'Failed to add task',
+        variant: 'destructive',
       });
     },
   });
@@ -404,29 +404,29 @@ export default function ProjectDetailClean({
 
     // Check if all tasks are completed
     const allTasksCompleted = tasks.every(
-      (task) => task.status === "completed"
+      (task) => task.status === 'completed'
     );
 
-    if (allTasksCompleted && project.status !== "completed") {
+    if (allTasksCompleted && project.status !== 'completed') {
       try {
         // Auto-complete the project
-        await apiRequest("PATCH", `/api/projects/${id}`, {
-          status: "completed",
+        await apiRequest('PATCH', `/api/projects/${id}`, {
+          status: 'completed',
         });
 
         // Send kudos to all project assignees
         await sendKudosForProjectCompletion(project, project.title);
 
         toast({
-          title: "🎉 Project Auto-Completed!",
+          title: '🎉 Project Auto-Completed!',
           description: `"${project.title}" has been automatically completed since all tasks are done!`,
         });
 
         // Refresh project data
-        queryClient.invalidateQueries({ queryKey: ["/api/projects", id] });
-        queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+        queryClient.invalidateQueries({ queryKey: ['/api/projects', id] });
+        queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
       } catch (error) {
-        console.error("Failed to auto-complete project:", error);
+        console.error('Failed to auto-complete project:', error);
       }
     }
   };
@@ -440,21 +440,21 @@ export default function ProjectDetailClean({
       taskId: number;
       taskData: Partial<Task>;
     }) => {
-      return await apiRequest("PATCH", `/api/tasks/${taskId}`, taskData);
+      return await apiRequest('PATCH', `/api/tasks/${taskId}`, taskData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["/api/projects", id, "tasks"],
+        queryKey: ['/api/projects', id, 'tasks'],
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/projects", id] });
+      queryClient.invalidateQueries({ queryKey: ['/api/projects', id] });
       setIsEditingTask(null);
-      toast({ description: "Task updated successfully" });
+      toast({ description: 'Task updated successfully' });
     },
     onError: (error: any) => {
       toast({
-        title: "Error updating task",
-        description: error.message || "Failed to update task",
-        variant: "destructive",
+        title: 'Error updating task',
+        description: error.message || 'Failed to update task',
+        variant: 'destructive',
       });
     },
   });
@@ -462,34 +462,34 @@ export default function ProjectDetailClean({
   // Delete task mutation
   const deleteTaskMutation = useMutation({
     mutationFn: async (taskId: number) => {
-      return await apiRequest("DELETE", `/api/tasks/${taskId}`);
+      return await apiRequest('DELETE', `/api/tasks/${taskId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["/api/projects", id, "tasks"],
+        queryKey: ['/api/projects', id, 'tasks'],
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/projects", id] });
-      toast({ description: "Task deleted successfully" });
+      queryClient.invalidateQueries({ queryKey: ['/api/projects', id] });
+      toast({ description: 'Task deleted successfully' });
     },
     onError: (error: any) => {
-      console.error("Task deletion failed:", error);
+      console.error('Task deletion failed:', error);
       toast({
-        description: "Failed to delete task",
-        variant: "destructive",
+        description: 'Failed to delete task',
+        variant: 'destructive',
       });
     },
   });
 
   const handleAddTask = () => {
     if (!newTask.title.trim()) {
-      toast({ description: "Task title is required", variant: "destructive" });
+      toast({ description: 'Task title is required', variant: 'destructive' });
       return;
     }
     addTaskMutation.mutate(newTask);
   };
 
   const handleDeleteTask = (taskId: number) => {
-    if (window.confirm("Are you sure you want to delete this task?")) {
+    if (window.confirm('Are you sure you want to delete this task?')) {
       deleteTaskMutation.mutate(taskId);
     }
   };
@@ -504,18 +504,18 @@ export default function ProjectDetailClean({
         onSuccess: () => {
           // Immediately invalidate and refetch the tasks
           queryClient.invalidateQueries({
-            queryKey: ["/api/projects", id, "tasks"],
+            queryKey: ['/api/projects', id, 'tasks'],
           });
-          queryClient.invalidateQueries({ queryKey: ["/api/projects", id] });
+          queryClient.invalidateQueries({ queryKey: ['/api/projects', id] });
           queryClient.refetchQueries({
-            queryKey: ["/api/projects", id, "tasks"],
+            queryKey: ['/api/projects', id, 'tasks'],
           });
 
           // Also manually refetch to ensure immediate UI update
           refetchTasks();
 
           // If marking as completed, check if we should auto-complete the project
-          if (newStatus === "completed") {
+          if (newStatus === 'completed') {
             setTimeout(() => {
               checkAndCompleteProject();
             }, 500); // Reduced delay since cache is now refreshed
@@ -555,56 +555,56 @@ export default function ProjectDetailClean({
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case "urgent":
-        return "bg-red-500 text-white";
-      case "high":
-        return "bg-orange-500 text-white";
-      case "medium":
-        return "bg-yellow-500 text-white";
-      case "low":
-        return "bg-green-500 text-white";
+      case 'urgent':
+        return 'bg-red-500 text-white';
+      case 'high':
+        return 'bg-orange-500 text-white';
+      case 'medium':
+        return 'bg-yellow-500 text-white';
+      case 'low':
+        return 'bg-green-500 text-white';
       default:
-        return "bg-gray-500 text-white";
+        return 'bg-gray-500 text-white';
     }
   };
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
-      case "technology":
-        return "💻";
-      case "events":
-        return "📅";
-      case "grants":
-        return "💰";
-      case "outreach":
-        return "🤝";
-      case "marketing":
-        return "📢";
-      case "operations":
-        return "⚙️";
-      case "community":
-        return "👥";
-      case "fundraising":
-        return "💵";
-      case "event":
-        return "🎉";
+      case 'technology':
+        return '💻';
+      case 'events':
+        return '📅';
+      case 'grants':
+        return '💰';
+      case 'outreach':
+        return '🤝';
+      case 'marketing':
+        return '📢';
+      case 'operations':
+        return '⚙️';
+      case 'community':
+        return '👥';
+      case 'fundraising':
+        return '💵';
+      case 'event':
+        return '🎉';
       default:
-        return "📁";
+        return '📁';
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "completed":
-        return "text-green-600 bg-green-50 border-green-200";
-      case "in_progress":
-        return "text-blue-600 bg-blue-50 border-blue-200";
-      case "available":
-        return "text-purple-600 bg-purple-50 border-purple-200";
-      case "waiting":
-        return "text-gray-600 bg-gray-50 border-gray-200";
+      case 'completed':
+        return 'text-green-600 bg-green-50 border-green-200';
+      case 'in_progress':
+        return 'text-blue-600 bg-blue-50 border-blue-200';
+      case 'available':
+        return 'text-purple-600 bg-purple-50 border-purple-200';
+      case 'waiting':
+        return 'text-gray-600 bg-gray-50 border-gray-200';
       default:
-        return "text-gray-600 bg-gray-50 border-gray-200";
+        return 'text-gray-600 bg-gray-50 border-gray-200';
     }
   };
 
@@ -632,8 +632,9 @@ export default function ProjectDetailClean({
     );
   }
 
-  const completedTasks = tasks.filter((task) => task.status === "completed")
-    .length;
+  const completedTasks = tasks.filter(
+    (task) => task.status === 'completed'
+  ).length;
   const totalTasks = tasks.length;
   const progressPercentage =
     totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
@@ -647,11 +648,11 @@ export default function ProjectDetailClean({
             variant="ghost"
             size="sm"
             onClick={() => {
-              console.log("Back to Projects clicked - navigating to projects");
+              console.log('Back to Projects clicked - navigating to projects');
               if ((window as any).dashboardSetActiveSection) {
-                (window as any).dashboardSetActiveSection("projects");
+                (window as any).dashboardSetActiveSection('projects');
               } else {
-                setLocation("/projects");
+                setLocation('/projects');
               }
             }}
             className="flex items-center gap-2 text-[#236383] hover:bg-[#236383]/10 font-roboto"
@@ -687,7 +688,7 @@ export default function ProjectDetailClean({
               project.status
             )} font-roboto px-3 py-1`}
           >
-            {project.status?.replace("_", " ")}
+            {project.status?.replace('_', ' ')}
           </Badge>
           <Badge
             className={`${getPriorityColor(
@@ -719,7 +720,7 @@ export default function ProjectDetailClean({
           <p className="text-sm text-gray-900 font-roboto font-medium mb-2 leading-tight">
             {project.assigneeName ||
               project.createdByName ||
-              "No owner assigned"}
+              'No owner assigned'}
           </p>
           <p className="text-xs text-gray-500 font-roboto">Project owner</p>
         </div>
@@ -735,7 +736,7 @@ export default function ProjectDetailClean({
             </h3>
           </div>
           <p className="text-sm text-gray-900 font-roboto font-medium mb-2 leading-tight">
-            {project.supportPeople || "No support assigned"}
+            {project.supportPeople || 'No support assigned'}
           </p>
           <p className="text-xs text-gray-500 font-roboto">
             Supporting this project
@@ -755,7 +756,7 @@ export default function ProjectDetailClean({
           <p className="text-sm text-gray-900 font-roboto font-medium mb-2 leading-tight">
             {project.dueDate
               ? new Date(project.dueDate).toLocaleDateString()
-              : "8/30/2025"}
+              : '8/30/2025'}
           </p>
           <p className="text-xs text-gray-500 font-roboto">
             About 1 month remaining
@@ -838,8 +839,8 @@ export default function ProjectDetailClean({
                     className="bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm px-2 sm:px-3"
                   >
                     {saveMilestoneMutation.isPending
-                      ? "Saving..."
-                      : "Save Milestone"}
+                      ? 'Saving...'
+                      : 'Save Milestone'}
                   </Button>
                 </div>
               </div>
@@ -939,9 +940,9 @@ export default function ProjectDetailClean({
                 variant="outline"
                 onClick={() => {
                   setMeetingDiscussionPoints(
-                    project.meetingDiscussionPoints || ""
+                    project.meetingDiscussionPoints || ''
                   );
-                  setMeetingDecisionItems(project.meetingDecisionItems || "");
+                  setMeetingDecisionItems(project.meetingDecisionItems || '');
                 }}
                 className="text-gray-600"
               >
@@ -953,8 +954,8 @@ export default function ProjectDetailClean({
                 className="bg-orange-600 hover:bg-orange-700 text-white"
               >
                 {saveMeetingNotesMutation.isPending
-                  ? "Saving..."
-                  : "Save Discussion Notes"}
+                  ? 'Saving...'
+                  : 'Save Discussion Notes'}
               </Button>
             </div>
           </div>
@@ -963,7 +964,7 @@ export default function ProjectDetailClean({
         {project.lastDiscussedDate && (
           <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
             <p className="text-sm text-gray-600">
-              <strong>Last discussed:</strong>{" "}
+              <strong>Last discussed:</strong>{' '}
               {new Date(project.lastDiscussedDate).toLocaleDateString()}
             </p>
           </div>
@@ -1083,7 +1084,7 @@ export default function ProjectDetailClean({
                   disabled={addTaskMutation.isPending}
                   className="bg-[#FBAD3F] hover:bg-[#FBAD3F]/90 text-white font-roboto"
                 >
-                  {addTaskMutation.isPending ? "Adding..." : "Add Task"}
+                  {addTaskMutation.isPending ? 'Adding...' : 'Add Task'}
                 </Button>
                 <Button
                   variant="outline"
@@ -1118,30 +1119,30 @@ export default function ProjectDetailClean({
               <div
                 key={task.id}
                 className={`bg-white rounded-lg border border-gray-200 p-6 ${
-                  task.status === "completed"
-                    ? "bg-green-50 border-green-200"
-                    : ""
+                  task.status === 'completed'
+                    ? 'bg-green-50 border-green-200'
+                    : ''
                 }`}
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
                     <h4
                       className={`text-lg font-semibold font-roboto ${
-                        task.status === "completed"
-                          ? "line-through text-gray-600"
-                          : "text-[#236383]"
+                        task.status === 'completed'
+                          ? 'line-through text-gray-600'
+                          : 'text-[#236383]'
                       }`}
                     >
-                      {task.status === "completed" && (
+                      {task.status === 'completed' && (
                         <CheckCircle2 className="inline w-5 h-5 mr-2 text-green-600" />
                       )}
                       {task.title}
                     </h4>
                     <p
                       className={`mt-1 text-gray-600 font-roboto ${
-                        task.status === "completed"
-                          ? "line-through text-gray-500"
-                          : ""
+                        task.status === 'completed'
+                          ? 'line-through text-gray-500'
+                          : ''
                       }`}
                     >
                       {task.description}
@@ -1160,16 +1161,16 @@ export default function ProjectDetailClean({
                         task.status
                       )} font-roboto px-2 py-1`}
                     >
-                      {task.status?.replace("_", " ")}
+                      {task.status?.replace('_', ' ')}
                     </Badge>
                     {user && canEditProject(user, project) && (
                       <>
-                        {task.status !== "completed" && (
+                        {task.status !== 'completed' && (
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() =>
-                              handleTaskStatusChange(task.id, "completed")
+                              handleTaskStatusChange(task.id, 'completed')
                             }
                             className="text-green-600 hover:text-green-800"
                             title="Mark as completed"
@@ -1177,13 +1178,13 @@ export default function ProjectDetailClean({
                             <CheckCircle2 className="h-4 w-4" />
                           </Button>
                         )}
-                        {task.status !== "in_progress" &&
-                          task.status !== "completed" && (
+                        {task.status !== 'in_progress' &&
+                          task.status !== 'completed' && (
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() =>
-                                handleTaskStatusChange(task.id, "in_progress")
+                                handleTaskStatusChange(task.id, 'in_progress')
                               }
                               className="text-blue-600 hover:text-blue-800"
                               title="Mark as in progress"
@@ -1260,15 +1261,15 @@ export default function ProjectDetailClean({
                           task.assigneeIds?.length > 0
                             ? task.assigneeIds
                             : task.assigneeId
-                            ? [task.assigneeId]
-                            : []
+                              ? [task.assigneeId]
+                              : []
                         }
                         assigneeNames={
                           task.assigneeNames?.length > 0
                             ? task.assigneeNames
                             : task.assigneeName
-                            ? [task.assigneeName]
-                            : []
+                              ? [task.assigneeName]
+                              : []
                         }
                         currentUserId={user?.id}
                         currentUserName={user?.firstName || user?.displayName}
@@ -1276,10 +1277,10 @@ export default function ProjectDetailClean({
                         onStatusChange={(isCompleted) => {
                           // Invalidate queries to refresh UI immediately
                           queryClient.invalidateQueries({
-                            queryKey: ["/api/projects", project.id, "tasks"],
+                            queryKey: ['/api/projects', project.id, 'tasks'],
                           });
                           queryClient.invalidateQueries({
-                            queryKey: ["/api/projects", project.id],
+                            queryKey: ['/api/projects', project.id],
                           });
 
                           // Trigger congratulations when task is completed by someone else
@@ -1287,28 +1288,28 @@ export default function ProjectDetailClean({
                             task.assigneeIds?.length > 0
                               ? task.assigneeIds
                               : task.assigneeId
-                              ? [task.assigneeId]
-                              : [];
+                                ? [task.assigneeId]
+                                : [];
                           const assigneeNames =
                             task.assigneeNames?.length > 0
                               ? task.assigneeNames
                               : task.assigneeName
-                              ? [task.assigneeName]
-                              : [];
+                                ? [task.assigneeName]
+                                : [];
                           if (
                             isCompleted &&
                             assigneeIds.length > 0 &&
-                            !assigneeIds.includes(user?.id || "")
+                            !assigneeIds.includes(user?.id || '')
                           ) {
                             toast({
-                              title: "🎉 Task Completed!",
+                              title: '🎉 Task Completed!',
                               description: `Team member completed "${task.title}"`,
                             });
                           }
                         }}
                       />
                       {/* Show kudos buttons for completed tasks */}
-                      {task.status === "completed" && (
+                      {task.status === 'completed' && (
                         <div className="flex gap-1 flex-wrap">
                           {/* Handle new format with assigneeIds array */}
                           {task.assigneeIds &&
@@ -1366,7 +1367,7 @@ export default function ProjectDetailClean({
                 <Label htmlFor="edit-project-title">Title</Label>
                 <Input
                   id="edit-project-title"
-                  value={editingProject?.title || ""}
+                  value={editingProject?.title || ''}
                   onChange={(e) =>
                     setEditingProject((prev) =>
                       prev ? { ...prev, title: e.target.value } : null
@@ -1379,7 +1380,7 @@ export default function ProjectDetailClean({
                 <Label htmlFor="edit-project-description">Description</Label>
                 <Textarea
                   id="edit-project-description"
-                  value={editingProject?.description || ""}
+                  value={editingProject?.description || ''}
                   onChange={(e) =>
                     setEditingProject((prev) =>
                       prev ? { ...prev, description: e.target.value } : null
@@ -1391,7 +1392,7 @@ export default function ProjectDetailClean({
               <div>
                 <Label htmlFor="edit-project-status">Status</Label>
                 <Select
-                  value={editingProject?.status || ""}
+                  value={editingProject?.status || ''}
                   onValueChange={(value) =>
                     setEditingProject((prev) =>
                       prev ? { ...prev, status: value } : null
@@ -1412,7 +1413,7 @@ export default function ProjectDetailClean({
               <div>
                 <Label htmlFor="edit-project-priority">Priority</Label>
                 <Select
-                  value={editingProject?.priority || ""}
+                  value={editingProject?.priority || ''}
                   onValueChange={(value) =>
                     setEditingProject((prev) =>
                       prev ? { ...prev, priority: value } : null
@@ -1433,7 +1434,7 @@ export default function ProjectDetailClean({
               <div>
                 <Label htmlFor="edit-project-category">Category</Label>
                 <Select
-                  value={editingProject?.category || ""}
+                  value={editingProject?.category || ''}
                   onValueChange={(value) =>
                     setEditingProject((prev) =>
                       prev ? { ...prev, category: value } : null
@@ -1453,7 +1454,7 @@ export default function ProjectDetailClean({
               </div>
               <div>
                 <ProjectAssigneeSelector
-                  value={editingProject?.assigneeName || ""}
+                  value={editingProject?.assigneeName || ''}
                   onChange={(value, userIds) =>
                     setEditingProject((prev) =>
                       prev
@@ -1472,7 +1473,7 @@ export default function ProjectDetailClean({
               </div>
               <div>
                 <ProjectAssigneeSelector
-                  value={(editingProject as any)?.supportPeople || ""}
+                  value={(editingProject as any)?.supportPeople || ''}
                   onChange={(value, userIds) =>
                     setEditingProject((prev) =>
                       prev
@@ -1495,8 +1496,8 @@ export default function ProjectDetailClean({
                   type="date"
                   value={
                     editingProject?.dueDate
-                      ? editingProject.dueDate.split("T")[0]
-                      : ""
+                      ? editingProject.dueDate.split('T')[0]
+                      : ''
                   }
                   onChange={(e) =>
                     setEditingProject((prev) =>
@@ -1510,7 +1511,7 @@ export default function ProjectDetailClean({
                 <Input
                   id="edit-project-budget"
                   type="number"
-                  value={editingProject?.budget || ""}
+                  value={editingProject?.budget || ''}
                   onChange={(e) =>
                     setEditingProject((prev) =>
                       prev ? { ...prev, budget: Number(e.target.value) } : null
@@ -1526,7 +1527,7 @@ export default function ProjectDetailClean({
                 <Input
                   id="edit-project-estimated-hours"
                   type="number"
-                  value={editingProject?.estimatedHours || ""}
+                  value={editingProject?.estimatedHours || ''}
                   onChange={(e) =>
                     setEditingProject((prev) =>
                       prev
@@ -1548,8 +1549,8 @@ export default function ProjectDetailClean({
               </Button>
               <Button type="submit" disabled={editProjectMutation.isPending}>
                 {editProjectMutation.isPending
-                  ? "Updating..."
-                  : "Update Project"}
+                  ? 'Updating...'
+                  : 'Update Project'}
               </Button>
             </DialogFooter>
           </form>
@@ -1574,7 +1575,7 @@ export default function ProjectDetailClean({
                 <Label htmlFor="edit-task-title">Title</Label>
                 <Input
                   id="edit-task-title"
-                  value={isEditingTask?.title || ""}
+                  value={isEditingTask?.title || ''}
                   onChange={(e) =>
                     setIsEditingTask((prev) =>
                       prev ? { ...prev, title: e.target.value } : null
@@ -1587,7 +1588,7 @@ export default function ProjectDetailClean({
                 <Label htmlFor="edit-task-description">Description</Label>
                 <Textarea
                   id="edit-task-description"
-                  value={isEditingTask?.description || ""}
+                  value={isEditingTask?.description || ''}
                   onChange={(e) =>
                     setIsEditingTask((prev) =>
                       prev ? { ...prev, description: e.target.value } : null
@@ -1599,7 +1600,7 @@ export default function ProjectDetailClean({
               <div>
                 <Label htmlFor="edit-task-status">Status</Label>
                 <Select
-                  value={isEditingTask?.status || ""}
+                  value={isEditingTask?.status || ''}
                   onValueChange={(value) =>
                     setIsEditingTask((prev) =>
                       prev ? { ...prev, status: value } : null
@@ -1620,7 +1621,7 @@ export default function ProjectDetailClean({
               <div>
                 <Label htmlFor="edit-task-priority">Priority</Label>
                 <Select
-                  value={isEditingTask?.priority || ""}
+                  value={isEditingTask?.priority || ''}
                   onValueChange={(value) =>
                     setIsEditingTask((prev) =>
                       prev ? { ...prev, priority: value } : null
@@ -1677,8 +1678,8 @@ export default function ProjectDetailClean({
                   type="date"
                   value={
                     isEditingTask?.dueDate
-                      ? isEditingTask.dueDate.split("T")[0]
-                      : ""
+                      ? isEditingTask.dueDate.split('T')[0]
+                      : ''
                   }
                   onChange={(e) =>
                     setIsEditingTask((prev) =>
@@ -1694,7 +1695,7 @@ export default function ProjectDetailClean({
                 <Input
                   id="edit-task-estimated-hours"
                   type="number"
-                  value={isEditingTask?.estimatedHours || ""}
+                  value={isEditingTask?.estimatedHours || ''}
                   onChange={(e) =>
                     setIsEditingTask((prev) =>
                       prev
@@ -1715,7 +1716,7 @@ export default function ProjectDetailClean({
                 Cancel
               </Button>
               <Button type="submit" disabled={editTaskMutation.isPending}>
-                {editTaskMutation.isPending ? "Updating..." : "Update Task"}
+                {editTaskMutation.isPending ? 'Updating...' : 'Update Task'}
               </Button>
             </DialogFooter>
           </form>

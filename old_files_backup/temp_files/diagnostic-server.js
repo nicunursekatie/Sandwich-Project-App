@@ -12,11 +12,11 @@ app.get('/', (req, res) => {
 });
 
 app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'ok', 
+  res.json({
+    status: 'ok',
     timestamp: Date.now(),
     env: process.env.NODE_ENV,
-    port: process.env.PORT || 5000
+    port: process.env.PORT || 5000,
   });
 });
 

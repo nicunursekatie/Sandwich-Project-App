@@ -1,11 +1,11 @@
-import sgMail from "@sendgrid/mail";
+import sgMail from '@sendgrid/mail';
 
 // Initialize SendGrid
 if (!process.env.SENDGRID_API_KEY) {
-  console.warn("⚠️  SENDGRID_API_KEY not found in environment variables");
+  console.warn('⚠️  SENDGRID_API_KEY not found in environment variables');
 } else {
   sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-  console.log("✅ SendGrid configured successfully");
+  console.log('✅ SendGrid configured successfully');
 }
 
 interface EmailParams {
@@ -19,26 +19,26 @@ interface EmailParams {
 export async function sendEmail(params: EmailParams): Promise<boolean> {
   try {
     if (!process.env.SENDGRID_API_KEY) {
-      throw new Error("SendGrid API key not configured");
+      throw new Error('SendGrid API key not configured');
     }
 
     const msg: sgMail.MailDataRequired = {
       to: params.to,
       from: params.from,
       subject: params.subject,
-      text: params.text || "",
-      html: params.html || params.text?.replace(/\n/g, "<br>") || "",
+      text: params.text || '',
+      html: params.html || params.text?.replace(/\n/g, '<br>') || '',
     };
 
     await sgMail.send(msg);
     console.log(`✅ Email sent successfully to ${params.to}`);
     return true;
   } catch (error) {
-    console.error("❌ SendGrid email error:", error);
+    console.error('❌ SendGrid email error:', error);
 
     // Log more details for debugging
     if (error.response?.body) {
-      console.error("SendGrid error details:", error.response.body);
+      console.error('SendGrid error details:', error.response.body);
     }
 
     throw error;

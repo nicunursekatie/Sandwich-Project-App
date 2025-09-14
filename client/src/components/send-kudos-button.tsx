@@ -1,22 +1,22 @@
-import { useState, useEffect } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { hasPermission, PERMISSIONS } from "@shared/auth-utils";
-import { Heart, Star, Trophy, Sparkles, Target } from "lucide-react";
+import { useState, useEffect } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import { apiRequest, queryClient } from '@/lib/queryClient';
+import { hasPermission, PERMISSIONS } from '@shared/auth-utils';
+import { Heart, Star, Trophy, Sparkles, Target } from 'lucide-react';
 
 interface SendKudosButtonProps {
   recipientId: string;
   recipientName: string;
-  contextType: "project" | "task";
+  contextType: 'project' | 'task';
   contextId: string;
   contextTitle: string;
   className?: string;
-  size?: "sm" | "default" | "lg";
-  variant?: "default" | "secondary" | "outline";
+  size?: 'sm' | 'default' | 'lg';
+  variant?: 'default' | 'secondary' | 'outline';
   iconOnly?: boolean; // New prop for icon-only display
 }
 
@@ -26,9 +26,9 @@ export default function SendKudosButton({
   contextType,
   contextId,
   contextTitle,
-  className = "",
-  size = "sm",
-  variant = "outline",
+  className = '',
+  size = 'sm',
+  variant = 'outline',
   iconOnly = false,
 }: SendKudosButtonProps) {
   const { user } = useAuth();
@@ -44,7 +44,7 @@ export default function SendKudosButton({
         const response = await fetch(
           `/api/messaging/kudos/check?recipientId=${recipientId}&contextType=${contextType}&contextId=${contextId}`,
           {
-            credentials: "include",
+            credentials: 'include',
           }
         );
         if (response.ok) {
@@ -63,7 +63,7 @@ export default function SendKudosButton({
 
   // Don't render if recipientId is empty or invalid
   if (!recipientId || !recipientId.trim()) {
-    console.warn("SendKudosButton: Not rendering due to empty recipientId", {
+    console.warn('SendKudosButton: Not rendering due to empty recipientId', {
       recipientId,
       recipientName,
       contextType,
@@ -80,7 +80,7 @@ export default function SendKudosButton({
 
   // Don't render if user doesn't have permission to send kudos
   if (!hasPermission(user, PERMISSIONS.SEND_KUDOS)) {
-    console.warn("SendKudosButton: User lacks SEND_KUDOS permission", {
+    console.warn('SendKudosButton: User lacks SEND_KUDOS permission', {
       user: user ? { id: (user as any).id, email: (user as any).email } : null,
       hasPermission: hasPermission(user, PERMISSIONS.SEND_KUDOS),
       SEND_KUDOS: PERMISSIONS.SEND_KUDOS,
@@ -97,7 +97,7 @@ export default function SendKudosButton({
       );
 
       // Debug logging
-      console.log("SendKudosButton mutation data:", {
+      console.log('SendKudosButton mutation data:', {
         recipientId,
         recipientName,
         contextType,
@@ -107,7 +107,7 @@ export default function SendKudosButton({
       });
 
       if (!recipientId || !recipientId.trim()) {
-        console.error("SendKudosButton: Empty recipientId detected", {
+        console.error('SendKudosButton: Empty recipientId detected', {
           recipientId,
           recipientName,
           contextType,
@@ -117,7 +117,7 @@ export default function SendKudosButton({
         throw new Error(`Cannot send kudos: recipient ID is empty`);
       }
 
-      return await apiRequest("POST", "/api/messaging/kudos", {
+      return await apiRequest('POST', '/api/messaging/kudos', {
         recipientId,
         contextType,
         contextId,
@@ -127,12 +127,12 @@ export default function SendKudosButton({
     },
     onSuccess: () => {
       setHasSentKudos(true);
-      queryClient.invalidateQueries({ queryKey: ["/api/messaging/kudos"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/messaging/kudos'] });
       queryClient.invalidateQueries({
-        queryKey: ["/api/messaging/kudos/received"],
+        queryKey: ['/api/messaging/kudos/received'],
       });
       queryClient.invalidateQueries({
-        queryKey: ["/api/message-notifications/unread-counts"],
+        queryKey: ['/api/message-notifications/unread-counts'],
       });
       toast({
         description: `Kudos sent to ${recipientName}!`,
@@ -148,10 +148,10 @@ export default function SendKudosButton({
         const errorMessage =
           error?.response?.data?.error ||
           error?.message ||
-          "Failed to send kudos";
+          'Failed to send kudos';
         toast({
           description: errorMessage,
-          variant: "destructive",
+          variant: 'destructive',
         });
       }
     },
@@ -216,7 +216,7 @@ export default function SendKudosButton({
       {sendKudosMutation.isPending ? (
         <>
           <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-current" />
-          {!iconOnly && "Sending..."}
+          {!iconOnly && 'Sending...'}
         </>
       ) : (
         <>

@@ -1,6 +1,6 @@
-import { db } from "./db";
-import { auditLogs, type InsertAuditLog } from "@shared/schema";
-import { sql, desc, eq } from "drizzle-orm";
+import { db } from './db';
+import { auditLogs, type InsertAuditLog } from '@shared/schema';
+import { sql, desc, eq } from 'drizzle-orm';
 
 export interface AuditContext {
   userId?: string;
@@ -67,11 +67,25 @@ export class AuditLogger {
   }
 
   static async logLogin(userId: string, context: AuditContext = {}) {
-    return this.log('LOGIN', 'users', userId, null, { loginTime: new Date() }, context);
+    return this.log(
+      'LOGIN',
+      'users',
+      userId,
+      null,
+      { loginTime: new Date() },
+      context
+    );
   }
 
   static async logLogout(userId: string, context: AuditContext = {}) {
-    return this.log('LOGOUT', 'users', userId, null, { logoutTime: new Date() }, context);
+    return this.log(
+      'LOGOUT',
+      'users',
+      userId,
+      null,
+      { logoutTime: new Date() },
+      context
+    );
   }
 
   static async getAuditHistory(
@@ -83,7 +97,7 @@ export class AuditLogger {
   ) {
     try {
       let query = db.select().from(auditLogs);
-      
+
       // Add filters
       if (tableName) {
         query = query.where(eq(auditLogs.tableName, tableName));

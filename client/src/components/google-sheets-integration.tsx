@@ -1,18 +1,18 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '@/lib/queryClient';
 import {
   ExternalLink,
   Download,
@@ -21,7 +21,7 @@ import {
   FileSpreadsheet,
   AlertCircle,
   CheckCircle,
-} from "lucide-react";
+} from 'lucide-react';
 
 export function GoogleSheetsIntegration() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -30,33 +30,33 @@ export function GoogleSheetsIntegration() {
   const [dryRun, setDryRun] = useState(true);
   const [analysis, setAnalysis] = useState<any>(null);
   const [importResult, setImportResult] = useState<any>(null);
-  const [sheetName, setSheetName] = useState("Sheet1");
+  const [sheetName, setSheetName] = useState('Sheet1');
   const { toast } = useToast();
 
   // Your provided Google Sheet URL and extracted ID
   const targetSheetUrl =
-    "https://docs.google.com/spreadsheets/d/1mjx5o6boluo8mNx8tzAV76NBGS6tF0um2Rq9bIdxPo8/edit?gid=2137648950#gid=2137648950";
-  const sheetId = "1mjx5o6boluo8mNx8tzAV76NBGS6tF0um2Rq9bIdxPo8";
+    'https://docs.google.com/spreadsheets/d/1mjx5o6boluo8mNx8tzAV76NBGS6tF0um2Rq9bIdxPo8/edit?gid=2137648950#gid=2137648950';
+  const sheetId = '1mjx5o6boluo8mNx8tzAV76NBGS6tF0um2Rq9bIdxPo8';
 
   const analyzeSheet = async () => {
     setIsAnalyzing(true);
     try {
       const response = await apiRequest(
-        "GET",
+        'GET',
         `/api/google-sheets/sync/analyze?sheet=${sheetName}`
       );
       setAnalysis(response.analysis);
       toast({
-        title: "Sheet Analysis Complete",
+        title: 'Sheet Analysis Complete',
         description: `Found ${response.analysis.totalRows} rows with ${response.analysis.headers.length} columns`,
       });
     } catch (error) {
-      console.error("Analysis failed:", error);
+      console.error('Analysis failed:', error);
       toast({
-        title: "Analysis Failed",
+        title: 'Analysis Failed',
         description:
-          "Unable to connect to Google Sheets. Please check API credentials.",
-        variant: "destructive",
+          'Unable to connect to Google Sheets. Please check API credentials.',
+        variant: 'destructive',
       });
     } finally {
       setIsAnalyzing(false);
@@ -67,8 +67,8 @@ export function GoogleSheetsIntegration() {
     setIsImporting(true);
     try {
       const response = await apiRequest(
-        "POST",
-        "/api/google-sheets/sync/import",
+        'POST',
+        '/api/google-sheets/sync/import',
         {
           sheetName,
           dryRun,
@@ -79,22 +79,23 @@ export function GoogleSheetsIntegration() {
 
       if (dryRun) {
         toast({
-          title: "Import Preview Complete",
-          description: `Preview: ${response.result.preview?.length ||
-            0} rows would be imported`,
+          title: 'Import Preview Complete',
+          description: `Preview: ${
+            response.result.preview?.length || 0
+          } rows would be imported`,
         });
       } else {
         toast({
-          title: "Import Complete",
+          title: 'Import Complete',
           description: `Imported ${response.result.imported} records, skipped ${response.result.skipped}`,
         });
       }
     } catch (error) {
-      console.error("Import failed:", error);
+      console.error('Import failed:', error);
       toast({
-        title: "Import Failed",
-        description: "Unable to import data from Google Sheets",
-        variant: "destructive",
+        title: 'Import Failed',
+        description: 'Unable to import data from Google Sheets',
+        variant: 'destructive',
       });
     } finally {
       setIsImporting(false);
@@ -105,23 +106,23 @@ export function GoogleSheetsIntegration() {
     setIsExporting(true);
     try {
       const response = await apiRequest(
-        "POST",
-        "/api/google-sheets/sync/export",
+        'POST',
+        '/api/google-sheets/sync/export',
         {
-          sheetName: "Database_Export",
+          sheetName: 'Database_Export',
         }
       );
 
       toast({
-        title: "Export Complete",
+        title: 'Export Complete',
         description: `Exported ${response.result.exported} records to Google Sheets`,
       });
     } catch (error) {
-      console.error("Export failed:", error);
+      console.error('Export failed:', error);
       toast({
-        title: "Export Failed",
-        description: "Unable to export data to Google Sheets",
-        variant: "destructive",
+        title: 'Export Failed',
+        description: 'Unable to export data to Google Sheets',
+        variant: 'destructive',
       });
     } finally {
       setIsExporting(false);
@@ -153,7 +154,7 @@ export function GoogleSheetsIntegration() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => window.open(targetSheetUrl, "_blank")}
+              onClick={() => window.open(targetSheetUrl, '_blank')}
             >
               <ExternalLink className="w-4 h-4 mr-2" />
               Open Sheet
@@ -236,8 +237,8 @@ export function GoogleSheetsIntegration() {
               <div>
                 <Label>Sample Data Row</Label>
                 <div className="mt-2 p-3 bg-gray-50 rounded text-sm font-mono">
-                  {analysis.sampleRow.slice(0, 5).join(" | ")}
-                  {analysis.sampleRow.length > 5 && "..."}
+                  {analysis.sampleRow.slice(0, 5).join(' | ')}
+                  {analysis.sampleRow.length > 5 && '...'}
                 </div>
               </div>
             )}
@@ -275,7 +276,7 @@ export function GoogleSheetsIntegration() {
             ) : (
               <Download className="w-4 h-4 mr-2" />
             )}
-            {dryRun ? "Preview Import" : "Import Data"}
+            {dryRun ? 'Preview Import' : 'Import Data'}
           </Button>
 
           {!analysis && (
@@ -293,7 +294,7 @@ export function GoogleSheetsIntegration() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <CheckCircle className="w-5 h-5 text-green-600" />
-              {dryRun ? "Import Preview Results" : "Import Results"}
+              {dryRun ? 'Import Preview Results' : 'Import Results'}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">

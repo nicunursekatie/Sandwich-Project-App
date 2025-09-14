@@ -1,16 +1,16 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Send, Users, Hash, Shield, Crown } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
-import { formatDistanceToNow } from "date-fns";
-import io, { Socket } from "socket.io-client";
-import LiveChatHub from "./live-chat-hub";
-import ChatMessageComponent from "./chat-message";
-import { HelpBubble, helpContent } from "@/components/help-system";
+import React, { useState, useEffect, useRef } from 'react';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Send, Users, Hash, Shield, Crown } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
+import { formatDistanceToNow } from 'date-fns';
+import io, { Socket } from 'socket.io-client';
+import LiveChatHub from './live-chat-hub';
+import ChatMessageComponent from './chat-message';
+import { HelpBubble, helpContent } from '@/components/help-system';
 
 interface ChatMessage {
   id: string;
@@ -32,53 +32,53 @@ interface ChannelInfo {
 
 const CHANNEL_INFO: Record<string, ChannelInfo> = {
   general: {
-    id: "general",
-    name: "General",
-    description: "Open discussion for all team members",
+    id: 'general',
+    name: 'General',
+    description: 'Open discussion for all team members',
     icon: <Hash className="h-5 w-5" />,
     isPrivate: false,
   },
-  "core-team": {
-    id: "core-team",
-    name: "Core Team",
-    description: "Private discussions for core team members",
+  'core-team': {
+    id: 'core-team',
+    name: 'Core Team',
+    description: 'Private discussions for core team members',
     icon: <Crown className="h-5 w-5" />,
     isPrivate: true,
   },
   committee: {
-    id: "committee",
-    name: "Committee",
-    description: "Committee member discussions",
+    id: 'committee',
+    name: 'Committee',
+    description: 'Committee member discussions',
     icon: <Users className="h-5 w-5" />,
     isPrivate: true,
   },
   host: {
-    id: "host",
-    name: "Host Chat",
-    description: "Communication for sandwich collection hosts",
+    id: 'host',
+    name: 'Host Chat',
+    description: 'Communication for sandwich collection hosts',
     icon: <Users className="h-5 w-5" />,
     isPrivate: false,
   },
   driver: {
-    id: "driver",
-    name: "Driver Chat",
-    description: "Coordination for delivery drivers",
+    id: 'driver',
+    name: 'Driver Chat',
+    description: 'Coordination for delivery drivers',
     icon: <Users className="h-5 w-5" />,
     isPrivate: false,
   },
   recipient: {
-    id: "recipient",
-    name: "Recipient Chat",
-    description: "Communication for recipient organizations",
+    id: 'recipient',
+    name: 'Recipient Chat',
+    description: 'Communication for recipient organizations',
     icon: <Users className="h-5 w-5" />,
     isPrivate: false,
   },
 };
 
 export default function EnhancedChat() {
-  const [selectedChannel, setSelectedChannel] = useState<string>("general");
+  const [selectedChannel, setSelectedChannel] = useState<string>('general');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [newMessage, setNewMessage] = useState("");
+  const [newMessage, setNewMessage] = useState('');
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [isJoined, setIsJoined] = useState(false);
@@ -92,35 +92,35 @@ export default function EnhancedChat() {
     if (!user) return;
 
     // Initialize socket connection
-    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const socketUrl = `${protocol}//${window.location.host}`;
     const socketInstance = io(socketUrl, {
-      transports: ["polling", "websocket"],
+      transports: ['polling', 'websocket'],
       upgrade: true,
       rememberUpgrade: false,
     });
 
     setSocket(socketInstance);
 
-    socketInstance.on("connect", () => {
+    socketInstance.on('connect', () => {
       setIsConnected(true);
-      console.log("Chat connected to Socket.IO");
+      console.log('Chat connected to Socket.IO');
     });
 
-    socketInstance.on("disconnect", () => {
+    socketInstance.on('disconnect', () => {
       setIsConnected(false);
       setIsJoined(false);
-      console.log("Chat disconnected from Socket.IO");
+      console.log('Chat disconnected from Socket.IO');
     });
 
-    socketInstance.on("joined-channel", ({ channel }) => {
+    socketInstance.on('joined-channel', ({ channel }) => {
       if (channel === selectedChannel) {
         setIsJoined(true);
         console.log(`Successfully joined channel: ${channel}`);
       }
     });
 
-    socketInstance.on("new-message", (message: ChatMessage) => {
+    socketInstance.on('new-message', (message: ChatMessage) => {
       if (message.channel === selectedChannel) {
         setMessages((prev) => [
           ...prev,
@@ -132,7 +132,7 @@ export default function EnhancedChat() {
       }
     });
 
-    socketInstance.on("message-history", (history: ChatMessage[]) => {
+    socketInstance.on('message-history', (history: ChatMessage[]) => {
       const formattedHistory = history.map((msg) => ({
         ...msg,
         timestamp: new Date(msg.timestamp || msg.createdAt),
@@ -140,7 +140,7 @@ export default function EnhancedChat() {
       setMessages(formattedHistory);
     });
 
-    socketInstance.on("message-edited", (editedMessage: ChatMessage) => {
+    socketInstance.on('message-edited', (editedMessage: ChatMessage) => {
       if (editedMessage.channel === selectedChannel) {
         setMessages((prev) =>
           prev.map((msg) =>
@@ -153,25 +153,25 @@ export default function EnhancedChat() {
           )
         );
         toast({
-          title: "Message edited",
-          description: "The message has been updated.",
+          title: 'Message edited',
+          description: 'The message has been updated.',
         });
       }
     });
 
-    socketInstance.on("message-deleted", ({ messageId, deletedBy }) => {
+    socketInstance.on('message-deleted', ({ messageId, deletedBy }) => {
       setMessages((prev) => prev.filter((msg) => msg.id !== messageId));
       toast({
-        title: "Message deleted",
+        title: 'Message deleted',
         description: `Message was deleted by ${deletedBy}`,
       });
     });
 
-    socketInstance.on("error", ({ message }) => {
+    socketInstance.on('error', ({ message }) => {
       toast({
-        title: "Error",
+        title: 'Error',
         description: message,
-        variant: "destructive",
+        variant: 'destructive',
       });
     });
 
@@ -187,15 +187,15 @@ export default function EnhancedChat() {
       setMessages([]); // Clear messages when switching channels
 
       const displayName =
-        user.displayName || user.firstName || user.email || "User";
-      console.log("Chat sending user data:", {
+        user.displayName || user.firstName || user.email || 'User';
+      console.log('Chat sending user data:', {
         displayName: user.displayName,
         firstName: user.firstName,
         email: user.email,
         finalName: displayName,
       });
 
-      socket.emit("join-channel", {
+      socket.emit('join-channel', {
         channel: selectedChannel,
         userId: user.id,
         userName: displayName,
@@ -210,13 +210,13 @@ export default function EnhancedChat() {
   const markChannelAsRead = async (channel: string) => {
     try {
       const response = await fetch(
-        "/api/message-notifications/mark-chat-read",
+        '/api/message-notifications/mark-chat-read',
         {
-          method: "POST",
+          method: 'POST',
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           },
-          credentials: "include",
+          credentials: 'include',
           body: JSON.stringify({ channel }),
         }
       );
@@ -224,7 +224,7 @@ export default function EnhancedChat() {
       if (response.ok) {
         console.log(`Marked all messages in ${channel} as read`);
         // Trigger a refresh of unread counts in the nav bar
-        window.dispatchEvent(new CustomEvent("refreshNotifications"));
+        window.dispatchEvent(new CustomEvent('refreshNotifications'));
       } else {
         console.warn(
           `Failed to mark ${channel} messages as read:`,
@@ -238,22 +238,22 @@ export default function EnhancedChat() {
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   const sendMessage = () => {
     if (!socket || !newMessage.trim() || !selectedChannel) return;
 
-    socket.emit("send-message", {
+    socket.emit('send-message', {
       channel: selectedChannel,
       content: newMessage.trim(),
     });
 
-    setNewMessage("");
+    setNewMessage('');
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
     }
@@ -262,7 +262,7 @@ export default function EnhancedChat() {
   const handleEditMessage = (messageId: string, newContent: string) => {
     if (!socket) return;
 
-    socket.emit("edit-message", {
+    socket.emit('edit-message', {
       messageId: parseInt(messageId),
       newContent,
     });
@@ -271,8 +271,8 @@ export default function EnhancedChat() {
   const handleDeleteMessage = (messageId: string) => {
     if (!socket) return;
 
-    if (window.confirm("Are you sure you want to delete this message?")) {
-      socket.emit("delete-message", {
+    if (window.confirm('Are you sure you want to delete this message?')) {
+      socket.emit('delete-message', {
         messageId: parseInt(messageId),
       });
     }
@@ -282,15 +282,15 @@ export default function EnhancedChat() {
     try {
       return formatDistanceToNow(timestamp, { addSuffix: true });
     } catch {
-      return "now";
+      return 'now';
     }
   };
 
   const getChannelHeaderClass = () => {
-    if (selectedChannel === "core-team") {
-      return "bg-gradient-to-r from-amber-500 to-orange-500 text-white";
+    if (selectedChannel === 'core-team') {
+      return 'bg-gradient-to-r from-amber-500 to-orange-500 text-white';
     }
-    return "bg-[#236383] text-white";
+    return 'bg-[#236383] text-white';
   };
 
   return (
@@ -331,13 +331,13 @@ export default function EnhancedChat() {
                 </Badge>
               )}
               <Badge
-                variant={isConnected ? "default" : "destructive"}
-                className={`text-xs ${isConnected ? "bg-green-500" : ""}`}
+                variant={isConnected ? 'default' : 'destructive'}
+                className={`text-xs ${isConnected ? 'bg-green-500' : ''}`}
               >
                 <span className="hidden sm:inline">
-                  {isConnected ? "Connected" : "Disconnected"}
+                  {isConnected ? 'Connected' : 'Disconnected'}
                 </span>
-                <span className="sm:hidden">{isConnected ? "●" : "○"}</span>
+                <span className="sm:hidden">{isConnected ? '●' : '○'}</span>
               </Badge>
             </div>
           </div>
@@ -393,7 +393,7 @@ export default function EnhancedChat() {
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder={`Message ${channelInfo?.name || "chat"}...`}
+              placeholder={`Message ${channelInfo?.name || 'chat'}...`}
               disabled={!isConnected || !isJoined}
               className="flex-1 text-sm sm:text-base h-10 sm:h-11"
             />

@@ -1,5 +1,5 @@
-import { google } from "googleapis";
-import { JWT } from "google-auth-library";
+import { google } from 'googleapis';
+import { JWT } from 'google-auth-library';
 
 export interface GoogleSheetsConfig {
   spreadsheetId: string;
@@ -41,21 +41,22 @@ export class GoogleSheetsService {
 
   private async initializeAuth() {
     try {
-      console.log("🔧 Initializing Google Sheets authentication...");
+      console.log('🔧 Initializing Google Sheets authentication...');
 
       // Run diagnostics if authentication fails repeatedly
-      if (process.env.NODE_ENV === "development") {
-        console.log("🔍 Running authentication diagnostics...");
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🔍 Running authentication diagnostics...');
         const { googleSheetsDiagnostics } = await import(
-          "./google-sheets-diagnostics"
+          './google-sheets-diagnostics'
         );
-        const diagnosticResults = await googleSheetsDiagnostics.runFullDiagnostics();
+        const diagnosticResults =
+          await googleSheetsDiagnostics.runFullDiagnostics();
         const criticalIssues = diagnosticResults.filter(
-          (r) => r.severity === "critical"
+          (r) => r.severity === 'critical'
         );
 
         if (criticalIssues.length > 0) {
-          console.log("❌ Critical authentication issues detected:");
+          console.log('❌ Critical authentication issues detected:');
           criticalIssues.forEach((issue) => {
             console.log(`   - ${issue.issue}: ${issue.description}`);
             console.log(`     Solution: ${issue.solution}`);
@@ -71,46 +72,46 @@ export class GoogleSheetsService {
 
       if (!clientEmail || !privateKey || !projectId) {
         throw new Error(
-          "Missing Google service account credentials (GOOGLE_SERVICE_ACCOUNT_EMAIL, GOOGLE_PRIVATE_KEY, GOOGLE_PROJECT_ID)"
+          'Missing Google service account credentials (GOOGLE_SERVICE_ACCOUNT_EMAIL, GOOGLE_PRIVATE_KEY, GOOGLE_PROJECT_ID)'
         );
       }
 
       // Handle private key format more robustly - Node.js v20 compatibility fix
       let cleanPrivateKey = privateKey;
 
-      console.log("🔧 Original private key format check:", {
-        hasBackslashN: cleanPrivateKey.includes("\\n"),
-        hasRealNewlines: cleanPrivateKey.includes("\n"),
-        hasBeginHeader: cleanPrivateKey.includes("-----BEGIN"),
+      console.log('🔧 Original private key format check:', {
+        hasBackslashN: cleanPrivateKey.includes('\\n'),
+        hasRealNewlines: cleanPrivateKey.includes('\n'),
+        hasBeginHeader: cleanPrivateKey.includes('-----BEGIN'),
         length: cleanPrivateKey.length,
       });
 
       // **NODE.JS v20 COMPATIBILITY FIX** - Handle all newline format issues
       // Replit often stores literal \n characters instead of actual newlines
-      if (cleanPrivateKey.includes("\\n")) {
-        cleanPrivateKey = cleanPrivateKey.replace(/\\n/g, "\n");
-        console.log("🔧 Converted \\n to actual newlines (Node.js v20 fix)");
+      if (cleanPrivateKey.includes('\\n')) {
+        cleanPrivateKey = cleanPrivateKey.replace(/\\n/g, '\n');
+        console.log('🔧 Converted \\n to actual newlines (Node.js v20 fix)');
       }
 
       // Additional newline handling for different platforms
       cleanPrivateKey = cleanPrivateKey
-        .replace(/\\r\\n/g, "\n") // Handle Windows-style escaped newlines
-        .replace(/\\r/g, "\n") // Handle Mac-style escaped newlines
-        .replace(/\r\n/g, "\n") // Normalize Windows newlines
-        .replace(/\r/g, "\n"); // Normalize Mac newlines
+        .replace(/\\r\\n/g, '\n') // Handle Windows-style escaped newlines
+        .replace(/\\r/g, '\n') // Handle Mac-style escaped newlines
+        .replace(/\r\n/g, '\n') // Normalize Windows newlines
+        .replace(/\r/g, '\n'); // Normalize Mac newlines
 
       // **CRITICAL NODE.JS v20 FIX** - Handle single-line key format from Replit
       if (
-        !cleanPrivateKey.includes("\n") &&
-        cleanPrivateKey.includes("-----BEGIN PRIVATE KEY-----")
+        !cleanPrivateKey.includes('\n') &&
+        cleanPrivateKey.includes('-----BEGIN PRIVATE KEY-----')
       ) {
         console.log(
-          "🔧 Detected single-line private key - fixing for Node.js v20..."
+          '🔧 Detected single-line private key - fixing for Node.js v20...'
         );
 
         // Extract the actual key content between headers
-        const beginMarker = "-----BEGIN PRIVATE KEY-----";
-        const endMarker = "-----END PRIVATE KEY-----";
+        const beginMarker = '-----BEGIN PRIVATE KEY-----';
+        const endMarker = '-----END PRIVATE KEY-----';
         const beginIndex = cleanPrivateKey.indexOf(beginMarker);
         const endIndex = cleanPrivateKey.indexOf(endMarker);
 
@@ -126,9 +127,9 @@ export class GoogleSheetsService {
           }
           lines.push(endMarker);
 
-          cleanPrivateKey = lines.join("\n");
+          cleanPrivateKey = lines.join('\n');
           console.log(
-            "🔧 Rebuilt private key with proper line breaks for Node.js v20"
+            '🔧 Rebuilt private key with proper line breaks for Node.js v20'
           );
         }
       }
@@ -139,28 +140,28 @@ export class GoogleSheetsService {
         (cleanPrivateKey.startsWith("'") && cleanPrivateKey.endsWith("'"))
       ) {
         cleanPrivateKey = cleanPrivateKey.slice(1, -1);
-        console.log("🔧 Removed surrounding quotes from private key");
+        console.log('🔧 Removed surrounding quotes from private key');
       }
 
       // Ensure proper PEM format
-      if (!cleanPrivateKey.includes("-----BEGIN PRIVATE KEY-----")) {
+      if (!cleanPrivateKey.includes('-----BEGIN PRIVATE KEY-----')) {
         // If it's just the key content without headers, add them
         cleanPrivateKey = `-----BEGIN PRIVATE KEY-----\n${cleanPrivateKey}\n-----END PRIVATE KEY-----`;
-        console.log("🔧 Added PEM headers to private key");
+        console.log('🔧 Added PEM headers to private key');
       }
 
       // Clean up any extra whitespace and normalize line endings
-      cleanPrivateKey = cleanPrivateKey.trim().replace(/\r\n/g, "\n");
+      cleanPrivateKey = cleanPrivateKey.trim().replace(/\r\n/g, '\n');
 
       // Ensure proper line breaks in PEM format
-      const lines = cleanPrivateKey.split("\n");
+      const lines = cleanPrivateKey.split('\n');
       const properLines = [];
 
       for (let line of lines) {
         line = line.trim();
         if (
-          line === "-----BEGIN PRIVATE KEY-----" ||
-          line === "-----END PRIVATE KEY-----"
+          line === '-----BEGIN PRIVATE KEY-----' ||
+          line === '-----END PRIVATE KEY-----'
         ) {
           properLines.push(line);
         } else if (line.length > 0) {
@@ -175,76 +176,76 @@ export class GoogleSheetsService {
         }
       }
 
-      cleanPrivateKey = properLines.join("\n");
+      cleanPrivateKey = properLines.join('\n');
 
-      console.log("🔧 Final private key format:", {
-        lineCount: cleanPrivateKey.split("\n").length,
+      console.log('🔧 Final private key format:', {
+        lineCount: cleanPrivateKey.split('\n').length,
         hasProperHeaders:
-          cleanPrivateKey.includes("-----BEGIN PRIVATE KEY-----") &&
-          cleanPrivateKey.includes("-----END PRIVATE KEY-----"),
+          cleanPrivateKey.includes('-----BEGIN PRIVATE KEY-----') &&
+          cleanPrivateKey.includes('-----END PRIVATE KEY-----'),
         properFormat:
-          cleanPrivateKey.split("\n")[0] === "-----BEGIN PRIVATE KEY-----",
+          cleanPrivateKey.split('\n')[0] === '-----BEGIN PRIVATE KEY-----',
       });
 
       // Use direct JWT authentication - simpler and more reliable
       try {
-        console.log("🔧 Attempting direct JWT authentication...");
+        console.log('🔧 Attempting direct JWT authentication...');
 
         // Simple JWT auth using google.auth.JWT directly
         const auth = new google.auth.JWT(
           clientEmail,
           undefined,
           cleanPrivateKey,
-          ["https://www.googleapis.com/auth/spreadsheets"]
+          ['https://www.googleapis.com/auth/spreadsheets']
         );
 
         this.auth = auth;
-        this.sheets = google.sheets({ version: "v4", auth });
+        this.sheets = google.sheets({ version: 'v4', auth });
 
         // Test with a simple API call to verify authentication actually works
-        console.log("🔧 Testing authentication with real API call...");
+        console.log('🔧 Testing authentication with real API call...');
 
         try {
           // **REAL AUTH TEST** - Test against user's ACTUAL spreadsheet, not demo
           if (!this.config.spreadsheetId) {
             throw new Error(
-              "No spreadsheetId provided for authentication test"
+              'No spreadsheetId provided for authentication test'
             );
           }
 
           const testResponse = await this.sheets.spreadsheets.get({
             spreadsheetId: this.config.spreadsheetId, // Test user's REAL spreadsheet
-            fields: "spreadsheetId,properties.title",
+            fields: 'spreadsheetId,properties.title',
           });
 
           console.log(
             "✅ Authentication test successful against USER'S spreadsheet:",
             {
               spreadsheetId: testResponse.data.spreadsheetId,
-              title: testResponse.data.properties?.title || "Unknown",
+              title: testResponse.data.properties?.title || 'Unknown',
             }
           );
 
           console.log(
-            "✅ Google Sheets JWT authentication FULLY VERIFIED against actual spreadsheet"
+            '✅ Google Sheets JWT authentication FULLY VERIFIED against actual spreadsheet'
           );
           return;
         } catch (testError) {
-          console.error("❌ Authentication test failed:", testError.message);
+          console.error('❌ Authentication test failed:', testError.message);
           throw new Error(
             `JWT authentication test failed: ${testError.message}`
           );
         }
       } catch (authError) {
         console.log(
-          "⚠️ JWT auth failed, trying simplified approach:",
+          '⚠️ JWT auth failed, trying simplified approach:',
           (authError as Error).message
         );
       }
 
       // Fallback to file-based authentication if JWT fails
-      const fs = await import("fs");
-      const path = await import("path");
+      const fs = await import('fs');
+      const path = await import('path');
 
       // Use minimal service account content - avoid empty private_key_id
       const serviceAccountContent = JSON.stringify(
@@ -258,41 +259,41 @@ export class GoogleSheetsService {
 
       const tempFilePath = path.join(
         process.cwd(),
-        "google-service-account.json"
+        'google-service-account.json'
       );
       fs.writeFileSync(tempFilePath, serviceAccountContent);
-      console.log("🔧 Created temporary service account file");
+      console.log('🔧 Created temporary service account file');
 
       const auth = new google.auth.GoogleAuth({
         keyFile: tempFilePath,
-        scopes: ["https://www.googleapis.com/auth/spreadsheets"],
+        scopes: ['https://www.googleapis.com/auth/spreadsheets'],
       });
 
       const authClient = await auth.getClient();
       this.auth = authClient as JWT;
-      this.sheets = google.sheets({ version: "v4", auth: authClient });
+      this.sheets = google.sheets({ version: 'v4', auth: authClient });
 
       // Test file-based authentication with real API call
-      console.log("🔧 Testing file-based authentication with real API call...");
+      console.log('🔧 Testing file-based authentication with real API call...');
 
       try {
         // **REAL AUTH TEST** - Test against user's ACTUAL spreadsheet
         if (!this.config.spreadsheetId) {
           throw new Error(
-            "No spreadsheetId provided for file-based authentication test"
+            'No spreadsheetId provided for file-based authentication test'
           );
         }
 
         const testResponse = await this.sheets.spreadsheets.get({
           spreadsheetId: this.config.spreadsheetId, // Test user's REAL spreadsheet
-          fields: "spreadsheetId,properties.title",
+          fields: 'spreadsheetId,properties.title',
         });
 
         console.log(
           "✅ File-based authentication test successful against USER'S spreadsheet:",
           {
             spreadsheetId: testResponse.data.spreadsheetId,
-            title: testResponse.data.properties?.title || "Unknown",
+            title: testResponse.data.properties?.title || 'Unknown',
           }
         );
       } catch (testError) {
@@ -305,32 +306,32 @@ export class GoogleSheetsService {
         );
       }
 
-      console.log("✅ Google Sheets file-based authentication fully verified");
+      console.log('✅ Google Sheets file-based authentication fully verified');
 
       // Clean up temp file
       fs.unlinkSync(tempFilePath);
-      console.log("🔧 Cleaned up temporary service account file");
+      console.log('🔧 Cleaned up temporary service account file');
     } catch (error) {
-      console.error("❌ Google Sheets authentication failed:", error.message);
+      console.error('❌ Google Sheets authentication failed:', error.message);
       if (
-        error.message.includes("DECODER") ||
-        error.message.includes("OSSL_UNSUPPORTED")
+        error.message.includes('DECODER') ||
+        error.message.includes('OSSL_UNSUPPORTED')
       ) {
         console.error(
-          "💡 This is a Node.js v20 OpenSSL compatibility issue with the private key format"
+          '💡 This is a Node.js v20 OpenSSL compatibility issue with the private key format'
         );
         console.error(
-          "💡 The private key from your Google Cloud Console may need to be regenerated for Node.js v20+"
+          '💡 The private key from your Google Cloud Console may need to be regenerated for Node.js v20+'
         );
       }
 
       // Clean up temp file on error
       try {
-        const fs = await import("fs");
-        const path = await import("path");
+        const fs = await import('fs');
+        const path = await import('path');
         const tempFilePath = path.join(
           process.cwd(),
-          "google-service-account.json"
+          'google-service-account.json'
         );
         if (fs.existsSync(tempFilePath)) {
           fs.unlinkSync(tempFilePath);
@@ -339,7 +340,7 @@ export class GoogleSheetsService {
         // Ignore cleanup errors
       }
 
-      throw new Error("Failed to initialize Google Sheets service");
+      throw new Error('Failed to initialize Google Sheets service');
     }
   }
 
@@ -361,25 +362,25 @@ export class GoogleSheetsService {
       // Skip header row and parse data - accounting for NEW sheet structure with Category
       const dataRows = rows.slice(1);
       return dataRows.map((row: any[], index: number) => ({
-        task: row[0] || "", // Column A: Task
-        reviewStatus: row[1] || "", // Column B: Review Status (P1, P2, etc.)
-        priority: row[2] || "", // Column C: Priority
-        owner: row[3] || "", // Column D: Owner
-        supportPeople: row[4] || "", // Column E: Support people
-        status: row[5] || "", // Column F: Status (actual project status)
-        startDate: row[6] || "", // Column G: Start
-        endDate: row[7] || "", // Column H: End date
-        category: row[8] || "", // Column I: Category (NEW - added after end date)
-        milestone: row[9] || "", // Column J: Milestone (shifted from I)
-        subTasksOwners: row[10] || "", // Column K: Sub-Tasks | Owners (shifted from J)
-        deliverable: row[11] || "", // Column L: Deliverable (shifted from K)
-        notes: row[12] || "", // Column M: Notes (shifted from L)
-        lastDiscussedDate: row[13] || "", // Column N: Last Discussed Date (shifted from M)
+        task: row[0] || '', // Column A: Task
+        reviewStatus: row[1] || '', // Column B: Review Status (P1, P2, etc.)
+        priority: row[2] || '', // Column C: Priority
+        owner: row[3] || '', // Column D: Owner
+        supportPeople: row[4] || '', // Column E: Support people
+        status: row[5] || '', // Column F: Status (actual project status)
+        startDate: row[6] || '', // Column G: Start
+        endDate: row[7] || '', // Column H: End date
+        category: row[8] || '', // Column I: Category (NEW - added after end date)
+        milestone: row[9] || '', // Column J: Milestone (shifted from I)
+        subTasksOwners: row[10] || '', // Column K: Sub-Tasks | Owners (shifted from J)
+        deliverable: row[11] || '', // Column L: Deliverable (shifted from K)
+        notes: row[12] || '', // Column M: Notes (shifted from L)
+        lastDiscussedDate: row[13] || '', // Column N: Last Discussed Date (shifted from M)
         rowIndex: index + 2, // +2 because sheets are 1-indexed and we skip header
       }));
     } catch (error) {
-      console.error("Error reading Google Sheet:", error);
-      throw new Error("Failed to read from Google Sheets");
+      console.error('Error reading Google Sheet:', error);
+      throw new Error('Failed to read from Google Sheets');
     }
   }
 
@@ -446,7 +447,7 @@ export class GoogleSheetsService {
         await this.sheets.spreadsheets.values.batchUpdate({
           spreadsheetId: this.config.spreadsheetId,
           resource: {
-            valueInputOption: "USER_ENTERED",
+            valueInputOption: 'USER_ENTERED',
             data: updates,
           },
         });
@@ -469,7 +470,7 @@ export class GoogleSheetsService {
         await this.sheets.spreadsheets.values.update({
           spreadsheetId: this.config.spreadsheetId,
           range: `${this.config.worksheetName}!A${insertRowStart}:N${insertRowEnd}`,
-          valueInputOption: "USER_ENTERED",
+          valueInputOption: 'USER_ENTERED',
           resource: {
             values: newRows,
           },
@@ -482,8 +483,8 @@ export class GoogleSheetsService {
 
       return true;
     } catch (error) {
-      console.error("Error updating Google Sheet:", error);
-      throw new Error("Failed to update Google Sheets");
+      console.error('Error updating Google Sheet:', error);
+      throw new Error('Failed to update Google Sheets');
     }
   }
 
@@ -537,7 +538,7 @@ export class GoogleSheetsService {
         await this.sheets.spreadsheets.values.update({
           spreadsheetId: this.config.spreadsheetId,
           range: `${this.config.worksheetName}!A${insertRowStart}:M${insertRowEnd}`,
-          valueInputOption: "USER_ENTERED",
+          valueInputOption: 'USER_ENTERED',
           resource: {
             values: newRows,
           },
@@ -553,8 +554,8 @@ export class GoogleSheetsService {
         skipped: rows.length - newRows.length,
       };
     } catch (error) {
-      console.error("Error in append-only sync:", error);
-      throw new Error("Failed to perform append-only sync");
+      console.error('Error in append-only sync:', error);
+      throw new Error('Failed to perform append-only sync');
     }
   }
 
@@ -564,31 +565,31 @@ export class GoogleSheetsService {
   async ensureHeaders(): Promise<void> {
     try {
       const headers = [
-        "Task", // Column A (Project title)
-        "Status", // Column B (Review Status: P1, P2, etc.)
-        "Priority", // Column C
-        "Owner", // Column D
-        "Support people", // Column E
-        "Status", // Column F (Actual project status)
-        "Start", // Column G
-        "End date", // Column H
-        "Milestone", // Column I
-        "Sub-Tasks | Owners", // Column J (Individual tasks within project)
-        "Deliverable", // Column K
-        "Notes", // Column L
+        'Task', // Column A (Project title)
+        'Status', // Column B (Review Status: P1, P2, etc.)
+        'Priority', // Column C
+        'Owner', // Column D
+        'Support people', // Column E
+        'Status', // Column F (Actual project status)
+        'Start', // Column G
+        'End date', // Column H
+        'Milestone', // Column I
+        'Sub-Tasks | Owners', // Column J (Individual tasks within project)
+        'Deliverable', // Column K
+        'Notes', // Column L
       ];
 
       await this.sheets.spreadsheets.values.update({
         spreadsheetId: this.config.spreadsheetId,
         range: `${this.config.worksheetName}!A1:L1`,
-        valueInputOption: "USER_ENTERED",
+        valueInputOption: 'USER_ENTERED',
         requestBody: {
           values: [headers],
         },
       });
     } catch (error) {
-      console.error("Error setting headers:", error);
-      throw new Error("Failed to set sheet headers");
+      console.error('Error setting headers:', error);
+      throw new Error('Failed to set sheet headers');
     }
   }
 
@@ -598,12 +599,12 @@ export class GoogleSheetsService {
   parseTasksAndOwners(
     text: string
   ): Array<{ task: string; owner: string | null }> {
-    if (!text || typeof text !== "string") return [];
+    if (!text || typeof text !== 'string') return [];
 
     const tasks: Array<{ task: string; owner: string | null }> = [];
 
     // Split by commas first
-    const segments = text.split(",").map((s) => s.trim());
+    const segments = text.split(',').map((s) => s.trim());
 
     for (const segment of segments) {
       // Look for "Name: Task" format
@@ -641,13 +642,13 @@ export class GoogleSheetsService {
   ): string {
     return tasks
       .map(({ task, owner }) => (owner ? `${owner}: ${task}` : task))
-      .join(", ");
+      .join(', ');
   }
 
   private parseBoolean(value: any): boolean {
-    if (typeof value === "boolean") return value;
-    if (typeof value === "string") {
-      return ["yes", "true", "1", "on"].includes(value.toLowerCase());
+    if (typeof value === 'boolean') return value;
+    if (typeof value === 'string') {
+      return ['yes', 'true', '1', 'on'].includes(value.toLowerCase());
     }
     return false;
   }
@@ -665,7 +666,7 @@ export function getGoogleSheetsService(
     !process.env.GOOGLE_PRIVATE_KEY
   ) {
     console.log(
-      "Google Sheets service not configured - missing environment variables"
+      'Google Sheets service not configured - missing environment variables'
     );
     return null;
   }
@@ -674,7 +675,7 @@ export function getGoogleSheetsService(
   if (customConfig) {
     if (!customConfig.spreadsheetId) {
       console.log(
-        "Google Sheets service not configured - missing spreadsheetId in custom config"
+        'Google Sheets service not configured - missing spreadsheetId in custom config'
       );
       return null;
     }
@@ -684,13 +685,13 @@ export function getGoogleSheetsService(
   // Default singleton behavior for backward compatibility
   if (!sheetsService) {
     const config: GoogleSheetsConfig = {
-      spreadsheetId: process.env.GOOGLE_SPREADSHEET_ID || "",
-      worksheetName: process.env.GOOGLE_WORKSHEET_NAME || "Sheet1",
+      spreadsheetId: process.env.GOOGLE_SPREADSHEET_ID || '',
+      worksheetName: process.env.GOOGLE_WORKSHEET_NAME || 'Sheet1',
     };
 
     if (!config.spreadsheetId) {
       console.log(
-        "Google Sheets service not configured - missing GOOGLE_SPREADSHEET_ID"
+        'Google Sheets service not configured - missing GOOGLE_SPREADSHEET_ID'
       );
       return null;
     }
@@ -705,14 +706,14 @@ export function getGoogleSheetsService(
 export function getProjectsGoogleSheetsService(): GoogleSheetsService | null {
   if (!process.env.PROJECTS_SHEET_ID) {
     console.log(
-      "Projects Google Sheets service not configured - missing PROJECTS_SHEET_ID"
+      'Projects Google Sheets service not configured - missing PROJECTS_SHEET_ID'
     );
     return null;
   }
 
   const config: GoogleSheetsConfig = {
     spreadsheetId: process.env.PROJECTS_SHEET_ID,
-    worksheetName: process.env.PROJECTS_WORKSHEET_NAME || "Sheet1",
+    worksheetName: process.env.PROJECTS_WORKSHEET_NAME || 'Sheet1',
   };
 
   return getGoogleSheetsService(config);

@@ -1,14 +1,14 @@
-import { useState, useEffect, useRef } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { useSocketChat, ChatMessage, ChatRoom } from "@/hooks/useSocketChat";
-import { useAuth } from "@/hooks/useAuth";
-import { ChatMessageLikeButton } from "./chat-message-like-button";
-import { MentionInput, MessageWithMentions } from "@/components/mention-input";
+import { useState, useEffect, useRef } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useSocketChat, ChatMessage, ChatRoom } from '@/hooks/useSocketChat';
+import { useAuth } from '@/hooks/useAuth';
+import { ChatMessageLikeButton } from './chat-message-like-button';
+import { MentionInput, MessageWithMentions } from '@/components/mention-input';
 import {
   MessageSquare,
   Send,
@@ -23,29 +23,29 @@ import {
   MessageCircle,
   Menu,
   Grid3X3,
-} from "lucide-react";
+} from 'lucide-react';
 
 const getRoomIcon = (roomId: string) => {
   switch (roomId) {
-    case "general":
+    case 'general':
       return <Hash className="h-4 w-4" />;
-    case "core-team":
+    case 'core-team':
       return <Shield className="h-4 w-4" />;
-    case "grants-committee":
+    case 'grants-committee':
       return <Users className="h-4 w-4" />;
-    case "events-committee":
+    case 'events-committee':
       return <Users className="h-4 w-4" />;
-    case "board-chat":
+    case 'board-chat':
       return <Users className="h-4 w-4" />;
-    case "web-committee":
+    case 'web-committee':
       return <Users className="h-4 w-4" />;
-    case "volunteer-management":
+    case 'volunteer-management':
       return <Users className="h-4 w-4" />;
-    case "host":
+    case 'host':
       return <Heart className="h-4 w-4" />;
-    case "driver":
+    case 'driver':
       return <Truck className="h-4 w-4" />;
-    case "recipient":
+    case 'recipient':
       return <MessageSquare className="h-4 w-4" />;
     default:
       return <Hash className="h-4 w-4" />;
@@ -54,54 +54,54 @@ const getRoomIcon = (roomId: string) => {
 
 const getRoomColor = (roomId: string) => {
   switch (roomId) {
-    case "general":
-      return "bg-blue-100 text-blue-800";
-    case "core-team":
-      return "bg-red-100 text-red-800";
-    case "grants-committee":
-      return "bg-purple-100 text-purple-800";
-    case "events-committee":
-      return "bg-purple-100 text-purple-800";
-    case "board-chat":
-      return "bg-purple-100 text-purple-800";
-    case "web-committee":
-      return "bg-purple-100 text-purple-800";
-    case "volunteer-management":
-      return "bg-purple-100 text-purple-800";
-    case "host":
-      return "bg-green-100 text-green-800";
-    case "driver":
-      return "bg-orange-100 text-orange-800";
-    case "recipient":
-      return "bg-pink-100 text-pink-800";
+    case 'general':
+      return 'bg-blue-100 text-blue-800';
+    case 'core-team':
+      return 'bg-red-100 text-red-800';
+    case 'grants-committee':
+      return 'bg-purple-100 text-purple-800';
+    case 'events-committee':
+      return 'bg-purple-100 text-purple-800';
+    case 'board-chat':
+      return 'bg-purple-100 text-purple-800';
+    case 'web-committee':
+      return 'bg-purple-100 text-purple-800';
+    case 'volunteer-management':
+      return 'bg-purple-100 text-purple-800';
+    case 'host':
+      return 'bg-green-100 text-green-800';
+    case 'driver':
+      return 'bg-orange-100 text-orange-800';
+    case 'recipient':
+      return 'bg-pink-100 text-pink-800';
     default:
-      return "bg-gray-100 text-gray-800";
+      return 'bg-gray-100 text-gray-800';
   }
 };
 
 // Helper function to get required permission for each room
 const getRoomPermission = (roomId: string): string | null => {
   switch (roomId) {
-    case "general":
-      return "CHAT_GENERAL";
-    case "core-team":
-      return "CHAT_CORE_TEAM";
-    case "grants-committee":
-      return "CHAT_GRANTS_COMMITTEE";
-    case "events-committee":
-      return "CHAT_EVENTS_COMMITTEE";
-    case "board-chat":
-      return "CHAT_BOARD";
-    case "web-committee":
-      return "CHAT_WEB_COMMITTEE";
-    case "volunteer-management":
-      return "CHAT_VOLUNTEER_MANAGEMENT";
-    case "host":
-      return "CHAT_HOST";
-    case "driver":
-      return "CHAT_DRIVER";
-    case "recipient":
-      return "CHAT_RECIPIENT";
+    case 'general':
+      return 'CHAT_GENERAL';
+    case 'core-team':
+      return 'CHAT_CORE_TEAM';
+    case 'grants-committee':
+      return 'CHAT_GRANTS_COMMITTEE';
+    case 'events-committee':
+      return 'CHAT_EVENTS_COMMITTEE';
+    case 'board-chat':
+      return 'CHAT_BOARD';
+    case 'web-committee':
+      return 'CHAT_WEB_COMMITTEE';
+    case 'volunteer-management':
+      return 'CHAT_VOLUNTEER_MANAGEMENT';
+    case 'host':
+      return 'CHAT_HOST';
+    case 'driver':
+      return 'CHAT_DRIVER';
+    case 'recipient':
+      return 'CHAT_RECIPIENT';
     default:
       return null;
   }
@@ -120,14 +120,14 @@ export default function SocketChatHub() {
     setCurrentRoom,
   } = useSocketChat();
 
-  const [newMessage, setNewMessage] = useState("");
+  const [newMessage, setNewMessage] = useState('');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   // Track if user is near bottom of scroll area
@@ -159,8 +159,8 @@ export default function SocketChatHub() {
     };
 
     checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   useEffect(() => {
@@ -172,7 +172,7 @@ export default function SocketChatHub() {
   const handleSendMessage = () => {
     if (newMessage.trim() && currentRoom) {
       sendMessage(currentRoom, newMessage.trim());
-      setNewMessage("");
+      setNewMessage('');
     }
   };
 
@@ -184,7 +184,7 @@ export default function SocketChatHub() {
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
     }
@@ -198,7 +198,7 @@ export default function SocketChatHub() {
     );
 
     // Show "now" for very recent messages
-    if (diffInMinutes < 1) return "now";
+    if (diffInMinutes < 1) return 'now';
 
     // Show relative time for very recent messages
     if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
@@ -207,8 +207,8 @@ export default function SocketChatHub() {
     const isToday = date.toDateString() === now.toDateString();
     if (isToday) {
       return date.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
+        hour: '2-digit',
+        minute: '2-digit',
       });
     }
 
@@ -218,8 +218,8 @@ export default function SocketChatHub() {
     const isYesterday = date.toDateString() === yesterday.toDateString();
     if (isYesterday) {
       return `Yesterday ${date.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
+        hour: '2-digit',
+        minute: '2-digit',
       })}`;
     }
 
@@ -228,26 +228,26 @@ export default function SocketChatHub() {
     weekAgo.setDate(weekAgo.getDate() - 7);
     if (date > weekAgo) {
       return `${date.toLocaleDateString([], {
-        weekday: "short",
+        weekday: 'short',
       })} ${date.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
+        hour: '2-digit',
+        minute: '2-digit',
       })}`;
     }
 
     // For older messages, show full date and time
     return `${date.toLocaleDateString([], {
-      month: "short",
-      day: "numeric",
-    })} ${date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+      month: 'short',
+      day: 'numeric',
+    })} ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
   };
 
   const getInitials = (name: string | undefined) => {
-    if (!name) return "U";
+    if (!name) return 'U';
     return name
-      .split(" ")
+      .split(' ')
       .map((n) => n[0])
-      .join("")
+      .join('')
       .toUpperCase()
       .slice(0, 2);
   };
@@ -261,7 +261,7 @@ export default function SocketChatHub() {
     const diffInDays = Math.floor(diffInHours / 24);
 
     // Less than 1 minute
-    if (diffInMinutes < 1) return "now";
+    if (diffInMinutes < 1) return 'now';
 
     // Less than 1 hour - show minutes
     if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
@@ -270,18 +270,18 @@ export default function SocketChatHub() {
     if (diffInHours < 24) return `${diffInHours}h ago`;
 
     // Yesterday
-    if (diffInDays === 1) return "Yesterday";
+    if (diffInDays === 1) return 'Yesterday';
 
     // Today (should not happen given the logic above, but safety check)
-    if (date.toDateString() === now.toDateString()) return "Today";
+    if (date.toDateString() === now.toDateString()) return 'Today';
 
     // Less than a week - show day name
     if (diffInDays < 7) {
-      return date.toLocaleDateString("en-US", { weekday: "long" });
+      return date.toLocaleDateString('en-US', { weekday: 'long' });
     }
 
     // More than a week - show date
-    return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
   // Group messages by relative time periods
@@ -310,7 +310,7 @@ export default function SocketChatHub() {
   return (
     <div
       className={`flex bg-white relative ${
-        isMobile ? "overflow-hidden h-[calc(100vh-200px)]" : "h-full"
+        isMobile ? 'overflow-hidden h-[calc(100vh-200px)]' : 'h-full'
       }`}
     >
       {/* Mobile Overlay */}
@@ -327,9 +327,9 @@ export default function SocketChatHub() {
         ${
           isMobile
             ? `fixed left-0 top-0 h-full w-80 z-20 transform transition-transform duration-300 ${
-                showSidebar ? "translate-x-0" : "-translate-x-full"
+                showSidebar ? 'translate-x-0' : '-translate-x-full'
               }`
-            : "w-72 relative h-full"
+            : 'w-72 relative h-full'
         } bg-gray-50 border-r border-gray-200 flex flex-col
       `}
       >
@@ -370,8 +370,8 @@ export default function SocketChatHub() {
                 key={room.id}
                 className={`rounded border ${
                   currentRoom === room.id
-                    ? "bg-[#236383] border-[#236383]"
-                    : "bg-white border-gray-200 hover:border-gray-300"
+                    ? 'bg-[#236383] border-[#236383]'
+                    : 'bg-white border-gray-200 hover:border-gray-300'
                 } transition-colors`}
               >
                 <button
@@ -383,8 +383,8 @@ export default function SocketChatHub() {
                       <span
                         className={
                           currentRoom === room.id
-                            ? "text-white"
-                            : "text-[#236383]"
+                            ? 'text-white'
+                            : 'text-[#236383]'
                         }
                       >
                         {getRoomIcon(room.id)}
@@ -392,8 +392,8 @@ export default function SocketChatHub() {
                       <span
                         className={`font-medium text-sm ${
                           currentRoom === room.id
-                            ? "text-white"
-                            : "text-gray-900"
+                            ? 'text-white'
+                            : 'text-gray-900'
                         }`}
                       >
                         {room.name}
@@ -404,8 +404,8 @@ export default function SocketChatHub() {
                         variant="outline"
                         className={`text-xs ${
                           currentRoom === room.id
-                            ? "border-white/30 text-white/90"
-                            : "border-gray-300 text-gray-500"
+                            ? 'border-white/30 text-white/90'
+                            : 'border-gray-300 text-gray-500'
                         }`}
                       >
                         {(messages[room.id] || []).length}
@@ -415,19 +415,19 @@ export default function SocketChatHub() {
                   <p
                     className={`text-xs leading-tight ${
                       currentRoom === room.id
-                        ? "text-blue-100"
-                        : "text-gray-500"
+                        ? 'text-blue-100'
+                        : 'text-gray-500'
                     }`}
                   >
                     {(() => {
                       const roomMessages = messages[room.id] || [];
                       if (roomMessages.length === 0) {
-                        return "No messages yet • Click to start the conversation";
+                        return 'No messages yet • Click to start the conversation';
                       }
                       const lastMessage = roomMessages[roomMessages.length - 1];
                       const preview =
                         lastMessage.content.length > 40
-                          ? lastMessage.content.substring(0, 40) + "..."
+                          ? lastMessage.content.substring(0, 40) + '...'
                           : lastMessage.content;
                       return `${lastMessage.userName}: ${preview}`;
                     })()}
@@ -440,7 +440,7 @@ export default function SocketChatHub() {
 
       {/* Main Chat Area - Fixed Layout */}
       <div
-        className={`flex-1 flex flex-col ${isMobile ? "h-full" : "min-h-0"}`}
+        className={`flex-1 flex flex-col ${isMobile ? 'h-full' : 'min-h-0'}`}
       >
         {currentRoom ? (
           <>
@@ -463,25 +463,25 @@ export default function SocketChatHub() {
                   <div className="min-w-0 flex-1">
                     <h3 className="text-lg font-semibold truncate">
                       {rooms.find((r) => r.id === currentRoom)?.name ||
-                        "Unknown Room"}
+                        'Unknown Room'}
                     </h3>
                     <p className="text-blue-100 text-sm truncate hidden sm:block">
-                      {currentRoom === "general" &&
-                        "Open discussion for all team members"}
-                      {currentRoom === "core-team" && "Core team coordination"}
-                      {currentRoom === "grants-committee" &&
-                        "Grants and funding discussions"}
-                      {currentRoom === "events-committee" &&
-                        "Event planning and coordination"}
-                      {currentRoom === "board-chat" &&
-                        "Board member governance"}
-                      {currentRoom === "web-committee" &&
-                        "Website and digital strategy"}
-                      {currentRoom === "volunteer-management" &&
-                        "Volunteer coordination"}
-                      {currentRoom === "host" && "Host coordination"}
-                      {currentRoom === "driver" && "Driver coordination"}
-                      {currentRoom === "recipient" && "Recipient communication"}
+                      {currentRoom === 'general' &&
+                        'Open discussion for all team members'}
+                      {currentRoom === 'core-team' && 'Core team coordination'}
+                      {currentRoom === 'grants-committee' &&
+                        'Grants and funding discussions'}
+                      {currentRoom === 'events-committee' &&
+                        'Event planning and coordination'}
+                      {currentRoom === 'board-chat' &&
+                        'Board member governance'}
+                      {currentRoom === 'web-committee' &&
+                        'Website and digital strategy'}
+                      {currentRoom === 'volunteer-management' &&
+                        'Volunteer coordination'}
+                      {currentRoom === 'host' && 'Host coordination'}
+                      {currentRoom === 'driver' && 'Driver coordination'}
+                      {currentRoom === 'recipient' && 'Recipient communication'}
                     </p>
                   </div>
                 </div>
@@ -498,7 +498,7 @@ export default function SocketChatHub() {
                     </Button>
                   )}
                   <Badge className="bg-green-500 text-white border-green-400 hidden sm:block">
-                    {connected ? "Connected" : "Disconnected"}
+                    {connected ? 'Connected' : 'Disconnected'}
                   </Badge>
                 </div>
               </div>
@@ -507,12 +507,12 @@ export default function SocketChatHub() {
             {/* Messages - Scrollable Middle Section */}
             <div
               className={`flex-1 bg-white ${
-                isMobile ? "overflow-hidden" : "min-h-0"
+                isMobile ? 'overflow-hidden' : 'min-h-0'
               }`}
             >
               <ScrollArea
                 className={`${
-                  isMobile ? "h-full" : "h-full"
+                  isMobile ? 'h-full' : 'h-full'
                 } px-2 md:px-4 py-2 md:py-3`}
                 onScroll={(e) => {
                   const target = e.target as HTMLDivElement;
@@ -523,23 +523,22 @@ export default function SocketChatHub() {
                   );
                 }}
               >
-                <div className={isMobile ? "space-y-0" : "space-y-1"}>
+                <div className={isMobile ? 'space-y-0' : 'space-y-1'}>
                   {(() => {
                     const currentMessages = messages[currentRoom] || [];
-                    const groupedMessages = groupMessagesByTime(
-                      currentMessages
-                    );
+                    const groupedMessages =
+                      groupMessagesByTime(currentMessages);
 
                     return Object.entries(groupedMessages).map(
                       ([timeLabel, timeMessages]) => (
                         <div
                           key={timeLabel}
-                          className={isMobile ? "mb-3" : "mb-6"}
+                          className={isMobile ? 'mb-3' : 'mb-6'}
                         >
                           {/* Time separator - iMessage style */}
                           <div
                             className={`flex items-center justify-end ${
-                              isMobile ? "mb-2" : "mb-4"
+                              isMobile ? 'mb-2' : 'mb-4'
                             }`}
                           >
                             <span className="text-xs text-gray-500 bg-gray-100 px-2 md:px-3 py-1 rounded-full">
@@ -550,23 +549,23 @@ export default function SocketChatHub() {
                           {/* Messages for this time period */}
                           {timeMessages.map((message: ChatMessage, index) => {
                             console.log(
-                              "Rendering socket chat message:",
+                              'Rendering socket chat message:',
                               message
                             );
 
                             // Generate consistent colors based on user name
                             const getAvatarColor = (userName: string) => {
                               const colors = [
-                                "bg-blue-500",
-                                "bg-green-500",
-                                "bg-purple-500",
-                                "bg-orange-500",
-                                "bg-pink-500",
-                                "bg-indigo-500",
-                                "bg-red-500",
-                                "bg-teal-500",
+                                'bg-blue-500',
+                                'bg-green-500',
+                                'bg-purple-500',
+                                'bg-orange-500',
+                                'bg-pink-500',
+                                'bg-indigo-500',
+                                'bg-red-500',
+                                'bg-teal-500',
                               ];
-                              const hash = userName.split("").reduce((a, b) => {
+                              const hash = userName.split('').reduce((a, b) => {
                                 a = (a << 5) - a + b.charCodeAt(0);
                                 return a & a;
                               }, 0);
@@ -577,7 +576,7 @@ export default function SocketChatHub() {
                               <div
                                 key={message.id}
                                 className={`flex gap-2 group ${
-                                  isMobile ? "py-0.5 mb-1" : "py-1"
+                                  isMobile ? 'py-0.5 mb-1' : 'py-1'
                                 }`}
                               >
                                 <Avatar className="h-6 w-6 md:h-7 md:w-7 flex-shrink-0">
@@ -601,8 +600,8 @@ export default function SocketChatHub() {
                                   <p
                                     className={`text-gray-800 text-sm break-words ${
                                       isMobile
-                                        ? "leading-snug"
-                                        : "leading-tight"
+                                        ? 'leading-snug'
+                                        : 'leading-tight'
                                     }`}
                                   >
                                     <MessageWithMentions
@@ -635,8 +634,9 @@ export default function SocketChatHub() {
                 value={newMessage}
                 onChange={setNewMessage}
                 onSend={handleSendMessage}
-                placeholder={`Message ${rooms.find((r) => r.id === currentRoom)
-                  ?.name || "General"}...`}
+                placeholder={`Message ${
+                  rooms.find((r) => r.id === currentRoom)?.name || 'General'
+                }...`}
                 disabled={!connected}
               />
             </div>

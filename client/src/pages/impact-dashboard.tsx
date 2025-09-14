@@ -1,15 +1,15 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery } from '@tanstack/react-query';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Progress } from "@/components/ui/progress";
-import { Button } from "@/components/ui/button";
+} from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Progress } from '@/components/ui/progress';
+import { Button } from '@/components/ui/button';
 import {
   TrendingUp,
   Heart,
@@ -23,7 +23,7 @@ import {
   PieChart,
   BarChart3,
   Activity,
-} from "lucide-react";
+} from 'lucide-react';
 import {
   ResponsiveContainer,
   LineChart,
@@ -39,53 +39,53 @@ import {
   PieChart as RechartsPieChart,
   Cell,
   Pie,
-} from "recharts";
-import { apiRequest } from "@/lib/queryClient";
-import { useState } from "react";
-import MonthlyComparisonAnalytics from "@/components/monthly-comparison-analytics";
-import { calculateTotalSandwiches } from "@/lib/analytics-utils";
+} from 'recharts';
+import { apiRequest } from '@/lib/queryClient';
+import { useState } from 'react';
+import MonthlyComparisonAnalytics from '@/components/monthly-comparison-analytics';
+import { calculateTotalSandwiches } from '@/lib/analytics-utils';
 
 export default function ImpactDashboard() {
-  const [chartView, setChartView] = useState<"daily" | "weekly" | "monthly">(
-    "monthly"
+  const [chartView, setChartView] = useState<'daily' | 'weekly' | 'monthly'>(
+    'monthly'
   );
 
   // Fetch sandwich collections data
   const { data: collectionsData } = useQuery({
-    queryKey: ["/api/sandwich-collections"],
-    queryFn: () => apiRequest("/api/sandwich-collections?limit=10000"),
+    queryKey: ['/api/sandwich-collections'],
+    queryFn: () => apiRequest('/api/sandwich-collections?limit=10000'),
   });
 
   const collections = collectionsData?.collections || [];
 
   // Fetch collection stats
   const { data: stats } = useQuery({
-    queryKey: ["/api/sandwich-collections/stats"],
+    queryKey: ['/api/sandwich-collections/stats'],
   });
 
   // Fetch hosts data
   const { data: hosts = [] } = useQuery({
-    queryKey: ["/api/hosts"],
+    queryKey: ['/api/hosts'],
   });
 
   // Process data for visualizations
   const processCollectionData = () => {
     // Debug logging
-    console.log("processCollectionData - chartView:", chartView);
-    console.log("processCollectionData - collections:", collections);
+    console.log('processCollectionData - chartView:', chartView);
+    console.log('processCollectionData - collections:', collections);
     console.log(
-      "processCollectionData - collections length:",
+      'processCollectionData - collections length:',
       collections?.length
     );
-    console.log("processCollectionData - collectionsData:", collectionsData);
+    console.log('processCollectionData - collectionsData:', collectionsData);
 
     // Return empty array if no collections data available
     if (!Array.isArray(collections) || collections.length === 0) {
-      console.log("No collections data available - returning empty array");
+      console.log('No collections data available - returning empty array');
       return [];
     }
 
-    console.log("Processing real collections data...");
+    console.log('Processing real collections data...');
 
     const timeData: Record<
       string,
@@ -103,7 +103,7 @@ export default function ImpactDashboard() {
         const date = new Date(collectionDate);
         let periodKey: string;
 
-        if (chartView === "weekly") {
+        if (chartView === 'weekly') {
           // Group by week (starting Monday)
           const weekStart = new Date(date);
           const day = weekStart.getDay();
@@ -111,12 +111,12 @@ export default function ImpactDashboard() {
           weekStart.setDate(diff);
           periodKey = `Week of ${weekStart.getFullYear()}-${String(
             weekStart.getMonth() + 1
-          ).padStart(2, "0")}-${String(weekStart.getDate()).padStart(2, "0")}`;
+          ).padStart(2, '0')}-${String(weekStart.getDate()).padStart(2, '0')}`;
         } else {
           // Group by month
           periodKey = `${date.getFullYear()}-${String(
             date.getMonth() + 1
-          ).padStart(2, "0")}`;
+          ).padStart(2, '0')}`;
         }
 
         if (!timeData[periodKey]) {
@@ -142,18 +142,18 @@ export default function ImpactDashboard() {
 
     const processedData = Object.values(timeData)
       .map((item) => ({
-        [chartView === "weekly" ? "week" : "month"]: item.period,
+        [chartView === 'weekly' ? 'week' : 'month']: item.period,
         sandwiches: item.sandwiches,
         collections: item.collections,
         hosts: item.hosts.size,
       }))
       .sort((a, b) =>
-        a[chartView === "weekly" ? "week" : "month"].localeCompare(
-          b[chartView === "weekly" ? "week" : "month"]
+        a[chartView === 'weekly' ? 'week' : 'month'].localeCompare(
+          b[chartView === 'weekly' ? 'week' : 'month']
         )
       );
 
-    console.log("Processed chart data:", processedData);
+    console.log('Processed chart data:', processedData);
     return processedData;
   };
 
@@ -174,7 +174,7 @@ export default function ImpactDashboard() {
     > = {};
 
     collections.forEach((collection: any) => {
-      const hostName = collection.hostName || "Unknown";
+      const hostName = collection.hostName || 'Unknown';
 
       if (!hostData[hostName]) {
         hostData[hostName] = {
@@ -243,9 +243,9 @@ export default function ImpactDashboard() {
               );
             } else if (
               collection.groupCollections &&
-              typeof collection.groupCollections === "string" &&
-              collection.groupCollections !== "" &&
-              collection.groupCollections !== "[]"
+              typeof collection.groupCollections === 'string' &&
+              collection.groupCollections !== '' &&
+              collection.groupCollections !== '[]'
             ) {
               try {
                 const groupData = JSON.parse(collection.groupCollections);
@@ -257,7 +257,7 @@ export default function ImpactDashboard() {
                   );
                 }
               } catch (e) {
-                console.log("Error parsing groupCollections JSON:", e);
+                console.log('Error parsing groupCollections JSON:', e);
                 groupSandwiches = 0;
               }
             }
@@ -283,15 +283,15 @@ export default function ImpactDashboard() {
   const impactMetrics = calculateImpactMetrics();
 
   // Debug logging for final data
-  console.log("=== IMPACT DASHBOARD DEBUG ===");
-  console.log("Final chartData:", chartData);
-  console.log("Final chartData length:", chartData?.length);
-  console.log("Chart view:", chartView);
-  console.log("Collections data from API:", collectionsData);
-  console.log("Stats data from API:", stats);
-  console.log("=== END DEBUG ===");
+  console.log('=== IMPACT DASHBOARD DEBUG ===');
+  console.log('Final chartData:', chartData);
+  console.log('Final chartData length:', chartData?.length);
+  console.log('Chart view:', chartView);
+  console.log('Collections data from API:', collectionsData);
+  console.log('Stats data from API:', stats);
+  console.log('=== END DEBUG ===');
 
-  const colors = ["#8884d8", "#82ca9d", "#ffc658", "#ff7c7c", "#8dd1e1"];
+  const colors = ['#8884d8', '#82ca9d', '#ffc658', '#ff7c7c', '#8dd1e1'];
 
   return (
     <div className="bg-gradient-to-br from-blue-50 to-indigo-100 p-6 rounded-lg">
@@ -397,7 +397,7 @@ export default function ImpactDashboard() {
                     <div>
                       <CardTitle className="flex items-center">
                         <BarChart3 className="w-5 h-5 mr-2" />
-                        {chartView === "weekly" ? "Weekly" : "Monthly"} Sandwich
+                        {chartView === 'weekly' ? 'Weekly' : 'Monthly'} Sandwich
                         Collections
                       </CardTitle>
                       <CardDescription>
@@ -407,17 +407,17 @@ export default function ImpactDashboard() {
                     <div className="flex gap-2">
                       <Button
                         variant={
-                          chartView === "monthly" ? "default" : "outline"
+                          chartView === 'monthly' ? 'default' : 'outline'
                         }
                         size="sm"
-                        onClick={() => setChartView("monthly")}
+                        onClick={() => setChartView('monthly')}
                       >
                         Monthly
                       </Button>
                       <Button
-                        variant={chartView === "weekly" ? "default" : "outline"}
+                        variant={chartView === 'weekly' ? 'default' : 'outline'}
                         size="sm"
-                        onClick={() => setChartView("weekly")}
+                        onClick={() => setChartView('weekly')}
                       >
                         Weekly
                       </Button>
@@ -430,17 +430,17 @@ export default function ImpactDashboard() {
                       <AreaChart data={chartData}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis
-                          dataKey={chartView === "weekly" ? "week" : "month"}
+                          dataKey={chartView === 'weekly' ? 'week' : 'month'}
                           tick={{ fontSize: 12 }}
                           tickFormatter={(value) => {
-                            if (chartView === "weekly") {
-                              return value.includes("Week of")
-                                ? value.replace("Week of ", "")
+                            if (chartView === 'weekly') {
+                              return value.includes('Week of')
+                                ? value.replace('Week of ', '')
                                 : value;
                             }
-                            const parts = (value || "").split("-");
+                            const parts = (value || '').split('-');
                             return parts.length >= 2
-                              ? parts[1] + "/" + parts[0].slice(2)
+                              ? parts[1] + '/' + parts[0].slice(2)
                               : value;
                           }}
                         />
@@ -448,14 +448,14 @@ export default function ImpactDashboard() {
                         <Tooltip
                           labelFormatter={(value) =>
                             `${
-                              chartView === "weekly" ? "Week" : "Month"
+                              chartView === 'weekly' ? 'Week' : 'Month'
                             }: ${value}`
                           }
                           formatter={(value, name) => [
                             value,
-                            name === "sandwiches"
-                              ? "Sandwiches"
-                              : "Collections",
+                            name === 'sandwiches'
+                              ? 'Sandwiches'
+                              : 'Collections',
                           ]}
                         />
                         <Area
@@ -506,7 +506,7 @@ export default function ImpactDashboard() {
                     <div className="bg-gray-100 rounded-full h-2">
                       <div
                         className="bg-green-500 h-2 rounded-full"
-                        style={{ width: "88%" }}
+                        style={{ width: '88%' }}
                       ></div>
                     </div>
                     <p className="text-xs text-gray-500 mt-1">
@@ -571,7 +571,7 @@ export default function ImpactDashboard() {
                     <div className="bg-gray-100 rounded-full h-2">
                       <div
                         className="bg-blue-500 h-2 rounded-full"
-                        style={{ width: "75%" }}
+                        style={{ width: '75%' }}
                       ></div>
                     </div>
                     <p className="text-xs text-gray-500 mt-1">
@@ -587,7 +587,7 @@ export default function ImpactDashboard() {
                     <div className="bg-gray-100 rounded-full h-2">
                       <div
                         className="bg-orange-500 h-2 rounded-full"
-                        style={{ width: "80%" }}
+                        style={{ width: '80%' }}
                       ></div>
                     </div>
                     <p className="text-xs text-gray-500 mt-1">
@@ -635,7 +635,7 @@ export default function ImpactDashboard() {
                           Sandwiches Provided
                         </p>
                         <p className="text-sm text-green-700">
-                          {impactMetrics.totalSandwiches?.toLocaleString()}{" "}
+                          {impactMetrics.totalSandwiches?.toLocaleString()}{' '}
                           sandwiches delivered to community members in need
                         </p>
                       </div>
@@ -661,7 +661,7 @@ export default function ImpactDashboard() {
                           Collection Records
                         </p>
                         <p className="text-sm text-teal-700">
-                          {impactMetrics.totalCollections?.toLocaleString()}{" "}
+                          {impactMetrics.totalCollections?.toLocaleString()}{' '}
                           collection events documented
                         </p>
                       </div>
@@ -674,7 +674,7 @@ export default function ImpactDashboard() {
                           2025 Progress
                         </p>
                         <p className="text-sm text-orange-700">
-                          {impactMetrics.year2025YTD?.toLocaleString()}{" "}
+                          {impactMetrics.year2025YTD?.toLocaleString()}{' '}
                           sandwiches collected year-to-date
                         </p>
                       </div>

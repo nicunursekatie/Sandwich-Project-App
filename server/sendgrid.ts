@@ -1,7 +1,7 @@
-import { MailService } from "@sendgrid/mail";
+import { MailService } from '@sendgrid/mail';
 
 if (!process.env.SENDGRID_API_KEY) {
-  throw new Error("SENDGRID_API_KEY environment variable must be set");
+  throw new Error('SENDGRID_API_KEY environment variable must be set');
 }
 
 const mailService = new MailService();
@@ -24,16 +24,16 @@ export async function sendEmail(params: EmailParams): Promise<boolean> {
       to: params.to,
       from: params.from,
       subject: params.subject,
-      text: params.text || "",
-      html: params.html || "",
+      text: params.text || '',
+      html: params.html || '',
     });
     console.log(`Email sent successfully to ${params.to}`);
     return true;
   } catch (error) {
-    console.error("SendGrid email error:", error);
+    console.error('SendGrid email error:', error);
     if (error.response && error.response.body) {
       console.error(
-        "SendGrid error details:",
+        'SendGrid error details:',
         JSON.stringify(error.response.body, null, 2)
       );
     }
@@ -91,8 +91,8 @@ This is an automated notification from The Sandwich Project suggestions portal.
   `;
 
   return sendEmail({
-    to: "katielong2316@gmail.com", // Your email for development notifications
-    from: "katielong2316@gmail.com", // Using your verified email as sender
+    to: 'katielong2316@gmail.com', // Your email for development notifications
+    from: 'katielong2316@gmail.com', // Using your verified email as sender
     subject: `New Suggestion: ${suggestion.title}`,
     text: emailContent,
     html: htmlContent,

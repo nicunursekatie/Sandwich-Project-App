@@ -1,6 +1,6 @@
-import { Router } from "express";
-import { storage } from "../storage-wrapper";
-import { requirePermission } from "../middleware/auth";
+import { Router } from 'express';
+import { storage } from '../storage-wrapper';
+import { requirePermission } from '../middleware/auth';
 
 interface AdminDependencies {
   isAuthenticated: any;
@@ -13,12 +13,12 @@ export function createAdminRoutes(deps: AdminDependencies) {
 
   // Permission migration endpoint (admin only)
   router.post(
-    "/migrate-permissions",
+    '/migrate-permissions',
     deps.isAuthenticated,
-    requirePermission("ADMIN_ACCESS"),
+    requirePermission('ADMIN_ACCESS'),
     async (req: any, res) => {
       try {
-        console.log("🔄 Starting permission migration...");
+        console.log('🔄 Starting permission migration...');
 
         // Get all users
         const allUsers = await storage.getAllUsers();
@@ -30,105 +30,105 @@ export function createAdminRoutes(deps: AdminDependencies) {
         // Permission mapping from old to new format
         const PERMISSION_MAPPING: Record<string, string> = {
           // Host management
-          access_hosts: "HOSTS_VIEW",
-          manage_hosts: "HOSTS_EDIT",
-          view_hosts: "HOSTS_VIEW",
-          add_hosts: "HOSTS_ADD",
-          edit_hosts: "HOSTS_EDIT",
-          delete_hosts: "HOSTS_DELETE",
+          access_hosts: 'HOSTS_VIEW',
+          manage_hosts: 'HOSTS_EDIT',
+          view_hosts: 'HOSTS_VIEW',
+          add_hosts: 'HOSTS_ADD',
+          edit_hosts: 'HOSTS_EDIT',
+          delete_hosts: 'HOSTS_DELETE',
 
           // Recipient management
-          access_recipients: "RECIPIENTS_VIEW",
-          manage_recipients: "RECIPIENTS_EDIT",
-          view_recipients: "RECIPIENTS_VIEW",
-          add_recipients: "RECIPIENTS_ADD",
-          edit_recipients: "RECIPIENTS_EDIT",
-          delete_recipients: "RECIPIENTS_DELETE",
+          access_recipients: 'RECIPIENTS_VIEW',
+          manage_recipients: 'RECIPIENTS_EDIT',
+          view_recipients: 'RECIPIENTS_VIEW',
+          add_recipients: 'RECIPIENTS_ADD',
+          edit_recipients: 'RECIPIENTS_EDIT',
+          delete_recipients: 'RECIPIENTS_DELETE',
 
           // Driver management
-          access_drivers: "DRIVERS_VIEW",
-          manage_drivers: "DRIVERS_EDIT",
-          view_drivers: "DRIVERS_VIEW",
-          add_drivers: "DRIVERS_ADD",
-          edit_drivers: "DRIVERS_EDIT",
-          delete_drivers: "DRIVERS_DELETE",
+          access_drivers: 'DRIVERS_VIEW',
+          manage_drivers: 'DRIVERS_EDIT',
+          view_drivers: 'DRIVERS_VIEW',
+          add_drivers: 'DRIVERS_ADD',
+          edit_drivers: 'DRIVERS_EDIT',
+          delete_drivers: 'DRIVERS_DELETE',
 
           // User management
-          manage_users: "USERS_EDIT",
-          view_users: "USERS_VIEW",
+          manage_users: 'USERS_EDIT',
+          view_users: 'USERS_VIEW',
 
           // Collections
-          access_collections: "COLLECTIONS_VIEW",
-          manage_collections: "COLLECTIONS_EDIT",
-          create_collections: "COLLECTIONS_ADD",
-          edit_all_collections: "COLLECTIONS_EDIT_ALL",
-          delete_all_collections: "COLLECTIONS_DELETE_ALL",
-          use_collection_walkthrough: "COLLECTIONS_WALKTHROUGH",
+          access_collections: 'COLLECTIONS_VIEW',
+          manage_collections: 'COLLECTIONS_EDIT',
+          create_collections: 'COLLECTIONS_ADD',
+          edit_all_collections: 'COLLECTIONS_EDIT_ALL',
+          delete_all_collections: 'COLLECTIONS_DELETE_ALL',
+          use_collection_walkthrough: 'COLLECTIONS_WALKTHROUGH',
 
           // Projects
-          access_projects: "PROJECTS_VIEW",
-          manage_projects: "PROJECTS_EDIT",
-          create_projects: "PROJECTS_ADD",
-          edit_all_projects: "PROJECTS_EDIT_ALL",
-          delete_all_projects: "PROJECTS_DELETE_ALL",
+          access_projects: 'PROJECTS_VIEW',
+          manage_projects: 'PROJECTS_EDIT',
+          create_projects: 'PROJECTS_ADD',
+          edit_all_projects: 'PROJECTS_EDIT_ALL',
+          delete_all_projects: 'PROJECTS_DELETE_ALL',
 
           // Distributions
-          access_donation_tracking: "DISTRIBUTIONS_VIEW",
-          manage_donation_tracking: "DISTRIBUTIONS_EDIT",
-          view_donation_tracking: "DISTRIBUTIONS_VIEW",
-          add_donation_tracking: "DISTRIBUTIONS_ADD",
-          edit_donation_tracking: "DISTRIBUTIONS_EDIT",
-          delete_donation_tracking: "DISTRIBUTIONS_DELETE",
+          access_donation_tracking: 'DISTRIBUTIONS_VIEW',
+          manage_donation_tracking: 'DISTRIBUTIONS_EDIT',
+          view_donation_tracking: 'DISTRIBUTIONS_VIEW',
+          add_donation_tracking: 'DISTRIBUTIONS_ADD',
+          edit_donation_tracking: 'DISTRIBUTIONS_EDIT',
+          delete_donation_tracking: 'DISTRIBUTIONS_DELETE',
 
           // Event requests
-          access_event_requests: "EVENT_REQUESTS_VIEW",
-          manage_event_requests: "EVENT_REQUESTS_EDIT",
-          view_event_requests: "EVENT_REQUESTS_VIEW",
-          add_event_requests: "EVENT_REQUESTS_ADD",
-          edit_event_requests: "EVENT_REQUESTS_EDIT",
-          delete_event_requests: "EVENT_REQUESTS_DELETE",
+          access_event_requests: 'EVENT_REQUESTS_VIEW',
+          manage_event_requests: 'EVENT_REQUESTS_EDIT',
+          view_event_requests: 'EVENT_REQUESTS_VIEW',
+          add_event_requests: 'EVENT_REQUESTS_ADD',
+          edit_event_requests: 'EVENT_REQUESTS_EDIT',
+          delete_event_requests: 'EVENT_REQUESTS_DELETE',
 
           // Messages
-          access_messages: "MESSAGES_VIEW",
-          send_messages: "MESSAGES_SEND",
-          moderate_messages: "MESSAGES_MODERATE",
+          access_messages: 'MESSAGES_VIEW',
+          send_messages: 'MESSAGES_SEND',
+          moderate_messages: 'MESSAGES_MODERATE',
 
           // Work logs
-          access_work_logs: "WORK_LOGS_VIEW",
-          create_work_logs: "WORK_LOGS_ADD",
-          view_all_work_logs: "WORK_LOGS_VIEW_ALL",
-          edit_all_work_logs: "WORK_LOGS_EDIT_ALL",
-          delete_all_work_logs: "WORK_LOGS_DELETE_ALL",
+          access_work_logs: 'WORK_LOGS_VIEW',
+          create_work_logs: 'WORK_LOGS_ADD',
+          view_all_work_logs: 'WORK_LOGS_VIEW_ALL',
+          edit_all_work_logs: 'WORK_LOGS_EDIT_ALL',
+          delete_all_work_logs: 'WORK_LOGS_DELETE_ALL',
 
           // Chat permissions
-          access_chat: "CHAT_GENERAL",
-          general_chat: "CHAT_GENERAL",
-          committee_chat: "CHAT_COMMITTEE",
-          host_chat: "CHAT_HOST",
-          driver_chat: "CHAT_DRIVER",
-          recipient_chat: "CHAT_RECIPIENT",
-          core_team_chat: "CHAT_CORE_TEAM",
-          direct_messages: "CHAT_DIRECT",
-          GENERAL_CHAT: "CHAT_GENERAL",
-          COMMITTEE_CHAT: "CHAT_COMMITTEE",
-          HOST_CHAT: "CHAT_HOST",
-          DRIVER_CHAT: "CHAT_DRIVER",
-          RECIPIENT_CHAT: "CHAT_RECIPIENT",
-          CORE_TEAM_CHAT: "CHAT_CORE_TEAM",
+          access_chat: 'CHAT_GENERAL',
+          general_chat: 'CHAT_GENERAL',
+          committee_chat: 'CHAT_COMMITTEE',
+          host_chat: 'CHAT_HOST',
+          driver_chat: 'CHAT_DRIVER',
+          recipient_chat: 'CHAT_RECIPIENT',
+          core_team_chat: 'CHAT_CORE_TEAM',
+          direct_messages: 'CHAT_DIRECT',
+          GENERAL_CHAT: 'CHAT_GENERAL',
+          COMMITTEE_CHAT: 'CHAT_COMMITTEE',
+          HOST_CHAT: 'CHAT_HOST',
+          DRIVER_CHAT: 'CHAT_DRIVER',
+          RECIPIENT_CHAT: 'CHAT_RECIPIENT',
+          CORE_TEAM_CHAT: 'CHAT_CORE_TEAM',
 
           // Analytics and other features
-          access_analytics: "ANALYTICS_VIEW",
-          access_meetings: "MEETINGS_VIEW",
-          manage_meetings: "MEETINGS_MANAGE",
-          access_suggestions: "SUGGESTIONS_VIEW",
-          create_suggestions: "SUGGESTIONS_ADD",
-          manage_suggestions: "SUGGESTIONS_MANAGE",
-          access_toolkit: "DOCUMENTS_VIEW",
-          access_documents: "DOCUMENTS_VIEW",
-          manage_documents: "DOCUMENTS_MANAGE",
-          export_data: "DATA_EXPORT",
-          import_data: "DATA_IMPORT",
-          edit_data: "DATA_EXPORT",
+          access_analytics: 'ANALYTICS_VIEW',
+          access_meetings: 'MEETINGS_VIEW',
+          manage_meetings: 'MEETINGS_MANAGE',
+          access_suggestions: 'SUGGESTIONS_VIEW',
+          create_suggestions: 'SUGGESTIONS_ADD',
+          manage_suggestions: 'SUGGESTIONS_MANAGE',
+          access_toolkit: 'DOCUMENTS_VIEW',
+          access_documents: 'DOCUMENTS_VIEW',
+          manage_documents: 'DOCUMENTS_MANAGE',
+          export_data: 'DATA_EXPORT',
+          import_data: 'DATA_IMPORT',
+          edit_data: 'DATA_EXPORT',
         };
 
         for (const user of allUsers) {
@@ -152,7 +152,7 @@ export function createAdminRoutes(deps: AdminDependencies) {
                 return newPerm;
               } else {
                 // Keep permission as-is if already in new format or unrecognized
-                if (oldPerm.includes("_")) {
+                if (oldPerm.includes('_')) {
                   console.log(`  ✅ ${oldPerm} (already new format)`);
                 } else {
                   console.log(
@@ -175,8 +175,8 @@ export function createAdminRoutes(deps: AdminDependencies) {
 
           if (hasChanges) {
             console.log(`🔄 Migrating ${user.email}:`);
-            console.log(`   Old: ${userPermissions.join(", ")}`);
-            console.log(`   New: ${newPermissions.join(", ")}`);
+            console.log(`   Old: ${userPermissions.join(', ')}`);
+            console.log(`   New: ${newPermissions.join(', ')}`);
 
             await storage.updateUser(user.id, { permissions: newPermissions });
             migratedCount++;
@@ -197,11 +197,11 @@ export function createAdminRoutes(deps: AdminDependencies) {
           message: `Migration complete: ${migratedCount} users updated, ${unchangedCount} unchanged`,
         });
       } catch (error) {
-        console.error("❌ Permission migration failed:", error);
+        console.error('❌ Permission migration failed:', error);
         res.status(500).json({
           success: false,
-          error: "Migration failed",
-          details: error instanceof Error ? error.message : "Unknown error",
+          error: 'Migration failed',
+          details: error instanceof Error ? error.message : 'Unknown error',
         });
       }
     }
@@ -209,9 +209,9 @@ export function createAdminRoutes(deps: AdminDependencies) {
 
   // Debug endpoint for session information
   router.get(
-    "/debug/session",
+    '/debug/session',
     deps.isAuthenticated,
-    requirePermission("ADMIN_ACCESS"),
+    requirePermission('ADMIN_ACCESS'),
     async (req: any, res) => {
       try {
         const sessionUser = req.session?.user;
@@ -238,22 +238,22 @@ export function createAdminRoutes(deps: AdminDependencies) {
               }
             : null,
           cookies: req.headers.cookie,
-          userAgent: req.headers["user-agent"],
+          userAgent: req.headers['user-agent'],
           timestamp: new Date().toISOString(),
-          environment: process.env.NODE_ENV || "development",
+          environment: process.env.NODE_ENV || 'development',
         });
       } catch (error) {
-        console.error("Debug session error:", error);
-        res.status(500).json({ error: "Failed to get session info" });
+        console.error('Debug session error:', error);
+        res.status(500).json({ error: 'Failed to get session info' });
       }
     }
   );
 
   // Debug endpoint to check authentication status
   router.get(
-    "/debug/auth-status",
+    '/debug/auth-status',
     deps.isAuthenticated,
-    requirePermission("ADMIN_ACCESS"),
+    requirePermission('ADMIN_ACCESS'),
     async (req: any, res) => {
       try {
         const user = req.session?.user || req.user;
@@ -270,8 +270,8 @@ export function createAdminRoutes(deps: AdminDependencies) {
           timestamp: new Date().toISOString(),
         });
       } catch (error) {
-        console.error("Debug auth status error:", error);
-        res.status(500).json({ error: "Failed to get auth status" });
+        console.error('Debug auth status error:', error);
+        res.status(500).json({ error: 'Failed to get auth status' });
       }
     }
   );

@@ -1,22 +1,22 @@
-import React, { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
+} from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   ArrowLeft,
   Eye,
@@ -24,7 +24,7 @@ import {
   FileText,
   Clock,
   Calendar,
-} from "lucide-react";
+} from 'lucide-react';
 
 interface User {
   id: string;
@@ -54,11 +54,11 @@ interface IndividualUserActivityProps {
 
 const getActionIcon = (action: string) => {
   switch (action) {
-    case "View":
+    case 'View':
       return <Eye className="h-4 w-4" />;
-    case "Click":
+    case 'Click':
       return <MousePointer className="h-4 w-4" />;
-    case "Submit":
+    case 'Submit':
       return <FileText className="h-4 w-4" />;
     default:
       return <Clock className="h-4 w-4" />;
@@ -67,28 +67,28 @@ const getActionIcon = (action: string) => {
 
 const getActionColor = (action: string) => {
   switch (action) {
-    case "View":
-      return "bg-blue-100 text-blue-800";
-    case "Click":
-      return "bg-green-100 text-green-800";
-    case "Submit":
-      return "bg-purple-100 text-purple-800";
-    case "Create":
-      return "bg-emerald-100 text-emerald-800";
-    case "Update":
-      return "bg-orange-100 text-orange-800";
-    case "Export":
-      return "bg-indigo-100 text-indigo-800";
+    case 'View':
+      return 'bg-blue-100 text-blue-800';
+    case 'Click':
+      return 'bg-green-100 text-green-800';
+    case 'Submit':
+      return 'bg-purple-100 text-purple-800';
+    case 'Create':
+      return 'bg-emerald-100 text-emerald-800';
+    case 'Update':
+      return 'bg-orange-100 text-orange-800';
+    case 'Export':
+      return 'bg-indigo-100 text-indigo-800';
     default:
-      return "bg-gray-100 text-gray-800";
+      return 'bg-gray-100 text-gray-800';
   }
 };
 
 const formatFieldName = (fieldName: string) => {
   // Convert camelCase/snake_case to readable format
   return fieldName
-    .replace(/([A-Z])/g, " $1")
-    .replace(/_/g, " ")
+    .replace(/([A-Z])/g, ' $1')
+    .replace(/_/g, ' ')
     .replace(/^./, (str) => str.toUpperCase())
     .trim();
 };
@@ -97,8 +97,8 @@ export function IndividualUserActivity({
   user,
   onBack,
 }: IndividualUserActivityProps) {
-  const [timeFilter, setTimeFilter] = useState("7d");
-  const [actionFilter, setActionFilter] = useState("all");
+  const [timeFilter, setTimeFilter] = useState('7d');
+  const [actionFilter, setActionFilter] = useState('all');
 
   // Fetch individual user activity data
   const { data: userActivity, isLoading } = useQuery<{
@@ -112,8 +112,8 @@ export function IndividualUserActivity({
     };
   }>({
     queryKey: [
-      "/api/enhanced-user-activity",
-      "individual",
+      '/api/enhanced-user-activity',
+      'individual',
       user.id,
       timeFilter,
       actionFilter,
@@ -123,10 +123,10 @@ export function IndividualUserActivity({
         userId: user.id,
         timeFilter,
         actionFilter,
-        individual: "true",
+        individual: 'true',
       });
       const response = await fetch(`/api/enhanced-user-activity?${params}`);
-      if (!response.ok) throw new Error("Failed to fetch user activity data");
+      if (!response.ok) throw new Error('Failed to fetch user activity data');
       return response.json();
     },
     refetchInterval: 30000,
@@ -137,7 +137,7 @@ export function IndividualUserActivity({
   };
 
   const formatDuration = (duration: number | null) => {
-    if (!duration) return "N/A";
+    if (!duration) return 'N/A';
     if (duration < 1000) return `${duration}ms`;
     if (duration < 60000) return `${(duration / 1000).toFixed(1)}s`;
     return `${(duration / 60000).toFixed(1)}m`;
@@ -231,7 +231,7 @@ export function IndividualUserActivity({
             <div className="text-sm font-bold">
               {userActivity?.summary.lastActivity
                 ? formatDate(userActivity.summary.lastActivity)
-                : "Never"}
+                : 'Never'}
             </div>
             <p className="text-xs text-muted-foreground">Last Activity</p>
           </CardContent>
@@ -239,7 +239,7 @@ export function IndividualUserActivity({
         <Card>
           <CardContent className="p-6">
             <div className="text-sm font-bold">
-              {userActivity?.summary.topActions?.[0]?.action || "N/A"}
+              {userActivity?.summary.topActions?.[0]?.action || 'N/A'}
             </div>
             <p className="text-xs text-muted-foreground">Most Common Action</p>
           </CardContent>
@@ -358,7 +358,7 @@ export function IndividualUserActivity({
                       {activity.details}
                     </p>
                     {/* Show specific field changes for Updates */}
-                    {activity.action === "Update" &&
+                    {activity.action === 'Update' &&
                       activity.metadata?.auditDetails && (
                         <div className="mt-2 p-2 bg-gray-50 rounded text-xs">
                           <div className="font-medium text-gray-700 mb-1">
@@ -373,11 +373,11 @@ export function IndividualUserActivity({
                                   </span>
                                   <div className="ml-2 text-gray-700">
                                     <span className="text-red-600">
-                                      From: {details.from || "(empty)"}
+                                      From: {details.from || '(empty)'}
                                     </span>
                                     <span className="mx-2">→</span>
                                     <span className="text-green-600">
-                                      To: {details.to || "(empty)"}
+                                      To: {details.to || '(empty)'}
                                     </span>
                                   </div>
                                 </div>
@@ -397,8 +397,8 @@ export function IndividualUserActivity({
                             {Object.keys(activity.metadata).length} metadata
                             field
                             {Object.keys(activity.metadata).length > 1
-                              ? "s"
-                              : ""}
+                              ? 's'
+                              : ''}
                           </span>
                         )}
                     </div>
@@ -407,8 +407,8 @@ export function IndividualUserActivity({
               )) || (
                 <div className="text-center py-8 text-muted-foreground">
                   {isLoading
-                    ? "Loading activity data..."
-                    : "No activity found for this user in the selected time period"}
+                    ? 'Loading activity data...'
+                    : 'No activity found for this user in the selected time period'}
                 </div>
               )}
             </div>

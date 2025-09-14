@@ -1,18 +1,18 @@
-import { useState, useEffect } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
-import { useMessaging } from "@/hooks/useMessaging";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { formatDistanceToNow } from "date-fns";
+import { useState, useEffect } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import { useMessaging } from '@/hooks/useMessaging';
+import { apiRequest, queryClient } from '@/lib/queryClient';
+import { formatDistanceToNow } from 'date-fns';
 import {
   MessageCircle,
   Send,
@@ -26,39 +26,39 @@ import {
   UserPlus,
   Settings,
   Hash,
-} from "lucide-react";
+} from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import DirectMessaging from "@/components/direct-messaging";
-import { GroupMessaging } from "@/components/group-messaging";
+} from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import DirectMessaging from '@/components/direct-messaging';
+import { GroupMessaging } from '@/components/group-messaging';
 
 interface MessagingSystemProps {
-  initialTab?: "direct" | "groups" | "all";
+  initialTab?: 'direct' | 'groups' | 'all';
 }
 
 export default function MessagingSystem({
-  initialTab = "direct",
+  initialTab = 'direct',
 }: MessagingSystemProps) {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -67,11 +67,11 @@ export default function MessagingSystem({
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case "direct":
+      case 'direct':
         return <DirectMessaging />;
-      case "groups":
+      case 'groups':
         return <GroupMessaging currentUser={user} />;
-      case "all":
+      case 'all':
         return (
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -89,7 +89,7 @@ export default function MessagingSystem({
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setActiveTab("direct")}
+                    onClick={() => setActiveTab('direct')}
                     className="w-full"
                   >
                     Open Direct Messages
@@ -111,7 +111,7 @@ export default function MessagingSystem({
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setActiveTab("groups")}
+                    onClick={() => setActiveTab('groups')}
                     className="w-full"
                   >
                     Open Group Messages
@@ -177,29 +177,29 @@ export default function MessagingSystem({
         {/* Sidebar */}
         <div
           className={`${
-            sidebarCollapsed ? "w-16" : "w-64"
+            sidebarCollapsed ? 'w-16' : 'w-64'
           } bg-gray-50 border-r transition-all duration-200 flex flex-col`}
         >
           <div className="p-4">
             <nav className="space-y-2">
               {[
                 {
-                  id: "all",
-                  label: "All Messages",
+                  id: 'all',
+                  label: 'All Messages',
                   icon: MessageCircle,
-                  description: "Overview of all conversations",
+                  description: 'Overview of all conversations',
                 },
                 {
-                  id: "direct",
-                  label: "Direct Messages",
+                  id: 'direct',
+                  label: 'Direct Messages',
                   icon: MessageCircle,
-                  description: "One-on-one conversations",
+                  description: 'One-on-one conversations',
                 },
                 {
-                  id: "groups",
-                  label: "Group Messages",
+                  id: 'groups',
+                  label: 'Group Messages',
                   icon: Users,
-                  description: "Group conversations",
+                  description: 'Group conversations',
                 },
               ].map((tab) => (
                 <button
@@ -209,10 +209,10 @@ export default function MessagingSystem({
                     w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-all
                     ${
                       activeTab === tab.id
-                        ? "bg-white text-primary shadow-sm border border-gray-200"
-                        : "text-gray-700 hover:bg-gray-100"
+                        ? 'bg-white text-primary shadow-sm border border-gray-200'
+                        : 'text-gray-700 hover:bg-gray-100'
                     }
-                    ${sidebarCollapsed ? "justify-center" : ""}
+                    ${sidebarCollapsed ? 'justify-center' : ''}
                   `}
                   title={sidebarCollapsed ? tab.label : undefined}
                 >

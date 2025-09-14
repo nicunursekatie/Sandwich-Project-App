@@ -1,4 +1,7 @@
-import { getProjectsGoogleSheetsService, SheetRow } from './google-sheets-service';
+import {
+  getProjectsGoogleSheetsService,
+  SheetRow,
+} from './google-sheets-service';
 import type { IStorage } from './storage';
 import { Project } from '@shared/schema';
 
@@ -8,46 +11,54 @@ export class GoogleSheetsSyncService {
   /**
    * Sync projects from database to Google Sheets - Only syncs meeting projects (those with googleSheetRowId)
    */
-  async syncToGoogleSheets(): Promise<{ success: boolean; message: string; synced?: number }> {
+  async syncToGoogleSheets(): Promise<{
+    success: boolean;
+    message: string;
+    synced?: number;
+  }> {
     const sheetsService = getProjectsGoogleSheetsService();
     if (!sheetsService) {
-      return { success: false, message: 'Projects Google Sheets service not configured - missing PROJECTS_SHEET_ID' };
+      return {
+        success: false,
+        message:
+          'Projects Google Sheets service not configured - missing PROJECTS_SHEET_ID',
+      };
     }
 
     try {
       // Get only projects that should sync to sheets (meeting projects)
       const allProjects = await this.storage.getAllProjects();
-      const projects = allProjects.filter(p => p.googleSheetRowId); // Only sync meeting projects
-      
+      const projects = allProjects.filter((p) => p.googleSheetRowId); // Only sync meeting projects
+
       // Convert projects to sheet format (including sub-tasks)
       const sheetRows: SheetRow[] = [];
       for (const project of projects) {
         const projectTasks = await this.storage.getProjectTasks(project.id);
         sheetRows.push(this.projectToSheetRow(project, projectTasks));
       }
-      
+
       // Update the sheet
       await sheetsService.updateSheet(sheetRows);
-      
+
       // Mark projects as synced
       const now = new Date().toISOString();
       for (const project of projects) {
         await this.storage.updateProject(project.id, {
           lastSyncedAt: now,
-          syncStatus: 'synced'
+          syncStatus: 'synced',
         });
       }
-      
-      return { 
-        success: true, 
+
+      return {
+        success: true,
         message: `Successfully synced ${projects.length} projects to Google Sheets`,
-        synced: projects.length
+        synced: projects.length,
       };
     } catch (error) {
       console.error('Error syncing to Google Sheets:', error);
-      return { 
-        success: false, 
-        message: `Failed to sync: ${error instanceof Error ? error.message : 'Unknown error'}`
+      return {
+        success: false,
+        message: `Failed to sync: ${error instanceof Error ? error.message : 'Unknown error'}`,
       };
     }
   }
@@ -55,47 +66,60 @@ export class GoogleSheetsSyncService {
   /**
    * Sync from Google Sheets to database - Only syncs projects that have googleSheetRowId
    */
-  async syncFromGoogleSheets(): Promise<{ success: boolean; message: string; updated?: number; created?: number }> {
+  async syncFromGoogleSheets(): Promise<{
+    success: boolean;
+    message: string;
+    updated?: number;
+    created?: number;
+  }> {
     const sheetsService = getProjectsGoogleSheetsService();
     if (!sheetsService) {
-      return { success: false, message: 'Projects Google Sheets service not configured - missing PROJECTS_SHEET_ID' };
+      return {
+        success: false,
+        message:
+          'Projects Google Sheets service not configured - missing PROJECTS_SHEET_ID',
+      };
     }
 
     try {
       // Read from Google Sheets
       const sheetRows = await sheetsService.readSheet();
-      
+
       let updatedCount = 0;
       let createdCount = 0;
-      
+
       for (const row of sheetRows) {
         if (!row.task) continue; // Skip empty rows
-        
+
         // Try to find existing project by title or sheet row ID
         const existingProjects = await this.storage.getAllProjects();
-        const existingProject = existingProjects.find(p => 
-          p.googleSheetRowId === row.rowIndex?.toString() ||
-          p.title.toLowerCase().trim() === row.task.toLowerCase().trim()
+        const existingProject = existingProjects.find(
+          (p) =>
+            p.googleSheetRowId === row.rowIndex?.toString() ||
+            p.title.toLowerCase().trim() === row.task.toLowerCase().trim()
         );
-        
+
         const projectData = this.sheetRowToProject(row);
-        
+
         if (existingProject) {
           // Preserve meeting discussion content - don't overwrite it
           const preservedData = { ...projectData };
           if (existingProject.meetingDiscussionPoints) {
             delete preservedData.description; // Don't overwrite if it has meeting content
           }
-          
+
           // Update existing project but preserve meeting content
           await this.storage.updateProject(existingProject.id, {
             ...preservedData,
             syncStatus: 'synced',
-            googleSheetRowId: row.rowIndex?.toString()
+            googleSheetRowId: row.rowIndex?.toString(),
           });
-          
+
           // Sync sub-tasks for this project (with meeting content preservation)
-          await this.syncProjectTasksPreservingMeetingContent(existingProject.id, row.subTasksOwners);
+          await this.syncProjectTasksPreservingMeetingContent(
+            existingProject.id,
+            row.subTasksOwners
+          );
           updatedCount++;
         } else {
           // Only create new project if it doesn't exist - mark as meeting project
@@ -104,9 +128,9 @@ export class GoogleSheetsSyncService {
             createdBy: 'google-sheets-sync',
             createdByName: 'Google Sheets Import',
             syncStatus: 'synced',
-            googleSheetRowId: row.rowIndex?.toString()
+            googleSheetRowId: row.rowIndex?.toString(),
           });
-          
+
           // Sync sub-tasks for new project
           if (newProject) {
             await this.syncProjectTasks(newProject.id, row.subTasksOwners);
@@ -114,18 +138,18 @@ export class GoogleSheetsSyncService {
           createdCount++;
         }
       }
-      
+
       return {
         success: true,
         message: `Sync complete: ${createdCount} created, ${updatedCount} updated`,
         updated: updatedCount,
-        created: createdCount
+        created: createdCount,
       };
     } catch (error) {
       console.error('Error syncing from Google Sheets:', error);
-      return { 
-        success: false, 
-        message: `Failed to sync: ${error instanceof Error ? error.message : 'Unknown error'}`
+      return {
+        success: false,
+        message: `Failed to sync: ${error instanceof Error ? error.message : 'Unknown error'}`,
       };
     }
   }
@@ -133,27 +157,31 @@ export class GoogleSheetsSyncService {
   /**
    * Bi-directional sync - handles conflicts by prioritizing most recent update
    */
-  async bidirectionalSync(): Promise<{ success: boolean; message: string; details?: any }> {
+  async bidirectionalSync(): Promise<{
+    success: boolean;
+    message: string;
+    details?: any;
+  }> {
     try {
       // First sync FROM sheets to get latest manual changes
       const fromResult = await this.syncFromGoogleSheets();
-      
+
       // Then sync TO sheets to ensure everything is up to date
       const toResult = await this.syncToGoogleSheets();
-      
+
       return {
         success: fromResult.success && toResult.success,
         message: `Bidirectional sync complete. ${fromResult.message} | ${toResult.message}`,
         details: {
           fromSheets: fromResult,
-          toSheets: toResult
-        }
+          toSheets: toResult,
+        },
       };
     } catch (error) {
       console.error('Error in bidirectional sync:', error);
       return {
         success: false,
-        message: `Bidirectional sync failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+        message: `Bidirectional sync failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
       };
     }
   }
@@ -161,72 +189,98 @@ export class GoogleSheetsSyncService {
   /**
    * Sync individual project tasks from sheet format - preserving meeting discussion content
    */
-  private async syncProjectTasksPreservingMeetingContent(projectId: number, subTasksOwners: string): Promise<void> {
+  private async syncProjectTasksPreservingMeetingContent(
+    projectId: number,
+    subTasksOwners: string
+  ): Promise<void> {
     if (!subTasksOwners || typeof subTasksOwners !== 'string') return;
 
     // Parse tasks from string format (e.g., "• Task 1: Katie (C), • Task 2: Chris (IP)")
     const taskItems = this.parseTasksFromString(subTasksOwners);
-    
+
     // Get existing tasks for this project
     const existingTasks = await this.storage.getProjectTasks(projectId);
-    
+
     // Track which tasks we've processed
     const processedTaskTitles = new Set<string>();
-    
+
     // Update existing tasks or create new ones
     for (const taskItem of taskItems) {
       processedTaskTitles.add(taskItem.title);
-      
+
       // Find existing task with matching title
-      const existingTask = existingTasks.find(task => 
-        task.title.trim().toLowerCase() === taskItem.title.trim().toLowerCase()
+      const existingTask = existingTasks.find(
+        (task) =>
+          task.title.trim().toLowerCase() ===
+          taskItem.title.trim().toLowerCase()
       );
-      
+
       if (existingTask) {
         // PRESERVE meeting discussion content - only update status and assignee
         const updateData: any = {};
-        
+
         if (taskItem.status && taskItem.status !== existingTask.status) {
           updateData.status = taskItem.status;
-          console.log(`📝 Updating task "${taskItem.title}" status from "${existingTask.status}" to "${taskItem.status}"`);
+          console.log(
+            `📝 Updating task "${taskItem.title}" status from "${existingTask.status}" to "${taskItem.status}"`
+          );
         }
-        
-        if (taskItem.assignee && taskItem.assignee !== existingTask.assigneeName) {
+
+        if (
+          taskItem.assignee &&
+          taskItem.assignee !== existingTask.assigneeName
+        ) {
           updateData.assigneeName = taskItem.assignee;
           updateData.assigneeNames = [taskItem.assignee];
-          console.log(`👤 Updating task "${taskItem.title}" assignee to "${taskItem.assignee}"`);
+          console.log(
+            `👤 Updating task "${taskItem.title}" assignee to "${taskItem.assignee}"`
+          );
         }
-        
+
         // Do NOT update description if it contains meeting discussion content
-        if (existingTask.description && existingTask.description.includes('Meeting Discussion Notes:')) {
-          console.log(`🔒 Preserving meeting discussion content for task "${taskItem.title}"`);
+        if (
+          existingTask.description &&
+          existingTask.description.includes('Meeting Discussion Notes:')
+        ) {
+          console.log(
+            `🔒 Preserving meeting discussion content for task "${taskItem.title}"`
+          );
         }
-        
+
         if (Object.keys(updateData).length > 0) {
           await this.storage.updateProjectTask(existingTask.id, updateData);
         }
       } else {
         // Create new task (basic version from sheet)
-        console.log(`➕ Creating new task "${taskItem.title}" with status "${taskItem.status || 'available'}"`);
+        console.log(
+          `➕ Creating new task "${taskItem.title}" with status "${taskItem.status || 'available'}"`
+        );
         await this.storage.createProjectTask({
           projectId,
           title: taskItem.title,
           description: taskItem.description || '',
           status: taskItem.status || 'available',
           assigneeName: taskItem.assignee || undefined,
-          assigneeNames: taskItem.assignee ? [taskItem.assignee] : []
+          assigneeNames: taskItem.assignee ? [taskItem.assignee] : [],
         });
       }
     }
-    
+
     // Remove tasks that are no longer in the sheet (but preserve meeting-generated tasks)
     for (const existingTask of existingTasks) {
       if (!processedTaskTitles.has(existingTask.title)) {
         // Don't delete tasks that have meeting discussion content
-        if (existingTask.description && existingTask.description.includes('Meeting Discussion Notes:')) {
-          console.log(`🔒 Preserving meeting-generated task "${existingTask.title}"`);
+        if (
+          existingTask.description &&
+          existingTask.description.includes('Meeting Discussion Notes:')
+        ) {
+          console.log(
+            `🔒 Preserving meeting-generated task "${existingTask.title}"`
+          );
         } else {
-          console.log(`🗑️ Removing task "${existingTask.title}" as it's no longer in the sheet`);
+          console.log(
+            `🗑️ Removing task "${existingTask.title}" as it's no longer in the sheet`
+          );
           await this.storage.deleteProjectTask(existingTask.id);
         }
       }
@@ -236,63 +290,79 @@ export class GoogleSheetsSyncService {
   /**
    * Sync individual project tasks from sheet format
    */
-  private async syncProjectTasks(projectId: number, subTasksOwners: string): Promise<void> {
+  private async syncProjectTasks(
+    projectId: number,
+    subTasksOwners: string
+  ): Promise<void> {
     if (!subTasksOwners || typeof subTasksOwners !== 'string') return;
 
     // Parse tasks from string format (e.g., "• Task 1: Katie (C), • Task 2: Chris (IP)")
     const taskItems = this.parseTasksFromString(subTasksOwners);
-    
+
     // Get existing tasks for this project
     const existingTasks = await this.storage.getProjectTasks(projectId);
-    
+
     // Track which tasks we've processed
     const processedTaskTitles = new Set<string>();
-    
+
     // Update existing tasks or create new ones
     for (const taskItem of taskItems) {
       processedTaskTitles.add(taskItem.title);
-      
+
       // Find existing task with matching title
-      const existingTask = existingTasks.find(task => 
-        task.title.trim().toLowerCase() === taskItem.title.trim().toLowerCase()
+      const existingTask = existingTasks.find(
+        (task) =>
+          task.title.trim().toLowerCase() ===
+          taskItem.title.trim().toLowerCase()
       );
-      
+
       if (existingTask) {
         // Update existing task with new status and assignee
         const updateData: any = {};
-        
+
         if (taskItem.status && taskItem.status !== existingTask.status) {
           updateData.status = taskItem.status;
-          console.log(`📝 Updating task "${taskItem.title}" status from "${existingTask.status}" to "${taskItem.status}"`);
+          console.log(
+            `📝 Updating task "${taskItem.title}" status from "${existingTask.status}" to "${taskItem.status}"`
+          );
         }
-        
-        if (taskItem.assignee && taskItem.assignee !== existingTask.assigneeName) {
+
+        if (
+          taskItem.assignee &&
+          taskItem.assignee !== existingTask.assigneeName
+        ) {
           updateData.assigneeName = taskItem.assignee;
           updateData.assigneeNames = [taskItem.assignee];
-          console.log(`👤 Updating task "${taskItem.title}" assignee to "${taskItem.assignee}"`);
+          console.log(
+            `👤 Updating task "${taskItem.title}" assignee to "${taskItem.assignee}"`
+          );
         }
-        
+
         if (Object.keys(updateData).length > 0) {
           await this.storage.updateProjectTask(existingTask.id, updateData);
         }
       } else {
         // Create new task
-        console.log(`➕ Creating new task "${taskItem.title}" with status "${taskItem.status || 'available'}"`);
+        console.log(
+          `➕ Creating new task "${taskItem.title}" with status "${taskItem.status || 'available'}"`
+        );
         await this.storage.createProjectTask({
           projectId,
           title: taskItem.title,
           description: taskItem.description || '',
           status: taskItem.status || 'available',
           assigneeName: taskItem.assignee || undefined,
-          assigneeNames: taskItem.assignee ? [taskItem.assignee] : []
+          assigneeNames: taskItem.assignee ? [taskItem.assignee] : [],
         });
       }
     }
-    
+
     // Remove tasks that are no longer in the sheet
     for (const existingTask of existingTasks) {
       if (!processedTaskTitles.has(existingTask.title)) {
-        console.log(`🗑️ Removing task "${existingTask.title}" as it's no longer in the sheet`);
+        console.log(
+          `🗑️ Removing task "${existingTask.title}" as it's no longer in the sheet`
+        );
         await this.storage.deleteProjectTask(existingTask.id);
       }
     }
@@ -301,10 +371,14 @@ export class GoogleSheetsSyncService {
   /**
    * Convert project to Google Sheets row format
    */
-  private projectToSheetRow(project: Project, projectTasks: any[] = []): SheetRow {
+  private projectToSheetRow(
+    project: Project,
+    projectTasks: any[] = []
+  ): SheetRow {
     // Owner = Assigned project owner (assigneeName), fallback to creator
     // Support People = Only the supportPeople field
-    const projectOwner = project.assigneeName || project.createdByName || project.createdBy || '';
+    const projectOwner =
+      project.assigneeName || project.createdByName || project.createdBy || '';
     const supportPeopleOnly = project.supportPeople || '';
 
     const sheetRow = {
@@ -321,11 +395,11 @@ export class GoogleSheetsSyncService {
       subTasksOwners: this.formatTasksForSheet(projectTasks), // Format sub-tasks
       deliverable: project.deliverables || '',
       notes: project.notes || project.description || '',
-      lastDiscussedDate: project.lastDiscussedDate || '' // Column N
+      lastDiscussedDate: project.lastDiscussedDate || '', // Column N
     };
-    
+
     // Column mapping verified: task→A, reviewStatus→B, status→F
-    
+
     return sheetRow;
   }
 
@@ -366,27 +440,29 @@ export class GoogleSheetsSyncService {
    */
   private parseSheetDate(dateString: string | undefined): string | undefined {
     if (!dateString || dateString.trim() === '') return undefined;
-    
+
     try {
       // Handle various date formats from Google Sheets
       const cleaned = dateString.trim();
-      
+
       // Try parsing common formats: MM/DD/YYYY, M/D/YYYY, YYYY-MM-DD
       // Use Date constructor but adjust for timezone to avoid day-off issues
       const date = new Date(cleaned);
-      
+
       // Check if it's a valid date
       if (isNaN(date.getTime())) {
-        console.warn(`⚠️ Invalid date format from Google Sheets: "${dateString}"`);
+        console.warn(
+          `⚠️ Invalid date format from Google Sheets: "${dateString}"`
+        );
         return undefined;
       }
-      
+
       // Get local date components to avoid timezone offset issues
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, '0');
       const day = String(date.getDate()).padStart(2, '0');
       const isoString = `${year}-${month}-${day}`;
-      
+
       console.log(`✅ Parsed date "${dateString}" to: ${isoString}`);
       return isoString;
     } catch (error) {
@@ -400,20 +476,23 @@ export class GoogleSheetsSyncService {
    */
   private formatTasksForSheet(projectTasks: any[]): string {
     if (!projectTasks || projectTasks.length === 0) return '';
-    
+
     return projectTasks
-      .map(task => {
-        const assignee = task.assigneeName || (task.assigneeNames && task.assigneeNames[0]);
+      .map((task) => {
+        const assignee =
+          task.assigneeName || (task.assigneeNames && task.assigneeNames[0]);
         let statusIndicator = '';
-        
+
         // Add status indicators
         if (task.status === 'completed') {
           statusIndicator = ' (C)';
         } else if (task.status === 'in_progress') {
           statusIndicator = ' (IP)';
         }
-        
-        return assignee ? `• ${task.title}: ${assignee}${statusIndicator}` : `• ${task.title}${statusIndicator}`;
+
+        return assignee
+          ? `• ${task.title}: ${assignee}${statusIndicator}`
+          : `• ${task.title}${statusIndicator}`;
       })
       .join('\n');
   }
@@ -421,22 +500,32 @@ export class GoogleSheetsSyncService {
   /**
    * Parse tasks from sheet string format
    */
-  private parseTasksFromString(subTasksOwners: string): Array<{title: string, assignee?: string, description?: string, status?: string}> {
+  private parseTasksFromString(subTasksOwners: string): Array<{
+    title: string;
+    assignee?: string;
+    description?: string;
+    status?: string;
+  }> {
     if (!subTasksOwners) return [];
-    
-    const tasks: Array<{title: string, assignee?: string, description?: string, status?: string}> = [];
-    
+
+    const tasks: Array<{
+      title: string;
+      assignee?: string;
+      description?: string;
+      status?: string;
+    }> = [];
+
     // Split by bullet points or line breaks
-    const lines = subTasksOwners.split(/[•\n]/).filter(line => line.trim());
-    
+    const lines = subTasksOwners.split(/[•\n]/).filter((line) => line.trim());
+
     for (const line of lines) {
       const trimmed = line.trim();
       if (!trimmed) continue;
-      
+
       // Extract status indicators first
       let taskText = trimmed;
       let status = 'available'; // default status
-      
+
       // Look for status indicators at the end: (C), (IP), C, IP
       const statusMatch = taskText.match(/\s*\(?(C|IP)\)?$/i);
       if (statusMatch) {
@@ -449,24 +538,24 @@ export class GoogleSheetsSyncService {
         // Remove status indicator from task text
         taskText = taskText.replace(/\s*\(?(C|IP)\)?$/i, '').trim();
       }
-      
+
       // Look for "Task: Assignee" format
       const colonMatch = taskText.match(/^(.+?):\s*(.+)$/);
       if (colonMatch) {
         tasks.push({
           title: colonMatch[1].trim(),
           assignee: colonMatch[2].trim(),
-          status
+          status,
         });
       } else {
         // Just a task title
         tasks.push({
           title: taskText,
-          status
+          status,
         });
       }
     }
-    
+
     return tasks;
   }
 
@@ -476,9 +565,15 @@ export class GoogleSheetsSyncService {
     return reviewInNextMeeting ? 'P1' : '';
   }
 
-  private mapReviewStatusFromSheet(reviewStatus: string | null | undefined): boolean {
+  private mapReviewStatusFromSheet(
+    reviewStatus: string | null | undefined
+  ): boolean {
     // Handle null, undefined, or empty values
-    if (!reviewStatus || typeof reviewStatus !== 'string' || reviewStatus.trim() === '') {
+    if (
+      !reviewStatus ||
+      typeof reviewStatus !== 'string' ||
+      reviewStatus.trim() === ''
+    ) {
       return false;
     }
     // Any P status means review in next meeting
@@ -487,30 +582,30 @@ export class GoogleSheetsSyncService {
 
   private mapPriority(priority: string): string {
     const map: Record<string, string> = {
-      'low': 'Low',
-      'medium': 'Medium', 
-      'high': 'High',
-      'urgent': 'Urgent'
+      low: 'Low',
+      medium: 'Medium',
+      high: 'High',
+      urgent: 'Urgent',
     };
     return map[priority] || 'Medium';
   }
 
   private mapPriorityFromSheet(priority: string): string {
     const map: Record<string, string> = {
-      'Low': 'low',
-      'Medium': 'medium',
-      'High': 'high', 
-      'Urgent': 'urgent'
+      Low: 'low',
+      Medium: 'medium',
+      High: 'high',
+      Urgent: 'urgent',
     };
     return map[priority] || 'medium';
   }
 
   private mapStatus(status: string): string {
     const map: Record<string, string> = {
-      'waiting': 'Not started',
-      'available': 'Not started',
-      'in_progress': 'In progress',
-      'completed': 'Completed'
+      waiting: 'Not started',
+      available: 'Not started',
+      in_progress: 'In progress',
+      completed: 'Completed',
     };
     return map[status] || 'Not started';
   }
@@ -519,7 +614,7 @@ export class GoogleSheetsSyncService {
     const map: Record<string, string> = {
       'Not started': 'available',
       'In progress': 'in_progress',
-      'Completed': 'completed'
+      Completed: 'completed',
     };
     return map[status] || 'available';
   }
@@ -528,7 +623,9 @@ export class GoogleSheetsSyncService {
 // Export singleton
 let syncService: GoogleSheetsSyncService | null = null;
 
-export function getGoogleSheetsSyncService(storage: IStorage): GoogleSheetsSyncService {
+export function getGoogleSheetsSyncService(
+  storage: IStorage
+): GoogleSheetsSyncService {
   if (!syncService) {
     syncService = new GoogleSheetsSyncService(storage);
   }
@@ -540,10 +637,10 @@ export async function triggerGoogleSheetsSync(): Promise<void> {
   try {
     const { storage } = await import('./storage-wrapper');
     const syncService = getGoogleSheetsSyncService(storage);
-    
+
     console.log('🔄 Starting automatic Google Sheets sync...');
     const result = await syncService.syncToGoogleSheets();
-    
+
     if (result.success) {
       console.log(`✅ Google Sheets sync completed: ${result.message}`);
     } else {

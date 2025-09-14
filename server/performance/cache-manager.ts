@@ -1,4 +1,4 @@
-import { LRUCache } from "lru-cache";
+import { LRUCache } from 'lru-cache';
 
 export interface CacheOptions {
   maxSize?: number;
@@ -27,15 +27,15 @@ export class CacheManager {
   }
 
   // Optimized cache for frequently accessed data
-  static collections = this.getCache("collections", {
+  static collections = this.getCache('collections', {
     maxSize: 1000,
     ttl: 120000,
   }); // 2 minutes
-  static hosts = this.getCache("hosts", { maxSize: 200, ttl: 300000 }); // 5 minutes
-  static projects = this.getCache("projects", { maxSize: 100, ttl: 180000 }); // 3 minutes
-  static stats = this.getCache("stats", { maxSize: 50, ttl: 60000 }); // 1 minute
-  static search = this.getCache("search", { maxSize: 300, ttl: 600000 }); // 10 minutes
-  static users = this.getCache("users", { maxSize: 100, ttl: 900000 }); // 15 minutes
+  static hosts = this.getCache('hosts', { maxSize: 200, ttl: 300000 }); // 5 minutes
+  static projects = this.getCache('projects', { maxSize: 100, ttl: 180000 }); // 3 minutes
+  static stats = this.getCache('stats', { maxSize: 50, ttl: 60000 }); // 1 minute
+  static search = this.getCache('search', { maxSize: 300, ttl: 600000 }); // 10 minutes
+  static users = this.getCache('users', { maxSize: 100, ttl: 900000 }); // 15 minutes
 
   // Cache wrapper with automatic key generation
   static async withCache<T>(
@@ -97,7 +97,7 @@ export class CacheManager {
 
   // Smart cache warming for critical data
   static async warmCaches() {
-    console.log("Warming critical caches...");
+    console.log('Warming critical caches...');
 
     // Pre-load frequently accessed data
     const warmingTasks = [
@@ -107,43 +107,43 @@ export class CacheManager {
     ];
 
     await Promise.allSettled(warmingTasks);
-    console.log("Cache warming completed");
+    console.log('Cache warming completed');
   }
 
   private static async warmCollectionStats() {
     try {
       // This would typically call your stats API endpoint
-      const response = await fetch("/api/sandwich-collections/stats");
+      const response = await fetch('/api/sandwich-collections/stats');
       if (response.ok) {
         const stats = await response.json();
-        this.stats.set("collection-stats", stats);
+        this.stats.set('collection-stats', stats);
       }
     } catch (error) {
-      console.warn("Failed to warm collection stats cache:", error);
+      console.warn('Failed to warm collection stats cache:', error);
     }
   }
 
   private static async warmActiveHosts() {
     try {
-      const response = await fetch("/api/hosts?status=active");
+      const response = await fetch('/api/hosts?status=active');
       if (response.ok) {
         const hosts = await response.json();
-        this.hosts.set("active-hosts", hosts);
+        this.hosts.set('active-hosts', hosts);
       }
     } catch (error) {
-      console.warn("Failed to warm hosts cache:", error);
+      console.warn('Failed to warm hosts cache:', error);
     }
   }
 
   private static async warmRecentProjects() {
     try {
-      const response = await fetch("/api/projects?recent=true");
+      const response = await fetch('/api/projects?recent=true');
       if (response.ok) {
         const projects = await response.json();
-        this.projects.set("recent-projects", projects);
+        this.projects.set('recent-projects', projects);
       }
     } catch (error) {
-      console.warn("Failed to warm projects cache:", error);
+      console.warn('Failed to warm projects cache:', error);
     }
   }
 
@@ -154,7 +154,7 @@ export class CacheManager {
     limit: number,
     filters?: Record<string, any>
   ): string {
-    const filterStr = filters ? JSON.stringify(filters) : "";
+    const filterStr = filters ? JSON.stringify(filters) : '';
     return `${endpoint}:page=${page}:limit=${limit}:filters=${filterStr}`;
   }
 
@@ -170,7 +170,7 @@ export class CacheManager {
       currentPage + 1,
       limit
     );
-    const cache = this.getCache("pagination", { maxSize: 1000, ttl: 300000 });
+    const cache = this.getCache('pagination', { maxSize: 1000, ttl: 300000 });
 
     if (!cache.has(nextPageKey)) {
       // Preload next page in background
@@ -179,7 +179,7 @@ export class CacheManager {
           const nextPageData = await fetcher(currentPage + 1);
           cache.set(nextPageKey, nextPageData);
         } catch (error) {
-          console.warn("Failed to preload next page:", error);
+          console.warn('Failed to preload next page:', error);
         }
       }, 100);
     }

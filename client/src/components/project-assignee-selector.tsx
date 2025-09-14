@@ -1,17 +1,17 @@
-import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { UserPlus, Users, X } from "lucide-react";
+} from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { UserPlus, Users, X } from 'lucide-react';
 
 interface ProjectAssigneeSelectorProps {
   value: string;
@@ -39,17 +39,17 @@ interface SelectedUser {
 export function ProjectAssigneeSelector({
   value,
   onChange,
-  placeholder = "Add team members",
-  label = "Assigned To",
+  placeholder = 'Add team members',
+  label = 'Assigned To',
   className,
   multiple = true,
 }: ProjectAssigneeSelectorProps) {
   const [selectedUsers, setSelectedUsers] = useState<SelectedUser[]>([]);
-  const [customNameInput, setCustomNameInput] = useState("");
+  const [customNameInput, setCustomNameInput] = useState('');
 
   // Fetch system users for assignments
   const { data: users = [] } = useQuery<User[]>({
-    queryKey: ["/api/users/for-assignments"],
+    queryKey: ['/api/users/for-assignments'],
     retry: false,
   });
 
@@ -57,22 +57,24 @@ export function ProjectAssigneeSelector({
   useEffect(() => {
     if (value && users.length > 0) {
       const names = value
-        .split(",")
+        .split(',')
         .map((name) => name.trim())
         .filter((name) => name.length > 0);
       const allUsers: SelectedUser[] = [];
 
       names.forEach((name) => {
         const matchedUser = users.find((user) => {
-          const fullName = `${user.firstName || ""} ${user.lastName ||
-            ""}`.trim();
+          const fullName = `${user.firstName || ''} ${
+            user.lastName || ''
+          }`.trim();
           return fullName === name || user.email === name;
         });
 
         if (matchedUser) {
           const fullName =
-            `${matchedUser.firstName || ""} ${matchedUser.lastName ||
-              ""}`.trim() || matchedUser.email;
+            `${matchedUser.firstName || ''} ${
+              matchedUser.lastName || ''
+            }`.trim() || matchedUser.email;
           allUsers.push({
             id: matchedUser.id,
             name: fullName,
@@ -93,7 +95,7 @@ export function ProjectAssigneeSelector({
   }, [users, value]);
 
   const addUserById = (userId: string) => {
-    if (userId === "none") {
+    if (userId === 'none') {
       return; // Don't do anything for the placeholder option
     }
 
@@ -101,7 +103,7 @@ export function ProjectAssigneeSelector({
     if (!user) return;
 
     const fullName =
-      `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.email;
+      `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email;
 
     // Check if already selected
     if (selectedUsers.some((u) => u.id === user.id)) return;
@@ -125,7 +127,7 @@ export function ProjectAssigneeSelector({
         (u) => u.name.toLowerCase() === customNameInput.trim().toLowerCase()
       )
     ) {
-      setCustomNameInput("");
+      setCustomNameInput('');
       return;
     }
 
@@ -137,14 +139,14 @@ export function ProjectAssigneeSelector({
 
     const updatedUsers = [...selectedUsers, customUser];
     setSelectedUsers(updatedUsers);
-    setCustomNameInput("");
+    setCustomNameInput('');
 
     // Update parent
     updateParent(updatedUsers);
   };
 
   const updateParent = (users: SelectedUser[]) => {
-    const names = users.map((u) => u.name).join(", ");
+    const names = users.map((u) => u.name).join(', ');
     const systemUserIds = users.filter((u) => u.isSystemUser).map((u) => u.id);
     onChange(names, systemUserIds);
   };
@@ -182,8 +184,9 @@ export function ProjectAssigneeSelector({
                 .map((user) => (
                   <SelectItem key={user.id} value={user.id}>
                     <span className="font-medium">
-                      {`${user.firstName || ""} ${user.lastName ||
-                        ""}`.trim() || user.email}
+                      {`${user.firstName || ''} ${
+                        user.lastName || ''
+                      }`.trim() || user.email}
                     </span>
                   </SelectItem>
                 ))}
@@ -202,7 +205,7 @@ export function ProjectAssigneeSelector({
               onChange={(e) => setCustomNameInput(e.target.value)}
               placeholder="Enter custom name"
               onKeyPress={(e) => {
-                if (e.key === "Enter") {
+                if (e.key === 'Enter') {
                   e.preventDefault();
                   addCustomName();
                 }
@@ -228,7 +231,7 @@ export function ProjectAssigneeSelector({
               {selectedUsers.map((user) => (
                 <Badge
                   key={user.id}
-                  variant={user.isSystemUser ? "default" : "outline"}
+                  variant={user.isSystemUser ? 'default' : 'outline'}
                   className="flex items-center gap-1 px-3 py-1"
                 >
                   <span>{user.name}</span>

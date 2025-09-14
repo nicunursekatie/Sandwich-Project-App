@@ -1,8 +1,14 @@
-import { AlertTriangle, Trash2, Eye } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
-import type { SandwichCollection } from "@shared/schema";
+import { AlertTriangle, Trash2, Eye } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
+import type { SandwichCollection } from '@shared/schema';
 
 interface DuplicateAnalysis {
   totalCollections: number;
@@ -26,31 +32,34 @@ interface DuplicateAnalysisProps {
   isDeleting: boolean;
 }
 
-export function DuplicateAnalysisDialog({ 
-  isOpen, 
-  onClose, 
-  analysis, 
+export function DuplicateAnalysisDialog({
+  isOpen,
+  onClose,
+  analysis,
   onDeleteDuplicates,
-  isDeleting 
+  isDeleting,
 }: DuplicateAnalysisProps) {
   if (!analysis) return null;
 
   const handleDeleteAllDuplicates = () => {
-    const duplicateIds = analysis.duplicates.flatMap(group => 
-      group.toDelete.map(item => item.id)
+    const duplicateIds = analysis.duplicates.flatMap((group) =>
+      group.toDelete.map((item) => item.id)
     );
     onDeleteDuplicates(duplicateIds);
   };
 
   const handleDeleteGroup = (groupIndex: number) => {
     const group = analysis.duplicates[groupIndex];
-    const idsToDelete = group.toDelete.map(item => item.id);
+    const idsToDelete = group.toDelete.map((item) => item.id);
     onDeleteDuplicates(idsToDelete);
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto" aria-describedby="duplicate-analysis-description">
+      <DialogContent
+        className="max-w-4xl max-h-[80vh] overflow-y-auto"
+        aria-describedby="duplicate-analysis-description"
+      >
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-orange-500" />
@@ -60,24 +69,32 @@ export function DuplicateAnalysisDialog({
             Review and manage duplicate collection entries found in your data.
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="space-y-6">
           {/* Summary Stats */}
           <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-4">
             <div className="text-center p-4 bg-gray-50 rounded-lg">
-              <div className="text-2xl font-bold">{analysis.totalCollections}</div>
+              <div className="text-2xl font-bold">
+                {analysis.totalCollections}
+              </div>
               <div className="text-sm text-gray-600">Collections</div>
             </div>
             <div className="text-center p-4 bg-orange-50 rounded-lg">
-              <div className="text-2xl font-bold text-orange-600">{analysis.duplicateGroups}</div>
+              <div className="text-2xl font-bold text-orange-600">
+                {analysis.duplicateGroups}
+              </div>
               <div className="text-sm text-gray-600">Groups</div>
             </div>
             <div className="text-center p-4 bg-red-50 rounded-lg">
-              <div className="text-2xl font-bold text-red-600">{analysis.totalDuplicateEntries}</div>
+              <div className="text-2xl font-bold text-red-600">
+                {analysis.totalDuplicateEntries}
+              </div>
               <div className="text-sm text-gray-600">Duplicates</div>
             </div>
             <div className="text-center p-4 bg-yellow-50 rounded-lg">
-              <div className="text-2xl font-bold text-yellow-600">{analysis.suspiciousPatterns}</div>
+              <div className="text-2xl font-bold text-yellow-600">
+                {analysis.suspiciousPatterns}
+              </div>
               <div className="text-sm text-gray-600">Patterns</div>
             </div>
           </div>
@@ -85,7 +102,7 @@ export function DuplicateAnalysisDialog({
           {/* Action Buttons */}
           {analysis.duplicateGroups > 0 && (
             <div className="flex gap-2">
-              <Button 
+              <Button
                 onClick={handleDeleteAllDuplicates}
                 disabled={isDeleting}
                 variant="destructive"
@@ -116,7 +133,7 @@ export function DuplicateAnalysisDialog({
                       Delete {group.toDelete.length} duplicates
                     </Button>
                   </div>
-                  
+
                   <div className="space-y-2">
                     {/* Keep this one */}
                     <div className="p-3 bg-green-50 rounded border-l-4 border-green-500">
@@ -125,18 +142,24 @@ export function DuplicateAnalysisDialog({
                           KEEP
                         </Badge>
                         <div className="text-sm text-gray-600">
-                          {group.keepNewest.collectionDate} - {group.keepNewest.hostName}
+                          {group.keepNewest.collectionDate} -{' '}
+                          {group.keepNewest.hostName}
                         </div>
                       </div>
                       <div className="text-sm mt-1">
-                        Individual: {group.keepNewest.individualSandwiches} | 
-                        Groups: {(group.keepNewest.group1Count || 0) + (group.keepNewest.group2Count || 0)}
+                        Individual: {group.keepNewest.individualSandwiches} |
+                        Groups:{' '}
+                        {(group.keepNewest.group1Count || 0) +
+                          (group.keepNewest.group2Count || 0)}
                       </div>
                     </div>
-                    
+
                     {/* Delete these */}
                     {group.toDelete.map((item, itemIndex) => (
-                      <div key={itemIndex} className="p-3 bg-red-50 rounded border-l-4 border-red-500">
+                      <div
+                        key={itemIndex}
+                        className="p-3 bg-red-50 rounded border-l-4 border-red-500"
+                      >
                         <div className="flex justify-between items-center">
                           <Badge variant="destructive">DELETE</Badge>
                           <div className="text-sm text-gray-600">
@@ -144,8 +167,8 @@ export function DuplicateAnalysisDialog({
                           </div>
                         </div>
                         <div className="text-sm mt-1">
-                          Individual: {item.individualSandwiches} | 
-                          Groups: {(item.group1Count || 0) + (item.group2Count || 0)}
+                          Individual: {item.individualSandwiches} | Groups:{' '}
+                          {(item.group1Count || 0) + (item.group2Count || 0)}
                         </div>
                       </div>
                     ))}
@@ -160,11 +183,15 @@ export function DuplicateAnalysisDialog({
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Suspicious Patterns</h3>
               <div className="text-sm text-gray-600 mb-2">
-                These entries have unusual patterns that may indicate data quality issues:
+                These entries have unusual patterns that may indicate data
+                quality issues:
               </div>
               <div className="space-y-2">
                 {analysis.suspiciousEntries.map((entry, index) => (
-                  <div key={index} className="p-3 bg-yellow-50 rounded border-l-4 border-yellow-500">
+                  <div
+                    key={index}
+                    className="p-3 bg-yellow-50 rounded border-l-4 border-yellow-500"
+                  >
                     <div className="flex justify-between items-center">
                       <Badge className="bg-yellow-100 text-yellow-800">
                         REVIEW
@@ -174,8 +201,8 @@ export function DuplicateAnalysisDialog({
                       </div>
                     </div>
                     <div className="text-sm mt-1">
-                      Individual: {entry.individualSandwiches} | 
-                      Groups: {(entry.group1Count || 0) + (entry.group2Count || 0)}
+                      Individual: {entry.individualSandwiches} | Groups:{' '}
+                      {(entry.group1Count || 0) + (entry.group2Count || 0)}
                     </div>
                   </div>
                 ))}

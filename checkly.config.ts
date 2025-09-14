@@ -1,4 +1,4 @@
-import { defineConfig } from 'checkly'
+import { defineConfig } from 'checkly';
 
 /**
  * See https://www.checklyhq.com/docs/cli/project-structure/
@@ -7,8 +7,8 @@ const config = defineConfig({
   /* A human friendly name for your project */
   projectName: 'rest-express',
   /** A logical ID that needs to be unique across your Checkly account,
-  * See https://www.checklyhq.com/docs/cli/constructs/ to learn more about logical IDs.
-  */
+   * See https://www.checklyhq.com/docs/cli/constructs/ to learn more about logical IDs.
+   */
   logicalId: 'rest-express',
   /* An optional URL to your Git repo */
   repoUrl: 'https://github.com/checkly/checkly-cli',
@@ -30,8 +30,8 @@ const config = defineConfig({
     playwrightConfig: {},
     browserChecks: {
       /* A glob pattern matches any Playwright .spec.ts files and automagically creates a Browser Check. This way, you
-      * can just write native Playwright code. See https://www.checklyhq.com/docs/cli/using-check-test-match/
-      * */
+       * can just write native Playwright code. See https://www.checklyhq.com/docs/cli/using-check-test-match/
+       * */
       testMatch: '**/__checks__/**/*.spec.ts',
     },
   },
@@ -43,6 +43,6 @@ const config = defineConfig({
     /* How many times to retry a failing test run when running `npx checkly test` or `npx checkly trigger` (max. 3) */
     retries: 0,
   },
-})
+});
 
-export default config
+export default config;

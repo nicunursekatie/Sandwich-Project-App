@@ -1,23 +1,23 @@
-import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useState } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Calendar,
   Clock,
@@ -28,12 +28,12 @@ import {
   CheckCircle2,
   Circle,
   ArrowLeft,
-} from "lucide-react";
-import { queryClient } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
-import { hasPermission, PERMISSIONS } from "@shared/auth-utils";
-import { useLocation } from "wouter";
+} from 'lucide-react';
+import { queryClient } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import { hasPermission, PERMISSIONS } from '@shared/auth-utils';
+import { useLocation } from 'wouter';
 
 interface AgendaItem {
   id: number;
@@ -41,7 +41,7 @@ interface AgendaItem {
   submittedBy: string;
   title: string;
   description: string;
-  status: "pending" | "approved" | "rejected" | "postponed";
+  status: 'pending' | 'approved' | 'rejected' | 'postponed';
   submittedAt: string;
 }
 
@@ -53,72 +53,72 @@ export default function MeetingAgenda({
   isEmbedded = false,
 }: MeetingAgendaProps) {
   const { user } = useAuth();
-  const canModifyAgenda = (user as any)?.role !== "committee_member";
+  const canModifyAgenda = (user as any)?.role !== 'committee_member';
   const [, setLocation] = useLocation();
 
   const [isCreating, setIsCreating] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    submittedBy: (user as any)?.firstName || "User",
+    title: '',
+    description: '',
+    submittedBy: (user as any)?.firstName || 'User',
   });
   const { toast } = useToast();
 
   const { data: agendaItems = [], isLoading } = useQuery({
-    queryKey: ["/api/agenda-items"],
+    queryKey: ['/api/agenda-items'],
   });
 
   const createMutation = useMutation({
     mutationFn: async (data: any) => {
-      const response = await fetch("/api/agenda-items", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/api/agenda-items', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...data,
           meetingId: 1,
         }),
       });
-      if (!response.ok) throw new Error("Failed to create agenda item");
+      if (!response.ok) throw new Error('Failed to create agenda item');
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/agenda-items"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/agenda-items'] });
       setIsCreating(false);
       setFormData({
-        title: "",
-        description: "",
-        submittedBy: (user as any)?.firstName || "User",
+        title: '',
+        description: '',
+        submittedBy: (user as any)?.firstName || 'User',
       });
-      toast({ title: "Agenda item created successfully" });
+      toast({ title: 'Agenda item created successfully' });
     },
   });
 
   const updateStatusMutation = useMutation({
     mutationFn: async ({ id, status }: { id: number; status: string }) => {
       const response = await fetch(`/api/agenda-items/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status }),
       });
-      if (!response.ok) throw new Error("Failed to update status");
+      if (!response.ok) throw new Error('Failed to update status');
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/agenda-items"] });
-      toast({ title: "Status updated successfully" });
+      queryClient.invalidateQueries({ queryKey: ['/api/agenda-items'] });
+      toast({ title: 'Status updated successfully' });
     },
   });
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
       const response = await fetch(`/api/agenda-items/${id}`, {
-        method: "DELETE",
+        method: 'DELETE',
       });
-      if (!response.ok) throw new Error("Failed to delete agenda item");
+      if (!response.ok) throw new Error('Failed to delete agenda item');
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/agenda-items"] });
-      toast({ title: "Agenda item deleted successfully" });
+      queryClient.invalidateQueries({ queryKey: ['/api/agenda-items'] });
+      toast({ title: 'Agenda item deleted successfully' });
     },
   });
 
@@ -133,28 +133,28 @@ export default function MeetingAgenda({
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "approved":
-        return "bg-green-100 text-green-800";
-      case "rejected":
-        return "bg-red-100 text-red-800";
-      case "postponed":
-        return "bg-orange-100 text-orange-800";
-      case "pending":
-        return "bg-yellow-100 text-yellow-800";
+      case 'approved':
+        return 'bg-green-100 text-green-800';
+      case 'rejected':
+        return 'bg-red-100 text-red-800';
+      case 'postponed':
+        return 'bg-orange-100 text-orange-800';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800';
       default:
-        return "bg-gray-100 text-gray-800";
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case "approved":
+      case 'approved':
         return <CheckCircle2 className="w-4 h-4 text-green-600" />;
-      case "rejected":
+      case 'rejected':
         return <Circle className="w-4 h-4 text-red-600" />;
-      case "postponed":
+      case 'postponed':
         return <Clock className="w-4 h-4 text-orange-600" />;
-      case "pending":
+      case 'pending':
         return <Circle className="w-4 h-4 text-yellow-600" />;
       default:
         return <Circle className="w-4 h-4 text-gray-600" />;
@@ -173,10 +173,10 @@ export default function MeetingAgenda({
   }
 
   const approvedItems = (agendaItems as AgendaItem[]).filter(
-    (item) => item.status === "approved"
+    (item) => item.status === 'approved'
   ).length;
   const pendingItems = (agendaItems as AgendaItem[]).filter(
-    (item) => item.status === "pending"
+    (item) => item.status === 'pending'
   ).length;
 
   return (
@@ -188,7 +188,7 @@ export default function MeetingAgenda({
             variant="outline"
             size="sm"
             onClick={() =>
-              (window as any).dashboardSetActiveSection?.("meetings")
+              (window as any).dashboardSetActiveSection?.('meetings')
             }
             className="flex items-center gap-2"
           >
@@ -317,7 +317,7 @@ export default function MeetingAgenda({
               </div>
               <div className="flex gap-2">
                 <Button type="submit" disabled={createMutation.isPending}>
-                  {createMutation.isPending ? "Creating..." : "Create Item"}
+                  {createMutation.isPending ? 'Creating...' : 'Create Item'}
                 </Button>
                 <Button
                   type="button"
@@ -339,13 +339,13 @@ export default function MeetingAgenda({
             <Card
               key={item.id}
               className={
-                item.status === "approved"
-                  ? "border-green-200 bg-green-50"
-                  : item.status === "rejected"
-                  ? "border-red-200 bg-red-50"
-                  : item.status === "postponed"
-                  ? "border-orange-200 bg-orange-50"
-                  : ""
+                item.status === 'approved'
+                  ? 'border-green-200 bg-green-50'
+                  : item.status === 'rejected'
+                    ? 'border-red-200 bg-red-50'
+                    : item.status === 'postponed'
+                      ? 'border-orange-200 bg-orange-50'
+                      : ''
               }
             >
               <CardContent className="p-6">
@@ -382,12 +382,12 @@ export default function MeetingAgenda({
 
                   {/* Action Buttons */}
                   <div className="flex flex-col gap-2 ml-4">
-                    {item.status === "pending" && canModifyAgenda && (
+                    {item.status === 'pending' && canModifyAgenda && (
                       <div className="flex gap-2">
                         <Button
                           size="sm"
                           className="bg-green-600 hover:bg-green-700 text-white"
-                          onClick={() => handleStatusChange(item, "approved")}
+                          onClick={() => handleStatusChange(item, 'approved')}
                           disabled={updateStatusMutation.isPending}
                         >
                           Approve
@@ -396,7 +396,7 @@ export default function MeetingAgenda({
                           size="sm"
                           variant="outline"
                           className="border-red-300 text-red-600 hover:bg-red-50"
-                          onClick={() => handleStatusChange(item, "rejected")}
+                          onClick={() => handleStatusChange(item, 'rejected')}
                           disabled={updateStatusMutation.isPending}
                         >
                           Reject
@@ -405,7 +405,7 @@ export default function MeetingAgenda({
                           size="sm"
                           variant="outline"
                           className="border-orange-300 text-orange-600 hover:bg-orange-50"
-                          onClick={() => handleStatusChange(item, "postponed")}
+                          onClick={() => handleStatusChange(item, 'postponed')}
                           disabled={updateStatusMutation.isPending}
                         >
                           Postpone
@@ -413,11 +413,11 @@ export default function MeetingAgenda({
                       </div>
                     )}
 
-                    {item.status !== "pending" && canModifyAgenda && (
+                    {item.status !== 'pending' && canModifyAgenda && (
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => handleStatusChange(item, "pending")}
+                        onClick={() => handleStatusChange(item, 'pending')}
                         disabled={updateStatusMutation.isPending}
                       >
                         Reset to Pending

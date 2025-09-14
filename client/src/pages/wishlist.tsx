@@ -1,20 +1,20 @@
-import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
-import { useAuth } from "@/hooks/useAuth";
-import { hasPermission, PERMISSIONS } from "@shared/auth-utils";
-import { 
-  Copy, 
-  ExternalLink, 
-  Share2, 
-  Plus, 
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '@/lib/queryClient';
+import { useAuth } from '@/hooks/useAuth';
+import { hasPermission, PERMISSIONS } from '@shared/auth-utils';
+import {
+  Copy,
+  ExternalLink,
+  Share2,
+  Plus,
   Gift,
   Users,
   TrendingUp,
@@ -22,30 +22,34 @@ import {
   CheckCircle,
   XCircle,
   Clock,
-  Shield
-} from "lucide-react";
+  Shield,
+} from 'lucide-react';
 
 export default function WishlistPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAuth();
-  
+
   const [newSuggestion, setNewSuggestion] = useState({
-    item: "",
-    reason: "",
-    priority: "medium" as "high" | "medium" | "low"
+    item: '',
+    reason: '',
+    priority: 'medium' as 'high' | 'medium' | 'low',
   });
 
   // Fetch wishlist suggestions
-  const { data: suggestions = [], isLoading, error: suggestionsError } = useQuery<any[]>({
-    queryKey: ["/api/wishlist-suggestions"],
+  const {
+    data: suggestions = [],
+    isLoading,
+    error: suggestionsError,
+  } = useQuery<any[]>({
+    queryKey: ['/api/wishlist-suggestions'],
     retry: 1,
     staleTime: 30000,
   });
 
   // Fetch recent activity
   const { data: activity = [], error: activityError } = useQuery<any[]>({
-    queryKey: ["/api/wishlist-activity"],
+    queryKey: ['/api/wishlist-activity'],
     retry: 1,
     staleTime: 30000,
   });
@@ -53,100 +57,116 @@ export default function WishlistPage() {
   // Create suggestion mutation
   const createSuggestionMutation = useMutation({
     mutationFn: async (data: typeof newSuggestion) => {
-      return apiRequest("POST", "/api/wishlist-suggestions", {
+      return apiRequest('POST', '/api/wishlist-suggestions', {
         item: data.item,
         reason: data.reason,
         priority: data.priority,
-        status: "pending"
+        status: 'pending',
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/wishlist-suggestions"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/wishlist-activity"] });
+      queryClient.invalidateQueries({
+        queryKey: ['/api/wishlist-suggestions'],
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/wishlist-activity'] });
       toast({
-        title: "Suggestion Submitted",
-        description: "Your wishlist suggestion has been recorded for review",
+        title: 'Suggestion Submitted',
+        description: 'Your wishlist suggestion has been recorded for review',
       });
       setNewSuggestion({
-        item: "",
-        reason: "",
-        priority: "medium"
+        item: '',
+        reason: '',
+        priority: 'medium',
       });
     },
     onError: (error) => {
-      console.error("Wishlist submission error:", error);
+      console.error('Wishlist submission error:', error);
       toast({
-        title: "Submission Failed",
-        description: "There was an error submitting your suggestion. Please try again.",
-        variant: "destructive",
+        title: 'Submission Failed',
+        description:
+          'There was an error submitting your suggestion. Please try again.',
+        variant: 'destructive',
       });
-    }
+    },
   });
 
   // Admin review mutation
   const reviewSuggestionMutation = useMutation({
-    mutationFn: async ({ id, action, notes }: { id: number, action: 'approve' | 'reject', notes?: string }) => {
-      return apiRequest("PATCH", `/api/wishlist-suggestions/${id}`, {
+    mutationFn: async ({
+      id,
+      action,
+      notes,
+    }: {
+      id: number;
+      action: 'approve' | 'reject';
+      notes?: string;
+    }) => {
+      return apiRequest('PATCH', `/api/wishlist-suggestions/${id}`, {
         status: action === 'approve' ? 'approved' : 'rejected',
-        adminNotes: notes
+        adminNotes: notes,
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/wishlist-suggestions"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/wishlist-activity"] });
+      queryClient.invalidateQueries({
+        queryKey: ['/api/wishlist-suggestions'],
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/wishlist-activity'] });
       toast({
-        title: "Review Completed",
-        description: "Suggestion status has been updated",
+        title: 'Review Completed',
+        description: 'Suggestion status has been updated',
       });
     },
     onError: (error) => {
-      console.error("Review error:", error);
+      console.error('Review error:', error);
       toast({
-        title: "Review Failed",
-        description: "There was an error updating the suggestion",
-        variant: "destructive",
+        title: 'Review Failed',
+        description: 'There was an error updating the suggestion',
+        variant: 'destructive',
       });
-    }
+    },
   });
 
   // Delete suggestion mutation
   const deleteSuggestionMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest("DELETE", `/api/wishlist-suggestions/${id}`);
+      return apiRequest('DELETE', `/api/wishlist-suggestions/${id}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/wishlist-suggestions"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/wishlist-activity"] });
+      queryClient.invalidateQueries({
+        queryKey: ['/api/wishlist-suggestions'],
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/wishlist-activity'] });
       toast({
-        title: "Suggestion Deleted",
-        description: "The suggestion has been permanently removed",
+        title: 'Suggestion Deleted',
+        description: 'The suggestion has been permanently removed',
       });
     },
     onError: (error) => {
-      console.error("Delete error:", error);
+      console.error('Delete error:', error);
       toast({
-        title: "Delete Failed",
-        description: "There was an error deleting the suggestion",
-        variant: "destructive",
+        title: 'Delete Failed',
+        description: 'There was an error deleting the suggestion',
+        variant: 'destructive',
       });
-    }
+    },
   });
 
   // Amazon wishlist URL
-  const WISHLIST_URL = "https://www.amazon.com/hz/wishlist/ls/XRSQ9EDIIIWV?ref_=wl_share";
+  const WISHLIST_URL =
+    'https://www.amazon.com/hz/wishlist/ls/XRSQ9EDIIIWV?ref_=wl_share';
 
   const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
       toast({
-        title: "Copied!",
-        description: "Wishlist link copied to clipboard",
+        title: 'Copied!',
+        description: 'Wishlist link copied to clipboard',
       });
     } catch (err) {
       toast({
-        title: "Copy Failed",
-        description: "Please copy the link manually",
-        variant: "destructive",
+        title: 'Copy Failed',
+        description: 'Please copy the link manually',
+        variant: 'destructive',
       });
     }
   };
@@ -155,8 +175,8 @@ export default function WishlistPage() {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: "The Sandwich Project - Amazon Wishlist",
-          text: "Help support The Sandwich Project by checking out our Amazon wishlist!",
+          title: 'The Sandwich Project - Amazon Wishlist',
+          text: 'Help support The Sandwich Project by checking out our Amazon wishlist!',
           url: WISHLIST_URL,
         });
       } catch (err) {
@@ -172,7 +192,7 @@ export default function WishlistPage() {
   const handleSuggestionSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newSuggestion.item.trim()) return;
-    
+
     createSuggestionMutation.mutate(newSuggestion);
   };
 
@@ -181,15 +201,15 @@ export default function WishlistPage() {
     return (
       <div className="container mx-auto p-6 max-w-4xl">
         <div className="text-center space-y-4">
-          <h1 className="text-2xl font-bold text-red-600">Error Loading Wishlist</h1>
+          <h1 className="text-2xl font-bold text-red-600">
+            Error Loading Wishlist
+          </h1>
           <p className="text-slate-600">
-            {suggestionsError && "Failed to load suggestions. "}
-            {activityError && "Failed to load activity. "}
+            {suggestionsError && 'Failed to load suggestions. '}
+            {activityError && 'Failed to load activity. '}
             Please refresh the page or try again later.
           </p>
-          <Button onClick={() => window.location.reload()}>
-            Refresh Page
-          </Button>
+          <Button onClick={() => window.location.reload()}>Refresh Page</Button>
         </div>
       </div>
     );
@@ -205,8 +225,9 @@ export default function WishlistPage() {
             Amazon Wishlist
           </h1>
           <p className="text-slate-600 max-w-2xl mx-auto">
-            Help support The Sandwich Project! Our Amazon wishlist contains essential supplies 
-            and equipment that help us serve our community more effectively.
+            Help support The Sandwich Project! Our Amazon wishlist contains
+            essential supplies and equipment that help us serve our community
+            more effectively.
           </p>
         </div>
 
@@ -235,14 +256,11 @@ export default function WishlistPage() {
               </div>
 
               <div className="flex gap-3">
-                <Button 
-                  onClick={shareWishlist}
-                  className="flex-1"
-                >
+                <Button onClick={shareWishlist} className="flex-1">
                   <Share2 className="w-4 h-4 mr-2" />
                   Share Wishlist
                 </Button>
-                <Button 
+                <Button
                   variant="outline"
                   onClick={() => window.open(WISHLIST_URL, '_blank')}
                   className="flex-1"
@@ -268,32 +286,35 @@ export default function WishlistPage() {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center space-x-2">
                 <TrendingUp className="w-8 h-8 text-[#FBAD3F]" />
                 <div>
-                  <p className="text-2xl font-bold">{suggestions.filter(s => s.status === 'approved').length}</p>
+                  <p className="text-2xl font-bold">
+                    {suggestions.filter((s) => s.status === 'approved').length}
+                  </p>
                   <p className="text-xs text-slate-600">Items Approved</p>
                 </div>
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center space-x-2">
                 <Gift className="w-8 h-8 text-[#A31C41]" />
                 <div>
-                  <p className="text-2xl font-bold">{suggestions.filter(s => s.priority === 'high').length}</p>
+                  <p className="text-2xl font-bold">
+                    {suggestions.filter((s) => s.priority === 'high').length}
+                  </p>
                   <p className="text-xs text-slate-600">High Priority</p>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
-
 
         <Card>
           <CardHeader>
@@ -304,35 +325,59 @@ export default function WishlistPage() {
           </CardHeader>
           <CardContent>
             {suggestions.length === 0 ? (
-              <p className="text-slate-500 text-center py-4">No suggestions yet. Be the first to suggest an item!</p>
+              <p className="text-slate-500 text-center py-4">
+                No suggestions yet. Be the first to suggest an item!
+              </p>
             ) : (
               <div className="space-y-3">
                 {suggestions.map((suggestion: any) => (
-                  <div key={suggestion.id} className={`p-4 rounded-lg border ${
-                    suggestion.status === 'approved' ? 'bg-green-50 border-green-200' :
-                    suggestion.status === 'rejected' ? 'bg-red-50 border-red-200' :
-                    'bg-yellow-50 border-yellow-200'
-                  }`}>
+                  <div
+                    key={suggestion.id}
+                    className={`p-4 rounded-lg border ${
+                      suggestion.status === 'approved'
+                        ? 'bg-green-50 border-green-200'
+                        : suggestion.status === 'rejected'
+                          ? 'bg-red-50 border-red-200'
+                          : 'bg-yellow-50 border-yellow-200'
+                    }`}
+                  >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
                           <h4 className="font-medium">{suggestion.item}</h4>
-                          <Badge variant={
-                            suggestion.priority === 'high' ? 'destructive' :
-                            suggestion.priority === 'medium' ? 'default' : 'secondary'
-                          }>
+                          <Badge
+                            variant={
+                              suggestion.priority === 'high'
+                                ? 'destructive'
+                                : suggestion.priority === 'medium'
+                                  ? 'default'
+                                  : 'secondary'
+                            }
+                          >
                             {suggestion.priority}
                           </Badge>
-                          <Badge variant={
-                            suggestion.status === 'approved' ? 'default' :
-                            suggestion.status === 'rejected' ? 'destructive' : 'secondary'
-                          }>
+                          <Badge
+                            variant={
+                              suggestion.status === 'approved'
+                                ? 'default'
+                                : suggestion.status === 'rejected'
+                                  ? 'destructive'
+                                  : 'secondary'
+                            }
+                          >
                             {suggestion.status}
                           </Badge>
                         </div>
-                        <p className="text-sm text-slate-600 mb-1">{suggestion.reason}</p>
+                        <p className="text-sm text-slate-600 mb-1">
+                          {suggestion.reason}
+                        </p>
                         <p className="text-xs text-slate-500">
-                          Suggested by {suggestion.suggestedByFirstName ? `${suggestion.suggestedByFirstName} ${suggestion.suggestedByLastName}` : 'Unknown User'} on {new Date(suggestion.createdAt).toLocaleDateString()}
+                          Suggested by{' '}
+                          {suggestion.suggestedByFirstName
+                            ? `${suggestion.suggestedByFirstName} ${suggestion.suggestedByLastName}`
+                            : 'Unknown User'}{' '}
+                          on{' '}
+                          {new Date(suggestion.createdAt).toLocaleDateString()}
                         </p>
                         {suggestion.adminNotes && (
                           <p className="text-xs text-slate-700 mt-1 font-medium">
@@ -340,87 +385,116 @@ export default function WishlistPage() {
                           </p>
                         )}
                         {/* Admin Management Buttons - Show for all suggestions if user has permissions */}
-                        {user && (
-                          (user as any)?.permissions?.includes?.("manage_wishlist") || 
-                          (user as any)?.role === "super_admin" || 
-                          (user as any)?.role === "admin"
-                        ) && (
-                          <div className="flex gap-2 mt-3">
-                            {suggestion.status === 'pending' ? (
-                              <>
-                                <Button
-                                  size="sm"
-                                  onClick={() => reviewSuggestionMutation.mutate({
-                                    id: suggestion.id,
-                                    action: 'approve'
-                                  })}
-                                  disabled={reviewSuggestionMutation.isPending}
-                                  className="bg-green-600 hover:bg-green-700 text-white"
-                                >
-                                  <CheckCircle className="w-4 h-4 mr-1" />
-                                  Approve
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="destructive"
-                                  onClick={() => reviewSuggestionMutation.mutate({
-                                    id: suggestion.id,
-                                    action: 'reject'
-                                  })}
-                                  disabled={reviewSuggestionMutation.isPending}
-                                >
-                                  <XCircle className="w-4 h-4 mr-1" />
-                                  Reject
-                                </Button>
-                              </>
-                            ) : (
-                              <>
-                                {suggestion.status === 'approved' && (
+                        {user &&
+                          ((user as any)?.permissions?.includes?.(
+                            'manage_wishlist'
+                          ) ||
+                            (user as any)?.role === 'super_admin' ||
+                            (user as any)?.role === 'admin') && (
+                            <div className="flex gap-2 mt-3">
+                              {suggestion.status === 'pending' ? (
+                                <>
                                   <Button
                                     size="sm"
-                                    variant="outline"
-                                    onClick={() => reviewSuggestionMutation.mutate({
-                                      id: suggestion.id,
-                                      action: 'reject'
-                                    })}
-                                    disabled={reviewSuggestionMutation.isPending}
-                                  >
-                                    <XCircle className="w-4 h-4 mr-1" />
-                                    Mark as Rejected
-                                  </Button>
-                                )}
-                                {suggestion.status === 'rejected' && (
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => reviewSuggestionMutation.mutate({
-                                      id: suggestion.id,
-                                      action: 'approve'
-                                    })}
-                                    disabled={reviewSuggestionMutation.isPending}
+                                    onClick={() =>
+                                      reviewSuggestionMutation.mutate({
+                                        id: suggestion.id,
+                                        action: 'approve',
+                                      })
+                                    }
+                                    disabled={
+                                      reviewSuggestionMutation.isPending
+                                    }
+                                    className="bg-green-600 hover:bg-green-700 text-white"
                                   >
                                     <CheckCircle className="w-4 h-4 mr-1" />
-                                    Mark as Approved
+                                    Approve
                                   </Button>
-                                )}
-                                <Button
-                                  size="sm"
-                                  variant="destructive"
-                                  onClick={() => deleteSuggestionMutation.mutate(suggestion.id)}
-                                  disabled={deleteSuggestionMutation.isPending}
-                                >
-                                  <XCircle className="w-4 h-4 mr-1" />
-                                  Delete
-                                </Button>
-                              </>
-                            )}
-                          </div>
-                        )}
+                                  <Button
+                                    size="sm"
+                                    variant="destructive"
+                                    onClick={() =>
+                                      reviewSuggestionMutation.mutate({
+                                        id: suggestion.id,
+                                        action: 'reject',
+                                      })
+                                    }
+                                    disabled={
+                                      reviewSuggestionMutation.isPending
+                                    }
+                                  >
+                                    <XCircle className="w-4 h-4 mr-1" />
+                                    Reject
+                                  </Button>
+                                </>
+                              ) : (
+                                <>
+                                  {suggestion.status === 'approved' && (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() =>
+                                        reviewSuggestionMutation.mutate({
+                                          id: suggestion.id,
+                                          action: 'reject',
+                                        })
+                                      }
+                                      disabled={
+                                        reviewSuggestionMutation.isPending
+                                      }
+                                    >
+                                      <XCircle className="w-4 h-4 mr-1" />
+                                      Mark as Rejected
+                                    </Button>
+                                  )}
+                                  {suggestion.status === 'rejected' && (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() =>
+                                        reviewSuggestionMutation.mutate({
+                                          id: suggestion.id,
+                                          action: 'approve',
+                                        })
+                                      }
+                                      disabled={
+                                        reviewSuggestionMutation.isPending
+                                      }
+                                    >
+                                      <CheckCircle className="w-4 h-4 mr-1" />
+                                      Mark as Approved
+                                    </Button>
+                                  )}
+                                  <Button
+                                    size="sm"
+                                    variant="destructive"
+                                    onClick={() =>
+                                      deleteSuggestionMutation.mutate(
+                                        suggestion.id
+                                      )
+                                    }
+                                    disabled={
+                                      deleteSuggestionMutation.isPending
+                                    }
+                                  >
+                                    <XCircle className="w-4 h-4 mr-1" />
+                                    Delete
+                                  </Button>
+                                </>
+                              )}
+                            </div>
+                          )}
                       </div>
                       <div className="flex items-center gap-1">
-                        {suggestion.status === 'pending' && <Clock className="w-4 h-4 text-yellow-600" />}
-                        {suggestion.status === 'approved' && <CheckCircle className="w-4 h-4 text-green-600" />}
-                        {suggestion.status === 'rejected' && <XCircle className="w-4 h-4 text-red-600" />}
+                        {suggestion.status === 'pending' && (
+                          <Clock className="w-4 h-4 text-yellow-600" />
+                        )}
+                        {suggestion.status === 'approved' && (
+                          <CheckCircle className="w-4 h-4 text-green-600" />
+                        )}
+                        {suggestion.status === 'rejected' && (
+                          <XCircle className="w-4 h-4 text-red-600" />
+                        )}
                       </div>
                     </div>
                   </div>
@@ -445,17 +519,24 @@ export default function WishlistPage() {
                 <Input
                   id="item"
                   value={newSuggestion.item}
-                  onChange={(e) => setNewSuggestion({ ...newSuggestion, item: e.target.value })}
+                  onChange={(e) =>
+                    setNewSuggestion({ ...newSuggestion, item: e.target.value })
+                  }
                   placeholder="e.g., Disposable gloves (size L), Insulated food containers"
                 />
               </div>
-              
+
               <div>
                 <Label htmlFor="reason">Why is this needed?</Label>
                 <Textarea
                   id="reason"
                   value={newSuggestion.reason}
-                  onChange={(e) => setNewSuggestion({ ...newSuggestion, reason: e.target.value })}
+                  onChange={(e) =>
+                    setNewSuggestion({
+                      ...newSuggestion,
+                      reason: e.target.value,
+                    })
+                  }
                   placeholder="Explain how this item would help our operations..."
                   rows={3}
                 />
@@ -468,9 +549,18 @@ export default function WishlistPage() {
                     <Button
                       key={priority}
                       type="button"
-                      variant={newSuggestion.priority === priority ? "default" : "outline"}
+                      variant={
+                        newSuggestion.priority === priority
+                          ? 'default'
+                          : 'outline'
+                      }
                       size="sm"
-                      onClick={() => setNewSuggestion({ ...newSuggestion, priority: priority as any })}
+                      onClick={() =>
+                        setNewSuggestion({
+                          ...newSuggestion,
+                          priority: priority as any,
+                        })
+                      }
                     >
                       {priority.charAt(0).toUpperCase() + priority.slice(1)}
                     </Button>
@@ -478,13 +568,18 @@ export default function WishlistPage() {
                 </div>
               </div>
 
-              <Button 
-                type="submit" 
-                className="w-full" 
-                disabled={createSuggestionMutation.isPending || !newSuggestion.item.trim()}
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={
+                  createSuggestionMutation.isPending ||
+                  !newSuggestion.item.trim()
+                }
               >
                 <Plus className="w-4 h-4 mr-2" />
-                {createSuggestionMutation.isPending ? "Submitting..." : "Submit Suggestion"}
+                {createSuggestionMutation.isPending
+                  ? 'Submitting...'
+                  : 'Submit Suggestion'}
               </Button>
             </form>
           </CardContent>
@@ -501,26 +596,41 @@ export default function WishlistPage() {
           <CardContent>
             <div className="space-y-3">
               <div className="flex items-start gap-3">
-                <Badge variant="outline" className="text-xs">1</Badge>
+                <Badge variant="outline" className="text-xs">
+                  1
+                </Badge>
                 <div>
                   <p className="font-medium">Share on Social Media</p>
-                  <p className="text-sm text-slate-600">Post our wishlist link on Facebook, Instagram, or LinkedIn with a personal message about our mission.</p>
+                  <p className="text-sm text-slate-600">
+                    Post our wishlist link on Facebook, Instagram, or LinkedIn
+                    with a personal message about our mission.
+                  </p>
                 </div>
               </div>
-              
+
               <div className="flex items-start gap-3">
-                <Badge variant="outline" className="text-xs">2</Badge>
+                <Badge variant="outline" className="text-xs">
+                  2
+                </Badge>
                 <div>
                   <p className="font-medium">Email Your Network</p>
-                  <p className="text-sm text-slate-600">Send the wishlist to friends, family, or colleagues who might be interested in supporting our cause.</p>
+                  <p className="text-sm text-slate-600">
+                    Send the wishlist to friends, family, or colleagues who
+                    might be interested in supporting our cause.
+                  </p>
                 </div>
               </div>
-              
+
               <div className="flex items-start gap-3">
-                <Badge variant="outline" className="text-xs">3</Badge>
+                <Badge variant="outline" className="text-xs">
+                  3
+                </Badge>
                 <div>
                   <p className="font-medium">Workplace Announcements</p>
-                  <p className="text-sm text-slate-600">Share with your work team, church group, or community organizations that support local nonprofits.</p>
+                  <p className="text-sm text-slate-600">
+                    Share with your work team, church group, or community
+                    organizations that support local nonprofits.
+                  </p>
                 </div>
               </div>
             </div>
@@ -528,73 +638,99 @@ export default function WishlistPage() {
         </Card>
 
         {/* Admin Review Section - Only visible to admins */}
-        {user && hasPermission((user as any)?.permissions || 0, PERMISSIONS.MANAGE_WISHLIST) && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Shield className="w-5 h-5 text-[#A31C41]" />
-                Admin Review - Pending Suggestions
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {suggestions.filter(s => s.status === 'pending').length === 0 ? (
-                  <p className="text-slate-500 text-center py-4">No pending suggestions to review</p>
-                ) : (
-                  suggestions
-                    .filter(s => s.status === 'pending')
-                    .map((suggestion: any) => (
-                      <div key={suggestion.id} className="border rounded-lg p-4 bg-yellow-50">
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
-                              <h4 className="font-medium">{suggestion.item}</h4>
-                              <Badge variant={
-                                suggestion.priority === 'high' ? 'destructive' :
-                                suggestion.priority === 'medium' ? 'default' : 'secondary'
-                              }>
-                                {suggestion.priority} priority
-                              </Badge>
+        {user &&
+          hasPermission(
+            (user as any)?.permissions || 0,
+            PERMISSIONS.MANAGE_WISHLIST
+          ) && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="w-5 h-5 text-[#A31C41]" />
+                  Admin Review - Pending Suggestions
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {suggestions.filter((s) => s.status === 'pending').length ===
+                  0 ? (
+                    <p className="text-slate-500 text-center py-4">
+                      No pending suggestions to review
+                    </p>
+                  ) : (
+                    suggestions
+                      .filter((s) => s.status === 'pending')
+                      .map((suggestion: any) => (
+                        <div
+                          key={suggestion.id}
+                          className="border rounded-lg p-4 bg-yellow-50"
+                        >
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <h4 className="font-medium">
+                                  {suggestion.item}
+                                </h4>
+                                <Badge
+                                  variant={
+                                    suggestion.priority === 'high'
+                                      ? 'destructive'
+                                      : suggestion.priority === 'medium'
+                                        ? 'default'
+                                        : 'secondary'
+                                  }
+                                >
+                                  {suggestion.priority} priority
+                                </Badge>
+                              </div>
+                              <p className="text-sm text-slate-600 mb-2">
+                                {suggestion.reason}
+                              </p>
+                              <p className="text-xs text-slate-500">
+                                Suggested on{' '}
+                                {new Date(
+                                  suggestion.createdAt
+                                ).toLocaleDateString()}
+                              </p>
                             </div>
-                            <p className="text-sm text-slate-600 mb-2">{suggestion.reason}</p>
-                            <p className="text-xs text-slate-500">
-                              Suggested on {new Date(suggestion.createdAt).toLocaleDateString()}
-                            </p>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              onClick={() =>
+                                reviewSuggestionMutation.mutate({
+                                  id: suggestion.id,
+                                  action: 'approve',
+                                })
+                              }
+                              disabled={reviewSuggestionMutation.isPending}
+                              className="bg-green-600 hover:bg-green-700 text-white"
+                            >
+                              <CheckCircle className="w-4 h-4 mr-1" />
+                              Approve
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() =>
+                                reviewSuggestionMutation.mutate({
+                                  id: suggestion.id,
+                                  action: 'reject',
+                                })
+                              }
+                              disabled={reviewSuggestionMutation.isPending}
+                            >
+                              <XCircle className="w-4 h-4 mr-1" />
+                              Reject
+                            </Button>
                           </div>
                         </div>
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            onClick={() => reviewSuggestionMutation.mutate({
-                              id: suggestion.id,
-                              action: 'approve'
-                            })}
-                            disabled={reviewSuggestionMutation.isPending}
-                            className="bg-green-600 hover:bg-green-700 text-white"
-                          >
-                            <CheckCircle className="w-4 h-4 mr-1" />
-                            Approve
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => reviewSuggestionMutation.mutate({
-                              id: suggestion.id,
-                              action: 'reject'
-                            })}
-                            disabled={reviewSuggestionMutation.isPending}
-                          >
-                            <XCircle className="w-4 h-4 mr-1" />
-                            Reject
-                          </Button>
-                        </div>
-                      </div>
-                    ))
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        )}
+                      ))
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
         {/* Recent Activity */}
         <Card>
@@ -607,23 +743,41 @@ export default function WishlistPage() {
           <CardContent>
             <div className="space-y-3 text-sm">
               {activity.length === 0 ? (
-                <p className="text-slate-500 text-center py-4">No recent activity to show</p>
+                <p className="text-slate-500 text-center py-4">
+                  No recent activity to show
+                </p>
               ) : (
                 activity.map((item: any, index: number) => (
-                  <div key={index} className={`flex items-center justify-between p-3 rounded-lg ${
-                    item.type === 'suggestion' ? 'bg-blue-50' : 
-                    item.status === 'approved' ? 'bg-green-50' : 'bg-orange-50'
-                  }`}>
+                  <div
+                    key={index}
+                    className={`flex items-center justify-between p-3 rounded-lg ${
+                      item.type === 'suggestion'
+                        ? 'bg-blue-50'
+                        : item.status === 'approved'
+                          ? 'bg-green-50'
+                          : 'bg-orange-50'
+                    }`}
+                  >
                     <div className="flex items-center gap-3">
                       {item.type === 'suggestion' ? (
-                        <Plus className={`w-4 h-4 ${
-                          item.status === 'approved' ? 'text-green-600' : 
-                          item.status === 'pending' ? 'text-blue-600' : 'text-orange-600'
-                        }`} />
+                        <Plus
+                          className={`w-4 h-4 ${
+                            item.status === 'approved'
+                              ? 'text-green-600'
+                              : item.status === 'pending'
+                                ? 'text-blue-600'
+                                : 'text-orange-600'
+                          }`}
+                        />
                       ) : (
                         <Gift className="w-4 h-4 text-green-600" />
                       )}
-                      <span>{item.description || `${item.item} ${item.type === 'suggestion' ? 'suggested' : 'updated'}`}</span>
+                      <span>
+                        {item.description ||
+                          `${item.item} ${
+                            item.type === 'suggestion' ? 'suggested' : 'updated'
+                          }`}
+                      </span>
                     </div>
                     <span className="text-xs text-slate-500">
                       {new Date(item.createdAt).toLocaleDateString()}

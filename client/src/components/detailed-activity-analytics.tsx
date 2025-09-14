@@ -1,23 +1,23 @@
-import React, { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import React, { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
+} from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Eye,
   MousePointer,
@@ -29,9 +29,9 @@ import {
   Trash2,
   User,
   Users,
-} from "lucide-react";
-import { useActivityTracker } from "@/hooks/useActivityTracker";
-import { IndividualUserActivity } from "@/components/individual-user-activity";
+} from 'lucide-react';
+import { useActivityTracker } from '@/hooks/useActivityTracker';
+import { IndividualUserActivity } from '@/components/individual-user-activity';
 
 interface ActivityLog {
   id: number;
@@ -64,43 +64,47 @@ interface User {
 }
 
 export function DetailedActivityAnalytics() {
-  const [timeFilter, setTimeFilter] = useState("24h");
-  const [sectionFilter, setSectionFilter] = useState("all");
-  const [actionFilter, setActionFilter] = useState("all");
-  const [selectedUserId, setSelectedUserId] = useState<string>("all");
+  const [timeFilter, setTimeFilter] = useState('24h');
+  const [sectionFilter, setSectionFilter] = useState('all');
+  const [actionFilter, setActionFilter] = useState('all');
+  const [selectedUserId, setSelectedUserId] = useState<string>('all');
   const { trackView, trackClick, trackFilter } = useActivityTracker();
 
   // Track component view on mount
   useEffect(() => {
     trackView(
-      "Detailed Activity Analytics",
-      "Analytics",
-      "Activity Dashboard",
-      "User opened detailed activity analytics dashboard"
+      'Detailed Activity Analytics',
+      'Analytics',
+      'Activity Dashboard',
+      'User opened detailed activity analytics dashboard'
     );
   }, [trackView]);
 
   // Fetch users list for the selector
   const { data: users } = useQuery<User[]>({
-    queryKey: ["/api/users"],
+    queryKey: ['/api/users'],
     queryFn: async () => {
-      const response = await fetch("/api/users");
-      if (!response.ok) throw new Error("Failed to fetch users");
+      const response = await fetch('/api/users');
+      if (!response.ok) throw new Error('Failed to fetch users');
       return response.json();
     },
   });
 
   // Get selected user object
   const selectedUser =
-    selectedUserId !== "all"
+    selectedUserId !== 'all'
       ? users?.find((u) => u.id === selectedUserId)
       : null;
 
   // Fetch activity data
-  const { data: activityData, isLoading, refetch } = useQuery<ActivitySummary>({
+  const {
+    data: activityData,
+    isLoading,
+    refetch,
+  } = useQuery<ActivitySummary>({
     queryKey: [
-      "/api/enhanced-user-activity",
-      "detailed",
+      '/api/enhanced-user-activity',
+      'detailed',
       timeFilter,
       sectionFilter,
       actionFilter,
@@ -111,14 +115,14 @@ export function DetailedActivityAnalytics() {
         timeFilter,
         sectionFilter,
         actionFilter,
-        detailed: "true",
-        ...(selectedUserId !== "all" && {
+        detailed: 'true',
+        ...(selectedUserId !== 'all' && {
           userId: selectedUserId,
-          individual: "true",
+          individual: 'true',
         }),
       });
       const response = await fetch(`/api/enhanced-user-activity?${params}`);
-      if (!response.ok) throw new Error("Failed to fetch activity data");
+      if (!response.ok) throw new Error('Failed to fetch activity data');
       return response.json();
     },
     refetchInterval: 30000, // Refresh every 30 seconds for real-time feel
@@ -126,52 +130,52 @@ export function DetailedActivityAnalytics() {
 
   const handleFilterChange = (filterType: string, value: string) => {
     switch (filterType) {
-      case "time":
+      case 'time':
         setTimeFilter(value);
-        trackFilter("Time Filter", value, "Analytics", "Activity Dashboard");
+        trackFilter('Time Filter', value, 'Analytics', 'Activity Dashboard');
         break;
-      case "section":
+      case 'section':
         setSectionFilter(value);
-        trackFilter("Section Filter", value, "Analytics", "Activity Dashboard");
+        trackFilter('Section Filter', value, 'Analytics', 'Activity Dashboard');
         break;
-      case "action":
+      case 'action':
         setActionFilter(value);
-        trackFilter("Action Filter", value, "Analytics", "Activity Dashboard");
+        trackFilter('Action Filter', value, 'Analytics', 'Activity Dashboard');
         break;
-      case "user":
+      case 'user':
         setSelectedUserId(value);
-        trackFilter("User Filter", value, "Analytics", "Activity Dashboard");
+        trackFilter('User Filter', value, 'Analytics', 'Activity Dashboard');
         break;
     }
   };
 
   const handleRefresh = () => {
     trackClick(
-      "Refresh Data",
-      "Analytics",
-      "Activity Dashboard",
-      "Manual refresh of activity data"
+      'Refresh Data',
+      'Analytics',
+      'Activity Dashboard',
+      'Manual refresh of activity data'
     );
     refetch();
   };
 
   const getActionIcon = (action: string) => {
     switch (action.toLowerCase()) {
-      case "view":
+      case 'view':
         return <Eye className="h-4 w-4" />;
-      case "click":
+      case 'click':
         return <MousePointer className="h-4 w-4" />;
-      case "submit":
+      case 'submit':
         return <FileText className="h-4 w-4" />;
-      case "filter":
+      case 'filter':
         return <Filter className="h-4 w-4" />;
-      case "export":
+      case 'export':
         return <Download className="h-4 w-4" />;
-      case "create":
+      case 'create':
         return <Plus className="h-4 w-4" />;
-      case "update":
+      case 'update':
         return <Edit className="h-4 w-4" />;
-      case "delete":
+      case 'delete':
         return <Trash2 className="h-4 w-4" />;
       default:
         return <MousePointer className="h-4 w-4" />;
@@ -180,22 +184,22 @@ export function DetailedActivityAnalytics() {
 
   const getActionColor = (action: string) => {
     switch (action.toLowerCase()) {
-      case "view":
-        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
-      case "click":
-        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
-      case "submit":
-        return "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200";
-      case "create":
-        return "bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200";
-      case "update":
-        return "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200";
-      case "delete":
-        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
-      case "export":
-        return "bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200";
+      case 'view':
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+      case 'click':
+        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      case 'submit':
+        return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
+      case 'create':
+        return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200';
+      case 'update':
+        return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
+      case 'delete':
+        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+      case 'export':
+        return 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200';
       default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
     }
   };
 
@@ -204,7 +208,7 @@ export function DetailedActivityAnalytics() {
     return (
       <IndividualUserActivity
         user={selectedUser}
-        onBack={() => setSelectedUserId("all")}
+        onBack={() => setSelectedUserId('all')}
       />
     );
   }
@@ -246,7 +250,7 @@ export function DetailedActivityAnalytics() {
           <div className="flex flex-wrap gap-4">
             <Select
               value={selectedUserId}
-              onValueChange={(value) => handleFilterChange("user", value)}
+              onValueChange={(value) => handleFilterChange('user', value)}
             >
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="View Mode" />
@@ -271,7 +275,7 @@ export function DetailedActivityAnalytics() {
 
             <Select
               value={timeFilter}
-              onValueChange={(value) => handleFilterChange("time", value)}
+              onValueChange={(value) => handleFilterChange('time', value)}
             >
               <SelectTrigger className="w-[140px]">
                 <SelectValue placeholder="Time Range" />
@@ -288,7 +292,7 @@ export function DetailedActivityAnalytics() {
 
             <Select
               value={sectionFilter}
-              onValueChange={(value) => handleFilterChange("section", value)}
+              onValueChange={(value) => handleFilterChange('section', value)}
             >
               <SelectTrigger className="w-[140px]">
                 <SelectValue placeholder="Section" />
@@ -305,7 +309,7 @@ export function DetailedActivityAnalytics() {
 
             <Select
               value={actionFilter}
-              onValueChange={(value) => handleFilterChange("action", value)}
+              onValueChange={(value) => handleFilterChange('action', value)}
             >
               <SelectTrigger className="w-[140px]">
                 <SelectValue placeholder="Action" />
@@ -345,7 +349,7 @@ export function DetailedActivityAnalytics() {
         <Card>
           <CardContent className="p-6">
             <div className="text-2xl font-bold">
-              {activityData?.topActions?.[0]?.action || "N/A"}
+              {activityData?.topActions?.[0]?.action || 'N/A'}
             </div>
             <p className="text-xs text-muted-foreground">Top Action</p>
           </CardContent>
@@ -353,7 +357,7 @@ export function DetailedActivityAnalytics() {
         <Card>
           <CardContent className="p-6">
             <div className="text-2xl font-bold">
-              {activityData?.topSections?.[0]?.section || "N/A"}
+              {activityData?.topSections?.[0]?.section || 'N/A'}
             </div>
             <p className="text-xs text-muted-foreground">Top Section</p>
           </CardContent>
@@ -408,7 +412,7 @@ export function DetailedActivityAnalytics() {
                         </p>
                         <div className="flex items-center justify-between mt-2">
                           <span className="text-xs text-muted-foreground">
-                            {activity.userName} •{" "}
+                            {activity.userName} •{' '}
                             {new Date(activity.createdAt).toLocaleString()}
                           </span>
                           {activity.metadata &&

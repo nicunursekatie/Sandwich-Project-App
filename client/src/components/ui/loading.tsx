@@ -1,41 +1,41 @@
-import { Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Loader2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface LoadingSpinnerProps {
-  size?: "sm" | "md" | "lg";
+  size?: 'sm' | 'md' | 'lg';
   className?: string;
 }
 
 export function LoadingSpinner({
-  size = "md",
+  size = 'md',
   className,
 }: LoadingSpinnerProps) {
   const sizeClasses = {
-    sm: "w-4 h-4",
-    md: "w-6 h-6",
-    lg: "w-8 h-8",
+    sm: 'w-4 h-4',
+    md: 'w-6 h-6',
+    lg: 'w-8 h-8',
   };
 
   return (
     <Loader2
-      className={cn("animate-spin text-gray-600", sizeClasses[size], className)}
+      className={cn('animate-spin text-gray-600', sizeClasses[size], className)}
     />
   );
 }
 
 interface LoadingStateProps {
   text?: string;
-  size?: "sm" | "md" | "lg";
+  size?: 'sm' | 'md' | 'lg';
   className?: string;
 }
 
 export function LoadingState({
-  text = "Loading...",
-  size = "md",
+  text = 'Loading...',
+  size = 'md',
   className,
 }: LoadingStateProps) {
   return (
-    <div className={cn("flex items-center justify-center p-8", className)}>
+    <div className={cn('flex items-center justify-center p-8', className)}>
       <div className="flex flex-col items-center gap-3">
         <LoadingSpinner size={size} />
         <p className="text-sm text-gray-600">{text}</p>
@@ -119,7 +119,7 @@ interface LoadingButtonProps {
   className?: string;
   onClick?: () => void;
   disabled?: boolean;
-  variant?: "default" | "outline" | "ghost";
+  variant?: 'default' | 'outline' | 'ghost';
 }
 
 export function LoadingButton({
@@ -128,15 +128,15 @@ export function LoadingButton({
   className,
   onClick,
   disabled,
-  variant = "default",
+  variant = 'default',
 }: LoadingButtonProps) {
   const baseClasses =
-    "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background px-4 py-2";
+    'inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background px-4 py-2';
 
   const variantClasses = {
-    default: "bg-primary text-primary-foreground hover:bg-primary/90",
-    outline: "border border-input hover:bg-accent hover:text-accent-foreground",
-    ghost: "hover:bg-accent hover:text-accent-foreground",
+    default: 'bg-primary text-primary-foreground hover:bg-primary/90',
+    outline: 'border border-input hover:bg-accent hover:text-accent-foreground',
+    ghost: 'hover:bg-accent hover:text-accent-foreground',
   };
 
   return (

@@ -1,23 +1,23 @@
-import { Switch, Route } from "wouter";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { useEffect, lazy } from "react";
+import { Switch, Route } from 'wouter';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { useEffect, lazy } from 'react';
 
-import { queryClient } from "@/lib/queryClient";
-import { useAuth } from "@/hooks/useAuth";
-import { initGA } from "../lib/analytics";
-import { useAnalytics } from "../hooks/use-analytics";
-import { useEnhancedTracking } from "../hooks/use-enhanced-tracking";
+import { queryClient } from '@/lib/queryClient';
+import { useAuth } from '@/hooks/useAuth';
+import { initGA } from '../lib/analytics';
+import { useAnalytics } from '../hooks/use-analytics';
+import { useEnhancedTracking } from '../hooks/use-enhanced-tracking';
 
-import { Toaster } from "@/components/ui/toaster";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { LoadingState } from "@/components/ui/loading";
-import { ErrorBoundary } from "@/components/error-boundary";
+import { Toaster } from '@/components/ui/toaster';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import { LoadingState } from '@/components/ui/loading';
+import { ErrorBoundary } from '@/components/error-boundary';
 
-import Dashboard from "@/pages/dashboard";
-import Landing from "@/pages/landing";
-import SignupPage from "@/pages/signup";
-import ResetPassword from "@/pages/reset-password";
-import NotFound from "@/pages/not-found";
+import Dashboard from '@/pages/dashboard';
+import Landing from '@/pages/landing';
+import SignupPage from '@/pages/signup';
+import ResetPassword from '@/pages/reset-password';
+import NotFound from '@/pages/not-found';
 
 function Router() {
   const { isAuthenticated, isLoading, error } = useAuth();
@@ -39,8 +39,8 @@ function Router() {
   }
 
   // Enhanced error handling for authentication issues
-  if (error && error.message && !error.message.includes("401")) {
-    console.error("[App] Authentication error:", error);
+  if (error && error.message && !error.message.includes('401')) {
+    console.error('[App] Authentication error:', error);
     // For non-401 errors, show error state
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
@@ -68,7 +68,7 @@ function Router() {
             again.
           </p>
           <button
-            onClick={() => (window.location.href = "/api/login")}
+            onClick={() => (window.location.href = '/api/login')}
             className="w-full px-6 py-3 bg-[#236383] hover:bg-[#1e5a75] active:bg-[#1a4d61] text-white font-medium rounded-xl transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none focus:ring-4 focus:ring-[#236383]/20"
           >
             Try Again
@@ -86,12 +86,12 @@ function Router() {
         <Route path="/reset-password" component={ResetPassword} />
         <Route
           path="/sms-opt-in"
-          component={lazy(() => import("./pages/sms-opt-in"))}
+          component={lazy(() => import('./pages/sms-opt-in'))}
         />
         <Route path="/login">
           {() => {
             // Redirect to the backend login page
-            window.location.href = "/api/login";
+            window.location.href = '/api/login';
             return (
               <LoadingState
                 text="Redirecting to login..."
@@ -134,7 +134,7 @@ function Router() {
                   work.
                 </p>
                 <button
-                  onClick={() => (window.location.href = "/api/login")}
+                  onClick={() => (window.location.href = '/api/login')}
                   className="w-full px-6 py-3 bg-[#236383] hover:bg-[#1e5a75] active:bg-[#1a4d61] text-white font-medium rounded-xl transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none focus:ring-4 focus:ring-[#236383]/20"
                 >
                   Login to Continue
@@ -146,7 +146,7 @@ function Router() {
         <Route path="/">
           {() => {
             // Redirect unauthenticated users directly to login
-            window.location.href = "/api/login";
+            window.location.href = '/api/login';
             return (
               <LoadingState
                 text="Redirecting to login..."
@@ -159,7 +159,7 @@ function Router() {
         <Route>
           {() => {
             // Default fallback - redirect to login
-            window.location.href = "/api/login";
+            window.location.href = '/api/login';
             return (
               <LoadingState
                 text="Redirecting to login..."
@@ -217,7 +217,7 @@ function Router() {
       </Route>
       <Route
         path="/sms-opt-in"
-        component={lazy(() => import("./pages/sms-opt-in"))}
+        component={lazy(() => import('./pages/sms-opt-in'))}
       />
       <Route path="/dashboard">{() => <Dashboard />}</Route>
       <Route path="/dashboard/:section">
@@ -235,7 +235,7 @@ function App() {
     // Verify required environment variable is present
     if (!import.meta.env.VITE_GA_MEASUREMENT_ID) {
       console.warn(
-        "Missing required Google Analytics key: VITE_GA_MEASUREMENT_ID"
+        'Missing required Google Analytics key: VITE_GA_MEASUREMENT_ID'
       );
     } else {
       initGA();

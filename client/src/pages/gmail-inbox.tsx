@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
 import {
   Inbox,
   Send,
@@ -19,10 +19,10 @@ import {
   Heart,
   Clock,
   User,
-} from "lucide-react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
+} from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
 
 interface EmailMessage {
   id: number;
@@ -34,13 +34,13 @@ interface EmailMessage {
   isRead: boolean;
   isStarred: boolean;
   folder:
-    | "inbox"
-    | "sent"
-    | "drafts"
-    | "starred"
-    | "archived"
-    | "trash"
-    | "kudos";
+    | 'inbox'
+    | 'sent'
+    | 'drafts'
+    | 'starred'
+    | 'archived'
+    | 'trash'
+    | 'kudos';
   threadId?: number;
   isKudos?: boolean;
 }
@@ -55,26 +55,26 @@ interface EmailThread {
 }
 
 const FOLDERS = [
-  { id: "inbox", name: "Inbox", icon: Inbox, color: "text-blue-600" },
-  { id: "sent", name: "Sent", icon: Send, color: "text-green-600" },
-  { id: "drafts", name: "Drafts", icon: FileText, color: "text-yellow-600" },
-  { id: "starred", name: "Starred", icon: Star, color: "text-amber-500" },
-  { id: "kudos", name: "Kudos", icon: Heart, color: "text-red-500" },
-  { id: "archived", name: "Archived", icon: Archive, color: "text-gray-500" },
-  { id: "trash", name: "Trash", icon: Trash2, color: "text-red-600" },
+  { id: 'inbox', name: 'Inbox', icon: Inbox, color: 'text-blue-600' },
+  { id: 'sent', name: 'Sent', icon: Send, color: 'text-green-600' },
+  { id: 'drafts', name: 'Drafts', icon: FileText, color: 'text-yellow-600' },
+  { id: 'starred', name: 'Starred', icon: Star, color: 'text-amber-500' },
+  { id: 'kudos', name: 'Kudos', icon: Heart, color: 'text-red-500' },
+  { id: 'archived', name: 'Archived', icon: Archive, color: 'text-gray-500' },
+  { id: 'trash', name: 'Trash', icon: Trash2, color: 'text-red-600' },
 ];
 
 export default function GmailInbox() {
-  const [selectedFolder, setSelectedFolder] = useState("inbox");
+  const [selectedFolder, setSelectedFolder] = useState('inbox');
   const [selectedMessage, setSelectedMessage] = useState<EmailMessage | null>(
     null
   );
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
   const [isComposing, setIsComposing] = useState(false);
   const [composeData, setComposeData] = useState({
-    to: "",
-    subject: "",
-    content: "",
+    to: '',
+    subject: '',
+    content: '',
     isKudos: false,
   });
 
@@ -83,22 +83,22 @@ export default function GmailInbox() {
 
   // Fetch messages for current folder
   const { data: messages = [], isLoading: messagesLoading } = useQuery({
-    queryKey: ["/api/email-messages", selectedFolder, searchQuery],
+    queryKey: ['/api/email-messages', selectedFolder, searchQuery],
     queryFn: async () => {
       const params = new URLSearchParams({
         folder: selectedFolder,
         ...(searchQuery && { search: searchQuery }),
       });
-      return await apiRequest("GET", `/api/email-messages?${params}`);
+      return await apiRequest('GET', `/api/email-messages?${params}`);
     },
   });
 
   // Fetch message threads
   const { data: threads = [] } = useQuery({
-    queryKey: ["/api/email-threads", selectedFolder],
+    queryKey: ['/api/email-threads', selectedFolder],
     queryFn: async () => {
       return await apiRequest(
-        "GET",
+        'GET',
         `/api/email-threads?folder=${selectedFolder}`
       );
     },
@@ -107,28 +107,28 @@ export default function GmailInbox() {
   // Send message mutation
   const sendMessageMutation = useMutation({
     mutationFn: async (messageData: any) => {
-      return await apiRequest("POST", "/api/email-messages", messageData);
+      return await apiRequest('POST', '/api/email-messages', messageData);
     },
     onSuccess: () => {
-      toast({ title: "Message sent successfully!" });
+      toast({ title: 'Message sent successfully!' });
       setIsComposing(false);
-      setComposeData({ to: "", subject: "", content: "", isKudos: false });
-      queryClient.invalidateQueries({ queryKey: ["/api/email-messages"] });
+      setComposeData({ to: '', subject: '', content: '', isKudos: false });
+      queryClient.invalidateQueries({ queryKey: ['/api/email-messages'] });
     },
     onError: () => {
-      toast({ title: "Failed to send message", variant: "destructive" });
+      toast({ title: 'Failed to send message', variant: 'destructive' });
     },
   });
 
   // Mark as read mutation
   const markAsReadMutation = useMutation({
     mutationFn: async (messageId: number) => {
-      return await apiRequest("PATCH", `/api/email-messages/${messageId}`, {
+      return await apiRequest('PATCH', `/api/email-messages/${messageId}`, {
         isRead: true,
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/email-messages"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/email-messages'] });
     },
   });
 
@@ -141,13 +141,13 @@ export default function GmailInbox() {
       messageId: number;
       folder: string;
     }) => {
-      return await apiRequest("PATCH", `/api/email-messages/${messageId}`, {
+      return await apiRequest('PATCH', `/api/email-messages/${messageId}`, {
         folder,
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/email-messages"] });
-      toast({ title: "Message moved successfully!" });
+      queryClient.invalidateQueries({ queryKey: ['/api/email-messages'] });
+      toast({ title: 'Message moved successfully!' });
     },
   });
 
@@ -160,12 +160,12 @@ export default function GmailInbox() {
       messageId: number;
       isStarred: boolean;
     }) => {
-      return await apiRequest("PATCH", `/api/email-messages/${messageId}`, {
+      return await apiRequest('PATCH', `/api/email-messages/${messageId}`, {
         isStarred,
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/email-messages"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/email-messages'] });
     },
   });
 
@@ -178,13 +178,13 @@ export default function GmailInbox() {
 
   const handleSendMessage = () => {
     if (!composeData.to || !composeData.subject || !composeData.content) {
-      toast({ title: "Please fill in all fields", variant: "destructive" });
+      toast({ title: 'Please fill in all fields', variant: 'destructive' });
       return;
     }
 
     sendMessageMutation.mutate({
       ...composeData,
-      folder: composeData.isKudos ? "kudos" : "sent",
+      folder: composeData.isKudos ? 'kudos' : 'sent',
     });
   };
 
@@ -195,15 +195,15 @@ export default function GmailInbox() {
     const hours = diff / (1000 * 60 * 60);
 
     if (hours < 24) {
-      return date.toLocaleTimeString("en-US", {
-        hour: "numeric",
-        minute: "2-digit",
+      return date.toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
         hour12: true,
       });
     } else {
-      return date.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
+      return date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
       });
     }
   };
@@ -241,8 +241,8 @@ export default function GmailInbox() {
                 onClick={() => setSelectedFolder(folder.id)}
                 className={`w-full flex items-center px-4 py-2 text-left hover:bg-gray-100 transition-colors ${
                   selectedFolder === folder.id
-                    ? "bg-blue-50 border-r-2 border-blue-600"
-                    : ""
+                    ? 'bg-blue-50 border-r-2 border-blue-600'
+                    : ''
                 }`}
               >
                 <Icon className={`w-4 h-4 mr-3 ${folder.color}`} />
@@ -286,7 +286,7 @@ export default function GmailInbox() {
               <div className="p-4 text-center text-gray-500">
                 <div className="text-4xl mb-2">📭</div>
                 <div>
-                  No messages in{" "}
+                  No messages in{' '}
                   {FOLDERS.find((f) => f.id === selectedFolder)?.name}
                 </div>
               </div>
@@ -296,8 +296,8 @@ export default function GmailInbox() {
                   key={message.id}
                   onClick={() => handleSelectMessage(message)}
                   className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors ${
-                    selectedMessage?.id === message.id ? "bg-blue-50" : ""
-                  } ${!message.isRead ? "bg-blue-25" : ""}`}
+                    selectedMessage?.id === message.id ? 'bg-blue-50' : ''
+                  } ${!message.isRead ? 'bg-blue-25' : ''}`}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
@@ -305,11 +305,11 @@ export default function GmailInbox() {
                         <span
                           className={`text-sm ${
                             !message.isRead
-                              ? "font-semibold text-gray-900"
-                              : "text-gray-700"
+                              ? 'font-semibold text-gray-900'
+                              : 'text-gray-700'
                           }`}
                         >
-                          {selectedFolder === "sent"
+                          {selectedFolder === 'sent'
                             ? `To: ${message.recipient}`
                             : `From: ${message.sender}`}
                         </span>
@@ -323,8 +323,8 @@ export default function GmailInbox() {
                       <div
                         className={`text-sm mb-1 ${
                           !message.isRead
-                            ? "font-semibold text-gray-900"
-                            : "text-gray-600"
+                            ? 'font-semibold text-gray-900'
+                            : 'text-gray-600'
                         }`}
                       >
                         {message.subject}
@@ -359,7 +359,7 @@ export default function GmailInbox() {
                       <div className="flex items-center text-sm text-gray-600">
                         <User className="w-4 h-4 mr-2" />
                         <span className="font-medium mr-2">
-                          {selectedFolder === "sent"
+                          {selectedFolder === 'sent'
                             ? selectedMessage.recipient
                             : selectedMessage.sender}
                         </span>
@@ -385,8 +385,8 @@ export default function GmailInbox() {
                         <Star
                           className={`w-4 h-4 ${
                             selectedMessage.isStarred
-                              ? "fill-current text-amber-500"
-                              : ""
+                              ? 'fill-current text-amber-500'
+                              : ''
                           }`}
                         />
                       </Button>
@@ -396,7 +396,7 @@ export default function GmailInbox() {
                         onClick={() =>
                           moveToFolderMutation.mutate({
                             messageId: selectedMessage.id,
-                            folder: "archived",
+                            folder: 'archived',
                           })
                         }
                       >
@@ -408,7 +408,7 @@ export default function GmailInbox() {
                         onClick={() =>
                           moveToFolderMutation.mutate({
                             messageId: selectedMessage.id,
-                            folder: "trash",
+                            folder: 'trash',
                           })
                         }
                       >
@@ -541,7 +541,7 @@ export default function GmailInbox() {
                   onClick={handleSendMessage}
                   disabled={sendMessageMutation.isPending}
                 >
-                  {sendMessageMutation.isPending ? "Sending..." : "Send"}
+                  {sendMessageMutation.isPending ? 'Sending...' : 'Send'}
                 </Button>
                 <Button variant="outline" onClick={() => setIsComposing(false)}>
                   Cancel

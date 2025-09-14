@@ -1,7 +1,7 @@
-import { Button } from "@/components/ui/button";
-import { LogOut } from "lucide-react";
-import SimpleNav from "@/components/simple-nav";
-import AnalyticsDashboard from "@/components/analytics-dashboard";
+import { Button } from '@/components/ui/button';
+import { LogOut } from 'lucide-react';
+import SimpleNav from '@/components/simple-nav';
+import AnalyticsDashboard from '@/components/analytics-dashboard';
 
 export default function AnalyticsPage() {
   return (

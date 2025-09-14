@@ -1,21 +1,21 @@
-import { Router } from "express";
-import { db } from "../db";
-import { recipientTspContacts, users } from "@shared/schema";
-import { eq, and } from "drizzle-orm";
-import { insertRecipientTspContactSchema } from "@shared/schema";
-import { z } from "zod";
+import { Router } from 'express';
+import { db } from '../db';
+import { recipientTspContacts, users } from '@shared/schema';
+import { eq, and } from 'drizzle-orm';
+import { insertRecipientTspContactSchema } from '@shared/schema';
+import { z } from 'zod';
 
-import { PERMISSIONS } from "@shared/auth-utils";
-import { isAuthenticated as requireAuth } from "../temp-auth";
-import { requirePermission } from "../middleware/auth";
+import { PERMISSIONS } from '@shared/auth-utils';
+import { isAuthenticated as requireAuth } from '../temp-auth';
+import { requirePermission } from '../middleware/auth';
 
 const router = Router();
 
 // Get all TSP contacts for a specific recipient
 router.get(
-  "/:recipientId",
+  '/:recipientId',
   requireAuth,
-  requirePermission("RECIPIENTS_VIEW"),
+  requirePermission('RECIPIENTS_VIEW'),
   async (req, res) => {
     try {
       const recipientId = parseInt(req.params.recipientId);
@@ -51,17 +51,17 @@ router.get(
 
       res.json(contacts);
     } catch (error) {
-      console.error("Error fetching TSP contacts:", error);
-      res.status(500).json({ error: "Failed to fetch TSP contacts" });
+      console.error('Error fetching TSP contacts:', error);
+      res.status(500).json({ error: 'Failed to fetch TSP contacts' });
     }
   }
 );
 
 // Add a new TSP contact
 router.post(
-  "/",
+  '/',
   requireAuth,
-  requirePermission("RECIPIENTS_EDIT"),
+  requirePermission('RECIPIENTS_EDIT'),
   async (req, res) => {
     try {
       const validatedData = insertRecipientTspContactSchema.parse(req.body);
@@ -106,19 +106,19 @@ router.post(
       if (error instanceof z.ZodError) {
         return res
           .status(400)
-          .json({ error: "Invalid data", details: error.errors });
+          .json({ error: 'Invalid data', details: error.errors });
       }
-      console.error("Error creating TSP contact:", error);
-      res.status(500).json({ error: "Failed to create TSP contact" });
+      console.error('Error creating TSP contact:', error);
+      res.status(500).json({ error: 'Failed to create TSP contact' });
     }
   }
 );
 
 // Update a TSP contact
 router.patch(
-  "/:id",
+  '/:id',
   requireAuth,
-  requirePermission("RECIPIENTS_EDIT"),
+  requirePermission('RECIPIENTS_EDIT'),
   async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -176,7 +176,7 @@ router.patch(
         .returning();
 
       if (!contact) {
-        return res.status(404).json({ error: "TSP contact not found" });
+        return res.status(404).json({ error: 'TSP contact not found' });
       }
 
       res.json(contact);
@@ -184,19 +184,19 @@ router.patch(
       if (error instanceof z.ZodError) {
         return res
           .status(400)
-          .json({ error: "Invalid data", details: error.errors });
+          .json({ error: 'Invalid data', details: error.errors });
       }
-      console.error("Error updating TSP contact:", error);
-      res.status(500).json({ error: "Failed to update TSP contact" });
+      console.error('Error updating TSP contact:', error);
+      res.status(500).json({ error: 'Failed to update TSP contact' });
     }
   }
 );
 
 // Delete (deactivate) a TSP contact
 router.delete(
-  "/:id",
+  '/:id',
   requireAuth,
-  requirePermission("RECIPIENTS_EDIT"),
+  requirePermission('RECIPIENTS_EDIT'),
   async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -208,13 +208,13 @@ router.delete(
         .returning();
 
       if (!contact) {
-        return res.status(404).json({ error: "TSP contact not found" });
+        return res.status(404).json({ error: 'TSP contact not found' });
       }
 
-      res.json({ message: "TSP contact deactivated successfully" });
+      res.json({ message: 'TSP contact deactivated successfully' });
     } catch (error) {
-      console.error("Error deleting TSP contact:", error);
-      res.status(500).json({ error: "Failed to delete TSP contact" });
+      console.error('Error deleting TSP contact:', error);
+      res.status(500).json({ error: 'Failed to delete TSP contact' });
     }
   }
 );

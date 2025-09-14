@@ -4,8 +4,8 @@ import React, {
   useState,
   useCallback,
   useEffect,
-} from "react";
-import { HelpContent } from "./HelpBubble";
+} from 'react';
+import { HelpContent } from './HelpBubble';
 
 interface HelpContextType {
   showHelp: (content: HelpContent) => void;
@@ -21,7 +21,7 @@ const HelpContext = createContext<HelpContextType | null>(null);
 export function useHelp() {
   const context = useContext(HelpContext);
   if (!context) {
-    throw new Error("useHelp must be used within a HelpProvider");
+    throw new Error('useHelp must be used within a HelpProvider');
   }
   return context;
 }
@@ -36,7 +36,7 @@ export function HelpProvider({ children }: HelpProviderProps) {
   >(new Map());
   const [isHelpEnabled, setIsHelpEnabled] = useState(() => {
     // Check if user has help mode preference stored
-    const saved = localStorage.getItem("help-mode-enabled");
+    const saved = localStorage.getItem('help-mode-enabled');
     return saved ? JSON.parse(saved) : true; // Default to enabled
   });
 
@@ -46,17 +46,17 @@ export function HelpProvider({ children }: HelpProviderProps) {
 
   const showHelp = useCallback((content: HelpContent) => {
     // This would be used for programmatic help display
-    console.log("Showing help:", content);
+    console.log('Showing help:', content);
   }, []);
 
   const hideHelp = useCallback((id: string) => {
-    console.log("Hiding help:", id);
+    console.log('Hiding help:', id);
   }, []);
 
   const toggleHelpMode = useCallback(() => {
     const newMode = !isHelpEnabled;
     setIsHelpEnabled(newMode);
-    localStorage.setItem("help-mode-enabled", JSON.stringify(newMode));
+    localStorage.setItem('help-mode-enabled', JSON.stringify(newMode));
   }, [isHelpEnabled]);
 
   const getHelpContent = useCallback(
@@ -74,7 +74,7 @@ export function HelpProvider({ children }: HelpProviderProps) {
       const key = localStorage.key(i);
       if (
         key &&
-        (key.startsWith("help-") || key.startsWith("tooltip-dismissed-"))
+        (key.startsWith('help-') || key.startsWith('tooltip-dismissed-'))
       ) {
         keysToRemove.push(key);
       }
@@ -82,14 +82,14 @@ export function HelpProvider({ children }: HelpProviderProps) {
     keysToRemove.forEach((key) => localStorage.removeItem(key));
 
     // Permanently disable help system
-    localStorage.setItem("help-system-disabled", "true");
+    localStorage.setItem('help-system-disabled', 'true');
   }, []);
 
   // Initialize default help content - DISABLED
   useEffect(() => {
     // All help content registration disabled to prevent any guides from appearing
     const isHelpDisabled =
-      localStorage.getItem("help-system-disabled") === "true";
+      localStorage.getItem('help-system-disabled') === 'true';
     if (isHelpDisabled) {
       return; // Exit early - no help content registered
     }
@@ -97,132 +97,132 @@ export function HelpProvider({ children }: HelpProviderProps) {
     const defaultHelpContent: Array<[string, HelpContent]> = [
       // All content commented out to prevent any guides
       [
-        "collections-form",
+        'collections-form',
         {
-          id: "collections-form",
-          title: "Recording Your Collections",
+          id: 'collections-form',
+          title: 'Recording Your Collections',
           message:
             "Every sandwich you record here represents a meal for someone in need. Don't worry about making mistakes - you can always edit entries later. Just do your best, and know that your contribution matters so much!",
-          tone: "supportive",
-          character: "mentor",
-          position: "right",
+          tone: 'supportive',
+          character: 'mentor',
+          position: 'right',
         },
       ],
       [
-        "navigation-help",
+        'navigation-help',
         {
-          id: "navigation-help",
-          title: "Finding Your Way Around",
+          id: 'navigation-help',
+          title: 'Finding Your Way Around',
           message:
             "Think of this sidebar as your map to everything TSP! Each section is designed to help you contribute in your own unique way. Take your time exploring - there's no rush.",
-          tone: "informative",
-          character: "guide",
-          position: "right",
+          tone: 'informative',
+          character: 'guide',
+          position: 'right',
         },
       ],
       [
-        "team-chat",
+        'team-chat',
         {
-          id: "team-chat",
-          title: "Connect with Your Team",
+          id: 'team-chat',
+          title: 'Connect with Your Team',
           message:
             "This is where the magic happens! Chat with your fellow volunteers, share updates, and celebrate each other's wins. We're all in this together, and your voice matters here.",
-          tone: "encouraging",
-          character: "friend",
-          position: "top",
+          tone: 'encouraging',
+          character: 'friend',
+          position: 'top',
         },
       ],
       [
-        "reports-analytics",
+        'reports-analytics',
         {
-          id: "reports-analytics",
-          title: "See Your Impact",
+          id: 'reports-analytics',
+          title: 'See Your Impact',
           message:
             "These numbers tell the story of our collective impact! Every chart and statistic represents real people whose lives we've touched. You should feel proud - you're part of something beautiful.",
-          tone: "celebratory",
-          character: "coach",
-          position: "bottom",
+          tone: 'celebratory',
+          character: 'coach',
+          position: 'bottom',
         },
       ],
       [
-        "directory-contacts",
+        'directory-contacts',
         {
-          id: "directory-contacts",
-          title: "Your TSP Family",
+          id: 'directory-contacts',
+          title: 'Your TSP Family',
           message:
             "Here's everyone who's part of our wonderful community! Don't hesitate to reach out to anyone - we're all here to support each other in this important work.",
-          tone: "supportive",
-          character: "friend",
-          position: "left",
+          tone: 'supportive',
+          character: 'friend',
+          position: 'left',
         },
       ],
       [
-        "meetings-schedule",
+        'meetings-schedule',
         {
-          id: "meetings-schedule",
-          title: "Stay Connected",
+          id: 'meetings-schedule',
+          title: 'Stay Connected',
           message:
             "Meetings are where we come together as a team! They're not just about business - they're about connecting, sharing ideas, and supporting each other. Your participation is valued!",
-          tone: "encouraging",
-          character: "mentor",
-          position: "bottom",
+          tone: 'encouraging',
+          character: 'mentor',
+          position: 'bottom',
         },
       ],
       [
-        "project-management",
+        'project-management',
         {
-          id: "project-management",
-          title: "Making Things Happen",
+          id: 'project-management',
+          title: 'Making Things Happen',
           message:
             "Projects might seem overwhelming, but remember - every big change starts with small steps. You don't have to do everything at once. Just pick something that speaks to you and take it one task at a time!",
-          tone: "supportive",
-          character: "coach",
-          position: "right",
+          tone: 'supportive',
+          character: 'coach',
+          position: 'right',
         },
       ],
       [
-        "data-entry-tips",
+        'data-entry-tips',
         {
-          id: "data-entry-tips",
-          title: "Data Entry Made Easy",
+          id: 'data-entry-tips',
+          title: 'Data Entry Made Easy',
           message:
             "I know forms can feel tedious, but think of each entry as a story of generosity! Take breaks when you need them, and remember - accuracy matters more than speed. You're doing great!",
-          tone: "encouraging",
-          character: "mentor",
-          position: "top",
+          tone: 'encouraging',
+          character: 'mentor',
+          position: 'top',
         },
       ],
       [
-        "first-time-user",
+        'first-time-user',
         {
-          id: "first-time-user",
+          id: 'first-time-user',
           title: "New Here? You're Welcome!",
           message:
             "Starting something new can feel a bit overwhelming, but you've joined an incredibly supportive community! Take things at your own pace, ask questions whenever you need to, and know that everyone here wants to see you succeed.",
-          tone: "supportive",
-          character: "friend",
-          position: "bottom",
+          tone: 'supportive',
+          character: 'friend',
+          position: 'bottom',
           showOnFirstVisit: false, // Disabled auto-show
           actions: [
             {
-              label: "Take a Quick Tour",
+              label: 'Take a Quick Tour',
               action: () => {
-                console.log("Starting tour");
+                console.log('Starting tour');
                 // Mark onboarding as complete when starting tour
-                localStorage.setItem("onboarding-complete", "true");
-                localStorage.setItem("help-first-time-user-seen", "true");
+                localStorage.setItem('onboarding-complete', 'true');
+                localStorage.setItem('help-first-time-user-seen', 'true');
               },
               primary: true,
             },
             {
               label: "I'll Explore on My Own",
               action: () => {
-                console.log("Self exploration");
+                console.log('Self exploration');
                 // Mark onboarding as complete and help as seen when skipping
-                localStorage.setItem("onboarding-complete", "true");
-                localStorage.setItem("help-first-time-user-seen", "true");
+                localStorage.setItem('onboarding-complete', 'true');
+                localStorage.setItem('help-first-time-user-seen', 'true');
                 // Hide the help bubble
-                hideHelp("first-time-user");
+                hideHelp('first-time-user');
               },
             },
           ],

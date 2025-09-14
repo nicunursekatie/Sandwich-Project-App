@@ -1,17 +1,17 @@
-import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Activity,
   Database,
@@ -23,10 +23,10 @@ import {
   HardDrive,
   Gauge,
   LogOut,
-} from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
-import SimpleNav from "@/components/simple-nav";
+} from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '@/lib/queryClient';
+import SimpleNav from '@/components/simple-nav';
 
 interface PerformanceMetrics {
   database: {
@@ -80,10 +80,14 @@ interface PerformanceMetrics {
 export default function PerformanceDashboard() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState('overview');
 
-  const { data: metrics, isLoading, refetch } = useQuery<PerformanceMetrics>({
-    queryKey: ["/api/performance/dashboard"],
+  const {
+    data: metrics,
+    isLoading,
+    refetch,
+  } = useQuery<PerformanceMetrics>({
+    queryKey: ['/api/performance/dashboard'],
     refetchInterval: 30000, // Refresh every 30 seconds
     staleTime: 15000, // Consider stale after 15 seconds
   });
@@ -91,75 +95,73 @@ export default function PerformanceDashboard() {
   const optimizeMutation = useMutation({
     mutationFn: (action: string) =>
       apiRequest(`/api/performance/optimize`, {
-        method: "POST",
+        method: 'POST',
         body: JSON.stringify({ action }),
-        headers: { "Content-Type": "application/json" },
+        headers: { 'Content-Type': 'application/json' },
       }),
     onSuccess: (data) => {
       toast({
-        title: "Optimization Complete",
+        title: 'Optimization Complete',
         description: data.message,
       });
       refetch();
     },
     onError: (error) => {
       toast({
-        title: "Optimization Failed",
+        title: 'Optimization Failed',
         description: error.message,
-        variant: "destructive",
+        variant: 'destructive',
       });
     },
   });
 
   const cacheMutation = useMutation({
-    mutationFn: (action: "clear" | "warm" | "maintenance") => {
+    mutationFn: (action: 'clear' | 'warm' | 'maintenance') => {
       const endpoints = {
-        clear: "/api/performance/cache",
-        warm: "/api/performance/cache/warm",
-        maintenance: "/api/performance/cache/maintenance",
+        clear: '/api/performance/cache',
+        warm: '/api/performance/cache/warm',
+        maintenance: '/api/performance/cache/maintenance',
       };
-      const method = action === "clear" ? "DELETE" : "POST";
+      const method = action === 'clear' ? 'DELETE' : 'POST';
       return apiRequest(endpoints[action], { method });
     },
     onSuccess: (data) => {
       toast({
-        title: "Cache Operation Complete",
+        title: 'Cache Operation Complete',
         description: data.message,
       });
       refetch();
     },
     onError: (error) => {
       toast({
-        title: "Cache Operation Failed",
+        title: 'Cache Operation Failed',
         description: error.message,
-        variant: "destructive",
+        variant: 'destructive',
       });
     },
   });
 
   const getConnectionStatus = () => {
-    if (!metrics?.database.connectionPool) return "unknown";
-    const {
-      active_connections,
-      total_connections,
-    } = metrics.database.connectionPool;
+    if (!metrics?.database.connectionPool) return 'unknown';
+    const { active_connections, total_connections } =
+      metrics.database.connectionPool;
     const usage = (active_connections / total_connections) * 100;
-    if (usage > 80) return "high";
-    if (usage > 50) return "medium";
-    return "low";
+    if (usage > 80) return 'high';
+    if (usage > 50) return 'medium';
+    return 'low';
   };
 
   const getCacheHealth = () => {
-    if (!metrics?.cache) return "unknown";
+    if (!metrics?.cache) return 'unknown';
     const avgHitRate =
       Object.values(metrics.cache).reduce(
         (sum, cache) => sum + cache.hitRate,
         0
       ) / Object.values(metrics.cache).length;
-    if (avgHitRate > 0.8) return "excellent";
-    if (avgHitRate > 0.6) return "good";
-    if (avgHitRate > 0.4) return "fair";
-    return "poor";
+    if (avgHitRate > 0.8) return 'excellent';
+    if (avgHitRate > 0.6) return 'good';
+    if (avgHitRate > 0.4) return 'fair';
+    return 'poor';
   };
 
   if (isLoading) {
@@ -254,10 +256,10 @@ export default function PerformanceDashboard() {
                 Refresh
               </Button>
               <Badge variant="secondary">
-                Last updated:{" "}
+                Last updated:{' '}
                 {metrics
                   ? new Date(metrics.timestamp).toLocaleTimeString()
-                  : "Never"}
+                  : 'Never'}
               </Badge>
             </div>
           </div>
@@ -273,16 +275,16 @@ export default function PerformanceDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {metrics?.database.connectionPool?.active_connections || 0} /{" "}
+                  {metrics?.database.connectionPool?.active_connections || 0} /{' '}
                   {metrics?.database.connectionPool?.total_connections || 0}
                 </div>
                 <Badge
                   variant={
-                    getConnectionStatus() === "high"
-                      ? "destructive"
-                      : getConnectionStatus() === "medium"
-                      ? "default"
-                      : "secondary"
+                    getConnectionStatus() === 'high'
+                      ? 'destructive'
+                      : getConnectionStatus() === 'medium'
+                        ? 'default'
+                        : 'secondary'
                   }
                 >
                   {getConnectionStatus()} usage
@@ -299,16 +301,16 @@ export default function PerformanceDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {metrics?.cache ? Object.keys(metrics.cache).length : 0}{" "}
+                  {metrics?.cache ? Object.keys(metrics.cache).length : 0}{' '}
                   caches
                 </div>
                 <Badge
                   variant={
-                    getCacheHealth() === "excellent"
-                      ? "default"
-                      : getCacheHealth() === "good"
-                      ? "secondary"
-                      : "destructive"
+                    getCacheHealth() === 'excellent'
+                      ? 'default'
+                      : getCacheHealth() === 'good'
+                        ? 'secondary'
+                        : 'destructive'
                   }
                 >
                   {getCacheHealth()} hit rate
@@ -418,7 +420,7 @@ export default function PerformanceDashboard() {
                     <Button
                       variant="outline"
                       className="w-full justify-start"
-                      onClick={() => optimizeMutation.mutate("create_indexes")}
+                      onClick={() => optimizeMutation.mutate('create_indexes')}
                       disabled={optimizeMutation.isPending}
                     >
                       <Database className="h-4 w-4 mr-2" />
@@ -427,7 +429,7 @@ export default function PerformanceDashboard() {
                     <Button
                       variant="outline"
                       className="w-full justify-start"
-                      onClick={() => cacheMutation.mutate("warm")}
+                      onClick={() => cacheMutation.mutate('warm')}
                       disabled={cacheMutation.isPending}
                     >
                       <Zap className="h-4 w-4 mr-2" />
@@ -436,7 +438,7 @@ export default function PerformanceDashboard() {
                     <Button
                       variant="outline"
                       className="w-full justify-start"
-                      onClick={() => cacheMutation.mutate("clear")}
+                      onClick={() => cacheMutation.mutate('clear')}
                       disabled={cacheMutation.isPending}
                     >
                       <RefreshCw className="h-4 w-4 mr-2" />
@@ -559,10 +561,10 @@ export default function PerformanceDashboard() {
                               <Badge
                                 variant={
                                   stats.hitRate > 0.8
-                                    ? "default"
+                                    ? 'default'
                                     : stats.hitRate > 0.6
-                                    ? "secondary"
-                                    : "destructive"
+                                      ? 'secondary'
+                                      : 'destructive'
                                 }
                               >
                                 {(stats.hitRate * 100).toFixed(1)}% hit rate
@@ -614,7 +616,7 @@ export default function PerformanceDashboard() {
                     <div className="grid gap-2 md:grid-cols-3">
                       <Button
                         variant="outline"
-                        onClick={() => cacheMutation.mutate("warm")}
+                        onClick={() => cacheMutation.mutate('warm')}
                         disabled={cacheMutation.isPending}
                       >
                         <Zap className="h-4 w-4 mr-2" />
@@ -622,7 +624,7 @@ export default function PerformanceDashboard() {
                       </Button>
                       <Button
                         variant="outline"
-                        onClick={() => cacheMutation.mutate("maintenance")}
+                        onClick={() => cacheMutation.mutate('maintenance')}
                         disabled={cacheMutation.isPending}
                       >
                         <HardDrive className="h-4 w-4 mr-2" />
@@ -630,7 +632,7 @@ export default function PerformanceDashboard() {
                       </Button>
                       <Button
                         variant="destructive"
-                        onClick={() => cacheMutation.mutate("clear")}
+                        onClick={() => cacheMutation.mutate('clear')}
                         disabled={cacheMutation.isPending}
                       >
                         <RefreshCw className="h-4 w-4 mr-2" />
@@ -669,14 +671,14 @@ export default function PerformanceDashboard() {
                                   </div>
                                   {suggestion.tables && (
                                     <div className="text-sm">
-                                      <strong>Affected tables:</strong>{" "}
-                                      {suggestion.tables.join(", ")}
+                                      <strong>Affected tables:</strong>{' '}
+                                      {suggestion.tables.join(', ')}
                                     </div>
                                   )}
                                   {suggestion.indexes && (
                                     <div className="text-sm">
-                                      <strong>Affected indexes:</strong>{" "}
-                                      {suggestion.indexes.join(", ")}
+                                      <strong>Affected indexes:</strong>{' '}
+                                      {suggestion.indexes.join(', ')}
                                     </div>
                                   )}
                                 </div>
@@ -721,7 +723,7 @@ export default function PerformanceDashboard() {
                       <Button
                         variant="outline"
                         onClick={() =>
-                          optimizeMutation.mutate("create_indexes")
+                          optimizeMutation.mutate('create_indexes')
                         }
                         disabled={optimizeMutation.isPending}
                       >
@@ -731,7 +733,7 @@ export default function PerformanceDashboard() {
                       <Button
                         variant="outline"
                         onClick={() =>
-                          optimizeMutation.mutate("analyze_queries")
+                          optimizeMutation.mutate('analyze_queries')
                         }
                         disabled={optimizeMutation.isPending}
                       >

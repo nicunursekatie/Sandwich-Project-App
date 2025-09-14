@@ -1,25 +1,25 @@
-import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
+import { useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import { Plus } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+} from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest, queryClient } from '@/lib/queryClient';
 
 interface AddMeetingModalProps {
   open: boolean;
@@ -31,10 +31,10 @@ export default function AddMeetingModal({
   onOpenChange,
 }: AddMeetingModalProps) {
   const { toast } = useToast();
-  const [title, setTitle] = useState("");
-  const [date, setDate] = useState("");
-  const [summary, setSummary] = useState("");
-  const [color, setColor] = useState("blue");
+  const [title, setTitle] = useState('');
+  const [date, setDate] = useState('');
+  const [summary, setSummary] = useState('');
+  const [color, setColor] = useState('blue');
 
   const addMeetingMutation = useMutation({
     mutationFn: async (data: {
@@ -43,26 +43,26 @@ export default function AddMeetingModal({
       summary: string;
       color: string;
     }) => {
-      const response = await apiRequest("POST", "/api/meeting-minutes", data);
+      const response = await apiRequest('POST', '/api/meeting-minutes', data);
       return response.json();
     },
     onSuccess: () => {
-      setTitle("");
-      setDate("");
-      setSummary("");
-      setColor("blue");
-      queryClient.invalidateQueries({ queryKey: ["/api/meeting-minutes"] });
+      setTitle('');
+      setDate('');
+      setSummary('');
+      setColor('blue');
+      queryClient.invalidateQueries({ queryKey: ['/api/meeting-minutes'] });
       onOpenChange(false);
       toast({
-        title: "Meeting minutes added",
-        description: "The meeting minutes have been saved successfully.",
+        title: 'Meeting minutes added',
+        description: 'The meeting minutes have been saved successfully.',
       });
     },
     onError: () => {
       toast({
-        title: "Failed to add meeting minutes",
-        description: "Please check your input and try again.",
-        variant: "destructive",
+        title: 'Failed to add meeting minutes',
+        description: 'Please check your input and try again.',
+        variant: 'destructive',
       });
     },
   });
@@ -72,9 +72,9 @@ export default function AddMeetingModal({
 
     if (!title || !date || !summary) {
       toast({
-        title: "Missing information",
-        description: "Please fill in all required fields.",
-        variant: "destructive",
+        title: 'Missing information',
+        description: 'Please fill in all required fields.',
+        variant: 'destructive',
       });
       return;
     }
@@ -83,10 +83,10 @@ export default function AddMeetingModal({
   };
 
   const handleClose = () => {
-    setTitle("");
-    setDate("");
-    setSummary("");
-    setColor("blue");
+    setTitle('');
+    setDate('');
+    setSummary('');
+    setColor('blue');
     onOpenChange(false);
   };
 
@@ -181,8 +181,8 @@ export default function AddMeetingModal({
                 className="bg-purple-600 hover:bg-purple-700 text-white"
               >
                 {addMeetingMutation.isPending
-                  ? "Adding..."
-                  : "Add Meeting Minutes"}
+                  ? 'Adding...'
+                  : 'Add Meeting Minutes'}
               </Button>
             </div>
           </form>

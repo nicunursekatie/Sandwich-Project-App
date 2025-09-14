@@ -1,84 +1,84 @@
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Download, Eye, FileImage, Palette, ImageIcon } from "lucide-react";
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Download, Eye, FileImage, Palette, ImageIcon } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 
 // Logo files information
 const logoFiles = [
   {
     id: 1,
-    name: "CMYK Print Logo",
-    filename: "CMYK_PRINT_TSP-01-01.jpg",
-    description: "High-quality CMYK version for professional printing",
-    type: "JPEG",
-    usage: "Print materials, brochures, professional documents",
-    bgColor: "white",
+    name: 'CMYK Print Logo',
+    filename: 'CMYK_PRINT_TSP-01-01.jpg',
+    description: 'High-quality CMYK version for professional printing',
+    type: 'JPEG',
+    usage: 'Print materials, brochures, professional documents',
+    bgColor: 'white',
     icon: <Palette className="h-5 w-5" />,
   },
   {
     id: 2,
-    name: "Main Transparent Logo",
-    filename: "TSP_transparent.png",
-    description: "Primary logo with transparent background",
-    type: "PNG",
-    usage: "Web, presentations, overlays on any background",
-    bgColor: "#f8f9fa",
+    name: 'Main Transparent Logo',
+    filename: 'TSP_transparent.png',
+    description: 'Primary logo with transparent background',
+    type: 'PNG',
+    usage: 'Web, presentations, overlays on any background',
+    bgColor: '#f8f9fa',
     icon: <ImageIcon className="h-5 w-5" />,
   },
   {
     id: 3,
-    name: "Reverse Transparent Logo",
-    filename: "TSP_reverse_transparent.png",
-    description: "Inverted colors for dark backgrounds",
-    type: "PNG",
-    usage: "Dark backgrounds, night mode interfaces",
-    bgColor: "#2d3748",
+    name: 'Reverse Transparent Logo',
+    filename: 'TSP_reverse_transparent.png',
+    description: 'Inverted colors for dark backgrounds',
+    type: 'PNG',
+    usage: 'Dark backgrounds, night mode interfaces',
+    bgColor: '#2d3748',
     icon: <Eye className="h-5 w-5" />,
   },
   {
     id: 4,
-    name: "Sandwich Logo",
-    filename: "sandwich logo.png",
-    description: "Simple sandwich icon logo",
-    type: "PNG",
-    usage: "Icons, favicons, small applications",
-    bgColor: "white",
+    name: 'Sandwich Logo',
+    filename: 'sandwich logo.png',
+    description: 'Simple sandwich icon logo',
+    type: 'PNG',
+    usage: 'Icons, favicons, small applications',
+    bgColor: 'white',
     icon: <FileImage className="h-5 w-5" />,
   },
   {
     id: 5,
-    name: "Transparent Logo (Copy)",
-    filename: "Copy of TSP_transparent.png",
-    description: "Backup copy of transparent logo",
-    type: "PNG",
-    usage: "Backup version for web and digital use",
-    bgColor: "#f8f9fa",
+    name: 'Transparent Logo (Copy)',
+    filename: 'Copy of TSP_transparent.png',
+    description: 'Backup copy of transparent logo',
+    type: 'PNG',
+    usage: 'Backup version for web and digital use',
+    bgColor: '#f8f9fa',
     icon: <ImageIcon className="h-5 w-5" />,
   },
 ];
 
 export default function LogosPage() {
-  const [selectedLogo, setSelectedLogo] = useState<typeof logoFiles[0] | null>(
-    null
-  );
+  const [selectedLogo, setSelectedLogo] = useState<
+    (typeof logoFiles)[0] | null
+  >(null);
 
   const handleDownload = async (filename: string, displayName: string) => {
     try {
       const response = await fetch(`/attached_assets/LOGOS/${filename}`);
-      if (!response.ok) throw new Error("Logo not found");
+      if (!response.ok) throw new Error('Logo not found');
 
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.style.display = "none";
+      const a = document.createElement('a');
+      a.style.display = 'none';
       a.href = url;
       a.download = filename;
       document.body.appendChild(a);
@@ -86,12 +86,12 @@ export default function LogosPage() {
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
     } catch (error) {
-      console.error("Download failed:", error);
-      alert("Failed to download logo. Please try again.");
+      console.error('Download failed:', error);
+      alert('Failed to download logo. Please try again.');
     }
   };
 
-  const handlePreview = (logo: typeof logoFiles[0]) => {
+  const handlePreview = (logo: (typeof logoFiles)[0]) => {
     setSelectedLogo(logo);
   };
 
@@ -161,7 +161,7 @@ export default function LogosPage() {
                   className="max-w-full max-h-full object-contain p-2"
                   onError={(e) => {
                     e.currentTarget.src =
-                      "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiBmaWxsPSIjZjNmNGY2Ii8+CjxwYXRoIGQ9Ik0yMCAyMEg0NFY0NEgyMFYyMFoiIGZpbGw9IiNkMWQ1ZGIiLz4KPC9zdmc+";
+                      'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiBmaWxsPSIjZjNmNGY2Ii8+CjxwYXRoIGQ9Ik0yMCAyMEg0NFY0NEgyMFYyMFoiIGZpbGw9IiNkMWQ1ZGIiLz4KPC9zdmc+';
                   }}
                 />
               </div>
@@ -205,15 +205,15 @@ export default function LogosPage() {
                       </div>
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div>
-                          <strong className="text-[#236383]">File Type:</strong>{" "}
+                          <strong className="text-[#236383]">File Type:</strong>{' '}
                           {logo.type}
                         </div>
                         <div>
-                          <strong className="text-[#236383]">Filename:</strong>{" "}
+                          <strong className="text-[#236383]">Filename:</strong>{' '}
                           {logo.filename}
                         </div>
                         <div className="col-span-2">
-                          <strong className="text-[#236383]">Usage:</strong>{" "}
+                          <strong className="text-[#236383]">Usage:</strong>{' '}
                           {logo.usage}
                         </div>
                       </div>

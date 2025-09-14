@@ -1,4 +1,4 @@
-import { ApiCheck, AssertionBuilder } from 'checkly/constructs'
+import { ApiCheck, AssertionBuilder } from 'checkly/constructs';
 
 new ApiCheck('books-api-check-1', {
   name: 'Books API',
@@ -16,4 +16,4 @@ new ApiCheck('books-api-check-1', {
     ],
   },
   runParallel: true,
-})
+});

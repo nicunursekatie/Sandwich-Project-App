@@ -1,15 +1,15 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
+} from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import {
   Sandwich,
   Users,
@@ -21,9 +21,9 @@ import {
   Target,
   Calendar,
   CheckCircle,
-} from "lucide-react";
-import { formatDistanceToNow, format } from "date-fns";
-import { apiRequest } from "@/lib/queryClient";
+} from 'lucide-react';
+import { formatDistanceToNow, format } from 'date-fns';
+import { apiRequest } from '@/lib/queryClient';
 
 interface MeaningfulActivity {
   userId: string;
@@ -61,64 +61,66 @@ interface PlatformImpact {
 }
 
 export default function MeaningfulUserAnalytics() {
-  const [selectedTimeframe, setSelectedTimeframe] = useState("30");
-  const [sortBy, setSortBy] = useState("contribution");
+  const [selectedTimeframe, setSelectedTimeframe] = useState('30');
+  const [sortBy, setSortBy] = useState('contribution');
 
   // Get meaningful platform metrics
-  const { data: platformImpact, isLoading: isLoadingImpact } = useQuery<
-    PlatformImpact
-  >({
-    queryKey: ["/api/meaningful-analytics/platform-impact", selectedTimeframe],
-    queryFn: async () => {
-      const res = await fetch(
-        `/api/meaningful-analytics/platform-impact?days=${selectedTimeframe}`,
-        {
-          credentials: "include",
+  const { data: platformImpact, isLoading: isLoadingImpact } =
+    useQuery<PlatformImpact>({
+      queryKey: [
+        '/api/meaningful-analytics/platform-impact',
+        selectedTimeframe,
+      ],
+      queryFn: async () => {
+        const res = await fetch(
+          `/api/meaningful-analytics/platform-impact?days=${selectedTimeframe}`,
+          {
+            credentials: 'include',
+          }
+        );
+        if (!res.ok) {
+          // Return meaningful fallback data based on actual platform purpose
+          return {
+            totalSandwichesRecorded: 127500,
+            totalVolunteersManaged: 144,
+            totalHostsConnected: 12,
+            totalReportsGenerated: 23,
+            activeContributors: 18,
+            dataQualityScore: 94,
+            userProductivity: 87,
+            recentDataEntries: 89,
+            recentCommunications: 156,
+            recentCoordination: 34,
+          };
         }
-      );
-      if (!res.ok) {
-        // Return meaningful fallback data based on actual platform purpose
-        return {
-          totalSandwichesRecorded: 127500,
-          totalVolunteersManaged: 144,
-          totalHostsConnected: 12,
-          totalReportsGenerated: 23,
-          activeContributors: 18,
-          dataQualityScore: 94,
-          userProductivity: 87,
-          recentDataEntries: 89,
-          recentCommunications: 156,
-          recentCoordination: 34,
-        };
-      }
-      return res.json();
-    },
-    staleTime: 300000, // 5 minutes
-  });
+        return res.json();
+      },
+      staleTime: 300000, // 5 minutes
+    });
 
   // Get meaningful user activities
   const { data: userActivities, isLoading: isLoadingUsers } = useQuery<
     MeaningfulActivity[]
   >({
     queryKey: [
-      "/api/meaningful-analytics/user-contributions",
+      '/api/meaningful-analytics/user-contributions',
       selectedTimeframe,
     ],
     queryFn: async () => {
       const res = await fetch(
         `/api/meaningful-analytics/user-contributions?days=${selectedTimeframe}`,
         {
-          credentials: "include",
+          credentials: 'include',
         }
       );
       if (!res.ok) {
         // Return meaningful example data
         return [
           {
-            userId: "katie_admin",
-            userName: "Katie Long",
-            email: "katielong2316@gmail.com",
-            role: "Core Team",
+            userId: 'katie_admin',
+            userName: 'Katie Long',
+            email: 'katielong2316@gmail.com',
+            role: 'Core Team',
             sandwichDataEntered: 45,
             volunteersManaged: 12,
             reportsGenerated: 8,
@@ -129,10 +131,10 @@ export default function MeaningfulUserAnalytics() {
             totalContributionValue: 95,
           },
           {
-            userId: "admin_user",
-            userName: "Admin User",
-            email: "admin@sandwich.project",
-            role: "Admin",
+            userId: 'admin_user',
+            userName: 'Admin User',
+            email: 'admin@sandwich.project',
+            role: 'Admin',
             sandwichDataEntered: 38,
             volunteersManaged: 8,
             reportsGenerated: 12,
@@ -143,10 +145,10 @@ export default function MeaningfulUserAnalytics() {
             totalContributionValue: 88,
           },
           {
-            userId: "coordinator_1",
-            userName: "Sarah Martinez",
-            email: "sarah@sandwich.project",
-            role: "Coordinator",
+            userId: 'coordinator_1',
+            userName: 'Sarah Martinez',
+            email: 'sarah@sandwich.project',
+            role: 'Coordinator',
             sandwichDataEntered: 22,
             volunteersManaged: 15,
             reportsGenerated: 3,
@@ -166,13 +168,13 @@ export default function MeaningfulUserAnalytics() {
   const sortedUsers =
     userActivities?.sort((a, b) => {
       switch (sortBy) {
-        case "contribution":
+        case 'contribution':
           return b.totalContributionValue - a.totalContributionValue;
-        case "data":
+        case 'data':
           return b.sandwichDataEntered - a.sandwichDataEntered;
-        case "volunteers":
+        case 'volunteers':
           return b.volunteersManaged - a.volunteersManaged;
-        case "active":
+        case 'active':
           return b.daysActive - a.daysActive;
         default:
           return 0;
@@ -182,26 +184,26 @@ export default function MeaningfulUserAnalytics() {
   const getContributionLevel = (score: number) => {
     if (score >= 90)
       return {
-        level: "Exceptional",
-        color: "bg-green-500",
-        textColor: "text-green-700",
+        level: 'Exceptional',
+        color: 'bg-green-500',
+        textColor: 'text-green-700',
       };
     if (score >= 75)
       return {
-        level: "High Impact",
-        color: "bg-blue-500",
-        textColor: "text-blue-700",
+        level: 'High Impact',
+        color: 'bg-blue-500',
+        textColor: 'text-blue-700',
       };
     if (score >= 50)
       return {
-        level: "Contributing",
-        color: "bg-yellow-500",
-        textColor: "text-yellow-700",
+        level: 'Contributing',
+        color: 'bg-yellow-500',
+        textColor: 'text-yellow-700',
       };
     return {
-      level: "Getting Started",
-      color: "bg-gray-500",
-      textColor: "text-gray-700",
+      level: 'Getting Started',
+      color: 'bg-gray-500',
+      textColor: 'text-gray-700',
     };
   };
 
@@ -396,12 +398,12 @@ export default function MeaningfulUserAnalytics() {
                   </div>
                   <div className="text-right">
                     <div className="text-sm text-muted-foreground">
-                      Last active{" "}
+                      Last active{' '}
                       {user.lastActive
                         ? formatDistanceToNow(user.lastActive, {
                             addSuffix: true,
                           })
-                        : "Never"}
+                        : 'Never'}
                     </div>
                   </div>
                 </div>

@@ -1,18 +1,18 @@
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { useAuth } from "@/hooks/useAuth";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Heart, Trophy, CheckCircle, Clock } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { useAuth } from '@/hooks/useAuth';
+import { apiRequest, queryClient } from '@/lib/queryClient';
+import { useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Heart, Trophy, CheckCircle, Clock } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
 
 interface KudosMessage {
   id: number;
   content: string;
   sender: string;
   senderName: string;
-  contextType: "task" | "project";
+  contextType: 'task' | 'project';
   contextId: string;
   entityName: string;
   createdAt: string;
@@ -22,10 +22,12 @@ interface KudosMessage {
 export function KudosInbox() {
   const { user } = useAuth();
 
-  const { data: kudosMessages = [], isLoading, refetch } = useQuery<
-    KudosMessage[]
-  >({
-    queryKey: ["/api/messaging/kudos/received"],
+  const {
+    data: kudosMessages = [],
+    isLoading,
+    refetch,
+  } = useQuery<KudosMessage[]>({
+    queryKey: ['/api/messaging/kudos/received'],
     enabled: !!user,
     refetchInterval: 30000, // Refresh every 30 seconds for new kudos
   });
@@ -33,21 +35,21 @@ export function KudosInbox() {
   // Mutation to mark kudos as read
   const markKudosAsReadMutation = useMutation({
     mutationFn: async (kudosIds: number[]) => {
-      return apiRequest("POST", "/api/messaging/kudos/mark-read", { kudosIds });
+      return apiRequest('POST', '/api/messaging/kudos/mark-read', { kudosIds });
     },
     onSuccess: () => {
       // Invalidate and refetch kudos to update read status
       queryClient.invalidateQueries({
-        queryKey: ["/api/messaging/kudos/received"],
+        queryKey: ['/api/messaging/kudos/received'],
       });
       // Also invalidate notification counts to update the bell icon
       queryClient.invalidateQueries({
-        queryKey: ["/api/message-notifications/unread-counts"],
+        queryKey: ['/api/message-notifications/unread-counts'],
       });
       refetch();
     },
     onError: (error) => {
-      console.error("Failed to mark kudos as read:", error);
+      console.error('Failed to mark kudos as read:', error);
     },
   });
 
@@ -114,8 +116,8 @@ export function KudosInbox() {
             key={kudos.id}
             className={`transition-all duration-200 ${
               !kudos.read
-                ? "bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200 shadow-md"
-                : "bg-white hover:bg-gray-50"
+                ? 'bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200 shadow-md'
+                : 'bg-white hover:bg-gray-50'
             }`}
           >
             <CardContent className="p-4">
@@ -123,10 +125,10 @@ export function KudosInbox() {
                 {/* Icon based on context */}
                 <div
                   className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
-                    !kudos.read ? "bg-yellow-100" : "bg-gray-100"
+                    !kudos.read ? 'bg-yellow-100' : 'bg-gray-100'
                   }`}
                 >
-                  {kudos.contextType === "task" ? (
+                  {kudos.contextType === 'task' ? (
                     <CheckCircle className="w-5 h-5 text-green-600" />
                   ) : (
                     <Trophy className="w-5 h-5 text-yellow-600" />
@@ -145,7 +147,7 @@ export function KudosInbox() {
                       {/* Context info */}
                       <div className="flex items-center gap-2 text-xs text-gray-500">
                         <Badge variant="outline" className="text-xs">
-                          {kudos.contextType === "task" ? "Task" : "Project"}
+                          {kudos.contextType === 'task' ? 'Task' : 'Project'}
                         </Badge>
                         <span>"{kudos.entityName}"</span>
                       </div>

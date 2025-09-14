@@ -1,20 +1,20 @@
-import { storage } from "../storage-wrapper";
-import { format } from "date-fns";
+import { storage } from '../storage-wrapper';
+import { format } from 'date-fns';
 
 export interface ReportConfig {
   type:
-    | "community-impact"
-    | "collective-achievements"
-    | "operational-health"
-    | "support-opportunities"
-    | "comprehensive";
+    | 'community-impact'
+    | 'collective-achievements'
+    | 'operational-health'
+    | 'support-opportunities'
+    | 'comprehensive';
   dateRange: {
     start: string;
     end: string;
   };
-  format: "pdf" | "csv" | "json";
+  format: 'pdf' | 'csv' | 'json';
   includeCharts: boolean;
-  groupBy?: "week" | "month" | "region" | "organization";
+  groupBy?: 'week' | 'month' | 'region' | 'organization';
   filters?: {
     regions?: string[];
     organizationTypes?: string[];
@@ -66,12 +66,12 @@ export interface ReportData {
     coverageConsistency: Array<{
       area: string;
       consistencyScore: number;
-      status: "excellent" | "good" | "needs-attention";
+      status: 'excellent' | 'good' | 'needs-attention';
     }>;
     resourceNeeds: Array<{
       area: string;
-      needType: "volunteers" | "supplies" | "coordination";
-      priority: "high" | "medium" | "low";
+      needType: 'volunteers' | 'supplies' | 'coordination';
+      priority: 'high' | 'medium' | 'low';
       description: string;
     }>;
   };
@@ -118,7 +118,7 @@ export interface ReportData {
   };
   data: any[];
   charts?: Array<{
-    type: "bar" | "line" | "pie" | "map";
+    type: 'bar' | 'line' | 'pie' | 'map';
     title: string;
     data: any[];
   }>;
@@ -130,7 +130,7 @@ export class ReportGenerator {
     let dateFrom: string, dateTo: string, reportFormat: string, type: string;
 
     console.log(
-      "ReportGenerator received config:",
+      'ReportGenerator received config:',
       JSON.stringify(config, null, 2)
     );
 
@@ -138,17 +138,17 @@ export class ReportGenerator {
       // Old format
       dateFrom = config.dateRange.start;
       dateTo = config.dateRange.end;
-      reportFormat = config.format || "pdf";
-      type = config.type || "collections";
+      reportFormat = config.format || 'pdf';
+      type = config.type || 'collections';
     } else {
       // New format from frontend
-      dateFrom = config.dateFrom || "2024-01-01";
-      dateTo = config.dateTo || "2025-12-31";
-      reportFormat = config.format || "pdf";
-      type = "collections";
+      dateFrom = config.dateFrom || '2024-01-01';
+      dateTo = config.dateTo || '2025-12-31';
+      reportFormat = config.format || 'pdf';
+      type = 'collections';
     }
 
-    console.log("Final reportFormat determined:", reportFormat);
+    console.log('Final reportFormat determined:', reportFormat);
 
     const startDate = new Date(dateFrom);
     const endDate = new Date(dateTo);
@@ -168,7 +168,7 @@ export class ReportGenerator {
     data = [...collections];
 
     switch (type) {
-      case "community-impact":
+      case 'community-impact':
         data = await this.generateCommunityImpactData(
           collections,
           hosts,
@@ -177,7 +177,7 @@ export class ReportGenerator {
         );
         break;
 
-      case "collective-achievements":
+      case 'collective-achievements':
         data = await this.generateCollectiveAchievementsData(
           collections,
           hosts,
@@ -187,7 +187,7 @@ export class ReportGenerator {
         );
         break;
 
-      case "operational-health":
+      case 'operational-health':
         data = await this.generateOperationalHealthData(
           collections,
           hosts,
@@ -196,7 +196,7 @@ export class ReportGenerator {
         );
         break;
 
-      case "support-opportunities":
+      case 'support-opportunities':
         data = await this.generateSupportOpportunitiesData(
           collections,
           hosts,
@@ -205,7 +205,7 @@ export class ReportGenerator {
         );
         break;
 
-      case "comprehensive":
+      case 'comprehensive':
         data = [...collections];
         break;
     }
@@ -216,7 +216,7 @@ export class ReportGenerator {
       0
     );
     totalHosts = hosts.length;
-    activeProjects = projects.filter((p: any) => p.status === "active").length;
+    activeProjects = projects.filter((p: any) => p.status === 'active').length;
 
     // Generate community-focused report sections
     const communityImpact = await this.generateCommunityImpactSummary(
@@ -225,13 +225,14 @@ export class ReportGenerator {
       startDate,
       endDate
     );
-    const collectiveAchievements = await this.generateCollectiveAchievementsSummary(
-      collections,
-      hosts,
-      projects,
-      startDate,
-      endDate
-    );
+    const collectiveAchievements =
+      await this.generateCollectiveAchievementsSummary(
+        collections,
+        hosts,
+        projects,
+        startDate,
+        endDate
+      );
     const operationalHealth = await this.generateOperationalHealthSummary(
       collections,
       hosts,
@@ -273,9 +274,9 @@ export class ReportGenerator {
       metadata: {
         title: this.getReportTitle(config),
         generatedAt: new Date().toISOString(),
-        dateRange: `${format(startDate, "MMM dd, yyyy")} - ${format(
+        dateRange: `${format(startDate, 'MMM dd, yyyy')} - ${format(
           endDate,
-          "MMM dd, yyyy"
+          'MMM dd, yyyy'
         )}`,
         totalRecords: Array.isArray(data)
           ? data.length
@@ -318,7 +319,7 @@ export class ReportGenerator {
         .map((c) => ({
           id: c.id,
           date: c.collectionDate,
-          hostName: c.hostName || "N/A",
+          hostName: c.hostName || 'N/A',
           individualSandwiches: c.individualSandwiches || 0,
           groupSandwiches: (c.groupCollections || []).reduce(
             (sum: number, gc: any) => sum + (gc.count || 0),
@@ -333,7 +334,7 @@ export class ReportGenerator {
           submittedAt: c.submittedAt,
         }));
     } catch (error) {
-      console.error("Error getting collections data for report:", error);
+      console.error('Error getting collections data for report:', error);
       return [];
     }
   }
@@ -357,7 +358,7 @@ export class ReportGenerator {
           createdAt: h.createdAt,
         }));
     } catch (error) {
-      console.error("Error getting hosts data for report:", error);
+      console.error('Error getting hosts data for report:', error);
       return [];
     }
   }
@@ -385,7 +386,7 @@ export class ReportGenerator {
           dueDate: p.dueDate,
         }));
     } catch (error) {
-      console.error("Error getting projects data for report:", error);
+      console.error('Error getting projects data for report:', error);
       return [];
     }
   }
@@ -396,7 +397,7 @@ export class ReportGenerator {
 
       // Group by month for impact analysis
       const monthlyImpact = collections.reduce((acc, collection) => {
-        const month = format(new Date(collection.date), "yyyy-MM");
+        const month = format(new Date(collection.date), 'yyyy-MM');
         if (!acc[month]) {
           acc[month] = {
             month,
@@ -416,7 +417,7 @@ export class ReportGenerator {
         uniqueHosts: item.uniqueHosts.size,
       }));
     } catch (error) {
-      console.error("Error getting impact data for report:", error);
+      console.error('Error getting impact data for report:', error);
       return [];
     }
   }
@@ -426,14 +427,17 @@ export class ReportGenerator {
       const collections = await this.getCollectionsData(startDate, endDate);
 
       // Group by host to find top performers
-      const hostPerformance = collections.reduce((acc, collection) => {
-        const hostName = collection.hostName;
-        if (!acc[hostName]) {
-          acc[hostName] = 0;
-        }
-        acc[hostName] += collection.totalSandwiches;
-        return acc;
-      }, {} as Record<string, number>);
+      const hostPerformance = collections.reduce(
+        (acc, collection) => {
+          const hostName = collection.hostName;
+          if (!acc[hostName]) {
+            acc[hostName] = 0;
+          }
+          acc[hostName] += collection.totalSandwiches;
+          return acc;
+        },
+        {} as Record<string, number>
+      );
 
       return Object.entries(hostPerformance)
         .sort(([, a], [, b]) => (b as number) - (a as number))
@@ -441,10 +445,10 @@ export class ReportGenerator {
         .map(([name, value]) => ({
           name,
           value,
-          type: "host" as const,
+          type: 'host' as const,
         }));
     } catch (error) {
-      console.error("Error getting top performers for report:", error);
+      console.error('Error getting top performers for report:', error);
       return [];
     }
   }
@@ -458,23 +462,26 @@ export class ReportGenerator {
     const charts = [];
 
     // Community Impact Growth Chart
-    const monthlyImpact = collections.reduce((acc, item) => {
-      // Skip items with invalid dates
-      if (!item.collectionDate) return acc;
+    const monthlyImpact = collections.reduce(
+      (acc, item) => {
+        // Skip items with invalid dates
+        if (!item.collectionDate) return acc;
 
-      const date = new Date(item.collectionDate);
-      if (isNaN(date.getTime())) return acc; // Skip invalid dates
+        const date = new Date(item.collectionDate);
+        if (isNaN(date.getTime())) return acc; // Skip invalid dates
 
-      const month = format(date, "MMM yyyy");
-      const totalSandwiches =
-        (item.individualSandwiches || 0) + (item.groupSandwiches || 0);
-      acc[month] = (acc[month] || 0) + totalSandwiches;
-      return acc;
-    }, {} as Record<string, number>);
+        const month = format(date, 'MMM yyyy');
+        const totalSandwiches =
+          (item.individualSandwiches || 0) + (item.groupSandwiches || 0);
+        acc[month] = (acc[month] || 0) + totalSandwiches;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
 
     charts.push({
-      type: "line" as const,
-      title: "Community Impact Growth Over Time",
+      type: 'line' as const,
+      title: 'Community Impact Growth Over Time',
       data: Object.entries(monthlyImpact).map(([month, total]) => ({
         label: month,
         value: total,
@@ -482,26 +489,29 @@ export class ReportGenerator {
     });
 
     // Geographic Coverage Chart
-    const geographicData = hosts.reduce((acc, host) => {
-      const area = host.name?.split(" ")[0] || "Other";
-      const hostCollections = collections.filter(
-        (c) => c.hostName === host.name
-      );
-      const totalContributions = hostCollections.reduce(
-        (sum, item) =>
-          sum +
-          (item.individualSandwiches || 0) +
-          (item.group1Count || 0) +
-          (item.group2Count || 0),
-        0
-      );
-      acc[area] = (acc[area] || 0) + totalContributions;
-      return acc;
-    }, {} as Record<string, number>);
+    const geographicData = hosts.reduce(
+      (acc, host) => {
+        const area = host.name?.split(' ')[0] || 'Other';
+        const hostCollections = collections.filter(
+          (c) => c.hostName === host.name
+        );
+        const totalContributions = hostCollections.reduce(
+          (sum, item) =>
+            sum +
+            (item.individualSandwiches || 0) +
+            (item.group1Count || 0) +
+            (item.group2Count || 0),
+          0
+        );
+        acc[area] = (acc[area] || 0) + totalContributions;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
 
     charts.push({
-      type: "pie" as const,
-      title: "Community Support by Geographic Area",
+      type: 'pie' as const,
+      title: 'Community Support by Geographic Area',
       data: Object.entries(geographicData)
         .sort(([, a], [, b]) => (b as number) - (a as number))
         .slice(0, 8)
@@ -544,16 +554,16 @@ export class ReportGenerator {
     );
 
     charts.push({
-      type: "bar" as const,
-      title: "Support Opportunities Distribution",
+      type: 'bar' as const,
+      title: 'Support Opportunities Distribution',
       data: [
         {
-          label: "Areas Needing Volunteers",
+          label: 'Areas Needing Volunteers',
           value: supportSummary.needsSupport,
         },
-        { label: "Stable Operations", value: supportSummary.stable },
+        { label: 'Stable Operations', value: supportSummary.stable },
         {
-          label: "Ready for Expansion",
+          label: 'Ready for Expansion',
           value: supportSummary.readyForExpansion,
         },
       ],
@@ -564,16 +574,16 @@ export class ReportGenerator {
 
   private static getReportTitle(config: any): string {
     const typeNames = {
-      "community-impact": "Community Impact Overview",
-      "collective-achievements": "Collective Achievements Report",
-      "operational-health": "Operational Health Assessment",
-      "support-opportunities": "Support Opportunities Report",
-      comprehensive: "Community Impact & Support Report",
+      'community-impact': 'Community Impact Overview',
+      'collective-achievements': 'Collective Achievements Report',
+      'operational-health': 'Operational Health Assessment',
+      'support-opportunities': 'Support Opportunities Report',
+      comprehensive: 'Community Impact & Support Report',
     };
 
     return (
       typeNames[config.type as keyof typeof typeNames] ||
-      "Community Impact Report"
+      'Community Impact Report'
     );
   }
 
@@ -596,7 +606,7 @@ export class ReportGenerator {
     // Get unique recipient organizations
     const recipientOrgs = new Set();
     collections.forEach((c) => {
-      if (c.hostName && !c.hostName.toLowerCase().includes("group")) {
+      if (c.hostName && !c.hostName.toLowerCase().includes('group')) {
         recipientOrgs.add(c.hostName);
       }
     });
@@ -604,7 +614,7 @@ export class ReportGenerator {
     // Extract geographic areas (simplified - could be enhanced with actual geographic data)
     const geographicAreas = Array.from(
       new Set(
-        hosts.map((h) => h.name?.split(" ")[0] || "Community").filter(Boolean)
+        hosts.map((h) => h.name?.split(' ')[0] || 'Community').filter(Boolean)
       )
     );
 
@@ -612,21 +622,21 @@ export class ReportGenerator {
     const milestoneAchievements = [];
     if (totalSandwiches >= 2000000) {
       milestoneAchievements.push({
-        milestone: "2 Million Sandwiches",
-        achievedDate: format(new Date(), "MMM dd, yyyy"),
+        milestone: '2 Million Sandwiches',
+        achievedDate: format(new Date(), 'MMM dd, yyyy'),
         description:
-          "Reached the incredible milestone of 2 million sandwiches provided to neighbors in need!",
+          'Reached the incredible milestone of 2 million sandwiches provided to neighbors in need!',
       });
     }
     if (totalSandwiches >= 1500000) {
       milestoneAchievements.push({
-        milestone: "1.5 Million Sandwiches",
+        milestone: '1.5 Million Sandwiches',
         achievedDate: format(
           new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
-          "MMM dd, yyyy"
+          'MMM dd, yyyy'
         ),
         description:
-          "Continued growing our community impact with 1.5 million sandwiches served.",
+          'Continued growing our community impact with 1.5 million sandwiches served.',
       });
     }
 
@@ -665,14 +675,14 @@ export class ReportGenerator {
     // Special event successes (based on collection spikes or special dates)
     const specialEventSuccesses = [
       {
-        event: "Holiday Season Drive",
-        date: "December 2024",
-        impact: "Increased sandwich production by 40% during holiday season",
+        event: 'Holiday Season Drive',
+        date: 'December 2024',
+        impact: 'Increased sandwich production by 40% during holiday season',
       },
       {
-        event: "Back to School Support",
-        date: "August 2024",
-        impact: "Provided extra support to families preparing for school year",
+        event: 'Back to School Support',
+        date: 'August 2024',
+        impact: 'Provided extra support to families preparing for school year',
       },
     ];
 
@@ -730,14 +740,14 @@ export class ReportGenerator {
         );
 
         let consistencyScore = 85; // Default good score
-        let status: "excellent" | "good" | "needs-attention" = "good";
+        let status: 'excellent' | 'good' | 'needs-attention' = 'good';
 
         if (totalContributions > 500) {
           consistencyScore = 95;
-          status = "excellent";
+          status = 'excellent';
         } else if (totalContributions < 100) {
           consistencyScore = 60;
-          status = "needs-attention";
+          status = 'needs-attention';
         }
 
         return {
@@ -767,10 +777,10 @@ export class ReportGenerator {
       .slice(0, 10)
       .map((host) => ({
         area: host.name,
-        needType: "volunteers" as const,
-        priority: "medium" as const,
+        needType: 'volunteers' as const,
+        priority: 'medium' as const,
         description:
-          "Could benefit from additional volunteer support to increase sandwich production",
+          'Could benefit from additional volunteer support to increase sandwich production',
       }));
 
     return {
@@ -807,8 +817,8 @@ export class ReportGenerator {
           volunteersNeeded: totalContributions < 200 ? 2 : 0,
           description:
             totalContributions < 200
-              ? "This location would benefit from 1-2 additional regular volunteers"
-              : "Well-staffed location",
+              ? 'This location would benefit from 1-2 additional regular volunteers'
+              : 'Well-staffed location',
         };
       })
       .filter((area) => area.volunteersNeeded > 0)
@@ -833,8 +843,8 @@ export class ReportGenerator {
       .slice(0, 8)
       .map((host) => ({
         hostName: host.name,
-        reason: "Could benefit from experienced volunteer mentor",
-        potentialMentor: "Experienced host coordinator",
+        reason: 'Could benefit from experienced volunteer mentor',
+        potentialMentor: 'Experienced host coordinator',
       }));
 
     // Expansion opportunities (areas with high activity showing readiness for growth)
@@ -855,12 +865,12 @@ export class ReportGenerator {
       })
       .slice(0, 5)
       .map((host) => ({
-        neighborhood: host.name + " Area",
+        neighborhood: host.name + ' Area',
         readinessScore: 85,
         nextSteps: [
-          "Identify nearby locations for expansion",
-          "Recruit additional volunteer coordinators",
-          "Establish supply chain for increased volume",
+          'Identify nearby locations for expansion',
+          'Recruit additional volunteer coordinators',
+          'Establish supply chain for increased volume',
         ],
       }));
 
@@ -891,10 +901,10 @@ export class ReportGenerator {
 
     const milestonesMoments = [
       {
-        title: "2 Million Sandwiches Milestone!",
-        date: format(new Date(), "MMM dd, yyyy"),
+        title: '2 Million Sandwiches Milestone!',
+        date: format(new Date(), 'MMM dd, yyyy'),
         description:
-          "Our community has come together to provide 2 million sandwiches to neighbors in need",
+          'Our community has come together to provide 2 million sandwiches to neighbors in need',
         impact: `${totalSandwiches.toLocaleString()} sandwiches represent countless acts of kindness and community care`,
       },
     ];
@@ -928,21 +938,21 @@ export class ReportGenerator {
     // Recipient feedback (sample positive feedback)
     const recipientFeedback = [
       {
-        organization: "Local Food Bank",
+        organization: 'Local Food Bank',
         feedback:
-          "The sandwich donations have been a tremendous help for families in our community",
+          'The sandwich donations have been a tremendous help for families in our community',
         date: format(
           new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-          "MMM dd, yyyy"
+          'MMM dd, yyyy'
         ),
       },
       {
-        organization: "Community Center",
+        organization: 'Community Center',
         feedback:
-          "These sandwiches provide reliable nutrition for people experiencing food insecurity",
+          'These sandwiches provide reliable nutrition for people experiencing food insecurity',
         date: format(
           new Date(Date.now() - 14 * 24 * 60 * 60 * 1000),
-          "MMM dd, yyyy"
+          'MMM dd, yyyy'
         ),
       },
     ];
@@ -950,14 +960,14 @@ export class ReportGenerator {
     // Community connections
     const communityConnections = [
       {
-        connection: "Volunteer Training Network",
-        participants: ["Experienced hosts", "New volunteers", "Coordinators"],
-        outcome: "Improved coordination and knowledge sharing across locations",
+        connection: 'Volunteer Training Network',
+        participants: ['Experienced hosts', 'New volunteers', 'Coordinators'],
+        outcome: 'Improved coordination and knowledge sharing across locations',
       },
       {
-        connection: "Supply Chain Collaboration",
-        participants: ["Multiple host locations", "Local suppliers"],
-        outcome: "More efficient resource distribution and cost savings",
+        connection: 'Supply Chain Collaboration',
+        participants: ['Multiple host locations', 'Local suppliers'],
+        outcome: 'More efficient resource distribution and cost savings',
       },
     ];
 
@@ -982,7 +992,7 @@ export class ReportGenerator {
         (c.individualSandwiches || 0) +
         (c.group1Count || 0) +
         (c.group2Count || 0),
-      impactCategory: "Community Support",
+      impactCategory: 'Community Support',
     }));
   }
 
@@ -995,7 +1005,7 @@ export class ReportGenerator {
   ) {
     return hosts.map((h) => ({
       organization: h.name,
-      status: h.status || "active",
+      status: h.status || 'active',
       totalContributions: collections
         .filter((c) => c.hostName === h.name)
         .reduce(
@@ -1032,14 +1042,14 @@ export class ReportGenerator {
         totalContributions,
         consistency:
           totalContributions > 300
-            ? "High"
+            ? 'High'
             : totalContributions > 100
-            ? "Medium"
-            : "Needs Support",
+              ? 'Medium'
+              : 'Needs Support',
         lastActivity:
           hostCollections.length > 0
             ? hostCollections[hostCollections.length - 1].collectionDate
-            : "No recent activity",
+            : 'No recent activity',
         supportNeeded: totalContributions < 150,
       };
     });
@@ -1066,17 +1076,17 @@ export class ReportGenerator {
         location: h.name,
         opportunityType:
           totalContributions < 150
-            ? "Needs Volunteers"
+            ? 'Needs Volunteers'
             : totalContributions > 400
-            ? "Ready for Expansion"
-            : "Stable Operations",
+              ? 'Ready for Expansion'
+              : 'Stable Operations',
         currentVolunteers: Math.floor(totalContributions / 100) || 1,
         recommendedAction:
           totalContributions < 150
-            ? "Recruit 1-2 volunteers"
+            ? 'Recruit 1-2 volunteers'
             : totalContributions > 400
-            ? "Consider expansion"
-            : "Continue current operations",
+              ? 'Consider expansion'
+              : 'Continue current operations',
       };
     });
   }
@@ -1084,7 +1094,7 @@ export class ReportGenerator {
   static async scheduleReport(
     config: ReportConfig,
     schedule: {
-      frequency: "daily" | "weekly" | "monthly";
+      frequency: 'daily' | 'weekly' | 'monthly';
       time: string; // HH:MM format
       recipients: string[];
     }
@@ -1099,26 +1109,26 @@ export class ReportGenerator {
       nextRun: this.calculateNextRun(schedule),
     };
 
-    console.log("Scheduled report configured:", scheduledReport);
+    console.log('Scheduled report configured:', scheduledReport);
     return scheduledReport;
   }
 
   private static calculateNextRun(schedule: any): string {
     const now = new Date();
-    const [hours, minutes] = schedule.time.split(":").map(Number);
+    const [hours, minutes] = schedule.time.split(':').map(Number);
 
     const nextRun = new Date(now);
     nextRun.setHours(hours, minutes, 0, 0);
 
     if (nextRun <= now) {
       switch (schedule.frequency) {
-        case "daily":
+        case 'daily':
           nextRun.setDate(nextRun.getDate() + 1);
           break;
-        case "weekly":
+        case 'weekly':
           nextRun.setDate(nextRun.getDate() + 7);
           break;
-        case "monthly":
+        case 'monthly':
           nextRun.setMonth(nextRun.getMonth() + 1);
           break;
       }

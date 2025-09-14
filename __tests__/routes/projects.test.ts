@@ -1,13 +1,18 @@
 /**
  * Projects API Integration Tests
- * 
+ *
  * Tests for project management endpoints including CRUD operations,
  * assignments, and status tracking. These tests verify endpoint
  * parity during migration from monolithic routes.
  */
 
 import request from 'supertest';
-import { createTestSession, cleanupTestData, createAuthenticatedRequest, TEST_CONSTANTS } from '../setup';
+import {
+  createTestSession,
+  cleanupTestData,
+  createAuthenticatedRequest,
+  TEST_CONSTANTS,
+} from '../setup';
 
 // TODO: Import actual Express app when available
 // import { app } from '../../server';
@@ -20,7 +25,7 @@ describe('Projects API Endpoint Parity Tests', () => {
   beforeAll(async () => {
     // TODO: Initialize test app and database
     // app = await createTestApp();
-    
+
     adminSession = await createTestSession(app, 'admin');
     userSession = await createTestSession(app, 'user');
   }, TEST_CONSTANTS.TIMEOUT);
@@ -125,7 +130,7 @@ describe('Projects API Endpoint Parity Tests', () => {
         title: 'Test Project',
         description: 'A test project for integration testing',
         status: 'planning',
-        assignedUsers: [userSession.userId]
+        assignedUsers: [userSession.userId],
       };
 
       // TODO: Implement when app is available
@@ -145,7 +150,7 @@ describe('Projects API Endpoint Parity Tests', () => {
 
     test('should validate required fields', async () => {
       const invalidProject = {
-        description: 'Project without title'
+        description: 'Project without title',
         // Missing title field
       };
 
@@ -163,7 +168,7 @@ describe('Projects API Endpoint Parity Tests', () => {
       const newProject = {
         title: 'Unauthorized Project',
         description: 'Should not be created',
-        status: 'planning'
+        status: 'planning',
       };
 
       // TODO: Implement when app is available
@@ -181,7 +186,7 @@ describe('Projects API Endpoint Parity Tests', () => {
     test('should update project for authorized user', async () => {
       const updateData = {
         status: 'in_progress',
-        description: 'Updated description'
+        description: 'Updated description',
       };
 
       // TODO: Implement when app is available
@@ -199,7 +204,7 @@ describe('Projects API Endpoint Parity Tests', () => {
 
     test('should allow project owner to update project', async () => {
       const updateData = {
-        description: 'Owner updated description'
+        description: 'Owner updated description',
       };
 
       // TODO: Implement when app is available
@@ -216,7 +221,7 @@ describe('Projects API Endpoint Parity Tests', () => {
 
     test('should deny update for unauthorized user', async () => {
       const updateData = {
-        status: 'completed'
+        status: 'completed',
       };
 
       // TODO: Implement when app is available
@@ -257,7 +262,7 @@ describe('Projects API Endpoint Parity Tests', () => {
       test('should assign users to project', async () => {
         const assignmentData = {
           userIds: ['user1', 'user2'],
-          role: 'contributor'
+          role: 'contributor',
         };
 
         // TODO: Implement when app is available
@@ -293,7 +298,7 @@ describe('Projects API Endpoint Parity Tests', () => {
       test('should update project status', async () => {
         const statusUpdate = {
           status: 'completed',
-          notes: 'Project completed successfully'
+          notes: 'Project completed successfully',
         };
 
         // TODO: Implement when app is available
@@ -310,7 +315,7 @@ describe('Projects API Endpoint Parity Tests', () => {
 
       test('should validate status values', async () => {
         const invalidStatus = {
-          status: 'invalid-status'
+          status: 'invalid-status',
         };
 
         // TODO: Implement when app is available

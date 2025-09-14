@@ -1,15 +1,15 @@
-import { useState, useEffect } from "react";
-import { Heart } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect } from 'react';
+import { Heart } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@/hooks/useAuth";
-import { apiRequest } from "@/lib/queryClient";
+} from '@/components/ui/tooltip';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '@/hooks/useAuth';
+import { apiRequest } from '@/lib/queryClient';
 
 interface ChatMessageLike {
   id: number;
@@ -26,7 +26,7 @@ interface ChatMessageLikeButtonProps {
 
 export function ChatMessageLikeButton({
   messageId,
-  className = "",
+  className = '',
 }: ChatMessageLikeButtonProps) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -35,7 +35,7 @@ export function ChatMessageLikeButton({
   const numericMessageId = Number(messageId);
 
   // Debug logging
-  console.log("ChatMessageLikeButton rendered:", {
+  console.log('ChatMessageLikeButton rendered:', {
     messageId,
     numericMessageId,
     user: user?.id,
@@ -48,9 +48,9 @@ export function ChatMessageLikeButton({
 
   // Fetch likes for this chat message
   const { data: likes = [], isLoading } = useQuery({
-    queryKey: ["chat-message-likes", numericMessageId],
+    queryKey: ['chat-message-likes', numericMessageId],
     queryFn: () =>
-      apiRequest("GET", `/api/chat-messages/${numericMessageId}/likes`),
+      apiRequest('GET', `/api/chat-messages/${numericMessageId}/likes`),
     staleTime: 30000, // 30 seconds
   });
 
@@ -64,12 +64,12 @@ export function ChatMessageLikeButton({
     mutationFn: async () => {
       if (hasUserLiked) {
         return apiRequest(
-          "DELETE",
+          'DELETE',
           `/api/chat-messages/${numericMessageId}/like`
         );
       } else {
         return apiRequest(
-          "POST",
+          'POST',
           `/api/chat-messages/${numericMessageId}/like`
         );
       }
@@ -77,11 +77,11 @@ export function ChatMessageLikeButton({
     onSuccess: () => {
       // Invalidate and refetch likes
       queryClient.invalidateQueries({
-        queryKey: ["chat-message-likes", numericMessageId],
+        queryKey: ['chat-message-likes', numericMessageId],
       });
     },
     onError: (error) => {
-      console.error("Error toggling chat message like:", error);
+      console.error('Error toggling chat message like:', error);
     },
   });
 
@@ -93,20 +93,21 @@ export function ChatMessageLikeButton({
   // Create tooltip content showing who liked the message
   const tooltipContent = () => {
     if (likeCount === 0) {
-      return "Be the first to like this message";
+      return 'Be the first to like this message';
     } else if (likeCount === 1) {
-      return `Liked by ${likes?.[0]?.userName || "Someone"}`;
+      return `Liked by ${likes?.[0]?.userName || 'Someone'}`;
     } else if (likeCount === 2) {
-      return `Liked by ${likes?.[0]?.userName || "Someone"} and ${likes?.[1]
-        ?.userName || "Someone"}`;
+      return `Liked by ${likes?.[0]?.userName || 'Someone'} and ${
+        likes?.[1]?.userName || 'Someone'
+      }`;
     } else {
       const firstTwo = (likes || [])
         .slice(0, 2)
         .map((like: ChatMessageLike) => like.userName)
-        .join(", ");
+        .join(', ');
       const remaining = likeCount - 2;
       return `Liked by ${firstTwo} and ${remaining} other${
-        remaining > 1 ? "s" : ""
+        remaining > 1 ? 's' : ''
       }`;
     }
   };
@@ -132,20 +133,20 @@ export function ChatMessageLikeButton({
             onClick={handleLikeToggle}
             disabled={likeMutation.isPending || !user}
             className={`h-6 px-2 py-1 transition-all duration-200 ${className} ${
-              shouldShow ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+              shouldShow ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
             }`}
           >
             <Heart
               className={`w-4 h-4 mr-1 transition-colors ${
                 hasUserLiked
-                  ? "text-red-500 fill-red-500"
-                  : "text-gray-400 hover:text-red-400"
+                  ? 'text-red-500 fill-red-500'
+                  : 'text-gray-400 hover:text-red-400'
               }`}
             />
             {likeCount > 0 && (
               <span
                 className={`text-xs font-medium ${
-                  hasUserLiked ? "text-red-500" : "text-gray-600"
+                  hasUserLiked ? 'text-red-500' : 'text-gray-600'
                 }`}
               >
                 {likeCount}

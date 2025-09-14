@@ -1,15 +1,15 @@
-import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useState } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import {
   Table,
   TableBody,
@@ -17,24 +17,24 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
+} from '@/components/ui/table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
 import {
   useCelebration,
   CelebrationToast,
-} from "@/components/celebration-toast";
+} from '@/components/celebration-toast';
 import {
   hasPermission,
   USER_ROLES,
   PERMISSIONS,
   getRoleDisplayName,
-} from "@shared/auth-utils";
-import { queryClient, apiRequest } from "@/lib/queryClient";
+} from '@shared/auth-utils';
+import { queryClient, apiRequest } from '@/lib/queryClient';
 import {
   Users,
   Shield,
@@ -64,38 +64,38 @@ import {
   TrendingUp,
   KeyRound,
   BarChart3,
-} from "lucide-react";
+} from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import EnhancedPermissionsDialog from "@/components/enhanced-permissions-dialog";
-import AnnouncementManager from "@/components/announcement-manager";
-import AuthDebug from "@/components/auth-debug";
-import ShoutoutSystem from "@/components/shoutout-system";
-import MeaningfulUserAnalytics from "@/components/meaningful-user-analytics";
-import { DetailedActivityAnalytics } from "@/components/detailed-activity-analytics";
-import { IndividualUserActivity } from "@/components/individual-user-activity";
-import { SystemHealthDashboard } from "@/components/system-health-dashboard";
-import { ButtonTooltip } from "@/components/ui/button-tooltip";
+} from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import EnhancedPermissionsDialog from '@/components/enhanced-permissions-dialog';
+import AnnouncementManager from '@/components/announcement-manager';
+import AuthDebug from '@/components/auth-debug';
+import ShoutoutSystem from '@/components/shoutout-system';
+import MeaningfulUserAnalytics from '@/components/meaningful-user-analytics';
+import { DetailedActivityAnalytics } from '@/components/detailed-activity-analytics';
+import { IndividualUserActivity } from '@/components/individual-user-activity';
+import { SystemHealthDashboard } from '@/components/system-health-dashboard';
+import { ButtonTooltip } from '@/components/ui/button-tooltip';
 
 interface User {
   id: string;
@@ -119,17 +119,17 @@ interface User {
 }
 
 const ROLE_COLORS = {
-  [USER_ROLES.SUPER_ADMIN]: "bg-red-100 text-red-800 border-red-200",
-  [USER_ROLES.ADMIN]: "bg-[#236383] text-white border-[#236383]",
-  [USER_ROLES.COMMITTEE_MEMBER]: "bg-teal-100 text-teal-800 border-teal-200",
-  [USER_ROLES.CORE_TEAM]: "bg-orange-100 text-orange-800 border-orange-200",
-  [USER_ROLES.HOST]: "bg-green-100 text-green-800 border-green-200",
-  [USER_ROLES.DEMO_USER]: "bg-purple-100 text-purple-800 border-purple-200",
-  [USER_ROLES.VOLUNTEER]: "bg-purple-100 text-purple-800 border-purple-200",
-  [USER_ROLES.RECIPIENT]: "bg-teal-100 text-teal-800 border-teal-200",
-  [USER_ROLES.DRIVER]: "bg-indigo-100 text-indigo-800 border-indigo-200",
-  [USER_ROLES.VIEWER]: "bg-gray-100 text-gray-800 border-gray-200",
-  [USER_ROLES.WORK_LOGGER]: "bg-yellow-100 text-yellow-800 border-yellow-200",
+  [USER_ROLES.SUPER_ADMIN]: 'bg-red-100 text-red-800 border-red-200',
+  [USER_ROLES.ADMIN]: 'bg-[#236383] text-white border-[#236383]',
+  [USER_ROLES.COMMITTEE_MEMBER]: 'bg-teal-100 text-teal-800 border-teal-200',
+  [USER_ROLES.CORE_TEAM]: 'bg-orange-100 text-orange-800 border-orange-200',
+  [USER_ROLES.HOST]: 'bg-green-100 text-green-800 border-green-200',
+  [USER_ROLES.DEMO_USER]: 'bg-purple-100 text-purple-800 border-purple-200',
+  [USER_ROLES.VOLUNTEER]: 'bg-purple-100 text-purple-800 border-purple-200',
+  [USER_ROLES.RECIPIENT]: 'bg-teal-100 text-teal-800 border-teal-200',
+  [USER_ROLES.DRIVER]: 'bg-indigo-100 text-indigo-800 border-indigo-200',
+  [USER_ROLES.VIEWER]: 'bg-gray-100 text-gray-800 border-gray-200',
+  [USER_ROLES.WORK_LOGGER]: 'bg-yellow-100 text-yellow-800 border-yellow-200',
 };
 
 const ROLE_ICONS = {
@@ -164,35 +164,35 @@ export default function UserManagementRedesigned() {
   const { toast } = useToast();
   const { celebration, triggerCelebration, hideCelebration } = useCelebration();
   const [activeTab, setActiveTab] = useState<
-    | "overview"
-    | "users"
-    | "user-activity"
-    | "activity"
-    | "announcements"
-    | "shoutouts"
-    | "system-health"
-    | "debug"
-  >("overview");
+    | 'overview'
+    | 'users'
+    | 'user-activity'
+    | 'activity'
+    | 'announcements'
+    | 'shoutouts'
+    | 'system-health'
+    | 'debug'
+  >('overview');
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [viewingUserActivity, setViewingUserActivity] = useState<User | null>(
     null
   );
-  const [searchQuery, setSearchQuery] = useState("");
-  const [roleFilter, setRoleFilter] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState('');
+  const [roleFilter, setRoleFilter] = useState<string>('all');
   const [showAddUserDialog, setShowAddUserDialog] = useState(false);
   const [newUser, setNewUser] = useState({
-    email: "",
-    firstName: "",
-    lastName: "",
-    role: "volunteer",
-    password: "",
+    email: '',
+    firstName: '',
+    lastName: '',
+    role: 'volunteer',
+    password: '',
   });
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [passwordUser, setPasswordUser] = useState<User | null>(null);
-  const [newPassword, setNewPassword] = useState("");
+  const [newPassword, setNewPassword] = useState('');
   const [showSMSDialog, setShowSMSDialog] = useState(false);
   const [smsUser, setSmsUser] = useState<User | null>(null);
-  const [smsPhoneNumber, setSmsPhoneNumber] = useState("");
+  const [smsPhoneNumber, setSmsPhoneNumber] = useState('');
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [editUser, setEditUser] = useState<User | null>(null);
 
@@ -218,7 +218,7 @@ export default function UserManagementRedesigned() {
 
   // Fetch users
   const { data: users = [], isLoading } = useQuery({
-    queryKey: ["/api/users"],
+    queryKey: ['/api/users'],
     enabled: hasPermission(currentUser, PERMISSIONS.MANAGE_USERS),
   });
 
@@ -233,22 +233,22 @@ export default function UserManagementRedesigned() {
       role: string;
       permissions: string[];
     }) => {
-      return apiRequest("PATCH", `/api/users/${userId}`, { role, permissions });
+      return apiRequest('PATCH', `/api/users/${userId}`, { role, permissions });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/users'] });
       setSelectedUser(null);
       toast({
-        title: "User Updated",
-        description: "User permissions have been successfully updated.",
+        title: 'User Updated',
+        description: 'User permissions have been successfully updated.',
       });
-      triggerCelebration("User permissions updated!");
+      triggerCelebration('User permissions updated!');
     },
     onError: (error: any) => {
       toast({
-        title: "Update Failed",
-        description: error.message || "Failed to update user permissions.",
-        variant: "destructive",
+        title: 'Update Failed',
+        description: error.message || 'Failed to update user permissions.',
+        variant: 'destructive',
       });
     },
   });
@@ -261,40 +261,40 @@ export default function UserManagementRedesigned() {
       userId: string;
       isActive: boolean;
     }) => {
-      return apiRequest("PATCH", `/api/users/${userId}/status`, { isActive });
+      return apiRequest('PATCH', `/api/users/${userId}/status`, { isActive });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/users'] });
       toast({
-        title: "User Status Updated",
-        description: "User status has been successfully changed.",
+        title: 'User Status Updated',
+        description: 'User status has been successfully changed.',
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Update Failed",
-        description: error.message || "Failed to update user status.",
-        variant: "destructive",
+        title: 'Update Failed',
+        description: error.message || 'Failed to update user status.',
+        variant: 'destructive',
       });
     },
   });
 
   const deleteUserMutation = useMutation({
     mutationFn: async (userId: string) => {
-      return apiRequest("DELETE", `/api/users/${userId}`);
+      return apiRequest('DELETE', `/api/users/${userId}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/users'] });
       toast({
-        title: "User Deleted",
-        description: "User has been successfully removed.",
+        title: 'User Deleted',
+        description: 'User has been successfully removed.',
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Delete Failed",
-        description: error.message || "Failed to delete user.",
-        variant: "destructive",
+        title: 'Delete Failed',
+        description: error.message || 'Failed to delete user.',
+        variant: 'destructive',
       });
     },
   });
@@ -306,22 +306,22 @@ export default function UserManagementRedesigned() {
       lastName: string;
       role: string;
     }) => {
-      return apiRequest("POST", "/api/users", userData);
+      return apiRequest('POST', '/api/users', userData);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/users'] });
       toast({
-        title: "User Added",
-        description: "New user has been successfully added.",
+        title: 'User Added',
+        description: 'New user has been successfully added.',
       });
       setShowAddUserDialog(false);
-      setNewUser({ email: "", firstName: "", lastName: "", role: "volunteer" });
+      setNewUser({ email: '', firstName: '', lastName: '', role: 'volunteer' });
     },
     onError: (error: any) => {
       toast({
-        title: "Add User Failed",
-        description: error.message || "Failed to add user.",
-        variant: "destructive",
+        title: 'Add User Failed',
+        description: error.message || 'Failed to add user.',
+        variant: 'destructive',
       });
     },
   });
@@ -329,9 +329,9 @@ export default function UserManagementRedesigned() {
   const handleAddUser = () => {
     if (!newUser.email || !newUser.firstName || !newUser.lastName) {
       toast({
-        title: "Missing Information",
-        description: "Please fill in all required fields.",
-        variant: "destructive",
+        title: 'Missing Information',
+        description: 'Please fill in all required fields.',
+        variant: 'destructive',
       });
       return;
     }
@@ -348,7 +348,7 @@ export default function UserManagementRedesigned() {
       role: string;
       isActive: boolean;
     }) => {
-      return apiRequest("PATCH", `/api/users/${data.userId}/profile`, {
+      return apiRequest('PATCH', `/api/users/${data.userId}/profile`, {
         email: data.email,
         firstName: data.firstName,
         lastName: data.lastName,
@@ -357,19 +357,19 @@ export default function UserManagementRedesigned() {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/users'] });
       toast({
-        title: "User Updated",
-        description: "User details have been successfully updated.",
+        title: 'User Updated',
+        description: 'User details have been successfully updated.',
       });
       setShowEditDialog(false);
       setEditUser(null);
     },
     onError: (error: any) => {
       toast({
-        title: "Update Failed",
-        description: error.message || "Failed to update user details.",
-        variant: "destructive",
+        title: 'Update Failed',
+        description: error.message || 'Failed to update user details.',
+        variant: 'destructive',
       });
     },
   });
@@ -387,9 +387,9 @@ export default function UserManagementRedesigned() {
       !editUser.lastName
     ) {
       toast({
-        title: "Missing Information",
-        description: "Please fill in all required fields.",
-        variant: "destructive",
+        title: 'Missing Information',
+        description: 'Please fill in all required fields.',
+        variant: 'destructive',
       });
       return;
     }
@@ -412,23 +412,23 @@ export default function UserManagementRedesigned() {
       userId: string;
       password: string;
     }) => {
-      return apiRequest("PATCH", `/api/users/${userId}/password`, { password });
+      return apiRequest('PATCH', `/api/users/${userId}/password`, { password });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/users'] });
       toast({
-        title: "Password Set",
-        description: "User password has been successfully updated.",
+        title: 'Password Set',
+        description: 'User password has been successfully updated.',
       });
       setShowPasswordDialog(false);
       setPasswordUser(null);
-      setNewPassword("");
+      setNewPassword('');
     },
     onError: (error: any) => {
       toast({
-        title: "Password Update Failed",
-        description: error.message || "Failed to update user password.",
-        variant: "destructive",
+        title: 'Password Update Failed',
+        description: error.message || 'Failed to update user password.',
+        variant: 'destructive',
       });
     },
   });
@@ -444,11 +444,11 @@ export default function UserManagementRedesigned() {
       enabled: boolean;
     }) => {
       // Get current user data from the existing users query
-      const currentUsers = queryClient.getQueryData(["/api/users"]) as User[];
+      const currentUsers = queryClient.getQueryData(['/api/users']) as User[];
       const currentUser = currentUsers?.find((u) => u.id === userId);
 
       if (!currentUser) {
-        throw new Error("User not found");
+        throw new Error('User not found');
       }
 
       const existingMetadata = currentUser.metadata || {};
@@ -458,9 +458,9 @@ export default function UserManagementRedesigned() {
         // Opt in
         smsConsent = {
           enabled: true,
-          phoneNumber: phoneNumber.startsWith("+1")
+          phoneNumber: phoneNumber.startsWith('+1')
             ? phoneNumber
-            : `+1${phoneNumber.replace(/\D/g, "")}`,
+            : `+1${phoneNumber.replace(/\D/g, '')}`,
           displayPhone: phoneNumber,
           optInDate: new Date().toISOString(),
           consent: true,
@@ -482,27 +482,27 @@ export default function UserManagementRedesigned() {
       };
 
       // Send ALL current user data plus the updated metadata to prevent overwriting other fields
-      return apiRequest("PATCH", `/api/users/${userId}`, {
+      return apiRequest('PATCH', `/api/users/${userId}`, {
         role: currentUser.role,
         permissions: currentUser.permissions,
         metadata: updatedMetadata,
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/users'] });
       toast({
-        title: "SMS Preferences Updated",
-        description: "User SMS preferences have been successfully updated.",
+        title: 'SMS Preferences Updated',
+        description: 'User SMS preferences have been successfully updated.',
       });
       setShowSMSDialog(false);
       setSmsUser(null);
-      setSmsPhoneNumber("");
+      setSmsPhoneNumber('');
     },
     onError: (error: any) => {
       toast({
-        title: "SMS Update Failed",
-        description: error.message || "Failed to update SMS preferences.",
-        variant: "destructive",
+        title: 'SMS Update Failed',
+        description: error.message || 'Failed to update SMS preferences.',
+        variant: 'destructive',
       });
     },
   });
@@ -510,9 +510,9 @@ export default function UserManagementRedesigned() {
   const handleSetPassword = () => {
     if (!newPassword || newPassword.length < 6) {
       toast({
-        title: "Invalid Password",
-        description: "Password must be at least 6 characters long.",
-        variant: "destructive",
+        title: 'Invalid Password',
+        description: 'Password must be at least 6 characters long.',
+        variant: 'destructive',
       });
       return;
     }
@@ -527,16 +527,16 @@ export default function UserManagementRedesigned() {
 
   const handleManageSMS = (user: User) => {
     setSmsUser(user);
-    setSmsPhoneNumber(user.metadata?.smsConsent?.displayPhone || "");
+    setSmsPhoneNumber(user.metadata?.smsConsent?.displayPhone || '');
     setShowSMSDialog(true);
   };
 
   const handleUpdateSMS = (enabled: boolean) => {
     if (enabled && !smsPhoneNumber) {
       toast({
-        title: "Phone Number Required",
-        description: "Please enter a phone number to enable SMS notifications.",
-        variant: "destructive",
+        title: 'Phone Number Required',
+        description: 'Please enter a phone number to enable SMS notifications.',
+        variant: 'destructive',
       });
       return;
     }
@@ -555,7 +555,7 @@ export default function UserManagementRedesigned() {
       user.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.email.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const matchesRole = roleFilter === "all" || user.role === roleFilter;
+    const matchesRole = roleFilter === 'all' || user.role === roleFilter;
 
     return matchesSearch && matchesRole;
   });
@@ -565,21 +565,26 @@ export default function UserManagementRedesigned() {
     total: (users as User[]).length,
     active: (users as User[]).filter((u: User) => u.isActive).length,
     inactive: (users as User[]).filter((u: User) => !u.isActive).length,
-    byRole: Object.values(USER_ROLES).reduce((acc, role) => {
-      acc[role] = (users as User[]).filter((u: User) => u.role === role).length;
-      return acc;
-    }, {} as Record<string, number>),
+    byRole: Object.values(USER_ROLES).reduce(
+      (acc, role) => {
+        acc[role] = (users as User[]).filter(
+          (u: User) => u.role === role
+        ).length;
+        return acc;
+      },
+      {} as Record<string, number>
+    ),
   };
 
   const formatLastLogin = (lastLoginAt: string | null) => {
-    if (!lastLoginAt) return "Never";
+    if (!lastLoginAt) return 'Never';
     const date = new Date(lastLoginAt);
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-    if (diffDays === 0) return "Today";
-    if (diffDays === 1) return "Yesterday";
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return 'Yesterday';
     if (diffDays < 7) return `${diffDays} days ago`;
     return date.toLocaleDateString();
   };
@@ -769,9 +774,10 @@ export default function UserManagementRedesigned() {
                         >
                           <div className="flex items-center gap-3">
                             <div
-                              className={`p-2 rounded-lg ${ROLE_COLORS[
-                                role as keyof typeof ROLE_COLORS
-                              ] || "bg-gray-100"}`}
+                              className={`p-2 rounded-lg ${
+                                ROLE_COLORS[role as keyof typeof ROLE_COLORS] ||
+                                'bg-gray-100'
+                              }`}
                             >
                               <RoleIcon className="h-4 w-4" />
                             </div>
@@ -940,9 +946,11 @@ export default function UserManagementRedesigned() {
                             <TableCell>
                               <Badge
                                 variant="outline"
-                                className={`${ROLE_COLORS[
-                                  user.role as keyof typeof ROLE_COLORS
-                                ] || "bg-gray-100"}`}
+                                className={`${
+                                  ROLE_COLORS[
+                                    user.role as keyof typeof ROLE_COLORS
+                                  ] || 'bg-gray-100'
+                                }`}
                               >
                                 <RoleIcon className="h-3 w-3 mr-1" />
                                 {getRoleDisplayName(user.role)}
@@ -951,10 +959,10 @@ export default function UserManagementRedesigned() {
                             <TableCell>
                               <Badge
                                 variant={
-                                  user.isActive ? "default" : "secondary"
+                                  user.isActive ? 'default' : 'secondary'
                                 }
                               >
-                                {user.isActive ? "Active" : "Inactive"}
+                                {user.isActive ? 'Active' : 'Inactive'}
                               </Badge>
                             </TableCell>
                             <TableCell>
@@ -1030,7 +1038,7 @@ export default function UserManagementRedesigned() {
                                   <DropdownMenuItem
                                     onClick={() => {
                                       setViewingUserActivity(user);
-                                      setActiveTab("user-activity");
+                                      setActiveTab('user-activity');
                                     }}
                                   >
                                     <BarChart3 className="h-4 w-4 mr-2" />
@@ -1211,11 +1219,11 @@ export default function UserManagementRedesigned() {
                 onClick={() => {
                   setShowAddUserDialog(false);
                   setNewUser({
-                    email: "",
-                    firstName: "",
-                    lastName: "",
-                    role: "volunteer",
-                    password: "",
+                    email: '',
+                    firstName: '',
+                    lastName: '',
+                    role: 'volunteer',
+                    password: '',
                   });
                 }}
               >
@@ -1226,7 +1234,7 @@ export default function UserManagementRedesigned() {
                 disabled={addUserMutation.isPending}
                 className="bg-[#236383] hover:bg-[#1a4d66]"
               >
-                {addUserMutation.isPending ? "Adding..." : "Add User"}
+                {addUserMutation.isPending ? 'Adding...' : 'Add User'}
               </Button>
             </div>
           </div>
@@ -1238,7 +1246,7 @@ export default function UserManagementRedesigned() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              Set Password for {passwordUser?.firstName}{" "}
+              Set Password for {passwordUser?.firstName}{' '}
               {passwordUser?.lastName}
             </DialogTitle>
             <DialogDescription>
@@ -1264,7 +1272,7 @@ export default function UserManagementRedesigned() {
               onClick={() => {
                 setShowPasswordDialog(false);
                 setPasswordUser(null);
-                setNewPassword("");
+                setNewPassword('');
               }}
             >
               Cancel
@@ -1274,7 +1282,7 @@ export default function UserManagementRedesigned() {
               disabled={setPasswordMutation.isPending}
               className="bg-[#236383] hover:bg-[#1a4d66]"
             >
-              {setPasswordMutation.isPending ? "Setting..." : "Set Password"}
+              {setPasswordMutation.isPending ? 'Setting...' : 'Set Password'}
             </Button>
           </div>
         </DialogContent>
@@ -1285,7 +1293,7 @@ export default function UserManagementRedesigned() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              Manage SMS Notifications for {smsUser?.firstName}{" "}
+              Manage SMS Notifications for {smsUser?.firstName}{' '}
               {smsUser?.lastName}
             </DialogTitle>
             <DialogDescription>
@@ -1312,7 +1320,7 @@ export default function UserManagementRedesigned() {
                   </p>
                   {smsUser?.metadata?.smsConsent?.phoneNumber && (
                     <p className="text-sm text-gray-500">
-                      Phone:{" "}
+                      Phone:{' '}
                       {smsUser.metadata.smsConsent.displayPhone ||
                         smsUser.metadata.smsConsent.phoneNumber}
                     </p>
@@ -1345,8 +1353,8 @@ export default function UserManagementRedesigned() {
               >
                 <Phone className="h-4 w-4 mr-2" />
                 {updateSMSConsentMutation.isPending
-                  ? "Updating..."
-                  : "Enable SMS"}
+                  ? 'Updating...'
+                  : 'Enable SMS'}
               </Button>
               <Button
                 variant="outline"
@@ -1355,8 +1363,8 @@ export default function UserManagementRedesigned() {
                 className="bg-red-50 hover:bg-red-100 border-red-200 text-red-700"
               >
                 {updateSMSConsentMutation.isPending
-                  ? "Updating..."
-                  : "Disable SMS"}
+                  ? 'Updating...'
+                  : 'Disable SMS'}
               </Button>
             </div>
             <Button
@@ -1364,7 +1372,7 @@ export default function UserManagementRedesigned() {
               onClick={() => {
                 setShowSMSDialog(false);
                 setSmsUser(null);
-                setSmsPhoneNumber("");
+                setSmsPhoneNumber('');
               }}
             >
               Close
@@ -1476,7 +1484,7 @@ export default function UserManagementRedesigned() {
                   disabled={editUserMutation.isPending}
                   className="bg-[#236383] hover:bg-[#1a4d66]"
                 >
-                  {editUserMutation.isPending ? "Saving..." : "Save Changes"}
+                  {editUserMutation.isPending ? 'Saving...' : 'Save Changes'}
                 </Button>
               </div>
             </div>
@@ -1506,8 +1514,8 @@ export default function UserManagementRedesigned() {
         emoji={celebration.emoji}
         onSendThanks={(message: string) => {
           toast({
-            title: "Thank you sent!",
-            description: "Your appreciation message has been recorded.",
+            title: 'Thank you sent!',
+            description: 'Your appreciation message has been recorded.',
           });
         }}
       />

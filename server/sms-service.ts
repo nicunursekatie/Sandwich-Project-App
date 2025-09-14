@@ -1,7 +1,7 @@
-import Twilio from "twilio";
-import { db } from "./db";
-import { hosts } from "@shared/schema";
-import { eq, and } from "drizzle-orm";
+import Twilio from 'twilio';
+import { db } from './db';
+import { hosts } from '@shared/schema';
+import { eq, and } from 'drizzle-orm';
 
 // Initialize Twilio client
 let twilioClient: ReturnType<typeof Twilio> | null = null;
@@ -11,10 +11,10 @@ if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
     process.env.TWILIO_ACCOUNT_SID,
     process.env.TWILIO_AUTH_TOKEN
   );
-  console.log("✅ Twilio SMS service initialized");
+  console.log('✅ Twilio SMS service initialized');
 } else {
   console.log(
-    "⚠️ Twilio credentials not found - SMS features will be disabled"
+    '⚠️ Twilio credentials not found - SMS features will be disabled'
   );
 }
 
@@ -31,25 +31,25 @@ export async function sendSMSReminder(
   hostLocation: string,
   appUrl: string = process.env.REPLIT_DOMAIN
     ? `https://${process.env.REPLIT_DOMAIN}`
-    : "https://your-app.replit.app"
+    : 'https://your-app.replit.app'
 ): Promise<SMSReminderResult> {
   if (!twilioClient) {
     return {
       success: false,
-      message: "SMS service not configured - missing Twilio credentials",
+      message: 'SMS service not configured - missing Twilio credentials',
     };
   }
 
   if (!process.env.TWILIO_PHONE_NUMBER) {
     return {
       success: false,
-      message: "SMS service not configured - missing Twilio phone number",
+      message: 'SMS service not configured - missing Twilio phone number',
     };
   }
 
   try {
     // Import storage to get users who have opted in to SMS
-    const { storage } = await import("./storage");
+    const { storage } = await import('./storage');
 
     // Get all users who have opted in to SMS
     const allUsers = await storage.getAllUsers();
@@ -96,7 +96,7 @@ export async function sendSMSReminder(
         console.error(`❌ Failed to send SMS to ${user.email}:`, error);
         results.push({
           user: user.email,
-          phone: user.metadata?.smsConsent?.phoneNumber || "unknown",
+          phone: user.metadata?.smsConsent?.phoneNumber || 'unknown',
           error: error.message,
           success: false,
         });
@@ -112,10 +112,10 @@ export async function sendSMSReminder(
       sentTo: results
         .filter((r) => r.success)
         .map((r) => r.user)
-        .join(", "),
+        .join(', '),
     };
   } catch (error) {
-    console.error("Error sending SMS reminder:", error);
+    console.error('Error sending SMS reminder:', error);
     return {
       success: false,
       message: `Failed to send SMS reminder: ${error.message}`,
@@ -152,25 +152,26 @@ export async function sendTestSMS(
   if (!twilioClient) {
     return {
       success: false,
-      message: "SMS service not configured - missing Twilio credentials",
+      message: 'SMS service not configured - missing Twilio credentials',
     };
   }
 
   if (!process.env.TWILIO_PHONE_NUMBER) {
     return {
       success: false,
-      message: "SMS service not configured - missing Twilio phone number",
+      message: 'SMS service not configured - missing Twilio phone number',
     };
   }
 
   try {
     // Clean and format phone number
-    const cleanPhone = toPhoneNumber.replace(/[^\d+]/g, "");
+    const cleanPhone = toPhoneNumber.replace(/[^\d+]/g, '');
     const formattedPhone =
       cleanPhone.length === 10 ? `+1${cleanPhone}` : cleanPhone;
 
-    const testMessage = `🧪 Test SMS from The Sandwich Project! This is a test of the SMS reminder system. App link: ${appUrl ||
-      "https://your-app.replit.app"}`;
+    const testMessage = `🧪 Test SMS from The Sandwich Project! This is a test of the SMS reminder system. App link: ${
+      appUrl || 'https://your-app.replit.app'
+    }`;
 
     const result = await twilioClient.messages.create({
       body: testMessage,
@@ -186,7 +187,7 @@ export async function sendTestSMS(
       sentTo: formattedPhone,
     };
   } catch (error) {
-    console.error("Error sending test SMS:", error);
+    console.error('Error sending test SMS:', error);
     return {
       success: false,
       message: `Failed to send test SMS: ${error.message}`,
@@ -203,10 +204,10 @@ export function validateSMSConfig(): {
 } {
   const missingItems = [];
 
-  if (!process.env.TWILIO_ACCOUNT_SID) missingItems.push("TWILIO_ACCOUNT_SID");
-  if (!process.env.TWILIO_AUTH_TOKEN) missingItems.push("TWILIO_AUTH_TOKEN");
+  if (!process.env.TWILIO_ACCOUNT_SID) missingItems.push('TWILIO_ACCOUNT_SID');
+  if (!process.env.TWILIO_AUTH_TOKEN) missingItems.push('TWILIO_AUTH_TOKEN');
   if (!process.env.TWILIO_PHONE_NUMBER)
-    missingItems.push("TWILIO_PHONE_NUMBER");
+    missingItems.push('TWILIO_PHONE_NUMBER');
 
   return {
     isConfigured: missingItems.length === 0,

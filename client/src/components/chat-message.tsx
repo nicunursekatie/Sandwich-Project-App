@@ -1,16 +1,16 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Edit2, Trash2, Check, X } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
-import { useAuth } from "@/hooks/useAuth";
-import { hasPermission, PERMISSIONS } from "@shared/auth-utils";
+} from '@/components/ui/dropdown-menu';
+import { MoreHorizontal, Edit2, Trash2, Check, X } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
+import { useAuth } from '@/hooks/useAuth';
+import { hasPermission, PERMISSIONS } from '@shared/auth-utils';
 
 export interface ChatMessage {
   id: string;
@@ -56,25 +56,25 @@ export default function ChatMessageComponent({
 
   const getUserInitials = (userName: string) => {
     return userName
-      .split(" ")
+      .split(' ')
       .map((n) => n[0])
-      .join("")
+      .join('')
       .toUpperCase()
       .slice(0, 2);
   };
 
   const getAvatarColor = (userId: string) => {
     const colors = [
-      "bg-red-500",
-      "bg-blue-500",
-      "bg-green-500",
-      "bg-yellow-500",
-      "bg-purple-500",
-      "bg-pink-500",
-      "bg-indigo-500",
-      "bg-teal-500",
+      'bg-red-500',
+      'bg-blue-500',
+      'bg-green-500',
+      'bg-yellow-500',
+      'bg-purple-500',
+      'bg-pink-500',
+      'bg-indigo-500',
+      'bg-teal-500',
     ];
-    const hash = userId.split("").reduce((a, b) => {
+    const hash = userId.split('').reduce((a, b) => {
       a = (a << 5) - a + b.charCodeAt(0);
       return a & a;
     }, 0);
@@ -111,9 +111,9 @@ export default function ChatMessageComponent({
               onChange={(e) => setEditContent(e.target.value)}
               className="min-h-[60px] text-sm"
               onKeyDown={(e) => {
-                if (e.key === "Enter" && e.ctrlKey) {
+                if (e.key === 'Enter' && e.ctrlKey) {
                   handleSaveEdit();
-                } else if (e.key === "Escape") {
+                } else if (e.key === 'Escape') {
                   handleCancelEdit();
                 }
               }}

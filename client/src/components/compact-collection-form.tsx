@@ -1,23 +1,23 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Calculator, Plus, HelpCircle, AlertCircle } from "lucide-react";
-import sandwichLogo from "@assets/LOGOS/sandwich logo.png";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useToast } from "@/hooks/use-toast";
+} from '@/components/ui/select';
+import { Calculator, Plus, HelpCircle, AlertCircle } from 'lucide-react';
+import sandwichLogo from '@assets/LOGOS/sandwich logo.png';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useToast } from '@/hooks/use-toast';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from '@/components/ui/tooltip';
 
 interface CompactCollectionFormProps {
   onSuccess?: () => void;
@@ -31,47 +31,47 @@ export default function CompactCollectionForm({
   const localDate = new Date(
     today.getTime() - today.getTimezoneOffset() * 60000
   );
-  const [date, setDate] = useState(localDate.toISOString().split("T")[0]);
-  const [location, setLocation] = useState("");
+  const [date, setDate] = useState(localDate.toISOString().split('T')[0]);
+  const [location, setLocation] = useState('');
   const [individualCount, setIndividualCount] = useState(0);
   const [groupCollections, setGroupCollections] = useState<
     Array<{ name: string; count: number }>
   >([]);
-  const [newGroupName, setNewGroupName] = useState("");
+  const [newGroupName, setNewGroupName] = useState('');
   const [newGroupCount, setNewGroupCount] = useState(0);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: allHosts = [] } = useQuery<any[]>({
-    queryKey: ["/api/hosts"],
+    queryKey: ['/api/hosts'],
   });
 
   // Filter to only show active hosts
-  const hosts = allHosts.filter((host: any) => host.status === "active");
+  const hosts = allHosts.filter((host: any) => host.status === 'active');
 
   const submitMutation = useMutation({
     mutationFn: async (data: any) => {
-      const response = await fetch("/api/sandwich-collections", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/api/sandwich-collections', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      if (!response.ok) throw new Error("Failed to submit");
+      if (!response.ok) throw new Error('Failed to submit');
       return response.json();
     },
     onSuccess: () => {
-      toast({ title: "Collection submitted successfully!" });
+      toast({ title: 'Collection submitted successfully!' });
       queryClient.invalidateQueries({
-        queryKey: ["/api/sandwich-collections"],
+        queryKey: ['/api/sandwich-collections'],
       });
       onSuccess?.();
       // Reset form
       setIndividualCount(0);
       setGroupCollections([]);
-      setLocation("");
+      setLocation('');
     },
     onError: () => {
-      toast({ title: "Failed to submit collection", variant: "destructive" });
+      toast({ title: 'Failed to submit collection', variant: 'destructive' });
     },
   });
 
@@ -80,7 +80,7 @@ export default function CompactCollectionForm({
     groupCollections.reduce((sum, group) => sum + group.count, 0);
 
   // Debug logging to track calculation
-  console.log("Calculation Debug:", {
+  console.log('Calculation Debug:', {
     individualCount,
     groupCollections,
     groupTotal: groupCollections.reduce((sum, group) => sum + group.count, 0),
@@ -93,24 +93,24 @@ export default function CompactCollectionForm({
         ...groupCollections,
         { name: newGroupName, count: Number(newGroupCount) }, // Ensure it's a number
       ]);
-      setNewGroupName("");
+      setNewGroupName('');
       setNewGroupCount(0);
     }
   };
 
   const handleSubmit = () => {
     if (!location) {
-      toast({ title: "Please select a location", variant: "destructive" });
+      toast({ title: 'Please select a location', variant: 'destructive' });
       return;
     }
 
     // Check for unsaved group entries - only warn if both fields have meaningful data
-    if (newGroupName.trim() !== "" && newGroupCount > 0) {
+    if (newGroupName.trim() !== '' && newGroupCount > 0) {
       toast({
-        title: "Unsaved group entry",
+        title: 'Unsaved group entry',
         description:
           "Please click 'Add This Group' to save your group entry before submitting, or clear the fields if you don't want to add this group.",
-        variant: "destructive",
+        variant: 'destructive',
       });
       return;
     }
@@ -120,7 +120,7 @@ export default function CompactCollectionForm({
       collectionDate: date,
       hostName: location,
       individualSandwiches: individualCount,
-      submissionMethod: "standard", // Track that this was submitted via standard form
+      submissionMethod: 'standard', // Track that this was submitted via standard form
     };
 
     // Include ALL groups in the submission (unlimited groups)
@@ -286,7 +286,7 @@ export default function CompactCollectionForm({
               <Input
                 type="number"
                 placeholder="Enter count (e.g. 25)"
-                value={newGroupCount || ""}
+                value={newGroupCount || ''}
                 onChange={(e) => {
                   const value = parseInt(e.target.value) || 0;
                   setNewGroupCount(value);
@@ -302,10 +302,10 @@ export default function CompactCollectionForm({
                   <Plus className="h-4 w-4 mr-2" />
                   Add This Group
                 </Button>
-                {(newGroupName.trim() !== "" || newGroupCount > 0) && (
+                {(newGroupName.trim() !== '' || newGroupCount > 0) && (
                   <Button
                     onClick={() => {
-                      setNewGroupName("");
+                      setNewGroupName('');
                       setNewGroupCount(0);
                     }}
                     variant="outline"
@@ -317,7 +317,7 @@ export default function CompactCollectionForm({
               </div>
 
               {/* Show warning if there are unsaved entries */}
-              {(newGroupName.trim() !== "" || newGroupCount > 0) &&
+              {(newGroupName.trim() !== '' || newGroupCount > 0) &&
                 (!newGroupName || newGroupCount <= 0) && (
                   <div className="bg-amber-50 border border-amber-200 rounded-lg p-2">
                     <div className="flex items-start gap-2">
@@ -367,7 +367,7 @@ export default function CompactCollectionForm({
               disabled={submitMutation.isPending}
               className="flex-1 h-14 md:h-12 bg-gradient-to-r from-[#FBAD3F] to-[#e89b2e] hover:from-[#e89b2e] hover:to-[#FBAD3F] text-white font-semibold text-xl md:text-lg"
             >
-              {submitMutation.isPending ? "Saving..." : "Save My Collection"}
+              {submitMutation.isPending ? 'Saving...' : 'Save My Collection'}
             </Button>
             <Tooltip>
               <TooltipTrigger>

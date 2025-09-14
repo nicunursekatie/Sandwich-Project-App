@@ -1,15 +1,15 @@
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+} from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   ExternalLink,
   Eye,
@@ -18,10 +18,10 @@ import {
   RefreshCw,
   Upload,
   Download,
-} from "lucide-react";
-import { apiRequest } from "@/lib/queryClient";
-import { useAuth } from "@/hooks/useAuth";
-import { hasPermission } from "@shared/auth-utils";
+} from 'lucide-react';
+import { apiRequest } from '@/lib/queryClient';
+import { useAuth } from '@/hooks/useAuth';
+import { hasPermission } from '@shared/auth-utils';
 
 interface GoogleSheetsViewerProps {
   initialUrl?: string;
@@ -30,18 +30,18 @@ interface GoogleSheetsViewerProps {
 }
 
 export function GoogleSheetsViewer({
-  initialUrl = "",
-  title = "Google Sheets Viewer",
+  initialUrl = '',
+  title = 'Google Sheets Viewer',
   height = 600,
 }: GoogleSheetsViewerProps) {
   // Fixed URL for the specific spreadsheet
   const FIXED_SHEET_URL =
-    "https://docs.google.com/spreadsheets/d/1mjx5o6boluo8mNx8tzAV76NBGS6tF0um2Rq9bIdxPo8/edit?gid=1218710353#gid=1218710353";
+    'https://docs.google.com/spreadsheets/d/1mjx5o6boluo8mNx8tzAV76NBGS6tF0um2Rq9bIdxPo8/edit?gid=1218710353#gid=1218710353';
   const FIXED_VIEWER_URL =
-    "https://docs.google.com/spreadsheets/d/1mjx5o6boluo8mNx8tzAV76NBGS6tF0um2Rq9bIdxPo8/edit?usp=sharing&embedded=true";
+    'https://docs.google.com/spreadsheets/d/1mjx5o6boluo8mNx8tzAV76NBGS6tF0um2Rq9bIdxPo8/edit?usp=sharing&embedded=true';
 
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const [showFallback, setShowFallback] = useState(false);
   const [fallbackFileStatus, setFallbackFileStatus] = useState<any>(null);
   const [uploading, setUploading] = useState(false);
@@ -55,10 +55,10 @@ export function GoogleSheetsViewer({
 
   const checkFallbackStatus = async () => {
     try {
-      const response = await apiRequest("GET", "/api/project-data/status");
+      const response = await apiRequest('GET', '/api/project-data/status');
       setFallbackFileStatus(response);
     } catch (error) {
-      console.error("Failed to check fallback status:", error);
+      console.error('Failed to check fallback status:', error);
     }
   };
 
@@ -70,7 +70,7 @@ export function GoogleSheetsViewer({
   };
 
   const openInNewTab = () => {
-    window.open(FIXED_SHEET_URL, "_blank");
+    window.open(FIXED_SHEET_URL, '_blank');
   };
 
   const handleFileUpload = async (
@@ -82,20 +82,20 @@ export function GoogleSheetsViewer({
     setUploading(true);
     try {
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append('file', file);
 
-      await apiRequest("POST", "/api/project-data/upload", formData);
+      await apiRequest('POST', '/api/project-data/upload', formData);
       await checkFallbackStatus(); // Refresh status
-      setError("");
+      setError('');
     } catch (error) {
-      setError("Failed to upload file. Please try again.");
+      setError('Failed to upload file. Please try again.');
     } finally {
       setUploading(false);
     }
   };
 
   const downloadFallbackFile = () => {
-    window.open("/api/project-data/current", "_blank");
+    window.open('/api/project-data/current', '_blank');
   };
 
   const handleSheetError = () => {
@@ -103,11 +103,11 @@ export function GoogleSheetsViewer({
     if (fallbackFileStatus?.hasFile) {
       setShowFallback(true);
       setError(
-        "Google Sheets access restricted. Showing static version instead."
+        'Google Sheets access restricted. Showing static version instead.'
       );
     } else {
       setError(
-        "Unable to load Google Sheet and no fallback file is available."
+        'Unable to load Google Sheet and no fallback file is available.'
       );
     }
   };
@@ -166,7 +166,7 @@ export function GoogleSheetsViewer({
           )}
 
           {/* File upload section - only for admins */}
-          {hasPermission(user, "manage_files") && (
+          {hasPermission(user, 'manage_files') && (
             <div className="border-t pt-4">
               <div className="flex items-center justify-between mb-2">
                 <div>
@@ -188,7 +188,7 @@ export function GoogleSheetsViewer({
                   >
                     <span>
                       <Upload className="h-4 w-4" />
-                      {uploading ? "Uploading..." : "Upload New File"}
+                      {uploading ? 'Uploading...' : 'Upload New File'}
                     </span>
                   </Button>
                 </Label>
@@ -242,8 +242,8 @@ export function GoogleSheetsViewer({
                 }}
                 style={{
                   height: `${height}px`,
-                  overflow: "hidden",
-                  isolation: "isolate",
+                  overflow: 'hidden',
+                  isolation: 'isolate',
                 }}
               >
                 <iframe
@@ -251,9 +251,9 @@ export function GoogleSheetsViewer({
                   width="100%"
                   height={height}
                   style={{
-                    border: "none",
-                    display: "block",
-                    overflow: "hidden",
+                    border: 'none',
+                    display: 'block',
+                    overflow: 'hidden',
                   }}
                   title="Sandwich Totals Data Sheet"
                   onLoad={() => setIsLoading(false)}

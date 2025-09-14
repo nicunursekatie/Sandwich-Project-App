@@ -1,4 +1,4 @@
-import { db } from "./db";
+import { db } from './db';
 import {
   sandwichCollections,
   hosts,
@@ -7,8 +7,8 @@ import {
   contacts,
   messages,
   hostContacts,
-} from "@shared/schema";
-import { sql, ilike, or, and, gte, lte } from "drizzle-orm";
+} from '@shared/schema';
+import { sql, ilike, or, and, gte, lte } from 'drizzle-orm';
 
 export interface SearchFilters {
   dateRange?: {
@@ -23,7 +23,7 @@ export interface SearchFilters {
 }
 
 export interface SearchResult {
-  type: "collection" | "host" | "recipient" | "project" | "contact" | "message";
+  type: 'collection' | 'host' | 'recipient' | 'project' | 'contact' | 'message';
   id: number | string;
   title: string;
   description: string;
@@ -87,15 +87,15 @@ export class SearchEngine {
       const results = await dbQuery.limit(limit);
 
       return results.map((item) => ({
-        type: "collection" as const,
+        type: 'collection' as const,
         id: item.id,
         title: `${item.hostName} - ${item.collectionDate}`,
         description: `${item.sandwichCount} sandwiches collected ${
-          item.notes ? `- ${item.notes}` : ""
+          item.notes ? `- ${item.notes}` : ''
         }`,
         relevance: this.calculateRelevance(query, [
           item.hostName,
-          item.notes || "",
+          item.notes || '',
         ]),
         metadata: {
           hostName: item.hostName,
@@ -105,7 +105,7 @@ export class SearchEngine {
         },
       }));
     } catch (error) {
-      console.error("Collection search failed:", error);
+      console.error('Collection search failed:', error);
       return [];
     }
   }
@@ -140,16 +140,16 @@ export class SearchEngine {
       const results = await dbQuery.limit(limit);
 
       return results.map((item) => ({
-        type: "host" as const,
+        type: 'host' as const,
         id: item.id,
         title: item.name,
-        description: `${item.status} - ${item.address || "No address"} ${
-          item.capacity ? `(Capacity: ${item.capacity})` : ""
+        description: `${item.status} - ${item.address || 'No address'} ${
+          item.capacity ? `(Capacity: ${item.capacity})` : ''
         }`,
         relevance: this.calculateRelevance(query, [
           item.name,
-          item.address || "",
-          item.notes || "",
+          item.address || '',
+          item.notes || '',
         ]),
         metadata: {
           address: item.address,
@@ -159,7 +159,7 @@ export class SearchEngine {
         },
       }));
     } catch (error) {
-      console.error("Host search failed:", error);
+      console.error('Host search failed:', error);
       return [];
     }
   }
@@ -199,16 +199,16 @@ export class SearchEngine {
       const results = await dbQuery.limit(limit);
 
       return results.map((item) => ({
-        type: "project" as const,
+        type: 'project' as const,
         id: item.id,
         title: item.title,
         description: `${item.status} - ${item.description?.substring(0, 100)}${
-          item.description && item.description.length > 100 ? "..." : ""
+          item.description && item.description.length > 100 ? '...' : ''
         }`,
         relevance: this.calculateRelevance(query, [
           item.title,
-          item.description || "",
-          item.assigneeName || "",
+          item.description || '',
+          item.assigneeName || '',
         ]),
         metadata: {
           status: item.status,
@@ -220,7 +220,7 @@ export class SearchEngine {
         },
       }));
     } catch (error) {
-      console.error("Project search failed:", error);
+      console.error('Project search failed:', error);
       return [];
     }
   }
@@ -252,18 +252,18 @@ export class SearchEngine {
       const results = await dbQuery.limit(limit);
 
       return results.map((item) => ({
-        type: "contact" as const,
+        type: 'contact' as const,
         id: item.id,
         title: item.name,
-        description: `${item.role || "Contact"} ${
-          item.organization ? `at ${item.organization}` : ""
+        description: `${item.role || 'Contact'} ${
+          item.organization ? `at ${item.organization}` : ''
         } - ${item.phone}`,
         relevance: this.calculateRelevance(query, [
           item.name,
-          item.organization || "",
-          item.role || "",
+          item.organization || '',
+          item.role || '',
           item.phone,
-          item.email || "",
+          item.email || '',
         ]),
         metadata: {
           organization: item.organization,
@@ -275,7 +275,7 @@ export class SearchEngine {
         },
       }));
     } catch (error) {
-      console.error("Contact search failed:", error);
+      console.error('Contact search failed:', error);
       return [];
     }
   }
@@ -286,17 +286,13 @@ export class SearchEngine {
     limit: number = 100
   ): Promise<{ results: SearchResult[]; summary: Record<string, number> }> {
     try {
-      const [
-        collectionResults,
-        hostResults,
-        projectResults,
-        contactResults,
-      ] = await Promise.all([
-        this.searchCollections(query, filters, Math.floor(limit * 0.4)),
-        this.searchHosts(query, filters, Math.floor(limit * 0.2)),
-        this.searchProjects(query, filters, Math.floor(limit * 0.3)),
-        this.searchContacts(query, Math.floor(limit * 0.1)),
-      ]);
+      const [collectionResults, hostResults, projectResults, contactResults] =
+        await Promise.all([
+          this.searchCollections(query, filters, Math.floor(limit * 0.4)),
+          this.searchHosts(query, filters, Math.floor(limit * 0.2)),
+          this.searchProjects(query, filters, Math.floor(limit * 0.3)),
+          this.searchContacts(query, Math.floor(limit * 0.1)),
+        ]);
 
       const allResults = [
         ...collectionResults,
@@ -321,7 +317,7 @@ export class SearchEngine {
         summary,
       };
     } catch (error) {
-      console.error("Global search failed:", error);
+      console.error('Global search failed:', error);
       return {
         results: [],
         summary: {
@@ -337,12 +333,12 @@ export class SearchEngine {
 
   static async getSearchSuggestions(
     query: string,
-    type?: "collection" | "host" | "project" | "contact"
+    type?: 'collection' | 'host' | 'project' | 'contact'
   ): Promise<string[]> {
     try {
       const suggestions: Set<string> = new Set();
 
-      if (!type || type === "host") {
+      if (!type || type === 'host') {
         const hostNames = await db
           .select({ name: hosts.name })
           .from(hosts)
@@ -351,7 +347,7 @@ export class SearchEngine {
         hostNames.forEach((h) => suggestions.add(h.name));
       }
 
-      if (!type || type === "project") {
+      if (!type || type === 'project') {
         const projectTitles = await db
           .select({ title: projects.title })
           .from(projects)
@@ -362,7 +358,7 @@ export class SearchEngine {
 
       return Array.from(suggestions).slice(0, 10);
     } catch (error) {
-      console.error("Search suggestions failed:", error);
+      console.error('Search suggestions failed:', error);
       return [];
     }
   }

@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
+import React, { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 import {
   User,
   Phone,
@@ -20,9 +20,9 @@ import {
   Search,
   Plus,
   Minus,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
-import { useToast } from "@/hooks/use-toast";
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 
 interface Driver {
   id: number;
@@ -57,12 +57,12 @@ export function DriverSelection({
   onDriversUpdate,
 }: DriverSelectionProps) {
   const [selectedDriverIds, setSelectedDriverIds] = useState<number[]>([]);
-  const [pickupTime, setPickupTime] = useState(currentDriverPickupTime || "");
-  const [driverNotes, setDriverNotes] = useState(currentDriverNotes || "");
+  const [pickupTime, setPickupTime] = useState(currentDriverPickupTime || '');
+  const [driverNotes, setDriverNotes] = useState(currentDriverNotes || '');
   const [driversArranged, setDriversArranged] = useState(
     currentDriversArranged
   );
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
   const [showAvailableOnly, setShowAvailableOnly] = useState(true);
 
   const { toast } = useToast();
@@ -70,7 +70,7 @@ export function DriverSelection({
 
   // Fetch available drivers
   const { data: drivers = [], isLoading: driversLoading } = useQuery({
-    queryKey: ["/api/event-requests/drivers/available"],
+    queryKey: ['/api/event-requests/drivers/available'],
     enabled: true,
   });
 
@@ -93,26 +93,26 @@ export function DriverSelection({
       driversArranged: boolean;
     }) => {
       const response = await fetch(`/api/event-requests/${eventId}/drivers`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      if (!response.ok) throw new Error("Failed to update driver assignments");
+      if (!response.ok) throw new Error('Failed to update driver assignments');
       return response.json();
     },
     onSuccess: () => {
       toast({
-        title: "Success",
-        description: "Driver assignments updated successfully",
+        title: 'Success',
+        description: 'Driver assignments updated successfully',
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/event-requests"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/event-requests'] });
       onDriversUpdate?.();
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to update driver assignments",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to update driver assignments',
+        variant: 'destructive',
       });
     },
   });
@@ -128,7 +128,7 @@ export function DriverSelection({
 
     const isAvailable =
       !showAvailableOnly ||
-      driver.availability === "available" ||
+      driver.availability === 'available' ||
       selectedDriverIds.includes(driver.id);
 
     return matchesSearch && isAvailable;
@@ -161,19 +161,19 @@ export function DriverSelection({
   // Get availability badge color
   const getAvailabilityBadge = (availability: string) => {
     switch (availability) {
-      case "available":
+      case 'available':
         return (
           <Badge variant="secondary" className="bg-green-100 text-green-800">
             Available
           </Badge>
         );
-      case "busy":
+      case 'busy':
         return (
           <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
             Busy
           </Badge>
         );
-      case "off-duty":
+      case 'off-duty':
         return (
           <Badge variant="secondary" className="bg-red-100 text-red-800">
             Off-duty
@@ -302,10 +302,10 @@ export function DriverSelection({
                   <div
                     key={driver.id}
                     className={cn(
-                      "border rounded-lg p-4 cursor-pointer transition-colors",
+                      'border rounded-lg p-4 cursor-pointer transition-colors',
                       isSelected
-                        ? "border-blue-500 bg-blue-50"
-                        : "border-gray-200 hover:border-gray-300"
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-200 hover:border-gray-300'
                     )}
                     onClick={() => toggleDriverSelection(driver.id)}
                   >
@@ -427,8 +427,8 @@ export function DriverSelection({
             className="min-w-[120px]"
           >
             {updateDriversMutation.isPending
-              ? "Saving..."
-              : "Save Driver Assignment"}
+              ? 'Saving...'
+              : 'Save Driver Assignment'}
           </Button>
         </div>
       </CardContent>

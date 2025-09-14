@@ -1,17 +1,17 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
+} from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Activity,
   Calendar,
@@ -25,8 +25,8 @@ import {
   MessageSquare,
   BarChart3,
   Target,
-} from "lucide-react";
-import { formatDistanceToNow, format } from "date-fns";
+} from 'lucide-react';
+import { formatDistanceToNow, format } from 'date-fns';
 
 // Enhanced interfaces for granular user behavior tracking
 interface DetailedUserActivity {
@@ -80,42 +80,44 @@ interface SystemStats {
 }
 
 export default function EnhancedUserAnalytics() {
-  const [selectedTimeframe, setSelectedTimeframe] = useState("7");
-  const [selectedUser, setSelectedUser] = useState<string>("all");
-  const [activityFilter, setActivityFilter] = useState<string>("all");
-  const [activeTab, setActiveTab] = useState("overview");
+  const [selectedTimeframe, setSelectedTimeframe] = useState('7');
+  const [selectedUser, setSelectedUser] = useState<string>('all');
+  const [activityFilter, setActivityFilter] = useState<string>('all');
+  const [activeTab, setActiveTab] = useState('overview');
 
   // System-wide analytics
-  const { data: systemStats, isLoading: isLoadingStats } = useQuery<
-    SystemStats
-  >({
-    queryKey: ["/api/enhanced-user-activity/enhanced-stats", selectedTimeframe],
-    queryFn: async () => {
-      const res = await fetch(
-        `/api/enhanced-user-activity/enhanced-stats?days=${selectedTimeframe}`,
-        {
-          credentials: "include",
-        }
-      );
-      if (!res.ok) throw new Error("Failed to fetch system stats");
-      return res.json();
-    },
-    staleTime: 60000,
-  });
+  const { data: systemStats, isLoading: isLoadingStats } =
+    useQuery<SystemStats>({
+      queryKey: [
+        '/api/enhanced-user-activity/enhanced-stats',
+        selectedTimeframe,
+      ],
+      queryFn: async () => {
+        const res = await fetch(
+          `/api/enhanced-user-activity/enhanced-stats?days=${selectedTimeframe}`,
+          {
+            credentials: 'include',
+          }
+        );
+        if (!res.ok) throw new Error('Failed to fetch system stats');
+        return res.json();
+      },
+      staleTime: 60000,
+    });
 
   // Detailed user activities
   const { data: detailedActivities, isLoading: isLoadingUsers } = useQuery<
     DetailedUserActivity[]
   >({
-    queryKey: ["/api/enhanced-user-activity/detailed-users", selectedTimeframe],
+    queryKey: ['/api/enhanced-user-activity/detailed-users', selectedTimeframe],
     queryFn: async () => {
       const res = await fetch(
         `/api/enhanced-user-activity/detailed-users?days=${selectedTimeframe}`,
         {
-          credentials: "include",
+          credentials: 'include',
         }
       );
-      if (!res.ok) throw new Error("Failed to fetch user activities");
+      if (!res.ok) throw new Error('Failed to fetch user activities');
       return res.json();
     },
     staleTime: 30000,
@@ -126,7 +128,7 @@ export default function EnhancedUserAnalytics() {
     ActivityLog[]
   >({
     queryKey: [
-      "/api/enhanced-user-activity/logs",
+      '/api/enhanced-user-activity/logs',
       selectedUser,
       activityFilter,
       selectedTimeframe,
@@ -134,64 +136,63 @@ export default function EnhancedUserAnalytics() {
     queryFn: async () => {
       const params = new URLSearchParams({
         days: selectedTimeframe,
-        ...(selectedUser !== "all" && { userId: selectedUser }),
-        ...(activityFilter !== "all" && { action: activityFilter }),
+        ...(selectedUser !== 'all' && { userId: selectedUser }),
+        ...(activityFilter !== 'all' && { action: activityFilter }),
       });
       const res = await fetch(`/api/enhanced-user-activity/logs?${params}`, {
-        credentials: "include",
+        credentials: 'include',
       });
-      if (!res.ok) throw new Error("Failed to fetch activity logs");
+      if (!res.ok) throw new Error('Failed to fetch activity logs');
       return res.json();
     },
     staleTime: 15000,
   });
 
   // Individual user stats
-  const { data: userStats, isLoading: isLoadingUserStats } = useQuery<
-    ActivityStats
-  >({
-    queryKey: [
-      "/api/enhanced-user-activity/user-stats",
-      selectedUser,
-      selectedTimeframe,
-    ],
-    queryFn: async () => {
-      const res = await fetch(
-        `/api/enhanced-user-activity/user-stats/${selectedUser}?days=${selectedTimeframe}`,
-        {
-          credentials: "include",
-        }
-      );
-      if (!res.ok) throw new Error("Failed to fetch user stats");
-      return res.json();
-    },
-    enabled: selectedUser !== "all",
-    staleTime: 30000,
-  });
+  const { data: userStats, isLoading: isLoadingUserStats } =
+    useQuery<ActivityStats>({
+      queryKey: [
+        '/api/enhanced-user-activity/user-stats',
+        selectedUser,
+        selectedTimeframe,
+      ],
+      queryFn: async () => {
+        const res = await fetch(
+          `/api/enhanced-user-activity/user-stats/${selectedUser}?days=${selectedTimeframe}`,
+          {
+            credentials: 'include',
+          }
+        );
+        if (!res.ok) throw new Error('Failed to fetch user stats');
+        return res.json();
+      },
+      enabled: selectedUser !== 'all',
+      staleTime: 30000,
+    });
 
   const getSectionColor = (section: string) => {
     const colors: Record<string, string> = {
-      Dashboard: "bg-blue-100 text-blue-800",
-      Collections: "bg-green-100 text-green-800",
-      Communication: "bg-purple-100 text-purple-800",
-      Directory: "bg-orange-100 text-orange-800",
-      Projects: "bg-teal-100 text-teal-800",
-      Analytics: "bg-yellow-100 text-yellow-800",
-      Admin: "bg-red-100 text-red-800",
-      Meetings: "bg-indigo-100 text-indigo-800",
+      Dashboard: 'bg-blue-100 text-blue-800',
+      Collections: 'bg-green-100 text-green-800',
+      Communication: 'bg-purple-100 text-purple-800',
+      Directory: 'bg-orange-100 text-orange-800',
+      Projects: 'bg-teal-100 text-teal-800',
+      Analytics: 'bg-yellow-100 text-yellow-800',
+      Admin: 'bg-red-100 text-red-800',
+      Meetings: 'bg-indigo-100 text-indigo-800',
     };
-    return colors[section] || "bg-gray-100 text-gray-800";
+    return colors[section] || 'bg-gray-100 text-gray-800';
   };
 
   const getActionIcon = (action: string) => {
     switch (action) {
-      case "View":
+      case 'View':
         return <Eye className="h-4 w-4" />;
-      case "Create":
+      case 'Create':
         return <FileText className="h-4 w-4" />;
-      case "Update":
+      case 'Update':
         return <MousePointer className="h-4 w-4" />;
-      case "Delete":
+      case 'Delete':
         return <Target className="h-4 w-4" />;
       default:
         return <Activity className="h-4 w-4" />;
@@ -284,7 +285,7 @@ export default function EnhancedUserAnalytics() {
               </div>
               <p className="text-xs text-gray-600">Total Users</p>
               <p className="text-xs text-gray-500 mt-1">
-                {systemStats.activeUsersLast24h || systemStats.activeUsers}{" "}
+                {systemStats.activeUsersLast24h || systemStats.activeUsers}{' '}
                 active today
               </p>
             </div>
@@ -310,7 +311,7 @@ export default function EnhancedUserAnalytics() {
                 </span>
               </div>
               <div className="text-lg sm:text-xl font-bold text-[#236383] mb-1 truncate">
-                {systemStats.topSections?.[0]?.section || "N/A"}
+                {systemStats.topSections?.[0]?.section || 'N/A'}
               </div>
               <p className="text-xs text-gray-600">Top Section</p>
               <p className="text-xs text-gray-500 mt-1">
@@ -326,7 +327,7 @@ export default function EnhancedUserAnalytics() {
                 </span>
               </div>
               <div className="text-sm sm:text-base font-bold text-[#236383] mb-1 line-clamp-2">
-                {systemStats.topFeatures?.[0]?.feature || "N/A"}
+                {systemStats.topFeatures?.[0]?.feature || 'N/A'}
               </div>
               <p className="text-xs text-gray-600">Top Feature</p>
               <p className="text-xs text-gray-500 mt-1">
@@ -349,7 +350,7 @@ export default function EnhancedUserAnalytics() {
                 <p className="text-xs text-gray-600  mt-1">
                   {systemStats.totalUsers -
                     (systemStats.activeUsersLast24h ||
-                      systemStats.activeUsers)}{" "}
+                      systemStats.activeUsers)}{' '}
                   users haven't logged in today
                 </p>
                 <p className="text-xs text-blue-600 font-medium mt-1">
@@ -400,33 +401,34 @@ export default function EnhancedUserAnalytics() {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-lg font-semibold">
-                {selectedUser === "all"
-                  ? "User Activity Summary"
-                  : "Individual User Analysis"}
+                {selectedUser === 'all'
+                  ? 'User Activity Summary'
+                  : 'Individual User Analysis'}
               </h3>
               <p className="text-sm text-muted-foreground">
-                {selectedUser === "all"
-                  ? "Overview of all users and their platform engagement"
+                {selectedUser === 'all'
+                  ? 'Overview of all users and their platform engagement'
                   : `Detailed analysis for ${
                       detailedActivities?.find((u) => u.userId === selectedUser)
                         ?.firstName
-                    } ${detailedActivities?.find(
-                      (u) => u.userId === selectedUser
-                    )?.lastName ||
+                    } ${
                       detailedActivities?.find((u) => u.userId === selectedUser)
-                        ?.email}`}
+                        ?.lastName ||
+                      detailedActivities?.find((u) => u.userId === selectedUser)
+                        ?.email
+                    }`}
               </p>
             </div>
             <Badge variant="outline">
-              {selectedUser === "all"
+              {selectedUser === 'all'
                 ? `${detailedActivities?.length || 0} total users`
-                : "Individual User"}
+                : 'Individual User'}
             </Badge>
           </div>
 
           <ScrollArea className="h-[700px]">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {(selectedUser === "all"
+              {(selectedUser === 'all'
                 ? detailedActivities
                 : detailedActivities?.filter(
                     (user) => user.userId === selectedUser
@@ -453,7 +455,7 @@ export default function EnhancedUserAnalytics() {
                       </div>
                       <Badge
                         variant={
-                          user.totalActions > 0 ? "default" : "secondary"
+                          user.totalActions > 0 ? 'default' : 'secondary'
                         }
                         className="text-xs"
                       >
@@ -519,7 +521,7 @@ export default function EnhancedUserAnalytics() {
                             ? formatDistanceToNow(new Date(user.lastActive), {
                                 addSuffix: true,
                               })
-                            : "Never"}
+                            : 'Never'}
                         </span>
                       </div>
                     </div>
@@ -558,7 +560,7 @@ export default function EnhancedUserAnalytics() {
           </ScrollArea>
 
           {/* Individual User Detailed Stats - Only show when specific user is selected */}
-          {selectedUser !== "all" && userStats && (
+          {selectedUser !== 'all' && userStats && (
             <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               <Card>
                 <CardHeader>
@@ -686,7 +688,7 @@ export default function EnhancedUserAnalytics() {
                       </div>
                       <div className="flex-1">
                         <p className="font-medium">
-                          {log.userName || "Unknown User"}
+                          {log.userName || 'Unknown User'}
                         </p>
                         <p className="text-sm text-muted-foreground">
                           {log.feature} in {log.section}
@@ -695,7 +697,7 @@ export default function EnhancedUserAnalytics() {
                       </div>
                       <div className="text-right">
                         <p className="text-sm font-medium">
-                          {format(new Date(log.createdAt), "MMM dd, HH:mm")}
+                          {format(new Date(log.createdAt), 'MMM dd, HH:mm')}
                         </p>
                         {log.duration && (
                           <p className="text-xs text-muted-foreground">
@@ -727,7 +729,7 @@ export default function EnhancedUserAnalytics() {
               <CardContent>
                 <div className="space-y-3">
                   {systemStats?.topFeatures
-                    ?.filter((f) => f.feature && f.feature !== "Unknown")
+                    ?.filter((f) => f.feature && f.feature !== 'Unknown')
                     .slice(0, 6)
                     .map((feature, idx) => (
                       <div
@@ -738,12 +740,12 @@ export default function EnhancedUserAnalytics() {
                           <div
                             className={`w-2 h-2 rounded-full ${
                               idx === 0
-                                ? "bg-green-500"
+                                ? 'bg-green-500'
                                 : idx === 1
-                                ? "bg-blue-500"
-                                : idx === 2
-                                ? "bg-purple-500"
-                                : "bg-gray-400"
+                                  ? 'bg-blue-500'
+                                  : idx === 2
+                                    ? 'bg-purple-500'
+                                    : 'bg-gray-400'
                             }`}
                           />
                           <span className="text-sm font-medium">
@@ -755,7 +757,7 @@ export default function EnhancedUserAnalytics() {
                             {feature.usage}
                           </span>
                           <p className="text-xs text-muted-foreground">
-                            {feature.feature !== "Unknown" ? "uses" : "unknown"}
+                            {feature.feature !== 'Unknown' ? 'uses' : 'unknown'}
                           </p>
                         </div>
                       </div>
@@ -785,8 +787,8 @@ export default function EnhancedUserAnalytics() {
                     ?.filter(
                       (s) =>
                         s.section &&
-                        s.section !== "General" &&
-                        s.section !== "Unknown"
+                        s.section !== 'General' &&
+                        s.section !== 'Unknown'
                     )
                     .slice(0, 6)
                     .map((section, idx) => (
@@ -799,8 +801,8 @@ export default function EnhancedUserAnalytics() {
                           variant="outline"
                         >
                           {section.section
-                            .replace("/api/", "")
-                            .replace("/", "")}
+                            .replace('/api/', '')
+                            .replace('/', '')}
                         </Badge>
                         <div className="text-right">
                           <span className="text-sm font-bold">
@@ -837,7 +839,7 @@ export default function EnhancedUserAnalytics() {
                     <div className="flex justify-between text-sm mb-1">
                       <span>Active Users</span>
                       <span>
-                        {systemStats?.activeUsers || 0} of{" "}
+                        {systemStats?.activeUsers || 0} of{' '}
                         {systemStats?.totalUsers || 0}
                       </span>
                     </div>
@@ -886,18 +888,18 @@ export default function EnhancedUserAnalytics() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Activity className="h-5 w-5 text-orange-600" />
-                  {selectedUser === "all"
-                    ? "All Users Activity Breakdown"
-                    : "Individual User Analysis"}
+                  {selectedUser === 'all'
+                    ? 'All Users Activity Breakdown'
+                    : 'Individual User Analysis'}
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  {selectedUser === "all"
-                    ? "Comprehensive platform usage overview"
-                    : "Detailed activity analysis for selected user"}
+                  {selectedUser === 'all'
+                    ? 'Comprehensive platform usage overview'
+                    : 'Detailed activity analysis for selected user'}
                 </p>
               </CardHeader>
               <CardContent>
-                {selectedUser === "all" ? (
+                {selectedUser === 'all' ? (
                   <div className="space-y-4">
                     <div>
                       <h4 className="font-medium mb-2">
@@ -952,7 +954,7 @@ export default function EnhancedUserAnalytics() {
                 ) : (
                   // Individual user analysis would go here when a specific user is selected
                   <div className="space-y-3">
-                    {selectedUser !== "all" &&
+                    {selectedUser !== 'all' &&
                       detailedActivities &&
                       (() => {
                         const user = detailedActivities.find(

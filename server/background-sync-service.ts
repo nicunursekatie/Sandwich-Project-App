@@ -24,9 +24,12 @@ export class BackgroundSyncService {
     this.performSync();
 
     // Set up recurring sync every 5 minutes
-    this.syncInterval = setInterval(() => {
-      this.performSync();
-    }, 5 * 60 * 1000); // 5 minutes
+    this.syncInterval = setInterval(
+      () => {
+        this.performSync();
+      },
+      5 * 60 * 1000
+    ); // 5 minutes
 
     console.log('✅ Background sync service started - syncing every 5 minutes');
   }
@@ -52,7 +55,7 @@ export class BackgroundSyncService {
     try {
       // Sync Projects from Google Sheets
       await this.syncProjects();
-      
+
       // Sync Event Requests from Google Sheets
       await this.syncEventRequests();
 
@@ -69,9 +72,11 @@ export class BackgroundSyncService {
     try {
       const projectSyncService = new GoogleSheetsSyncService(this.storage);
       const result = await projectSyncService.syncFromGoogleSheets();
-      
+
       if (result.success) {
-        console.log(`📋 Projects sync: ${result.updated || 0} updated, ${result.created || 0} created`);
+        console.log(
+          `📋 Projects sync: ${result.updated || 0} updated, ${result.created || 0} created`
+        );
       } else {
         console.log('⚠ Projects sync skipped:', result.message);
       }
@@ -85,17 +90,23 @@ export class BackgroundSyncService {
    */
   private async syncEventRequests() {
     try {
-      const eventRequestsSyncService = getEventRequestsGoogleSheetsService(this.storage);
-      
+      const eventRequestsSyncService = getEventRequestsGoogleSheetsService(
+        this.storage
+      );
+
       if (!eventRequestsSyncService) {
-        console.log('⚠ Event requests sync skipped: Google Sheets service not configured');
+        console.log(
+          '⚠ Event requests sync skipped: Google Sheets service not configured'
+        );
         return;
       }
 
       const result = await eventRequestsSyncService.syncFromGoogleSheets();
-      
+
       if (result.success) {
-        console.log(`📝 Event requests sync: ${result.updated || 0} updated, ${result.created || 0} created`);
+        console.log(
+          `📝 Event requests sync: ${result.updated || 0} updated, ${result.created || 0} created`
+        );
       } else {
         console.log('⚠ Event requests sync skipped:', result.message);
       }
@@ -110,7 +121,7 @@ export class BackgroundSyncService {
   getStatus() {
     return {
       isRunning: this.isRunning,
-      nextSyncIn: this.syncInterval ? '5 minutes' : 'Not scheduled'
+      nextSyncIn: this.syncInterval ? '5 minutes' : 'Not scheduled',
     };
   }
 }

@@ -1,16 +1,22 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Checkbox } from "@/components/ui/checkbox";
-import { MessageSquare, CheckCircle, AlertTriangle, Smartphone, ArrowLeft } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { useAuth } from "@/hooks/useAuth";
-import { Link } from "wouter";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  MessageSquare,
+  CheckCircle,
+  AlertTriangle,
+  Smartphone,
+  ArrowLeft,
+} from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '@/lib/queryClient';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { useAuth } from '@/hooks/useAuth';
+import { Link } from 'wouter';
 
 interface SMSOptInData {
   phoneNumber: string;
@@ -20,7 +26,7 @@ interface SMSOptInData {
 export default function SMSOptInPage() {
   const { toast } = useToast();
   const { user, isLoading: authLoading } = useAuth();
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [consent, setConsent] = useState(false);
   const [hasOptedIn, setHasOptedIn] = useState(false);
 
@@ -33,19 +39,20 @@ export default function SMSOptInPage() {
 
   // SMS opt-in mutation
   const optInMutation = useMutation({
-    mutationFn: (data: SMSOptInData) => apiRequest('POST', '/api/users/sms-opt-in', data),
+    mutationFn: (data: SMSOptInData) =>
+      apiRequest('POST', '/api/users/sms-opt-in', data),
     onSuccess: () => {
       setHasOptedIn(true);
       toast({
-        title: "Success!",
+        title: 'Success!',
         description: "You've been signed up for SMS reminders.",
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to sign up for SMS reminders.",
-        variant: "destructive",
+        title: 'Error',
+        description: error.message || 'Failed to sign up for SMS reminders.',
+        variant: 'destructive',
       });
     },
   });
@@ -55,53 +62,54 @@ export default function SMSOptInPage() {
     mutationFn: () => apiRequest('POST', '/api/users/sms-opt-out'),
     onSuccess: () => {
       toast({
-        title: "Unsubscribed",
+        title: 'Unsubscribed',
         description: "You've been removed from SMS reminders.",
       });
       setHasOptedIn(false);
-      setPhoneNumber("");
+      setPhoneNumber('');
       setConsent(false);
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to unsubscribe from SMS reminders.",
-        variant: "destructive",
+        title: 'Error',
+        description:
+          error.message || 'Failed to unsubscribe from SMS reminders.',
+        variant: 'destructive',
       });
     },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!phoneNumber.trim()) {
       toast({
-        title: "Error",
-        description: "Please enter your phone number.",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Please enter your phone number.',
+        variant: 'destructive',
       });
       return;
     }
 
     if (!consent) {
       toast({
-        title: "Error",
-        description: "Please check the consent box to proceed.",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Please check the consent box to proceed.',
+        variant: 'destructive',
       });
       return;
     }
 
     optInMutation.mutate({
       phoneNumber: phoneNumber.trim(),
-      consent: true
+      consent: true,
     });
   };
 
   const formatPhoneNumber = (value: string) => {
     // Remove all non-digits
     const digits = value.replace(/\D/g, '');
-    
+
     // Format as (XXX) XXX-XXXX for US numbers
     if (digits.length >= 10) {
       const match = digits.match(/^(\d{3})(\d{3})(\d{4})/);
@@ -119,7 +127,7 @@ export default function SMSOptInPage() {
         return `(${match[1]})`;
       }
     }
-    
+
     return digits;
   };
 
@@ -184,7 +192,8 @@ export default function SMSOptInPage() {
             </div>
             <CardTitle className="text-2xl">SMS Reminder Sign-up</CardTitle>
             <p className="text-gray-600 mt-2">
-              Get text message reminders for weekly sandwich collection submissions
+              Get text message reminders for weekly sandwich collection
+              submissions
             </p>
           </CardHeader>
 
@@ -195,7 +204,7 @@ export default function SMSOptInPage() {
                 <Alert>
                   <CheckCircle className="h-4 w-4" />
                   <AlertDescription>
-                    You're signed up for SMS reminders! 
+                    You're signed up for SMS reminders!
                     {userSMSStatus?.phoneNumber && (
                       <span className="block mt-1 font-medium">
                         Phone: {userSMSStatus.phoneNumber}
@@ -205,21 +214,28 @@ export default function SMSOptInPage() {
                 </Alert>
 
                 <div className="bg-gray-50 p-4 rounded-lg text-sm text-gray-600">
-                  <h4 className="font-medium text-gray-900 mb-2">What you'll receive:</h4>
+                  <h4 className="font-medium text-gray-900 mb-2">
+                    What you'll receive:
+                  </h4>
                   <ul className="space-y-1">
-                    <li>• Friendly reminders when weekly sandwich counts are missing</li>
+                    <li>
+                      • Friendly reminders when weekly sandwich counts are
+                      missing
+                    </li>
                     <li>• Direct links to the app for easy submission</li>
                     <li>• Only related to sandwich collection reminders</li>
                   </ul>
                 </div>
 
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={() => optOutMutation.mutate()}
                   disabled={optOutMutation.isPending}
                   className="w-full"
                 >
-                  {optOutMutation.isPending ? "Unsubscribing..." : "Unsubscribe from SMS Reminders"}
+                  {optOutMutation.isPending
+                    ? 'Unsubscribing...'
+                    : 'Unsubscribe from SMS Reminders'}
                 </Button>
               </div>
             ) : (
@@ -231,8 +247,13 @@ export default function SMSOptInPage() {
                     How SMS Reminders Work
                   </h3>
                   <ul className="text-sm text-blue-800 space-y-1">
-                    <li>• Get text reminders when weekly sandwich counts are missing</li>
-                    <li>• Includes direct links to the app for easy submission</li>
+                    <li>
+                      • Get text reminders when weekly sandwich counts are
+                      missing
+                    </li>
+                    <li>
+                      • Includes direct links to the app for easy submission
+                    </li>
                     <li>• Only used for sandwich collection reminders</li>
                     <li>• You can unsubscribe at any time</li>
                   </ul>
@@ -259,29 +280,46 @@ export default function SMSOptInPage() {
                     <Checkbox
                       id="consent"
                       checked={consent}
-                      onCheckedChange={(checked) => setConsent(checked as boolean)}
+                      onCheckedChange={(checked) =>
+                        setConsent(checked as boolean)
+                      }
                       className="mt-1"
                     />
                     <div>
-                      <Label htmlFor="consent" className="text-sm leading-relaxed cursor-pointer">
-                        I consent to receive SMS text message reminders from The Sandwich Project about weekly collection submissions. I understand:
+                      <Label
+                        htmlFor="consent"
+                        className="text-sm leading-relaxed cursor-pointer"
+                      >
+                        I consent to receive SMS text message reminders from The
+                        Sandwich Project about weekly collection submissions. I
+                        understand:
                       </Label>
                       <ul className="text-xs text-gray-600 mt-2 space-y-1 ml-4">
-                        <li>• Messages will only be sent for sandwich collection reminders</li>
+                        <li>
+                          • Messages will only be sent for sandwich collection
+                          reminders
+                        </li>
                         <li>• I can unsubscribe at any time</li>
                         <li>• Standard message and data rates may apply</li>
-                        <li>• My phone number will not be shared with third parties</li>
+                        <li>
+                          • My phone number will not be shared with third
+                          parties
+                        </li>
                       </ul>
                     </div>
                   </div>
                 </div>
 
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   className="w-full bg-[#1f7b7b] hover:bg-[#165a5a]"
-                  disabled={optInMutation.isPending || !consent || !phoneNumber.trim()}
+                  disabled={
+                    optInMutation.isPending || !consent || !phoneNumber.trim()
+                  }
                 >
-                  {optInMutation.isPending ? "Signing Up..." : "Sign Up for SMS Reminders"}
+                  {optInMutation.isPending
+                    ? 'Signing Up...'
+                    : 'Sign Up for SMS Reminders'}
                 </Button>
               </form>
             )}

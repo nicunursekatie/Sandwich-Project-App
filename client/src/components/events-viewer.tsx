@@ -1,14 +1,14 @@
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Slider } from '@/components/ui/slider';
 import {
   ExternalLink,
   RefreshCw,
   ZoomIn,
   ZoomOut,
   RotateCcw,
-} from "lucide-react";
+} from 'lucide-react';
 
 export default function EventsViewer() {
   const [isLoading, setIsLoading] = useState(false);
@@ -16,13 +16,13 @@ export default function EventsViewer() {
 
   // Use published Google Sheets URL (no authentication required)
   const embedUrl =
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vT2r5KMRKuKSrqn1yQxtw8T0e5Ooi_iBfd0HlgGVcIHtFat3o54FrqyTLB_uq-RxojjSFg1GTvpIZLZ/pubhtml?widget=true&headers=false";
+    'https://docs.google.com/spreadsheets/d/e/2PACX-1vT2r5KMRKuKSrqn1yQxtw8T0e5Ooi_iBfd0HlgGVcIHtFat3o54FrqyTLB_uq-RxojjSFg1GTvpIZLZ/pubhtml?widget=true&headers=false';
   const fullViewUrl =
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vT2r5KMRKuKSrqn1yQxtw8T0e5Ooi_iBfd0HlgGVcIHtFat3o54FrqyTLB_uq-RxojjSFg1GTvpIZLZ/pubhtml";
+    'https://docs.google.com/spreadsheets/d/e/2PACX-1vT2r5KMRKuKSrqn1yQxtw8T0e5Ooi_iBfd0HlgGVcIHtFat3o54FrqyTLB_uq-RxojjSFg1GTvpIZLZ/pubhtml';
 
   // Load user's saved zoom preference
   useEffect(() => {
-    const savedZoom = localStorage.getItem("events-spreadsheet-zoom");
+    const savedZoom = localStorage.getItem('events-spreadsheet-zoom');
     if (savedZoom) {
       setZoomLevel(parseInt(savedZoom));
     }
@@ -32,14 +32,14 @@ export default function EventsViewer() {
   const handleZoomChange = (newZoom: number[]) => {
     const zoom = newZoom[0];
     setZoomLevel(zoom);
-    localStorage.setItem("events-spreadsheet-zoom", zoom.toString());
+    localStorage.setItem('events-spreadsheet-zoom', zoom.toString());
   };
 
   const handleRefresh = () => {
     setIsLoading(true);
     // Reload the iframe by changing its key
     const iframe = document.getElementById(
-      "events-spreadsheet"
+      'events-spreadsheet'
     ) as HTMLIFrameElement;
     if (iframe) {
       iframe.src = iframe.src;
@@ -48,7 +48,7 @@ export default function EventsViewer() {
   };
 
   const handleOpenInNewTab = () => {
-    window.open(fullViewUrl, "_blank");
+    window.open(fullViewUrl, '_blank');
   };
 
   const handleZoomIn = () => {
@@ -82,7 +82,7 @@ export default function EventsViewer() {
                 className="flex items-center gap-2"
               >
                 <RefreshCw
-                  className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
+                  className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`}
                 />
                 Refresh
               </Button>
@@ -167,11 +167,11 @@ export default function EventsViewer() {
               src={embedUrl}
               className="border-0 rounded-b-lg"
               style={{
-                height: "calc(100vh - 180px)",
-                minHeight: "800px",
+                height: 'calc(100vh - 180px)',
+                minHeight: '800px',
                 width: `${100 / (zoomLevel / 100)}%`,
                 transform: `scale(${zoomLevel / 100})`,
-                transformOrigin: "top left",
+                transformOrigin: 'top left',
               }}
               title="Events Calendar"
               loading="lazy"

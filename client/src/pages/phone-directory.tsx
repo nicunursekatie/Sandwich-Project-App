@@ -12,41 +12,41 @@ import {
   Building2,
   FileText,
   Phone,
-} from "lucide-react";
-import PhoneDirectoryFixed from "@/components/phone-directory-fixed";
-import { useState } from "react";
-import { Link, useLocation } from "wouter";
-import { queryClient } from "@/lib/queryClient";
+} from 'lucide-react';
+import PhoneDirectoryFixed from '@/components/phone-directory-fixed';
+import { useState } from 'react';
+import { Link, useLocation } from 'wouter';
+import { queryClient } from '@/lib/queryClient';
 
 export default function PhoneDirectoryPage() {
   const [location] = useLocation();
 
   const sidebarItems = [
-    { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, path: "/" },
-    { id: "projects", label: "Projects", icon: ListTodo, path: "/" },
-    { id: "messages", label: "Messages", icon: MessageCircle, path: "/" },
+    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/' },
+    { id: 'projects', label: 'Projects', icon: ListTodo, path: '/' },
+    { id: 'messages', label: 'Messages', icon: MessageCircle, path: '/' },
     {
-      id: "meetings",
-      label: "Meetings",
+      id: 'meetings',
+      label: 'Meetings',
       icon: ClipboardList,
-      path: "/meetings",
+      path: '/meetings',
     },
-    { id: "toolkit", label: "Toolkit", icon: FileText, path: "/" },
-    { id: "collections", label: "Collections", icon: BarChart3, path: "/" },
-    { id: "hosts", label: "Hosts", icon: Building2, path: "/" },
-    { id: "recipients", label: "Recipients", icon: Users, path: "/" },
+    { id: 'toolkit', label: 'Toolkit', icon: FileText, path: '/' },
+    { id: 'collections', label: 'Collections', icon: BarChart3, path: '/' },
+    { id: 'hosts', label: 'Hosts', icon: Building2, path: '/' },
+    { id: 'recipients', label: 'Recipients', icon: Users, path: '/' },
     {
-      id: "directory",
-      label: "Phone Directory",
+      id: 'directory',
+      label: 'Phone Directory',
       icon: Phone,
-      path: "/phone-directory",
+      path: '/phone-directory',
     },
-    { id: "drivers", label: "Drivers", icon: Car, path: "/" },
+    { id: 'drivers', label: 'Drivers', icon: Car, path: '/' },
     {
-      id: "development",
-      label: "Development",
+      id: 'development',
+      label: 'Development',
       icon: FileText,
-      path: "/development",
+      path: '/development',
     },
   ];
 
@@ -76,8 +76,8 @@ export default function PhoneDirectoryPage() {
                     href={item.path}
                     className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
                       isActive
-                        ? "bg-blue-50 text-blue-700 border border-blue-200"
-                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                        ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                     }`}
                   >
                     <Icon className="w-5 h-5" />
@@ -96,23 +96,23 @@ export default function PhoneDirectoryPage() {
             <button
               onClick={async () => {
                 try {
-                  await fetch("/api/logout", {
-                    method: "POST",
-                    credentials: "include",
+                  await fetch('/api/logout', {
+                    method: 'POST',
+                    credentials: 'include',
                   });
                   queryClient.clear();
                   queryClient.invalidateQueries({
-                    queryKey: ["/api/auth/user"],
+                    queryKey: ['/api/auth/user'],
                   });
-                  queryClient.removeQueries({ queryKey: ["/api/auth/user"] });
-                  window.location.href = "/api/login";
+                  queryClient.removeQueries({ queryKey: ['/api/auth/user'] });
+                  window.location.href = '/api/login';
                 } catch (error) {
                   queryClient.clear();
                   queryClient.invalidateQueries({
-                    queryKey: ["/api/auth/user"],
+                    queryKey: ['/api/auth/user'],
                   });
-                  queryClient.removeQueries({ queryKey: ["/api/auth/user"] });
-                  window.location.href = "/api/login";
+                  queryClient.removeQueries({ queryKey: ['/api/auth/user'] });
+                  window.location.href = '/api/login';
                 }
               }}
               className="text-slate-400 hover:text-slate-600"

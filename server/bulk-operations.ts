@@ -1,19 +1,19 @@
-import { db } from "./db";
-import { 
-  sandwichCollections, 
-  hosts, 
-  recipients, 
-  projects, 
+import { db } from './db';
+import {
+  sandwichCollections,
+  hosts,
+  recipients,
+  projects,
   contacts,
   hostContacts,
   type InsertSandwichCollection,
   type InsertHost,
   type InsertRecipient,
   type InsertProject,
-  type InsertContact
-} from "@shared/schema";
-import { AuditLogger, type AuditContext } from "./audit-logger";
-import { eq, inArray, sql } from "drizzle-orm";
+  type InsertContact,
+} from '@shared/schema';
+import { AuditLogger, type AuditContext } from './audit-logger';
+import { eq, inArray, sql } from 'drizzle-orm';
 
 export interface BulkOperationResult {
   success: boolean;
@@ -33,13 +33,14 @@ export class BulkOperationsManager {
       success: true,
       processed: 0,
       errors: [],
-      created: 0
+      created: 0,
     };
 
     try {
       for (const collection of collections) {
         try {
-          const [created] = await db.insert(sandwichCollections)
+          const [created] = await db
+            .insert(sandwichCollections)
             .values(collection)
             .returning();
 
@@ -53,7 +54,9 @@ export class BulkOperationsManager {
           result.created!++;
           result.processed++;
         } catch (error) {
-          result.errors.push(`Failed to create collection for ${collection.hostName}: ${error}`);
+          result.errors.push(
+            `Failed to create collection for ${collection.hostName}: ${error}`
+          );
         }
       }
 
@@ -66,7 +69,7 @@ export class BulkOperationsManager {
       return {
         success: false,
         processed: 0,
-        errors: [`Bulk creation failed: ${error}`]
+        errors: [`Bulk creation failed: ${error}`],
       };
     }
   }
@@ -79,20 +82,24 @@ export class BulkOperationsManager {
       success: true,
       processed: 0,
       errors: [],
-      updated: 0
+      updated: 0,
     };
 
     try {
       for (const update of updates) {
         try {
-          const [oldData] = await db.select().from(hosts).where(eq(hosts.id, update.id));
-          
+          const [oldData] = await db
+            .select()
+            .from(hosts)
+            .where(eq(hosts.id, update.id));
+
           if (!oldData) {
             result.errors.push(`Host with ID ${update.id} not found`);
             continue;
           }
 
-          const [updated] = await db.update(hosts)
+          const [updated] = await db
+            .update(hosts)
             .set({ ...update.data, updatedAt: new Date() })
             .where(eq(hosts.id, update.id))
             .returning();
@@ -121,7 +128,7 @@ export class BulkOperationsManager {
       return {
         success: false,
         processed: 0,
-        errors: [`Bulk update failed: ${error}`]
+        errors: [`Bulk update failed: ${error}`],
       };
     }
   }
@@ -134,17 +141,19 @@ export class BulkOperationsManager {
       success: true,
       processed: 0,
       errors: [],
-      deleted: 0
+      deleted: 0,
     };
 
     try {
       // Get existing data for audit log
-      const existingData = await db.select()
+      const existingData = await db
+        .select()
         .from(sandwichCollections)
         .where(inArray(sandwichCollections.id, ids));
 
       // Delete records
-      const deletedResult = await db.delete(sandwichCollections)
+      const deletedResult = await db
+        .delete(sandwichCollections)
         .where(inArray(sandwichCollections.id, ids));
 
       // Log each deletion
@@ -165,17 +174,19 @@ export class BulkOperationsManager {
       return {
         success: false,
         processed: 0,
-        errors: [`Bulk deletion failed: ${error}`]
+        errors: [`Bulk deletion failed: ${error}`],
       };
     }
   }
 
-  static async deduplicateHosts(context: AuditContext = {}): Promise<BulkOperationResult> {
+  static async deduplicateHosts(
+    context: AuditContext = {}
+  ): Promise<BulkOperationResult> {
     const result: BulkOperationResult = {
       success: true,
       processed: 0,
       errors: [],
-      deleted: 0
+      deleted: 0,
     };
 
     try {
@@ -185,7 +196,7 @@ export class BulkOperationsManager {
 
       // Simple duplicate detection by exact name match
       const nameGroups = new Map<string, number[]>();
-      
+
       for (const host of allHosts) {
         const normalizedName = host.name.toLowerCase().trim();
         if (!nameGroups.has(normalizedName)) {
@@ -200,7 +211,7 @@ export class BulkOperationsManager {
           // Keep the first one (oldest), mark others for removal
           duplicates.push({
             keep: ids[0],
-            remove: ids.slice(1)
+            remove: ids.slice(1),
           });
         }
       }
@@ -210,20 +221,20 @@ export class BulkOperationsManager {
         try {
           // Update any collections that reference the duplicate hosts
           for (const removeId of duplicate.remove) {
-            const hostToRemove = allHosts.find(h => h.id === removeId);
-            const hostToKeep = allHosts.find(h => h.id === duplicate.keep);
-            
+            const hostToRemove = allHosts.find((h) => h.id === removeId);
+            const hostToKeep = allHosts.find((h) => h.id === duplicate.keep);
+
             if (hostToRemove && hostToKeep) {
               // Update collections to use the kept host
-              await db.update(sandwichCollections)
+              await db
+                .update(sandwichCollections)
                 .set({ hostName: hostToKeep.name })
                 .where(eq(sandwichCollections.hostName, hostToRemove.name));
             }
           }
 
           // Delete the duplicate hosts
-          await db.delete(hosts)
-            .where(inArray(hosts.id, duplicate.remove));
+          await db.delete(hosts).where(inArray(hosts.id, duplicate.remove));
 
           result.deleted! += duplicate.remove.length;
           result.processed += duplicate.remove.length;
@@ -238,7 +249,9 @@ export class BulkOperationsManager {
             context
           );
         } catch (error) {
-          result.errors.push(`Failed to remove duplicates for host group: ${error}`);
+          result.errors.push(
+            `Failed to remove duplicates for host group: ${error}`
+          );
         }
       }
 
@@ -251,7 +264,7 @@ export class BulkOperationsManager {
       return {
         success: false,
         processed: 0,
-        errors: [`Deduplication failed: ${error}`]
+        errors: [`Deduplication failed: ${error}`],
       };
     }
   }
@@ -260,7 +273,8 @@ export class BulkOperationsManager {
     issues: Array<{ type: string; description: string; count: number }>;
     summary: { totalIssues: number; criticalIssues: number };
   }> {
-    const issues: Array<{ type: string; description: string; count: number }> = [];
+    const issues: Array<{ type: string; description: string; count: number }> =
+      [];
 
     try {
       // Check for collections with missing hosts
@@ -276,7 +290,7 @@ export class BulkOperationsManager {
         issues.push({
           type: 'orphaned_collections',
           description: 'Collections referencing non-existent hosts',
-          count: Number(orphanedCollections.count)
+          count: Number(orphanedCollections.count),
         });
       }
 
@@ -290,7 +304,7 @@ export class BulkOperationsManager {
         issues.push({
           type: 'duplicate_hosts',
           description: 'Hosts with duplicate names',
-          count: Number(duplicateHosts.count)
+          count: Number(duplicateHosts.count),
         });
       }
 
@@ -305,7 +319,7 @@ export class BulkOperationsManager {
         issues.push({
           type: 'invalid_dates',
           description: 'Collections with missing or invalid dates',
-          count: Number(invalidDates.count)
+          count: Number(invalidDates.count),
         });
       }
 
@@ -320,24 +334,33 @@ export class BulkOperationsManager {
         issues.push({
           type: 'invalid_counts',
           description: 'Collections with invalid sandwich counts',
-          count: Number(invalidCounts.count)
+          count: Number(invalidCounts.count),
         });
       }
 
       const totalIssues = issues.reduce((sum, issue) => sum + issue.count, 0);
-      const criticalIssues = issues.filter(i => 
-        i.type === 'orphaned_collections' || i.type === 'invalid_counts'
-      ).reduce((sum, issue) => sum + issue.count, 0);
+      const criticalIssues = issues
+        .filter(
+          (i) =>
+            i.type === 'orphaned_collections' || i.type === 'invalid_counts'
+        )
+        .reduce((sum, issue) => sum + issue.count, 0);
 
       return {
         issues,
-        summary: { totalIssues, criticalIssues }
+        summary: { totalIssues, criticalIssues },
       };
     } catch (error) {
       console.error('Data integrity check failed:', error);
       return {
-        issues: [{ type: 'check_failed', description: 'Could not complete integrity check', count: 1 }],
-        summary: { totalIssues: 1, criticalIssues: 1 }
+        issues: [
+          {
+            type: 'check_failed',
+            description: 'Could not complete integrity check',
+            count: 1,
+          },
+        ],
+        summary: { totalIssues: 1, criticalIssues: 1 },
       };
     }
   }

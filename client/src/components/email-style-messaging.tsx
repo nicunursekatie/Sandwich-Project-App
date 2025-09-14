@@ -1,16 +1,16 @@
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
 import {
   Mail,
   Send,
@@ -27,7 +27,7 @@ import {
   Calendar,
   Paperclip,
   X,
-} from "lucide-react";
+} from 'lucide-react';
 
 interface EmailMessage {
   id: string;
@@ -41,7 +41,7 @@ interface EmailMessage {
   timestamp: string;
   read: boolean;
   starred: boolean;
-  folder: "inbox" | "sent" | "drafts" | "trash";
+  folder: 'inbox' | 'sent' | 'drafts' | 'trash';
   attachments?: {
     name: string;
     size: string;
@@ -60,22 +60,22 @@ export default function EmailStyleMessaging() {
     null
   );
   const [activeFolder, setActiveFolder] = useState<
-    "inbox" | "sent" | "drafts" | "trash"
-  >("inbox");
+    'inbox' | 'sent' | 'drafts' | 'trash'
+  >('inbox');
 
   // Clear selected message when switching tabs
-  const handleTabChange = (folder: "inbox" | "sent" | "drafts" | "trash") => {
+  const handleTabChange = (folder: 'inbox' | 'sent' | 'drafts' | 'trash') => {
     setActiveFolder(folder);
     setSelectedMessage(null); // Clear selection when switching tabs
     setSelectedMessages([]); // Clear bulk selections too
   };
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
   const [isComposing, setIsComposing] = useState(false);
   const [selectedMessages, setSelectedMessages] = useState<string[]>([]);
   const [composeData, setComposeData] = useState({
-    to: "",
-    subject: "",
-    content: "",
+    to: '',
+    subject: '',
+    content: '',
   });
   const [replyData, setReplyData] = useState<EmailMessage | null>(null);
 
@@ -86,8 +86,8 @@ export default function EmailStyleMessaging() {
 
     if (isToday) {
       return date.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
+        hour: '2-digit',
+        minute: '2-digit',
       });
     }
     return date.toLocaleDateString();
@@ -95,43 +95,47 @@ export default function EmailStyleMessaging() {
 
   const getInitials = (name: string) => {
     return name
-      .split(" ")
+      .split(' ')
       .map((n) => n[0])
-      .join("")
+      .join('')
       .toUpperCase()
       .slice(0, 2);
   };
 
   // Get messages from API with error handling
-  const { data: messages = [], isLoading, error: messagesError } = useQuery({
-    queryKey: ["/api/real-time-messages", activeFolder],
+  const {
+    data: messages = [],
+    isLoading,
+    error: messagesError,
+  } = useQuery({
+    queryKey: ['/api/real-time-messages', activeFolder],
     queryFn: () =>
-      apiRequest("GET", `/api/real-time-messages?folder=${activeFolder}`),
+      apiRequest('GET', `/api/real-time-messages?folder=${activeFolder}`),
     retry: false,
   });
 
   // Get users for recipient selection
   const { data: users = [] } = useQuery({
-    queryKey: ["/api/users"],
-    queryFn: () => apiRequest("GET", "/api/users"),
+    queryKey: ['/api/users'],
+    queryFn: () => apiRequest('GET', '/api/users'),
     retry: false,
   });
 
   // Fetch current user for authentication
   const { data: currentUser } = useQuery({
-    queryKey: ["/api/auth/user"],
+    queryKey: ['/api/auth/user'],
     retry: false,
   });
 
   // Send message mutation - Use messaging API for internal messages with graceful SendGrid handling
   const sendMessageMutation = useMutation({
     mutationFn: async (messageData: any) => {
-      console.log("Sending message data:", messageData);
+      console.log('Sending message data:', messageData);
 
       // Find recipient user by email
       const recipientUser = users.find((u: any) => u.email === messageData.to);
       if (!recipientUser) {
-        console.warn("Recipient not found in user list:", messageData.to);
+        console.warn('Recipient not found in user list:', messageData.to);
         throw new Error(
           `Recipient ${messageData.to} not found. Please make sure the email address is correct and the user exists in the system.`
         );
@@ -141,43 +145,43 @@ export default function EmailStyleMessaging() {
       const messagingData = {
         recipientIds: [recipientUser.id],
         content: `Subject: ${messageData.subject}\n\n${messageData.content}`,
-        contextType: "direct", // This triggers email notifications
+        contextType: 'direct', // This triggers email notifications
       };
 
       const response = await apiRequest(
-        "POST",
-        "/api/messaging",
+        'POST',
+        '/api/messaging',
         messagingData
       );
-      console.log("Send message response:", response);
+      console.log('Send message response:', response);
       return response;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/real-time-messages"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/messaging"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/real-time-messages'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/messaging'] });
       toast({
-        title: "Message sent",
+        title: 'Message sent',
         description:
-          "Your message has been delivered successfully and the recipient will be notified by email.",
+          'Your message has been delivered successfully and the recipient will be notified by email.',
       });
       setIsComposing(false);
       setReplyData(null);
-      setComposeData({ to: "", subject: "", content: "" });
+      setComposeData({ to: '', subject: '', content: '' });
     },
     onError: (error) => {
-      console.error("Send message error:", error);
+      console.error('Send message error:', error);
       // More detailed error handling
-      let errorMessage = "Failed to send message. Please try again.";
-      if (error.message?.includes("401")) {
-        errorMessage = "Authentication required. Please log in first.";
-      } else if (error.message?.includes("403")) {
+      let errorMessage = 'Failed to send message. Please try again.';
+      if (error.message?.includes('401')) {
+        errorMessage = 'Authentication required. Please log in first.';
+      } else if (error.message?.includes('403')) {
         errorMessage =
-          "Permission denied. You may not have access to send messages.";
+          'Permission denied. You may not have access to send messages.';
       }
       toast({
-        title: "Error",
+        title: 'Error',
         description: errorMessage,
-        variant: "destructive",
+        variant: 'destructive',
       });
     },
   });
@@ -217,13 +221,13 @@ export default function EmailStyleMessaging() {
   // Delete message mutation
   const deleteMessageMutation = useMutation({
     mutationFn: async (messageId: string) => {
-      return apiRequest("DELETE", `/api/real-time-messages/${messageId}`);
+      return apiRequest('DELETE', `/api/real-time-messages/${messageId}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/real-time-messages"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/real-time-messages'] });
       toast({
-        title: "Message deleted",
-        description: "The message has been moved to trash.",
+        title: 'Message deleted',
+        description: 'The message has been moved to trash.',
       });
     },
   });
@@ -231,10 +235,10 @@ export default function EmailStyleMessaging() {
   // Mark message as read when clicked
   const markAsReadMutation = useMutation({
     mutationFn: async (messageId: string) => {
-      return apiRequest("POST", `/api/real-time-messages/${messageId}/read`);
+      return apiRequest('POST', `/api/real-time-messages/${messageId}/read`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/real-time-messages"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/real-time-messages'] });
     },
   });
 
@@ -250,9 +254,9 @@ export default function EmailStyleMessaging() {
   const handleCompose = () => {
     if (!composeData.to || !composeData.subject || !composeData.content) {
       toast({
-        title: "Error",
-        description: "Please fill in all fields",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Please fill in all fields',
+        variant: 'destructive',
       });
       return;
     }
@@ -264,7 +268,7 @@ export default function EmailStyleMessaging() {
     setReplyData(message);
     setComposeData({
       to: message.from.email,
-      subject: message.subject.startsWith("Re:")
+      subject: message.subject.startsWith('Re:')
         ? message.subject
         : `Re: ${message.subject}`,
       content: `\n\n--- Original Message ---\nFrom: ${message.from.name} <${
@@ -277,15 +281,15 @@ export default function EmailStyleMessaging() {
   };
 
   const handleReplyAll = (message: EmailMessage) => {
-    const currentUserEmail = (currentUser as any)?.email || "";
+    const currentUserEmail = (currentUser as any)?.email || '';
     const allRecipients = [
       message.from.email,
       ...message.to.filter((email) => email !== currentUserEmail),
     ];
     setReplyData(message);
     setComposeData({
-      to: allRecipients.join(", "),
-      subject: message.subject.startsWith("Re:")
+      to: allRecipients.join(', '),
+      subject: message.subject.startsWith('Re:')
         ? message.subject
         : `Re: ${message.subject}`,
       content: `\n\n--- Original Message ---\nFrom: ${message.from.name} <${
@@ -300,8 +304,8 @@ export default function EmailStyleMessaging() {
   const handleForward = (message: EmailMessage) => {
     setReplyData(message);
     setComposeData({
-      to: "",
-      subject: message.subject.startsWith("Fwd:")
+      to: '',
+      subject: message.subject.startsWith('Fwd:')
         ? message.subject
         : `Fwd: ${message.subject}`,
       content: `\n\n--- Forwarded Message ---\nFrom: ${message.from.name} <${
@@ -328,7 +332,7 @@ export default function EmailStyleMessaging() {
       {/* Sidebar */}
       <div
         className={`${
-          selectedMessage ? "hidden md:block" : "block"
+          selectedMessage ? 'hidden md:block' : 'block'
         } w-56 lg:w-64 border-r bg-gray-50 flex-shrink-0`}
       >
         <div className="p-4 border-b">
@@ -341,43 +345,43 @@ export default function EmailStyleMessaging() {
         <div className="p-2">
           <nav className="space-y-1">
             <Button
-              variant={activeFolder === "inbox" ? "default" : "ghost"}
+              variant={activeFolder === 'inbox' ? 'default' : 'ghost'}
               className="w-full justify-start"
-              onClick={() => handleTabChange("inbox")}
+              onClick={() => handleTabChange('inbox')}
             >
               <Inbox className="h-4 w-4 mr-2" />
               Inbox
               <Badge variant="secondary" className="ml-auto">
                 {Array.isArray(messages)
                   ? messages.filter(
-                      (m: EmailMessage) => m.folder === "inbox" && !m.read
+                      (m: EmailMessage) => m.folder === 'inbox' && !m.read
                     ).length
                   : 0}
               </Badge>
             </Button>
 
             <Button
-              variant={activeFolder === "sent" ? "default" : "ghost"}
+              variant={activeFolder === 'sent' ? 'default' : 'ghost'}
               className="w-full justify-start"
-              onClick={() => handleTabChange("sent")}
+              onClick={() => handleTabChange('sent')}
             >
               <Send className="h-4 w-4 mr-2" />
               Sent
             </Button>
 
             <Button
-              variant={activeFolder === "drafts" ? "default" : "ghost"}
+              variant={activeFolder === 'drafts' ? 'default' : 'ghost'}
               className="w-full justify-start"
-              onClick={() => handleTabChange("drafts")}
+              onClick={() => handleTabChange('drafts')}
             >
               <Archive className="h-4 w-4 mr-2" />
               Drafts
             </Button>
 
             <Button
-              variant={activeFolder === "trash" ? "default" : "ghost"}
+              variant={activeFolder === 'trash' ? 'default' : 'ghost'}
               className="w-full justify-start"
-              onClick={() => handleTabChange("trash")}
+              onClick={() => handleTabChange('trash')}
             >
               <Trash2 className="h-4 w-4 mr-2" />
               Trash
@@ -395,12 +399,12 @@ export default function EmailStyleMessaging() {
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold">
                   {replyData
-                    ? replyData.subject.startsWith("Re:")
-                      ? "Reply to Message"
-                      : replyData.subject.startsWith("Fwd:")
-                      ? "Forward Message"
-                      : "Reply to Message"
-                    : "New Message"}
+                    ? replyData.subject.startsWith('Re:')
+                      ? 'Reply to Message'
+                      : replyData.subject.startsWith('Fwd:')
+                        ? 'Forward Message'
+                        : 'Reply to Message'
+                    : 'New Message'}
                 </h2>
                 <Button
                   variant="ghost"
@@ -498,7 +502,7 @@ export default function EmailStyleMessaging() {
                     onClick={() => {
                       setIsComposing(false);
                       setReplyData(null);
-                      setComposeData({ to: "", subject: "", content: "" });
+                      setComposeData({ to: '', subject: '', content: '' });
                     }}
                   >
                     Cancel
@@ -508,7 +512,7 @@ export default function EmailStyleMessaging() {
                     disabled={sendMessageMutation.isPending}
                   >
                     <Send className="h-4 w-4 mr-2" />
-                    {sendMessageMutation.isPending ? "Sending..." : "Send"}
+                    {sendMessageMutation.isPending ? 'Sending...' : 'Send'}
                   </Button>
                 </div>
               </div>
@@ -520,7 +524,7 @@ export default function EmailStyleMessaging() {
             {/* Message List */}
             <div
               className={`${
-                selectedMessage ? "hidden md:flex md:w-1/2 lg:w-2/5" : "w-full"
+                selectedMessage ? 'hidden md:flex md:w-1/2 lg:w-2/5' : 'w-full'
               } min-w-0 border-r flex flex-col bg-white`}
             >
               <div className="p-4 border-b bg-gray-50 space-y-3">
@@ -573,15 +577,15 @@ export default function EmailStyleMessaging() {
                         key={message.id}
                         className={`px-3 py-4 cursor-pointer transition-colors border-b border-gray-100 ${
                           selectedMessage?.id === message.id
-                            ? "bg-blue-50 border-l-4 border-l-blue-500"
+                            ? 'bg-blue-50 border-l-4 border-l-blue-500'
                             : !message.read
-                            ? "bg-blue-25 hover:bg-blue-50"
-                            : "bg-white hover:bg-gray-50"
+                              ? 'bg-blue-25 hover:bg-blue-50'
+                              : 'bg-white hover:bg-gray-50'
                         } ${
                           selectedMessages.includes(message.id)
-                            ? "bg-blue-25"
-                            : ""
-                        } ${!message.read ? "shadow-sm" : ""}`}
+                            ? 'bg-blue-25'
+                            : ''
+                        } ${!message.read ? 'shadow-sm' : ''}`}
                         onClick={() => handleMessageClick(message)}
                       >
                         <div className="flex items-start gap-3">
@@ -606,14 +610,14 @@ export default function EmailStyleMessaging() {
                                 <span
                                   className={`text-sm truncate ${
                                     !message.read
-                                      ? "font-bold text-gray-900"
-                                      : "font-normal text-gray-600"
+                                      ? 'font-bold text-gray-900'
+                                      : 'font-normal text-gray-600'
                                   }`}
                                 >
-                                  {activeFolder === "sent"
+                                  {activeFolder === 'sent'
                                     ? Array.isArray(message.to)
-                                      ? message.to.join(", ")
-                                      : message.to || "Unknown Recipient"
+                                      ? message.to.join(', ')
+                                      : message.to || 'Unknown Recipient'
                                     : message.from.name}
                                 </span>
                                 {!message.read && (
@@ -632,8 +636,8 @@ export default function EmailStyleMessaging() {
                                 <span
                                   className={`text-xs whitespace-nowrap ${
                                     !message.read
-                                      ? "text-gray-700 font-semibold"
-                                      : "text-gray-500 font-normal"
+                                      ? 'text-gray-700 font-semibold'
+                                      : 'text-gray-500 font-normal'
                                   }`}
                                 >
                                   {formatDate(message.timestamp)}
@@ -646,11 +650,11 @@ export default function EmailStyleMessaging() {
                               <h4
                                 className={`text-sm truncate ${
                                   !message.read
-                                    ? "font-bold text-gray-900"
-                                    : "font-normal text-gray-700"
+                                    ? 'font-bold text-gray-900'
+                                    : 'font-normal text-gray-700'
                                 }`}
                               >
-                                {message.subject || "(No Subject)"}
+                                {message.subject || '(No Subject)'}
                               </h4>
                             </div>
 
@@ -658,8 +662,8 @@ export default function EmailStyleMessaging() {
                             <p
                               className={`text-xs leading-relaxed line-clamp-2 pr-4 ${
                                 !message.read
-                                  ? "text-gray-700 font-medium"
-                                  : "text-gray-500 font-normal"
+                                  ? 'text-gray-700 font-medium'
+                                  : 'text-gray-500 font-normal'
                               }`}
                             >
                               {message.content}
@@ -688,7 +692,7 @@ export default function EmailStyleMessaging() {
             {/* Message Detail */}
             <div
               className={`${
-                selectedMessage ? "flex-1" : "hidden md:flex md:flex-1"
+                selectedMessage ? 'flex-1' : 'hidden md:flex md:flex-1'
               } flex flex-col overflow-hidden`}
             >
               {selectedMessage ? (
@@ -735,7 +739,7 @@ export default function EmailStyleMessaging() {
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1">
-                        {activeFolder === "sent" ? (
+                        {activeFolder === 'sent' ? (
                           // For sent messages, show TO information prominently, FROM minimized
                           <div>
                             <div className="flex items-center gap-2">
@@ -745,8 +749,8 @@ export default function EmailStyleMessaging() {
                               <span className="font-medium">
                                 {selectedMessage.to &&
                                 Array.isArray(selectedMessage.to)
-                                  ? selectedMessage.to.join(", ")
-                                  : selectedMessage.to || "Unknown Recipient"}
+                                  ? selectedMessage.to.join(', ')
+                                  : selectedMessage.to || 'Unknown Recipient'}
                               </span>
                             </div>
                           </div>

@@ -1,10 +1,10 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Search,
   Calendar,
@@ -20,8 +20,8 @@ import {
   Mic,
   UserCheck,
   Bell,
-} from "lucide-react";
-import { format, isValid } from "date-fns";
+} from 'lucide-react';
+import { format, isValid } from 'date-fns';
 
 interface Project {
   id: number;
@@ -75,67 +75,67 @@ interface EventRequest {
 }
 
 const ActionTracking = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [activeTab, setActiveTab] = useState("projects");
+  const [searchTerm, setSearchTerm] = useState('');
+  const [activeTab, setActiveTab] = useState('projects');
 
   // Fetch user's assigned projects
   const { data: projects = [] } = useQuery<Project[]>({
-    queryKey: ["/api/projects/assigned"],
+    queryKey: ['/api/projects/assigned'],
   });
 
   // Fetch user's assigned tasks
   const { data: tasks = [] } = useQuery<ProjectTask[]>({
-    queryKey: ["/api/tasks/assigned"],
+    queryKey: ['/api/tasks/assigned'],
   });
 
   // Fetch user's assigned events
   const { data: events = [] } = useQuery<EventRequest[]>({
-    queryKey: ["/api/event-requests/assigned"],
+    queryKey: ['/api/event-requests/assigned'],
   });
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case "urgent":
-        return "bg-red-100 text-red-800 border-red-200";
-      case "high":
-        return "bg-orange-100 text-orange-800 border-orange-200";
-      case "medium":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
-      case "low":
-        return "bg-green-100 text-green-800 border-green-200";
+      case 'urgent':
+        return 'bg-red-100 text-red-800 border-red-200';
+      case 'high':
+        return 'bg-orange-100 text-orange-800 border-orange-200';
+      case 'medium':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'low':
+        return 'bg-green-100 text-green-800 border-green-200';
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
+        return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "completed":
-        return "bg-green-100 text-green-800";
-      case "in_progress":
-        return "bg-blue-100 text-blue-800";
-      case "waiting":
-        return "bg-yellow-100 text-yellow-800";
-      case "available":
-        return "bg-purple-100 text-purple-800";
-      case "contact_completed":
-        return "bg-teal-100 text-teal-800";
-      case "scheduled":
-        return "bg-indigo-100 text-indigo-800";
-      case "new":
-        return "bg-gray-100 text-gray-800";
+      case 'completed':
+        return 'bg-green-100 text-green-800';
+      case 'in_progress':
+        return 'bg-blue-100 text-blue-800';
+      case 'waiting':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'available':
+        return 'bg-purple-100 text-purple-800';
+      case 'contact_completed':
+        return 'bg-teal-100 text-teal-800';
+      case 'scheduled':
+        return 'bg-indigo-100 text-indigo-800';
+      case 'new':
+        return 'bg-gray-100 text-gray-800';
       default:
-        return "bg-gray-100 text-gray-800";
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   const formatDate = (dateString?: string) => {
-    if (!dateString) return "";
+    if (!dateString) return '';
     try {
       const date = new Date(dateString);
-      return isValid(date) ? format(date, "MMM d, yyyy") : "";
+      return isValid(date) ? format(date, 'MMM d, yyyy') : '';
     } catch {
-      return "";
+      return '';
     }
   };
 
@@ -242,7 +242,7 @@ const ActionTracking = () => {
                             {project.priority}
                           </Badge>
                           <Badge className={getStatusColor(project.status)}>
-                            {project.status.replace("_", " ")}
+                            {project.status.replace('_', ' ')}
                           </Badge>
                         </div>
                       </div>
@@ -317,7 +317,7 @@ const ActionTracking = () => {
                             {task.priority}
                           </Badge>
                           <Badge className={getStatusColor(task.status)}>
-                            {task.status.replace("_", " ")}
+                            {task.status.replace('_', ' ')}
                           </Badge>
                         </div>
                       </div>
@@ -392,16 +392,16 @@ const ActionTracking = () => {
                                     variant="outline"
                                     className="text-xs bg-teal-50 text-teal-700 border-teal-200"
                                   >
-                                    {type === "TSP Contact" && (
+                                    {type === 'TSP Contact' && (
                                       <UserCheck className="w-3 h-3 mr-1" />
                                     )}
-                                    {type === "Driver" && (
+                                    {type === 'Driver' && (
                                       <Car className="w-3 h-3 mr-1" />
                                     )}
-                                    {type === "Speaker" && (
+                                    {type === 'Speaker' && (
                                       <Mic className="w-3 h-3 mr-1" />
                                     )}
-                                    {type === "Direct Assignment" && (
+                                    {type === 'Direct Assignment' && (
                                       <User className="w-3 h-3 mr-1" />
                                     )}
                                     {type}
@@ -412,7 +412,7 @@ const ActionTracking = () => {
                         </div>
                         <div className="flex items-center gap-2 ml-4">
                           <Badge className={getStatusColor(event.status)}>
-                            {event.status.replace("_", " ")}
+                            {event.status.replace('_', ' ')}
                           </Badge>
                           {event.contactedAt && (
                             <Badge className="bg-green-100 text-green-800">
@@ -441,7 +441,7 @@ const ActionTracking = () => {
                           )}
                           {event.communicationMethod && (
                             <div className="flex items-center gap-1">
-                              {event.communicationMethod.includes("email") ? (
+                              {event.communicationMethod.includes('email') ? (
                                 <Mail className="w-4 h-4" />
                               ) : (
                                 <Phone className="w-4 h-4" />
@@ -469,9 +469,9 @@ const ActionTracking = () => {
                                 onClick={() =>
                                   handleFollowUpComplete(
                                     event.id,
-                                    event.followUpReason?.includes("1-day")
-                                      ? "one_day"
-                                      : "one_month"
+                                    event.followUpReason?.includes('1-day')
+                                      ? 'one_day'
+                                      : 'one_month'
                                   )
                                 }
                               >

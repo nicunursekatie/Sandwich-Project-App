@@ -1,8 +1,8 @@
-import React, { useState, useCallback, useRef } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest, queryClient as baseQueryClient } from "@/lib/queryClient";
+import React, { useState, useCallback, useRef } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest, queryClient as baseQueryClient } from '@/lib/queryClient';
 import {
   formatDateForInput,
   formatDateForDisplay,
@@ -10,12 +10,12 @@ import {
   isDateInPast,
   getTodayString,
   formatTimeForDisplay,
-} from "@/lib/date-utils";
+} from '@/lib/date-utils';
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 import {
   Dialog,
   DialogContent,
@@ -23,19 +23,19 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogDescription,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { ObjectUploader } from "@/components/ObjectUploader";
-import { ProjectAssigneeSelector } from "@/components/project-assignee-selector";
+} from '@/components/ui/select';
+import { ObjectUploader } from '@/components/ObjectUploader';
+import { ProjectAssigneeSelector } from '@/components/project-assignee-selector';
 import {
   CalendarDays,
   Clock,
@@ -69,7 +69,7 @@ import {
   UserPlus,
   Edit3,
   UserCog,
-} from "lucide-react";
+} from 'lucide-react';
 
 interface Meeting {
   id: number;
@@ -135,65 +135,65 @@ interface ProjectTask {
 // Helper function to format status text
 const formatStatusText = (status: string) => {
   return status
-    .split("_")
+    .split('_')
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
+    .join(' ');
 };
 
 // Helper function to get status badge color and style
 const getStatusBadgeProps = (status: string) => {
   switch (status) {
-    case "completed":
+    case 'completed':
       return {
-        variant: "default" as const,
-        className: "bg-teal-100 text-teal-800 border-teal-200",
+        variant: 'default' as const,
+        className: 'bg-teal-100 text-teal-800 border-teal-200',
       };
-    case "in_progress":
+    case 'in_progress':
       return {
-        variant: "secondary" as const,
-        className: "text-black border-2",
-        style: { backgroundColor: "#FBAD3F", borderColor: "#FBAD3F" },
+        variant: 'secondary' as const,
+        className: 'text-black border-2',
+        style: { backgroundColor: '#FBAD3F', borderColor: '#FBAD3F' },
       };
-    case "pending":
+    case 'pending':
       return {
-        variant: "secondary" as const,
-        className: "bg-gray-100 text-gray-800 border-gray-200",
+        variant: 'secondary' as const,
+        className: 'bg-gray-100 text-gray-800 border-gray-200',
       };
-    case "on_hold":
+    case 'on_hold':
       return {
-        variant: "outline" as const,
-        className: "bg-red-50 text-red-700 border-red-200",
+        variant: 'outline' as const,
+        className: 'bg-red-50 text-red-700 border-red-200',
       };
     default:
       return {
-        variant: "secondary" as const,
-        className: "bg-gray-100 text-gray-800 border-gray-200",
+        variant: 'secondary' as const,
+        className: 'bg-gray-100 text-gray-800 border-gray-200',
       };
   }
 };
 
 const getCategoryIcon = (category: string) => {
   switch (category) {
-    case "technology":
-      return "💻";
-    case "events":
-      return "📅";
-    case "grants":
-      return "💰";
-    case "outreach":
-      return "🤝";
-    case "marketing":
-      return "📢";
-    case "operations":
-      return "⚙️";
-    case "community":
-      return "👥";
-    case "fundraising":
-      return "💵";
-    case "event":
-      return "🎉";
+    case 'technology':
+      return '💻';
+    case 'events':
+      return '📅';
+    case 'grants':
+      return '💰';
+    case 'outreach':
+      return '🤝';
+    case 'marketing':
+      return '📢';
+    case 'operations':
+      return '⚙️';
+    case 'community':
+      return '👥';
+    case 'fundraising':
+      return '💵';
+    case 'event':
+      return '🎉';
     default:
-      return "📁";
+      return '📁';
   }
 };
 
@@ -265,16 +265,16 @@ export default function EnhancedMeetingDashboard() {
   const [selectedMeeting, setSelectedMeeting] = useState<Meeting | null>(null);
   const [isCompiling, setIsCompiling] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
-  const [viewMode, setViewMode] = useState<"grid" | "calendar">("grid");
-  const [activeTab, setActiveTab] = useState<"overview" | "agenda">("overview");
+  const [viewMode, setViewMode] = useState<'grid' | 'calendar'>('grid');
+  const [activeTab, setActiveTab] = useState<'overview' | 'agenda'>('overview');
   const [showNewMeetingDialog, setShowNewMeetingDialog] = useState(false);
   const [newMeetingData, setNewMeetingData] = useState({
-    title: "",
-    date: "",
-    time: "",
-    type: "core_team",
-    location: "",
-    description: "",
+    title: '',
+    date: '',
+    time: '',
+    type: 'core_team',
+    location: '',
+    description: '',
   });
   const [selectedProjectIds, setSelectedProjectIds] = useState<number[]>([]);
   const [projectDiscussionTopics, setProjectDiscussionTopics] = useState<
@@ -286,18 +286,18 @@ export default function EnhancedMeetingDashboard() {
   const [showEditPeopleDialog, setShowEditPeopleDialog] = useState(false);
   const [showEditOwnerDialog, setShowEditOwnerDialog] = useState(false);
   const [showAddTaskDialog, setShowAddTaskDialog] = useState(false);
-  const [editSupportPeople, setEditSupportPeople] = useState<string>("");
-  const [editProjectOwner, setEditProjectOwner] = useState<string>("");
+  const [editSupportPeople, setEditSupportPeople] = useState<string>('');
+  const [editProjectOwner, setEditProjectOwner] = useState<string>('');
   const [supportPeopleList, setSupportPeopleList] = useState<
     Array<{
       id?: string;
       name: string;
       email?: string;
-      type: "user" | "custom";
+      type: 'user' | 'custom';
     }>
   >([]);
-  const [newTaskTitle, setNewTaskTitle] = useState<string>("");
-  const [newTaskDescription, setNewTaskDescription] = useState<string>("");
+  const [newTaskTitle, setNewTaskTitle] = useState<string>('');
+  const [newTaskDescription, setNewTaskDescription] = useState<string>('');
   const [uploadedFiles, setUploadedFiles] = useState<
     Record<number, { url: string; name: string }[]>
   >({});
@@ -307,7 +307,7 @@ export default function EnhancedMeetingDashboard() {
     new Set()
   );
   const [projectAgendaStatus, setProjectAgendaStatus] = useState<
-    Record<number, "none" | "agenda" | "tabled">
+    Record<number, 'none' | 'agenda' | 'tabled'>
   >({});
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [isSavingProgress, setIsSavingProgress] = useState(false);
@@ -324,42 +324,41 @@ export default function EnhancedMeetingDashboard() {
   const [editingMeeting, setEditingMeeting] = useState<Meeting | null>(null);
   const [showEditMeetingDialog, setShowEditMeetingDialog] = useState(false);
   const [editMeetingData, setEditMeetingData] = useState({
-    title: "",
-    date: "",
-    time: "",
-    type: "",
-    location: "",
-    description: "",
+    title: '',
+    date: '',
+    time: '',
+    type: '',
+    location: '',
+    description: '',
   });
 
   // Off-agenda item form states
-  const [offAgendaTitle, setOffAgendaTitle] = useState("");
-  const [offAgendaSection, setOffAgendaSection] = useState("");
+  const [offAgendaTitle, setOffAgendaTitle] = useState('');
+  const [offAgendaSection, setOffAgendaSection] = useState('');
 
   // Fetch meetings
   const { data: meetings = [], isLoading: meetingsLoading } = useQuery<
     Meeting[]
   >({
-    queryKey: ["/api/meetings"],
+    queryKey: ['/api/meetings'],
   });
 
   // Fetch projects for review
   const { data: projectsForReview = [] } = useQuery<Project[]>({
-    queryKey: ["/api/projects/for-review"],
+    queryKey: ['/api/projects/for-review'],
   });
 
   // Fetch all projects for agenda planning
   const { data: allProjects = [] } = useQuery<Project[]>({
-    queryKey: ["/api/projects"],
+    queryKey: ['/api/projects'],
   });
 
   // Fetch compiled agenda for selected meeting
-  const { data: compiledAgenda, isLoading: agendaLoading } = useQuery<
-    CompiledAgenda
-  >({
-    queryKey: ["/api/meetings", selectedMeeting?.id, "compiled-agenda"],
-    enabled: !!selectedMeeting,
-  });
+  const { data: compiledAgenda, isLoading: agendaLoading } =
+    useQuery<CompiledAgenda>({
+      queryKey: ['/api/meetings', selectedMeeting?.id, 'compiled-agenda'],
+      enabled: !!selectedMeeting,
+    });
 
   // Update project discussion mutation
   const updateProjectDiscussionMutation = useMutation({
@@ -374,18 +373,18 @@ export default function EnhancedMeetingDashboard() {
         reviewInNextMeeting?: boolean;
       };
     }) => {
-      return await apiRequest("PATCH", `/api/projects/${projectId}`, updates);
+      return await apiRequest('PATCH', `/api/projects/${projectId}`, updates);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/projects/for-review"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/projects/for-review'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
     },
     onError: (error: Error) => {
       toast({
-        title: "Update Failed",
+        title: 'Update Failed',
         description:
-          error.message || "Failed to update project discussion notes.",
-        variant: "destructive",
+          error.message || 'Failed to update project discussion notes.',
+        variant: 'destructive',
       });
     },
   });
@@ -397,8 +396,8 @@ export default function EnhancedMeetingDashboard() {
         (project: any) =>
           (project.meetingDiscussionPoints?.trim() ||
             project.meetingDecisionItems?.trim()) &&
-          (projectAgendaStatus[project.id] === "agenda" ||
-            projectAgendaStatus[project.id] === "tabled")
+          (projectAgendaStatus[project.id] === 'agenda' ||
+            projectAgendaStatus[project.id] === 'tabled')
       );
 
       const taskPromises = projectsWithNotes.map(async (project: any) => {
@@ -409,12 +408,12 @@ export default function EnhancedMeetingDashboard() {
           tasks.push({
             title: project.meetingDiscussionPoints.trim(),
             description: `Project: ${project.title}`,
-            assigneeName: project.assigneeName || "Unassigned",
-            priority: "medium",
-            status: "pending",
+            assigneeName: project.assigneeName || 'Unassigned',
+            priority: 'medium',
+            status: 'pending',
             dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
               .toISOString()
-              .split("T")[0], // 7 days from now
+              .split('T')[0], // 7 days from now
           });
         }
 
@@ -423,19 +422,19 @@ export default function EnhancedMeetingDashboard() {
           tasks.push({
             title: `Action item: ${project.title}`,
             description: `Meeting Decisions to Implement: ${project.meetingDecisionItems.trim()}`,
-            assigneeName: project.assigneeName || "Unassigned",
-            priority: "high",
-            status: "pending",
+            assigneeName: project.assigneeName || 'Unassigned',
+            priority: 'high',
+            status: 'pending',
             dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000)
               .toISOString()
-              .split("T")[0], // 3 days for decisions
+              .split('T')[0], // 3 days for decisions
           });
         }
 
         // Create tasks for this project
         const taskResults = await Promise.all(
           tasks.map((task) =>
-            apiRequest("POST", `/api/projects/${project.id}/tasks`, task)
+            apiRequest('POST', `/api/projects/${project.id}/tasks`, task)
           )
         );
 
@@ -454,25 +453,25 @@ export default function EnhancedMeetingDashboard() {
       );
       const projectCount = results.length;
 
-      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
 
       toast({
-        title: "Tasks Created Successfully!",
+        title: 'Tasks Created Successfully!',
         description: `Created ${totalTasks} task${
-          totalTasks !== 1 ? "s" : ""
+          totalTasks !== 1 ? 's' : ''
         } from meeting notes across ${projectCount} project${
-          projectCount !== 1 ? "s" : ""
+          projectCount !== 1 ? 's' : ''
         }`,
         duration: 5000,
       });
     },
     onError: (error: any) => {
-      console.error("Failed to create tasks from notes:", error);
+      console.error('Failed to create tasks from notes:', error);
       toast({
-        title: "Error Creating Tasks",
+        title: 'Error Creating Tasks',
         description:
-          error?.message || "Failed to convert meeting notes into tasks",
-        variant: "destructive",
+          error?.message || 'Failed to convert meeting notes into tasks',
+        variant: 'destructive',
       });
     },
   });
@@ -485,8 +484,8 @@ export default function EnhancedMeetingDashboard() {
         (project: any) =>
           (project.meetingDiscussionPoints?.trim() ||
             project.meetingDecisionItems?.trim()) &&
-          (projectAgendaStatus[project.id] === "agenda" ||
-            projectAgendaStatus[project.id] === "tabled")
+          (projectAgendaStatus[project.id] === 'agenda' ||
+            projectAgendaStatus[project.id] === 'tabled')
       );
 
       if (projectsWithNotes.length > 0) {
@@ -498,12 +497,12 @@ export default function EnhancedMeetingDashboard() {
             tasks.push({
               title: `Follow up on: ${project.title}`,
               description: `Meeting Discussion Notes: ${project.meetingDiscussionPoints.trim()}`,
-              assigneeName: project.assigneeName || "Unassigned",
-              priority: "medium",
-              status: "pending",
+              assigneeName: project.assigneeName || 'Unassigned',
+              priority: 'medium',
+              status: 'pending',
               dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
                 .toISOString()
-                .split("T")[0], // 7 days from now
+                .split('T')[0], // 7 days from now
             });
           }
 
@@ -512,12 +511,12 @@ export default function EnhancedMeetingDashboard() {
             tasks.push({
               title: `Action item: ${project.title}`,
               description: `Meeting Decisions to Implement: ${project.meetingDecisionItems.trim()}`,
-              assigneeName: project.assigneeName || "Unassigned",
-              priority: "high",
-              status: "pending",
+              assigneeName: project.assigneeName || 'Unassigned',
+              priority: 'high',
+              status: 'pending',
               dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000)
                 .toISOString()
-                .split("T")[0], // 3 days for decisions
+                .split('T')[0], // 3 days for decisions
             });
           }
 
@@ -525,7 +524,7 @@ export default function EnhancedMeetingDashboard() {
           if (tasks.length > 0) {
             const taskResults = await Promise.all(
               tasks.map((task) =>
-                apiRequest("POST", `/api/projects/${project.id}/tasks`, task)
+                apiRequest('POST', `/api/projects/${project.id}/tasks`, task)
               )
             );
             return {
@@ -547,9 +546,9 @@ export default function EnhancedMeetingDashboard() {
             project.meetingDecisionItems?.trim()
         )
         .map(async (project: any) => {
-          return apiRequest("PATCH", `/api/projects/${project.id}`, {
-            meetingDiscussionPoints: "",
-            meetingDecisionItems: "",
+          return apiRequest('PATCH', `/api/projects/${project.id}`, {
+            meetingDiscussionPoints: '',
+            meetingDecisionItems: '',
             reviewInNextMeeting: false,
           });
         });
@@ -559,7 +558,7 @@ export default function EnhancedMeetingDashboard() {
       }
 
       // Step 3: Refresh projects from Google Sheets to get any updates made during the week
-      await apiRequest("POST", "/api/google-sheets/projects/sync/from-sheets");
+      await apiRequest('POST', '/api/google-sheets/projects/sync/from-sheets');
 
       return {
         notesProcessed: projectsWithNotes.length,
@@ -573,10 +572,10 @@ export default function EnhancedMeetingDashboard() {
       setLocalProjectText({});
 
       // Refresh projects data
-      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
 
       toast({
-        title: "Agenda Planning Reset Complete!",
+        title: 'Agenda Planning Reset Complete!',
         description: `✓ ${results.notesProcessed} projects converted to tasks\n✓ ${results.notesCleared} project notes cleared\n✓ Projects refreshed from Google Sheets\n✓ Ready for next week's planning`,
         duration: 8000,
       });
@@ -584,12 +583,12 @@ export default function EnhancedMeetingDashboard() {
       setShowResetConfirmDialog(false);
     },
     onError: (error: any) => {
-      console.error("Failed to reset agenda planning:", error);
+      console.error('Failed to reset agenda planning:', error);
       toast({
-        title: "Reset Failed",
+        title: 'Reset Failed',
         description:
-          error?.message || "Failed to complete agenda planning reset",
-        variant: "destructive",
+          error?.message || 'Failed to complete agenda planning reset',
+        variant: 'destructive',
       });
       setShowResetConfirmDialog(false);
     },
@@ -602,29 +601,29 @@ export default function EnhancedMeetingDashboard() {
       section: string;
       meetingId: number;
     }) => {
-      return await apiRequest("POST", "/api/agenda-items", {
+      return await apiRequest('POST', '/api/agenda-items', {
         title: itemData.title,
         description: `Section: ${itemData.section}`,
         meetingId: itemData.meetingId,
-        submittedBy: user?.email || "unknown",
+        submittedBy: user?.email || 'unknown',
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/agenda-items"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/agenda-items'] });
       toast({
-        title: "Agenda Item Added",
+        title: 'Agenda Item Added',
         description:
-          "Off-agenda item has been successfully added to the meeting",
+          'Off-agenda item has been successfully added to the meeting',
       });
       // Reset form
-      setOffAgendaTitle("");
-      setOffAgendaSection("");
+      setOffAgendaTitle('');
+      setOffAgendaSection('');
     },
     onError: (error: Error) => {
       toast({
-        title: "Failed to Add Item",
-        description: error.message || "Failed to add off-agenda item",
-        variant: "destructive",
+        title: 'Failed to Add Item',
+        description: error.message || 'Failed to add off-agenda item',
+        variant: 'destructive',
       });
     },
   });
@@ -633,18 +632,18 @@ export default function EnhancedMeetingDashboard() {
   const handleAddOffAgendaItem = () => {
     if (!offAgendaTitle.trim()) {
       toast({
-        title: "Title Required",
-        description: "Please enter a title for the agenda item",
-        variant: "destructive",
+        title: 'Title Required',
+        description: 'Please enter a title for the agenda item',
+        variant: 'destructive',
       });
       return;
     }
 
     if (!offAgendaSection) {
       toast({
-        title: "Section Required",
-        description: "Please select a section for the agenda item",
-        variant: "destructive",
+        title: 'Section Required',
+        description: 'Please select a section for the agenda item',
+        variant: 'destructive',
       });
       return;
     }
@@ -673,9 +672,9 @@ export default function EnhancedMeetingDashboard() {
 
     if (!targetMeeting) {
       toast({
-        title: "No Meetings Available",
-        description: "Please create a meeting first to add agenda items",
-        variant: "destructive",
+        title: 'No Meetings Available',
+        description: 'Please create a meeting first to add agenda items',
+        variant: 'destructive',
       });
       return;
     }
@@ -719,7 +718,7 @@ export default function EnhancedMeetingDashboard() {
   const handleTextChange = useCallback(
     (
       projectId: number,
-      field: "discussionPoints" | "decisionItems",
+      field: 'discussionPoints' | 'decisionItems',
       value: string
     ) => {
       // Update local state immediately
@@ -733,7 +732,7 @@ export default function EnhancedMeetingDashboard() {
 
       // Trigger debounced save
       const updates =
-        field === "discussionPoints"
+        field === 'discussionPoints'
           ? { meetingDiscussionPoints: value }
           : { meetingDecisionItems: value };
 
@@ -746,7 +745,7 @@ export default function EnhancedMeetingDashboard() {
   const getTextValue = useCallback(
     (
       projectId: number,
-      field: "discussionPoints" | "decisionItems",
+      field: 'discussionPoints' | 'decisionItems',
       fallback: string
     ) => {
       const localValue = localProjectText[projectId]?.[field];
@@ -759,7 +758,7 @@ export default function EnhancedMeetingDashboard() {
   const handleSendToAgenda = useCallback(
     (projectId: number) => {
       // Debug logging for Christine's issue
-      console.log("🔍 Send to Agenda Debug Info:", {
+      console.log('🔍 Send to Agenda Debug Info:', {
         user: user?.email,
         role: user?.role,
         permissions: user?.permissions?.length || 0,
@@ -767,14 +766,14 @@ export default function EnhancedMeetingDashboard() {
         timestamp: new Date().toISOString(),
       });
 
-      setProjectAgendaStatus((prev) => ({ ...prev, [projectId]: "agenda" }));
+      setProjectAgendaStatus((prev) => ({ ...prev, [projectId]: 'agenda' }));
       setMinimizedProjects((prev) => new Set([...Array.from(prev), projectId]));
       updateProjectDiscussionMutation.mutate({
         projectId,
         updates: { reviewInNextMeeting: true },
       });
       toast({
-        title: "Added to Agenda",
+        title: 'Added to Agenda',
         description: "Project has been added to this week's meeting agenda",
       });
     },
@@ -783,15 +782,15 @@ export default function EnhancedMeetingDashboard() {
 
   const handleTableProject = useCallback(
     (projectId: number) => {
-      setProjectAgendaStatus((prev) => ({ ...prev, [projectId]: "tabled" }));
+      setProjectAgendaStatus((prev) => ({ ...prev, [projectId]: 'tabled' }));
       setMinimizedProjects((prev) => new Set([...Array.from(prev), projectId]));
       updateProjectDiscussionMutation.mutate({
         projectId,
         updates: { reviewInNextMeeting: false },
       });
       toast({
-        title: "Tabled for Later",
-        description: "Project has been tabled for a future meeting",
+        title: 'Tabled for Later',
+        description: 'Project has been tabled for a future meeting',
       });
     },
     [updateProjectDiscussionMutation, toast]
@@ -812,22 +811,22 @@ export default function EnhancedMeetingDashboard() {
 
       // Get agenda projects and tabled projects (excluding completed ones)
       const activeProjects = Array.isArray(allProjects)
-        ? allProjects.filter((p: Project) => p.status !== "completed")
+        ? allProjects.filter((p: Project) => p.status !== 'completed')
         : [];
       const agendaProjects = activeProjects.filter(
-        (p: Project) => projectAgendaStatus[p.id] === "agenda"
+        (p: Project) => projectAgendaStatus[p.id] === 'agenda'
       );
       const tabledProjects = activeProjects.filter(
-        (p: Project) => projectAgendaStatus[p.id] === "tabled"
+        (p: Project) => projectAgendaStatus[p.id] === 'tabled'
       );
 
       // Validate that we have agenda items to generate
       if (agendaProjects.length === 0 && tabledProjects.length === 0) {
         toast({
-          title: "No Agenda Items",
+          title: 'No Agenda Items',
           description:
-            "Please add at least one project to the agenda or table some items before generating PDF.",
-          variant: "destructive",
+            'Please add at least one project to the agenda or table some items before generating PDF.',
+          variant: 'destructive',
         });
         return;
       }
@@ -839,37 +838,37 @@ export default function EnhancedMeetingDashboard() {
             const tasksResponse = await fetch(
               `/api/projects/${project.id}/tasks`,
               {
-                credentials: "include",
+                credentials: 'include',
               }
             );
             const tasks = tasksResponse.ok ? await tasksResponse.json() : [];
 
             return {
               title: project.title,
-              owner: project.assigneeName || "Unassigned",
-              supportPeople: project.supportPeople || "",
-              discussionPoints: project.meetingDiscussionPoints || "",
-              decisionItems: project.meetingDecisionItems || "",
+              owner: project.assigneeName || 'Unassigned',
+              supportPeople: project.supportPeople || '',
+              discussionPoints: project.meetingDiscussionPoints || '',
+              decisionItems: project.meetingDecisionItems || '',
               status: project.status,
               priority: project.priority,
               tasks: tasks
-                .filter((task: any) => task.status !== "completed")
+                .filter((task: any) => task.status !== 'completed')
                 .map((task: any) => ({
                   title: task.title,
                   status: task.status,
                   priority: task.priority,
                   description: task.description,
-                  assignee: task.assigneeName || task.assignee || "Unassigned",
+                  assignee: task.assigneeName || task.assignee || 'Unassigned',
                 })),
             };
           } catch (error) {
             // If task fetching fails, continue without tasks
             return {
               title: project.title,
-              owner: project.assigneeName || "Unassigned",
-              supportPeople: project.supportPeople || "",
-              discussionPoints: project.meetingDiscussionPoints || "",
-              decisionItems: project.meetingDecisionItems || "",
+              owner: project.assigneeName || 'Unassigned',
+              supportPeople: project.supportPeople || '',
+              discussionPoints: project.meetingDiscussionPoints || '',
+              decisionItems: project.meetingDecisionItems || '',
               status: project.status,
               priority: project.priority,
               tasks: [],
@@ -884,19 +883,19 @@ export default function EnhancedMeetingDashboard() {
         agendaProjects: projectsWithTasks,
         tabledProjects: tabledProjects.map((p: Project) => ({
           title: p.title,
-          owner: p.assigneeName || "Unassigned",
-          reason: p.meetingDiscussionPoints || "No reason specified",
+          owner: p.assigneeName || 'Unassigned',
+          reason: p.meetingDiscussionPoints || 'No reason specified',
         })),
       };
 
       // Call API to generate PDF using fetch directly (for binary response)
-      const response = await fetch("/api/meetings/finalize-agenda-pdf", {
-        method: "POST",
+      const response = await fetch('/api/meetings/finalize-agenda-pdf', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(agendaData),
-        credentials: "include",
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -917,38 +916,38 @@ export default function EnhancedMeetingDashboard() {
       // Download the PDF
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
+      const link = document.createElement('a');
       link.href = url;
       link.download = `meeting-agenda-${getTodayString()}.pdf`;
       link.click();
       window.URL.revokeObjectURL(url);
 
       toast({
-        title: "Agenda Finalized",
+        title: 'Agenda Finalized',
         description: `PDF agenda downloaded with ${agendaProjects.length} projects and ${tabledProjects.length} tabled items`,
       });
     } catch (error) {
-      console.error("=== PDF GENERATION CLIENT ERROR ===");
-      console.error("Error details:", error);
-      console.error("User permissions:", user?.permissions);
-      console.error("User email:", user?.email);
-      console.error("====================================");
+      console.error('=== PDF GENERATION CLIENT ERROR ===');
+      console.error('Error details:', error);
+      console.error('User permissions:', user?.permissions);
+      console.error('User email:', user?.email);
+      console.error('====================================');
 
-      let errorMessage = "Failed to generate agenda PDF";
-      if (error?.message?.includes("403")) {
+      let errorMessage = 'Failed to generate agenda PDF';
+      if (error?.message?.includes('403')) {
         errorMessage =
-          "Permission denied - please contact an administrator to ensure you have meeting management permissions";
-      } else if (error?.message?.includes("400")) {
+          'Permission denied - please contact an administrator to ensure you have meeting management permissions';
+      } else if (error?.message?.includes('400')) {
         errorMessage =
-          "Invalid agenda data - please ensure you have projects selected for the agenda";
+          'Invalid agenda data - please ensure you have projects selected for the agenda';
       } else if (error?.message) {
         errorMessage = error.message;
       }
 
       toast({
-        title: "Export Failed",
+        title: 'Export Failed',
         description: errorMessage,
-        variant: "destructive",
+        variant: 'destructive',
         duration: 8000, // Show longer for debugging
       });
     } finally {
@@ -958,7 +957,7 @@ export default function EnhancedMeetingDashboard() {
 
   // Calculate agenda summary (only for non-completed projects)
   const activeProjects = Array.isArray(allProjects)
-    ? allProjects.filter((project: Project) => project.status !== "completed")
+    ? allProjects.filter((project: Project) => project.status !== 'completed')
     : [];
   const agendaSummary = {
     agendaCount: Object.entries(projectAgendaStatus).filter(
@@ -966,7 +965,7 @@ export default function EnhancedMeetingDashboard() {
         const project = Array.isArray(allProjects)
           ? allProjects.find((p: Project) => p.id === parseInt(projectId))
           : undefined;
-        return project && project.status !== "completed" && status === "agenda";
+        return project && project.status !== 'completed' && status === 'agenda';
       }
     ).length,
     tabledCount: Object.entries(projectAgendaStatus).filter(
@@ -974,7 +973,7 @@ export default function EnhancedMeetingDashboard() {
         const project = Array.isArray(allProjects)
           ? allProjects.find((p: Project) => p.id === parseInt(projectId))
           : undefined;
-        return project && project.status !== "completed" && status === "tabled";
+        return project && project.status !== 'completed' && status === 'tabled';
       }
     ).length,
     undecidedCount:
@@ -983,14 +982,14 @@ export default function EnhancedMeetingDashboard() {
         const project = Array.isArray(allProjects)
           ? allProjects.find((p: Project) => p.id === parseInt(projectId))
           : undefined;
-        return project && project.status !== "completed";
+        return project && project.status !== 'completed';
       }).length,
   };
 
   // Helper function to format dates in a user-friendly way - TIMEZONE SAFE
   const formatMeetingDate = (dateString: string) => {
     // Use timezone-safe parsing by adding noon time
-    const date = new Date(dateString + "T12:00:00");
+    const date = new Date(dateString + 'T12:00:00');
     const today = new Date();
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
@@ -1013,16 +1012,16 @@ export default function EnhancedMeetingDashboard() {
     );
 
     if (meetingDateOnly.getTime() === todayOnly.getTime()) {
-      return "Today";
+      return 'Today';
     } else if (meetingDateOnly.getTime() === tomorrowOnly.getTime()) {
-      return "Tomorrow";
+      return 'Tomorrow';
     } else {
-      return date.toLocaleDateString("en-US", {
-        weekday: "short",
-        month: "short",
-        day: "numeric",
+      return date.toLocaleDateString('en-US', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
         year:
-          date.getFullYear() !== today.getFullYear() ? "numeric" : undefined,
+          date.getFullYear() !== today.getFullYear() ? 'numeric' : undefined,
       });
     }
   };
@@ -1046,16 +1045,16 @@ export default function EnhancedMeetingDashboard() {
     endOfWeek.setDate(startOfWeek.getDate() + 6); // Saturday
 
     return {
-      week: `${startOfWeek.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-      })} - ${endOfWeek.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
+      week: `${startOfWeek.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+      })} - ${endOfWeek.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
       })}`,
-      month: now.toLocaleDateString("en-US", {
-        month: "long",
-        year: "numeric",
+      month: now.toLocaleDateString('en-US', {
+        month: 'long',
+        year: 'numeric',
       }),
     };
   };
@@ -1066,29 +1065,29 @@ export default function EnhancedMeetingDashboard() {
   const compileAgendaMutation = useMutation({
     mutationFn: async (meetingId: number) => {
       return await apiRequest(
-        "POST",
+        'POST',
         `/api/meetings/${meetingId}/compile-agenda`
       );
     },
     onSuccess: () => {
       toast({
-        title: "Agenda Compiled Successfully",
+        title: 'Agenda Compiled Successfully',
         description:
-          "The meeting agenda has been compiled from Google Sheet projects and submitted items.",
+          'The meeting agenda has been compiled from Google Sheet projects and submitted items.',
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/meetings"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/meetings'] });
       if (selectedMeeting) {
         queryClient.invalidateQueries({
-          queryKey: ["/api/meetings", selectedMeeting.id, "compiled-agenda"],
+          queryKey: ['/api/meetings', selectedMeeting.id, 'compiled-agenda'],
         });
       }
     },
     onError: (error: Error) => {
       toast({
-        title: "Compilation Failed",
+        title: 'Compilation Failed',
         description:
-          error.message || "Failed to compile agenda. Please try again.",
-        variant: "destructive",
+          error.message || 'Failed to compile agenda. Please try again.',
+        variant: 'destructive',
       });
     },
   });
@@ -1097,23 +1096,23 @@ export default function EnhancedMeetingDashboard() {
   const exportToSheetsMutation = useMutation({
     mutationFn: async (meetingId: number) => {
       return await apiRequest(
-        "POST",
+        'POST',
         `/api/meetings/${meetingId}/export-to-sheets`
       );
     },
     onSuccess: () => {
       toast({
-        title: "Export Successful",
-        description: "Meeting agenda has been exported to Google Sheets.",
+        title: 'Export Successful',
+        description: 'Meeting agenda has been exported to Google Sheets.',
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Export Failed",
+        title: 'Export Failed',
         description:
           error.message ||
-          "Failed to export to Google Sheets. Please try again.",
-        variant: "destructive",
+          'Failed to export to Google Sheets. Please try again.',
+        variant: 'destructive',
       });
     },
   });
@@ -1137,8 +1136,8 @@ export default function EnhancedMeetingDashboard() {
 
     try {
       const response = await fetch(`/api/meetings/${meeting.id}/download-pdf`, {
-        method: "GET",
-        credentials: "include", // Include session cookies
+        method: 'GET',
+        credentials: 'include', // Include session cookies
       });
 
       if (!response.ok) {
@@ -1150,9 +1149,9 @@ export default function EnhancedMeetingDashboard() {
 
       // Create download link
       const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
+      const link = document.createElement('a');
       link.href = url;
-      link.download = `${meeting.title.replace(/[^a-zA-Z0-9\s]/g, "_")}_${
+      link.download = `${meeting.title.replace(/[^a-zA-Z0-9\s]/g, '_')}_${
         meeting.date
       }.pdf`;
 
@@ -1165,16 +1164,16 @@ export default function EnhancedMeetingDashboard() {
       window.URL.revokeObjectURL(url);
 
       toast({
-        title: "PDF Downloaded",
-        description: "Meeting agenda PDF has been downloaded successfully.",
+        title: 'PDF Downloaded',
+        description: 'Meeting agenda PDF has been downloaded successfully.',
       });
     } catch (error) {
-      console.error("PDF download error:", error);
+      console.error('PDF download error:', error);
       toast({
-        title: "Download Failed",
+        title: 'Download Failed',
         description:
-          "Failed to download the meeting agenda PDF. Please try again.",
-        variant: "destructive",
+          'Failed to download the meeting agenda PDF. Please try again.',
+        variant: 'destructive',
       });
     }
   };
@@ -1182,30 +1181,30 @@ export default function EnhancedMeetingDashboard() {
   // Create new meeting mutation
   const createMeetingMutation = useMutation({
     mutationFn: async (meetingData: typeof newMeetingData) => {
-      return await apiRequest("POST", "/api/meetings", meetingData);
+      return await apiRequest('POST', '/api/meetings', meetingData);
     },
     onSuccess: () => {
       toast({
-        title: "Meeting Scheduled",
-        description: "Your new meeting has been scheduled successfully.",
+        title: 'Meeting Scheduled',
+        description: 'Your new meeting has been scheduled successfully.',
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/meetings"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/meetings'] });
       setShowNewMeetingDialog(false);
       setNewMeetingData({
-        title: "",
-        date: "",
-        time: "",
-        type: "core_team",
-        location: "",
-        description: "",
+        title: '',
+        date: '',
+        time: '',
+        type: 'core_team',
+        location: '',
+        description: '',
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Failed to Schedule Meeting",
+        title: 'Failed to Schedule Meeting',
         description:
-          error.message || "Failed to schedule the meeting. Please try again.",
-        variant: "destructive",
+          error.message || 'Failed to schedule the meeting. Please try again.',
+        variant: 'destructive',
       });
     },
   });
@@ -1216,26 +1215,26 @@ export default function EnhancedMeetingDashboard() {
       meetingData: { id: number } & typeof editMeetingData
     ) => {
       return await apiRequest(
-        "PATCH",
+        'PATCH',
         `/api/meetings/${meetingData.id}`,
         meetingData
       );
     },
     onSuccess: () => {
       toast({
-        title: "Meeting Updated",
-        description: "Meeting details have been updated successfully.",
+        title: 'Meeting Updated',
+        description: 'Meeting details have been updated successfully.',
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/meetings"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/meetings'] });
       setShowEditMeetingDialog(false);
       setEditingMeeting(null);
     },
     onError: (error: Error) => {
       toast({
-        title: "Failed to Update Meeting",
+        title: 'Failed to Update Meeting',
         description:
-          error.message || "Failed to update the meeting. Please try again.",
-        variant: "destructive",
+          error.message || 'Failed to update the meeting. Please try again.',
+        variant: 'destructive',
       });
     },
   });
@@ -1243,9 +1242,9 @@ export default function EnhancedMeetingDashboard() {
   const handleCreateMeeting = () => {
     if (!newMeetingData.title || !newMeetingData.date) {
       toast({
-        title: "Missing Information",
-        description: "Please fill in the meeting title and date.",
-        variant: "destructive",
+        title: 'Missing Information',
+        description: 'Please fill in the meeting title and date.',
+        variant: 'destructive',
       });
       return;
     }
@@ -1258,9 +1257,9 @@ export default function EnhancedMeetingDashboard() {
       title: meeting.title,
       date: formatDateForInput(meeting.date), // Ensure proper date format for input
       time: meeting.time,
-      type: meeting.type || "core_team",
-      location: meeting.location || "",
-      description: meeting.description || "",
+      type: meeting.type || 'core_team',
+      location: meeting.location || '',
+      description: meeting.description || '',
     });
     setShowEditMeetingDialog(true);
   };
@@ -1268,9 +1267,9 @@ export default function EnhancedMeetingDashboard() {
   const handleUpdateMeeting = () => {
     if (!editMeetingData.title || !editMeetingData.date) {
       toast({
-        title: "Missing Information",
-        description: "Please fill in the meeting title and date.",
-        variant: "destructive",
+        title: 'Missing Information',
+        description: 'Please fill in the meeting title and date.',
+        variant: 'destructive',
       });
       return;
     }
@@ -1285,13 +1284,13 @@ export default function EnhancedMeetingDashboard() {
   // Helper functions for agenda section icons and colors
   const getSectionIcon = (title: string) => {
     switch (title.toLowerCase()) {
-      case "old business":
+      case 'old business':
         return <RotateCcw className="w-4 h-4 text-primary" />;
-      case "urgent items":
+      case 'urgent items':
         return <AlertCircle className="w-4 h-4 text-red-600" />;
-      case "housekeeping":
+      case 'housekeeping':
         return <Home className="w-4 h-4 text-teal-600" />;
-      case "new business":
+      case 'new business':
         return <Lightbulb className="w-4 h-4 text-orange-600" />;
       default:
         return <FileText className="w-4 h-4 text-gray-600" />;
@@ -1300,16 +1299,16 @@ export default function EnhancedMeetingDashboard() {
 
   const getSectionColor = (title: string) => {
     switch (title.toLowerCase()) {
-      case "old business":
-        return "text-primary";
-      case "urgent items":
-        return "text-red-800";
-      case "housekeeping":
-        return "text-teal-800";
-      case "new business":
-        return "text-orange-800";
+      case 'old business':
+        return 'text-primary';
+      case 'urgent items':
+        return 'text-red-800';
+      case 'housekeeping':
+        return 'text-teal-800';
+      case 'new business':
+        return 'text-orange-800';
       default:
-        return "text-gray-800";
+        return 'text-gray-800';
     }
   };
 
@@ -1355,22 +1354,22 @@ export default function EnhancedMeetingDashboard() {
       {/* Tab Navigation */}
       <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-lg w-full md:w-fit overflow-x-auto">
         <button
-          onClick={() => setActiveTab("overview")}
+          onClick={() => setActiveTab('overview')}
           className={`flex items-center gap-2 px-3 md:px-4 py-2 rounded-md text-sm font-medium transition-all whitespace-nowrap ${
-            activeTab === "overview"
-              ? "bg-white text-teal-700 shadow-sm"
-              : "text-gray-600 hover:text-teal-700"
+            activeTab === 'overview'
+              ? 'bg-white text-teal-700 shadow-sm'
+              : 'text-gray-600 hover:text-teal-700'
           }`}
         >
           <CalendarDays className="w-4 h-4" />
           <span className="hidden sm:inline">Meeting </span>Overview
         </button>
         <button
-          onClick={() => setActiveTab("agenda")}
+          onClick={() => setActiveTab('agenda')}
           className={`flex items-center gap-2 px-3 md:px-4 py-2 rounded-md text-sm font-medium transition-all whitespace-nowrap ${
-            activeTab === "agenda"
-              ? "bg-white text-teal-700 shadow-sm"
-              : "text-gray-600 hover:text-teal-700"
+            activeTab === 'agenda'
+              ? 'bg-white text-teal-700 shadow-sm'
+              : 'text-gray-600 hover:text-teal-700'
           }`}
         >
           <BookOpen className="w-4 h-4" />
@@ -1379,7 +1378,7 @@ export default function EnhancedMeetingDashboard() {
       </div>
 
       {/* Tab Content */}
-      {activeTab === "overview" && (
+      {activeTab === 'overview' && (
         <>
           {/* Projects for Review Alert */}
           {projectsForReview.length > 0 && (
@@ -1406,7 +1405,7 @@ export default function EnhancedMeetingDashboard() {
                         variant="outline"
                         className="border-orange-300 text-orange-700"
                       >
-                        {project.priority || "Standard"}
+                        {project.priority || 'Standard'}
                       </Badge>
                       <span className="text-orange-800">{project.title}</span>
                     </div>
@@ -1425,22 +1424,22 @@ export default function EnhancedMeetingDashboard() {
           <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
             <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-lg w-fit">
               <button
-                onClick={() => setViewMode("grid")}
+                onClick={() => setViewMode('grid')}
                 className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all ${
-                  viewMode === "grid"
-                    ? "bg-white text-teal-700 shadow-sm"
-                    : "text-gray-600 hover:text-teal-700"
+                  viewMode === 'grid'
+                    ? 'bg-white text-teal-700 shadow-sm'
+                    : 'text-gray-600 hover:text-teal-700'
                 }`}
               >
                 <Grid3X3 className="w-4 h-4" />
                 <span className="hidden sm:inline">Grid</span>
               </button>
               <button
-                onClick={() => setViewMode("calendar")}
+                onClick={() => setViewMode('calendar')}
                 className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all ${
-                  viewMode === "calendar"
-                    ? "bg-white text-teal-700 shadow-sm"
-                    : "text-gray-600 hover:text-teal-700"
+                  viewMode === 'calendar'
+                    ? 'bg-white text-teal-700 shadow-sm'
+                    : 'text-gray-600 hover:text-teal-700'
                 }`}
               >
                 <Calendar className="w-4 h-4" />
@@ -1449,9 +1448,9 @@ export default function EnhancedMeetingDashboard() {
             </div>
             <button
               onClick={() => setShowNewMeetingDialog(true)}
-              style={{ backgroundColor: "#FBAD3F" }}
-              onMouseEnter={(e) => (e.target.style.backgroundColor = "#e09d36")}
-              onMouseLeave={(e) => (e.target.style.backgroundColor = "#FBAD3F")}
+              style={{ backgroundColor: '#FBAD3F' }}
+              onMouseEnter={(e) => (e.target.style.backgroundColor = '#e09d36')}
+              onMouseLeave={(e) => (e.target.style.backgroundColor = '#FBAD3F')}
               className="flex items-center justify-center gap-2 text-white px-3 md:px-4 py-3 md:py-2.5 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 w-full sm:w-auto text-sm"
             >
               <Plus className="w-4 h-4" />
@@ -1646,11 +1645,11 @@ export default function EnhancedMeetingDashboard() {
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
                   <FileText className="w-5 h-5" />
-                  {selectedMeeting?.title} -{" "}
+                  {selectedMeeting?.title} -{' '}
                   {selectedMeeting &&
                   isPastMeeting(selectedMeeting.date, selectedMeeting.time)
-                    ? "Meeting Documentation"
-                    : "Agenda Review"}
+                    ? 'Meeting Documentation'
+                    : 'Agenda Review'}
                 </DialogTitle>
               </DialogHeader>
 
@@ -1731,13 +1730,13 @@ export default function EnhancedMeetingDashboard() {
                       <div>
                         <span className="font-medium text-teal-900">Date:</span>
                         <span className="ml-2 text-teal-800">
-                          {formatMeetingDate(selectedMeeting?.date || "")}
+                          {formatMeetingDate(selectedMeeting?.date || '')}
                         </span>
                       </div>
                       <div>
                         <span className="font-medium text-teal-900">Time:</span>
                         <span className="ml-2 text-teal-800">
-                          {formatMeetingTime(selectedMeeting?.time || "")}
+                          {formatMeetingTime(selectedMeeting?.time || '')}
                         </span>
                       </div>
                       <div>
@@ -1745,7 +1744,7 @@ export default function EnhancedMeetingDashboard() {
                           Duration:
                         </span>
                         <span className="ml-2 text-teal-800">
-                          {compiledAgenda.totalEstimatedTime || "1 hour"}
+                          {compiledAgenda.totalEstimatedTime || '1 hour'}
                         </span>
                       </div>
                       <div>
@@ -1755,9 +1754,9 @@ export default function EnhancedMeetingDashboard() {
                         <Badge
                           className="ml-2"
                           variant={
-                            compiledAgenda.status === "finalized"
-                              ? "default"
-                              : "secondary"
+                            compiledAgenda.status === 'finalized'
+                              ? 'default'
+                              : 'secondary'
                           }
                         >
                           {compiledAgenda.status}
@@ -1811,23 +1810,23 @@ export default function EnhancedMeetingDashboard() {
                                               Presenter: {item.submittedBy}
                                             </span>
                                             <span>
-                                              Time:{" "}
-                                              {item.estimatedTime || "5 min"}
+                                              Time:{' '}
+                                              {item.estimatedTime || '5 min'}
                                             </span>
                                             <Badge
                                               variant="outline"
                                               className="text-xs"
                                             >
-                                              {item.type.replace("_", " ")}
+                                              {item.type.replace('_', ' ')}
                                             </Badge>
                                           </div>
                                         </div>
                                         {item.status && (
                                           <Badge
                                             variant={
-                                              item.status === "approved"
-                                                ? "default"
-                                                : "secondary"
+                                              item.status === 'approved'
+                                                ? 'default'
+                                                : 'secondary'
                                             }
                                           >
                                             {item.status}
@@ -2175,14 +2174,14 @@ export default function EnhancedMeetingDashboard() {
                   <button
                     onClick={handleUpdateMeeting}
                     disabled={updateMeetingMutation.isPending}
-                    style={{ backgroundColor: "#FBAD3F" }}
+                    style={{ backgroundColor: '#FBAD3F' }}
                     onMouseEnter={(e) =>
                       !updateMeetingMutation.isPending &&
-                      (e.target.style.backgroundColor = "#e09d36")
+                      (e.target.style.backgroundColor = '#e09d36')
                     }
                     onMouseLeave={(e) =>
                       !updateMeetingMutation.isPending &&
-                      (e.target.style.backgroundColor = "#FBAD3F")
+                      (e.target.style.backgroundColor = '#FBAD3F')
                     }
                     className="flex-1 flex items-center justify-center gap-2 disabled:from-gray-400 disabled:to-gray-500 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 disabled:cursor-not-allowed"
                   >
@@ -2201,7 +2200,7 @@ export default function EnhancedMeetingDashboard() {
       )}
 
       {/* Agenda Planning Tab */}
-      {activeTab === "agenda" && (
+      {activeTab === 'agenda' && (
         <div className="space-y-6">
           {/* Header Actions */}
           <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
@@ -2221,25 +2220,25 @@ export default function EnhancedMeetingDashboard() {
                   try {
                     setIsCompiling(true);
                     const response = await apiRequest(
-                      "POST",
-                      "/api/google-sheets/projects/sync/from-sheets"
+                      'POST',
+                      '/api/google-sheets/projects/sync/from-sheets'
                     );
                     toast({
-                      title: "Sync Complete",
+                      title: 'Sync Complete',
                       description:
                         response.message ||
-                        "Successfully synced projects from Google Sheets",
+                        'Successfully synced projects from Google Sheets',
                     });
                     // Refresh the projects data
                     queryClient.invalidateQueries({
-                      queryKey: ["/api/projects"],
+                      queryKey: ['/api/projects'],
                     });
                   } catch (error) {
                     toast({
-                      title: "Sync Failed",
+                      title: 'Sync Failed',
                       description:
-                        error.message || "Failed to sync from Google Sheets",
-                      variant: "destructive",
+                        error.message || 'Failed to sync from Google Sheets',
+                      variant: 'destructive',
                     });
                   } finally {
                     setIsCompiling(false);
@@ -2248,7 +2247,7 @@ export default function EnhancedMeetingDashboard() {
                 disabled={isCompiling}
               >
                 <ExternalLink className="w-4 h-4 mr-2" />
-                {isCompiling ? "Syncing..." : "Sync Google Sheets"}
+                {isCompiling ? 'Syncing...' : 'Sync Google Sheets'}
               </Button>
 
               <Button
@@ -2256,12 +2255,12 @@ export default function EnhancedMeetingDashboard() {
                 size="sm"
                 onClick={() => setShowResetConfirmDialog(true)}
                 disabled={resetAgendaPlanningMutation.isPending}
-                style={{ borderColor: "#FBAD3F", color: "#FBAD3F" }}
+                style={{ borderColor: '#FBAD3F', color: '#FBAD3F' }}
                 onMouseEnter={(e) =>
-                  (e.target.style.backgroundColor = "#fef7e6")
+                  (e.target.style.backgroundColor = '#fef7e6')
                 }
                 onMouseLeave={(e) =>
-                  (e.target.style.backgroundColor = "transparent")
+                  (e.target.style.backgroundColor = 'transparent')
                 }
                 className=""
               >
@@ -2278,7 +2277,7 @@ export default function EnhancedMeetingDashboard() {
                   className="bg-primary hover:bg-primary/90 text-primary-foreground"
                 >
                   <Download className="w-4 h-4 mr-2" />
-                  {isGeneratingPDF ? "Generating..." : "Finalize Agenda PDF"}
+                  {isGeneratingPDF ? 'Generating...' : 'Finalize Agenda PDF'}
                 </Button>
               )}
             </div>
@@ -2314,7 +2313,7 @@ export default function EnhancedMeetingDashboard() {
                     className="bg-primary hover:bg-primary/90 text-primary-foreground"
                   >
                     <Download className="w-4 h-4 mr-2" />
-                    {isGeneratingPDF ? "Generating..." : "Download Agenda PDF"}
+                    {isGeneratingPDF ? 'Generating...' : 'Download Agenda PDF'}
                   </Button>
                 </div>
               </CardContent>
@@ -2330,8 +2329,8 @@ export default function EnhancedMeetingDashboard() {
                 </span>
                 <div className="flex items-center gap-4">
                   <span className="text-teal-600 font-medium">
-                    {agendaSummary.agendaCount + agendaSummary.tabledCount} of{" "}
-                    {allProjects.filter((p) => p.status !== "completed").length}{" "}
+                    {agendaSummary.agendaCount + agendaSummary.tabledCount} of{' '}
+                    {allProjects.filter((p) => p.status !== 'completed').length}{' '}
                     reviewed
                   </span>
                   <div className="w-32 bg-gray-200 rounded-full h-2">
@@ -2342,7 +2341,7 @@ export default function EnhancedMeetingDashboard() {
                           100,
                           ((agendaSummary.agendaCount +
                             agendaSummary.tabledCount) /
-                            allProjects.filter((p) => p.status !== "completed")
+                            allProjects.filter((p) => p.status !== 'completed')
                               .length) *
                             100
                         )}%`,
@@ -2362,7 +2361,7 @@ export default function EnhancedMeetingDashboard() {
                 Google Sheets Projects (
                 {
                   allProjects.filter(
-                    (project: any) => project.status !== "completed"
+                    (project: any) => project.status !== 'completed'
                   ).length
                 }
                 )
@@ -2385,12 +2384,12 @@ export default function EnhancedMeetingDashboard() {
                 ) : (
                   <div className="space-y-4">
                     {allProjects
-                      .filter((project: any) => project.status !== "completed")
+                      .filter((project: any) => project.status !== 'completed')
                       .map((project: any, index: number) => {
                         // Add section headers to break up the list
                         let sectionHeader = null;
                         const filteredProjects = allProjects.filter(
-                          (p: any) => p.status !== "completed"
+                          (p: any) => p.status !== 'completed'
                         );
 
                         if (index === 0) {
@@ -2435,11 +2434,11 @@ export default function EnhancedMeetingDashboard() {
                         // Use our date utility to avoid timezone conversion issues
                         const lastDiscussed = project.lastDiscussedDate
                           ? formatDateForDisplay(project.lastDiscussedDate)
-                          : "Never discussed";
+                          : 'Never discussed';
 
                         const isMinimized = minimizedProjects.has(project.id);
                         const agendaStatus =
-                          projectAgendaStatus[project.id] || "none";
+                          projectAgendaStatus[project.id] || 'none';
                         const needsDiscussion =
                           project.meetingDiscussionPoints ||
                           project.meetingDecisionItems;
@@ -2451,13 +2450,13 @@ export default function EnhancedMeetingDashboard() {
                               {sectionHeader}
                               <Card
                                 className={`border-2 transition-all mb-2 ${
-                                  agendaStatus === "agenda"
-                                    ? "border-green-300 bg-green-50"
-                                    : agendaStatus === "tabled"
-                                    ? "border-orange-300 bg-orange-50"
-                                    : index % 2 === 0
-                                    ? "border-gray-200 bg-white"
-                                    : "border-gray-200 bg-gray-50"
+                                  agendaStatus === 'agenda'
+                                    ? 'border-green-300 bg-green-50'
+                                    : agendaStatus === 'tabled'
+                                      ? 'border-orange-300 bg-orange-50'
+                                      : index % 2 === 0
+                                        ? 'border-gray-200 bg-white'
+                                        : 'border-gray-200 bg-gray-50'
                                 }`}
                               >
                                 <CardContent className="p-4">
@@ -2469,28 +2468,28 @@ export default function EnhancedMeetingDashboard() {
                                         </h3>
                                         <Badge
                                           className={`text-xs font-medium ${
-                                            agendaStatus === "agenda"
-                                              ? "bg-green-100 text-green-800 border-green-200"
-                                              : agendaStatus === "tabled"
-                                              ? "bg-orange-100 text-orange-800 border-orange-200"
-                                              : "bg-gray-100 text-gray-600 border-gray-200"
+                                            agendaStatus === 'agenda'
+                                              ? 'bg-green-100 text-green-800 border-green-200'
+                                              : agendaStatus === 'tabled'
+                                                ? 'bg-orange-100 text-orange-800 border-orange-200'
+                                                : 'bg-gray-100 text-gray-600 border-gray-200'
                                           }`}
                                         >
-                                          {agendaStatus === "agenda"
-                                            ? "📅 On Agenda"
-                                            : agendaStatus === "tabled"
-                                            ? "⏳ Tabled"
-                                            : "Not Scheduled"}
+                                          {agendaStatus === 'agenda'
+                                            ? '📅 On Agenda'
+                                            : agendaStatus === 'tabled'
+                                              ? '⏳ Tabled'
+                                              : 'Not Scheduled'}
                                         </Badge>
                                       </div>
                                       <div className="flex items-center gap-4 mt-2 text-sm text-gray-600">
                                         <span>
-                                          <strong>Owner:</strong>{" "}
-                                          {project.assigneeName || "Unassigned"}
+                                          <strong>Owner:</strong>{' '}
+                                          {project.assigneeName || 'Unassigned'}
                                         </span>
                                         {project.supportPeople && (
                                           <span>
-                                            <strong>Support:</strong>{" "}
+                                            <strong>Support:</strong>{' '}
                                             {project.supportPeople}
                                           </span>
                                         )}
@@ -2500,31 +2499,31 @@ export default function EnhancedMeetingDashboard() {
                                         <div className="mt-2 p-2 bg-gray-50 rounded text-xs">
                                           {project.meetingDiscussionPoints && (
                                             <div className="mb-1">
-                                              <strong>Discussion:</strong>{" "}
+                                              <strong>Discussion:</strong>{' '}
                                               {project.meetingDiscussionPoints.slice(
                                                 0,
                                                 100
                                               )}
                                               {project.meetingDiscussionPoints
-                                                .length > 100 && "..."}
+                                                .length > 100 && '...'}
                                             </div>
                                           )}
                                           {project.meetingDecisionItems && (
                                             <div>
-                                              <strong>Decisions:</strong>{" "}
+                                              <strong>Decisions:</strong>{' '}
                                               {project.meetingDecisionItems.slice(
                                                 0,
                                                 100
                                               )}
                                               {project.meetingDecisionItems
-                                                .length > 100 && "..."}
+                                                .length > 100 && '...'}
                                             </div>
                                           )}
                                         </div>
                                       )}
                                     </div>
                                     <div className="flex gap-2 ml-4 opacity-80 hover:opacity-100 transition-opacity">
-                                      {agendaStatus === "agenda" ? (
+                                      {agendaStatus === 'agenda' ? (
                                         <>
                                           <Button
                                             size="sm"
@@ -2549,7 +2548,7 @@ export default function EnhancedMeetingDashboard() {
                                             Remove from Agenda
                                           </Button>
                                         </>
-                                      ) : agendaStatus === "tabled" ? (
+                                      ) : agendaStatus === 'tabled' ? (
                                         <>
                                           <Button
                                             size="sm"
@@ -2601,7 +2600,7 @@ export default function EnhancedMeetingDashboard() {
                             {sectionHeader}
                             <Card
                               className={`border border-gray-200 hover:border-gray-300 mb-3 ${
-                                index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                                index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
                               }`}
                             >
                               <CardHeader className="pb-4">
@@ -2639,7 +2638,7 @@ export default function EnhancedMeetingDashboard() {
                                             variant="outline"
                                             className="text-xs bg-[#236383] text-white whitespace-nowrap"
                                           >
-                                            {getCategoryIcon(project.category)}{" "}
+                                            {getCategoryIcon(project.category)}{' '}
                                             {project.category}
                                           </Badge>
                                         )}
@@ -2663,14 +2662,14 @@ export default function EnhancedMeetingDashboard() {
                                         handleSendToAgenda(project.id)
                                       }
                                       className={`px-3 py-2 rounded font-medium transition-all text-sm whitespace-nowrap ${
-                                        agendaStatus === "agenda"
-                                          ? "bg-teal-600 text-white"
-                                          : "bg-white border-2 border-teal-600 text-teal-600 hover:bg-teal-50"
+                                        agendaStatus === 'agenda'
+                                          ? 'bg-teal-600 text-white'
+                                          : 'bg-white border-2 border-teal-600 text-teal-600 hover:bg-teal-50'
                                       }`}
                                     >
-                                      {agendaStatus === "agenda"
-                                        ? "✓ On Agenda"
-                                        : "Send to Agenda"}
+                                      {agendaStatus === 'agenda'
+                                        ? '✓ On Agenda'
+                                        : 'Send to Agenda'}
                                     </Button>
                                     <Button
                                       size="sm"
@@ -2699,20 +2698,21 @@ export default function EnhancedMeetingDashboard() {
                                       // Add owner/assignee
                                       if (project.assigneeName) {
                                         people.push({
-                                          role: "Owner",
+                                          role: 'Owner',
                                           name: project.assigneeName,
                                         });
                                       }
 
                                       // Add support people from Google Sheets
                                       if (project.supportPeople) {
-                                        const supportList = project.supportPeople
-                                          .split(",")
-                                          .map((p) => p.trim())
-                                          .filter((p) => p);
+                                        const supportList =
+                                          project.supportPeople
+                                            .split(',')
+                                            .map((p) => p.trim())
+                                            .filter((p) => p);
                                         supportList.forEach((person) => {
                                           people.push({
-                                            role: "Support",
+                                            role: 'Support',
                                             name: person,
                                           });
                                         });
@@ -2753,7 +2753,7 @@ export default function EnhancedMeetingDashboard() {
                                         onClick={() => {
                                           setEditingProject(project.id);
                                           setEditProjectOwner(
-                                            project.assigneeName || ""
+                                            project.assigneeName || ''
                                           );
                                           setShowEditOwnerDialog(true);
                                         }}
@@ -2768,7 +2768,7 @@ export default function EnhancedMeetingDashboard() {
                                         onClick={() => {
                                           setEditingProject(project.id);
                                           setEditSupportPeople(
-                                            project.supportPeople || ""
+                                            project.supportPeople || ''
                                           );
                                           setShowEditPeopleDialog(true);
                                         }}
@@ -2827,13 +2827,13 @@ export default function EnhancedMeetingDashboard() {
                                       <Textarea
                                         value={getTextValue(
                                           project.id,
-                                          "discussionPoints",
-                                          project.meetingDiscussionPoints || ""
+                                          'discussionPoints',
+                                          project.meetingDiscussionPoints || ''
                                         )}
                                         onChange={(e) =>
                                           handleTextChange(
                                             project.id,
-                                            "discussionPoints",
+                                            'discussionPoints',
                                             e.target.value
                                           )
                                         }
@@ -2858,13 +2858,13 @@ export default function EnhancedMeetingDashboard() {
                                       <Textarea
                                         value={getTextValue(
                                           project.id,
-                                          "decisionItems",
-                                          project.meetingDecisionItems || ""
+                                          'decisionItems',
+                                          project.meetingDecisionItems || ''
                                         )}
                                         onChange={(e) =>
                                           handleTextChange(
                                             project.id,
-                                            "decisionItems",
+                                            'decisionItems',
                                             e.target.value
                                           )
                                         }
@@ -2895,7 +2895,7 @@ export default function EnhancedMeetingDashboard() {
                                           ],
                                         }));
                                         toast({
-                                          title: "Files uploaded",
+                                          title: 'Files uploaded',
                                           description: `${files.length} file(s) uploaded successfully for ${project.title}`,
                                         });
                                       }}
@@ -2923,7 +2923,7 @@ export default function EnhancedMeetingDashboard() {
                                               variant="ghost"
                                               className="h-6 px-2 text-primary hover:text-primary/80"
                                               onClick={() =>
-                                                window.open(file.url, "_blank")
+                                                window.open(file.url, '_blank')
                                               }
                                             >
                                               View
@@ -2985,19 +2985,19 @@ export default function EnhancedMeetingDashboard() {
                 <Button
                   onClick={handleAddOffAgendaItem}
                   disabled={createOffAgendaItemMutation.isPending}
-                  style={{ backgroundColor: "#FBAD3F" }}
+                  style={{ backgroundColor: '#FBAD3F' }}
                   onMouseEnter={(e) =>
                     !createOffAgendaItemMutation.isPending &&
-                    (e.target.style.backgroundColor = "#e09d36")
+                    (e.target.style.backgroundColor = '#e09d36')
                   }
                   onMouseLeave={(e) =>
                     !createOffAgendaItemMutation.isPending &&
-                    (e.target.style.backgroundColor = "#FBAD3F")
+                    (e.target.style.backgroundColor = '#FBAD3F')
                   }
                 >
                   {createOffAgendaItemMutation.isPending
-                    ? "Adding..."
-                    : "Add Item"}
+                    ? 'Adding...'
+                    : 'Add Item'}
                 </Button>
               </div>
             </CardContent>
@@ -3011,7 +3011,7 @@ export default function EnhancedMeetingDashboard() {
                   <div>
                     <h3 className="font-medium text-teal-900">
                       {selectedProjectIds.length} project
-                      {selectedProjectIds.length !== 1 ? "s" : ""} selected for
+                      {selectedProjectIds.length !== 1 ? 's' : ''} selected for
                       discussion
                     </h3>
                     <p className="text-sm text-teal-700">
@@ -3101,43 +3101,44 @@ export default function EnhancedMeetingDashboard() {
               onClick={async () => {
                 if (editingProject) {
                   try {
-                    console.log("=== SUPPORT PEOPLE UPDATE DEBUG ===");
-                    console.log("Project ID:", editingProject);
-                    console.log("Support People Value:", editSupportPeople);
+                    console.log('=== SUPPORT PEOPLE UPDATE DEBUG ===');
+                    console.log('Project ID:', editingProject);
+                    console.log('Support People Value:', editSupportPeople);
                     console.log(
-                      "Support People Length:",
+                      'Support People Length:',
                       editSupportPeople?.length
                     );
 
                     const response = await apiRequest(
-                      "PATCH",
+                      'PATCH',
                       `/api/projects/${editingProject}`,
                       {
                         supportPeople: editSupportPeople,
                       }
                     );
 
-                    console.log("API Response:", response);
+                    console.log('API Response:', response);
                     queryClient.invalidateQueries({
-                      queryKey: ["/api/projects"],
+                      queryKey: ['/api/projects'],
                     });
 
                     toast({
-                      title: "Success",
-                      description: "Support people updated successfully",
+                      title: 'Success',
+                      description: 'Support people updated successfully',
                     });
                     setShowEditPeopleDialog(false);
                   } catch (error) {
-                    console.error("=== SUPPORT PEOPLE ERROR ===");
-                    console.error("Error details:", error);
-                    console.error("Error message:", error?.message);
-                    console.error("Error response:", error?.response);
+                    console.error('=== SUPPORT PEOPLE ERROR ===');
+                    console.error('Error details:', error);
+                    console.error('Error message:', error?.message);
+                    console.error('Error response:', error?.response);
 
                     toast({
-                      title: "Error",
-                      description: `Failed to update support people: ${error?.message ||
-                        "Unknown error"}`,
-                      variant: "destructive",
+                      title: 'Error',
+                      description: `Failed to update support people: ${
+                        error?.message || 'Unknown error'
+                      }`,
+                      variant: 'destructive',
                     });
                   }
                 }
@@ -3179,39 +3180,40 @@ export default function EnhancedMeetingDashboard() {
               onClick={async () => {
                 if (editingProject) {
                   try {
-                    console.log("=== PROJECT OWNER UPDATE DEBUG ===");
-                    console.log("Project ID:", editingProject);
-                    console.log("Project Owner Value:", editProjectOwner);
+                    console.log('=== PROJECT OWNER UPDATE DEBUG ===');
+                    console.log('Project ID:', editingProject);
+                    console.log('Project Owner Value:', editProjectOwner);
 
                     const response = await apiRequest(
-                      "PATCH",
+                      'PATCH',
                       `/api/projects/${editingProject}`,
                       {
                         assigneeName: editProjectOwner,
                       }
                     );
 
-                    console.log("API Response:", response);
+                    console.log('API Response:', response);
                     queryClient.invalidateQueries({
-                      queryKey: ["/api/projects"],
+                      queryKey: ['/api/projects'],
                     });
 
                     toast({
-                      title: "Success",
-                      description: "Project owner updated successfully",
+                      title: 'Success',
+                      description: 'Project owner updated successfully',
                     });
                     setShowEditOwnerDialog(false);
                   } catch (error) {
-                    console.error("=== PROJECT OWNER ERROR ===");
-                    console.error("Error details:", error);
-                    console.error("Error message:", error?.message);
-                    console.error("Error response:", error?.response);
+                    console.error('=== PROJECT OWNER ERROR ===');
+                    console.error('Error details:', error);
+                    console.error('Error message:', error?.message);
+                    console.error('Error response:', error?.response);
 
                     toast({
-                      title: "Error",
-                      description: `Failed to update project owner: ${error?.message ||
-                        "Unknown error"}`,
-                      variant: "destructive",
+                      title: 'Error',
+                      description: `Failed to update project owner: ${
+                        error?.message || 'Unknown error'
+                      }`,
+                      variant: 'destructive',
                     });
                   }
                 }
@@ -3256,8 +3258,8 @@ export default function EnhancedMeetingDashboard() {
                 variant="outline"
                 onClick={() => {
                   setShowAddTaskDialog(false);
-                  setNewTaskTitle("");
-                  setNewTaskDescription("");
+                  setNewTaskTitle('');
+                  setNewTaskDescription('');
                 }}
               >
                 Cancel
@@ -3268,30 +3270,30 @@ export default function EnhancedMeetingDashboard() {
                   if (editingProject && newTaskTitle.trim()) {
                     try {
                       await apiRequest(
-                        "POST",
+                        'POST',
                         `/api/projects/${editingProject}/tasks`,
                         {
                           title: newTaskTitle.trim(),
                           description: newTaskDescription.trim() || null,
-                          status: "pending",
-                          priority: "medium",
+                          status: 'pending',
+                          priority: 'medium',
                         }
                       );
                       queryClient.invalidateQueries({
                         queryKey: [`/api/projects/${editingProject}/tasks`],
                       });
                       toast({
-                        title: "Success",
-                        description: "Task added successfully",
+                        title: 'Success',
+                        description: 'Task added successfully',
                       });
                       setShowAddTaskDialog(false);
-                      setNewTaskTitle("");
-                      setNewTaskDescription("");
+                      setNewTaskTitle('');
+                      setNewTaskDescription('');
                     } catch (error) {
                       toast({
-                        title: "Error",
-                        description: "Failed to add task",
-                        variant: "destructive",
+                        title: 'Error',
+                        description: 'Failed to add task',
+                        variant: 'destructive',
                       });
                     }
                   }
@@ -3326,7 +3328,7 @@ export default function EnhancedMeetingDashboard() {
                     <span className="text-sm text-orange-800">
                       <strong>
                         Convert all discussion and decision notes to tasks
-                      </strong>{" "}
+                      </strong>{' '}
                       (if they haven't been already)
                     </span>
                   </div>
@@ -3340,7 +3342,7 @@ export default function EnhancedMeetingDashboard() {
                   <div className="flex items-start gap-2">
                     <RotateCcw className="w-4 h-4 text-orange-600 mt-0.5 flex-shrink-0" />
                     <span className="text-sm text-orange-800">
-                      <strong>Reset all project selections</strong>{" "}
+                      <strong>Reset all project selections</strong>{' '}
                       (agenda/tabled status)
                     </span>
                   </div>
@@ -3356,7 +3358,7 @@ export default function EnhancedMeetingDashboard() {
                   This prepares the agenda planning interface for next week's
                   meeting.
                   <strong>
-                    {" "}
+                    {' '}
                     Make sure you've finalized this week's agenda first!
                   </strong>
                 </p>
@@ -3375,14 +3377,14 @@ export default function EnhancedMeetingDashboard() {
             <Button
               onClick={() => resetAgendaPlanningMutation.mutate()}
               disabled={resetAgendaPlanningMutation.isPending}
-              style={{ backgroundColor: "#FBAD3F" }}
+              style={{ backgroundColor: '#FBAD3F' }}
               onMouseEnter={(e) =>
                 !resetAgendaPlanningMutation.isPending &&
-                (e.target.style.backgroundColor = "#e09d36")
+                (e.target.style.backgroundColor = '#e09d36')
               }
               onMouseLeave={(e) =>
                 !resetAgendaPlanningMutation.isPending &&
-                (e.target.style.backgroundColor = "#FBAD3F")
+                (e.target.style.backgroundColor = '#FBAD3F')
               }
               className="flex-1 text-white"
             >

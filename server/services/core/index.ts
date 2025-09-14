@@ -1,5 +1,5 @@
-import { QueryOptimizer } from "../../performance/query-optimizer";
-import { checkWeeklySubmissions } from "../../weekly-monitoring";
+import { QueryOptimizer } from '../../performance/query-optimizer';
+import { checkWeeklySubmissions } from '../../weekly-monitoring';
 
 /**
  * Core Service - Health checks and system monitoring
@@ -10,13 +10,13 @@ export class CoreService {
    */
   static getBasicHealth() {
     return {
-      status: "healthy",
+      status: 'healthy',
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
-      environment: process.env.NODE_ENV || "development",
+      environment: process.env.NODE_ENV || 'development',
       dependencies: {
-        googleCloudStorage: "@google-cloud/storage",
-        database: process.env.DATABASE_URL ? "connected" : "not configured",
+        googleCloudStorage: '@google-cloud/storage',
+        database: process.env.DATABASE_URL ? 'connected' : 'not configured',
       },
     };
   }
@@ -29,17 +29,17 @@ export class CoreService {
     const memoryUsage = process.memoryUsage();
 
     return {
-      status: "healthy",
+      status: 'healthy',
       timestamp: new Date().toISOString(),
       cache: {
         size: stats.size,
         activeKeys: stats.keys.length,
       },
       memory: {
-        used: Math.round(memoryUsage.heapUsed / 1024 / 1024) + "MB",
-        total: Math.round(memoryUsage.heapTotal / 1024 / 1024) + "MB",
+        used: Math.round(memoryUsage.heapUsed / 1024 / 1024) + 'MB',
+        total: Math.round(memoryUsage.heapTotal / 1024 / 1024) + 'MB',
       },
-      uptime: Math.round(process.uptime()) + "s",
+      uptime: Math.round(process.uptime()) + 's',
     };
   }
 
@@ -60,27 +60,27 @@ export class CoreService {
     const dayOfWeek = now.getDay();
 
     // Calculate next scheduled check
-    let nextCheck = "Thursday 7:00 PM";
+    let nextCheck = 'Thursday 7:00 PM';
     if (dayOfWeek === 4 && now.getHours() >= 19) {
-      nextCheck = "Friday 8:00 AM";
+      nextCheck = 'Friday 8:00 AM';
     } else if (dayOfWeek === 5 && now.getHours() >= 8) {
-      nextCheck = "Next Thursday 7:00 PM";
+      nextCheck = 'Next Thursday 7:00 PM';
     }
 
     // Get current week range (Wednesday to Tuesday) to display proper week period
-    const { getCurrentWeekRange } = await import("../../weekly-monitoring");
+    const { getCurrentWeekRange } = await import('../../weekly-monitoring');
     const { startDate, endDate } = getCurrentWeekRange();
 
     // Format week display as "Wed Aug 14 - Tue Aug 20, 2025"
-    const weekDisplay = `${startDate.toLocaleDateString("en-US", {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-    })} - ${endDate.toLocaleDateString("en-US", {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-      year: "numeric",
+    const weekDisplay = `${startDate.toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+    })} - ${endDate.toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
     })}`;
 
     return {
@@ -99,10 +99,10 @@ export class CoreService {
    * Get project data status
    */
   static async getProjectDataStatus() {
-    const fs = await import("fs/promises");
-    const path = await import("path");
+    const fs = await import('fs/promises');
+    const path = await import('path');
 
-    const projectDataDir = path.join(process.cwd(), "uploads", "project-data");
+    const projectDataDir = path.join(process.cwd(), 'uploads', 'project-data');
 
     try {
       await fs.access(projectDataDir);
@@ -131,7 +131,7 @@ export class CoreService {
         const newestFile = sortedFiles[0];
 
         return {
-          status: "available",
+          status: 'available',
           totalFiles: files.length,
           newestFile: {
             name: newestFile.name,
@@ -146,14 +146,14 @@ export class CoreService {
         };
       } else {
         return {
-          status: "empty",
-          message: "Project data directory exists but contains no files",
+          status: 'empty',
+          message: 'Project data directory exists but contains no files',
         };
       }
     } catch (error) {
       return {
-        status: "not_found",
-        message: "Project data directory does not exist",
+        status: 'not_found',
+        message: 'Project data directory does not exist',
         error: (error as Error).message,
       };
     }

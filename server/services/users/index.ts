@@ -1,6 +1,6 @@
-import { storage } from "../../storage-wrapper";
-import { getDefaultPermissionsForRole } from "@shared/auth-utils";
-import { AuditLogger } from "../../audit-logger";
+import { storage } from '../../storage-wrapper';
+import { getDefaultPermissionsForRole } from '@shared/auth-utils';
+import { AuditLogger } from '../../audit-logger';
 
 export interface IUserService {
   // User CRUD operations
@@ -58,8 +58,8 @@ export class UserService implements IUserService {
       const users = await storage.getAllUsers();
       return users;
     } catch (error) {
-      console.error("Error fetching all users:", error);
-      throw new Error("Failed to fetch users");
+      console.error('Error fetching all users:', error);
+      throw new Error('Failed to fetch users');
     }
   }
 
@@ -80,8 +80,8 @@ export class UserService implements IUserService {
       }));
       return assignableUsers;
     } catch (error) {
-      console.error("Error fetching users for assignments:", error);
-      throw new Error("Failed to fetch users for assignments");
+      console.error('Error fetching users for assignments:', error);
+      throw new Error('Failed to fetch users for assignments');
     }
   }
 
@@ -90,24 +90,19 @@ export class UserService implements IUserService {
       // Validate required fields
       const validation = this.validateUserData(userData);
       if (!validation.isValid) {
-        throw new Error(validation.errors.join(", "));
+        throw new Error(validation.errors.join(', '));
       }
 
       // Check if user already exists
       const existingUser = await storage.getUserByEmail(userData.email);
       if (existingUser) {
-        throw new Error("User with this email already exists");
+        throw new Error('User with this email already exists');
       }
 
       // Generate user ID and get default permissions for role
       const userId =
-        "user_" +
-        Date.now() +
-        "_" +
-        Math.random()
-          .toString(36)
-          .substr(2, 9);
-      const userRole = userData.role || "volunteer";
+        'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      const userRole = userData.role || 'volunteer';
       const defaultPermissions = getDefaultPermissionsForRole(userRole);
 
       const newUser = await storage.createUser({
@@ -124,7 +119,7 @@ export class UserService implements IUserService {
 
       return newUser;
     } catch (error) {
-      console.error("Error creating user:", error);
+      console.error('Error creating user:', error);
       throw error;
     }
   }
@@ -147,8 +142,8 @@ export class UserService implements IUserService {
       const updatedUser = await storage.updateUser(id, updateData);
       return updatedUser;
     } catch (error) {
-      console.error("Error updating user:", error);
-      throw new Error("Failed to update user");
+      console.error('Error updating user:', error);
+      throw new Error('Failed to update user');
     }
   }
 
@@ -157,8 +152,8 @@ export class UserService implements IUserService {
       const updatedUser = await storage.updateUser(id, { isActive });
       return updatedUser;
     } catch (error) {
-      console.error("Error updating user status:", error);
-      throw new Error("Failed to update user status");
+      console.error('Error updating user status:', error);
+      throw new Error('Failed to update user status');
     }
   }
 
@@ -184,8 +179,8 @@ export class UserService implements IUserService {
       // Log the user profile update
       if (requestUserId) {
         await AuditLogger.log(
-          "user_profile_updated",
-          "user_management",
+          'user_profile_updated',
+          'user_management',
           id,
           { updatedFields: Object.keys(updateData), newValues: updateData },
           { userId: requestUserId }
@@ -194,8 +189,8 @@ export class UserService implements IUserService {
 
       return updatedUser;
     } catch (error) {
-      console.error("Error updating user profile:", error);
-      throw new Error("Failed to update user profile");
+      console.error('Error updating user profile:', error);
+      throw new Error('Failed to update user profile');
     }
   }
 
@@ -203,8 +198,8 @@ export class UserService implements IUserService {
     try {
       await storage.deleteUser(id);
     } catch (error) {
-      console.error("Error deleting user:", error);
-      throw new Error("Failed to delete user");
+      console.error('Error deleting user:', error);
+      throw new Error('Failed to delete user');
     }
   }
 
@@ -212,12 +207,12 @@ export class UserService implements IUserService {
     try {
       const passwordValidation = this.validatePassword(password);
       if (!passwordValidation.isValid) {
-        throw new Error(passwordValidation.errors.join(", "));
+        throw new Error(passwordValidation.errors.join(', '));
       }
 
       await storage.setUserPassword(id, password);
     } catch (error) {
-      console.error("Error setting user password:", error);
+      console.error('Error setting user password:', error);
       throw error;
     }
   }
@@ -226,13 +221,13 @@ export class UserService implements IUserService {
     const errors: string[] = [];
 
     if (!userData.email) {
-      errors.push("Email is required");
+      errors.push('Email is required');
     }
     if (!userData.firstName) {
-      errors.push("First name is required");
+      errors.push('First name is required');
     }
     if (!userData.lastName) {
-      errors.push("Last name is required");
+      errors.push('Last name is required');
     }
 
     return {
@@ -245,7 +240,7 @@ export class UserService implements IUserService {
     const errors: string[] = [];
 
     if (!password || password.length < 6) {
-      errors.push("Password must be at least 6 characters long");
+      errors.push('Password must be at least 6 characters long');
     }
 
     return {
@@ -259,7 +254,7 @@ export class UserService implements IUserService {
       const user = await storage.getUserById(userId);
       return user?.permissions || [];
     } catch (error) {
-      console.error("Error fetching user permissions:", error);
+      console.error('Error fetching user permissions:', error);
       return [];
     }
   }
@@ -269,7 +264,7 @@ export class UserService implements IUserService {
       const user = await storage.getUserByEmail(email);
       return !!user;
     } catch (error) {
-      console.error("Error checking if user exists:", error);
+      console.error('Error checking if user exists:', error);
       return false;
     }
   }

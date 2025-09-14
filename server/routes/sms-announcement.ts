@@ -1,44 +1,38 @@
-import { Router } from "express";
-import { isAuthenticated } from "../temp-auth";
-import { requirePermission } from "../middleware/auth";
-import { sendEmail } from "../sendgrid";
-import { storage } from "../storage";
-import { z } from "zod";
+import { Router } from 'express';
+import { isAuthenticated } from '../temp-auth';
+import { requirePermission } from '../middleware/auth';
+import { sendEmail } from '../sendgrid';
+import { storage } from '../storage';
+import { z } from 'zod';
 
 const router = Router();
 
 const sendAnnouncementSchema = z.object({
-  testMode: z
-    .boolean()
-    .optional()
-    .default(false),
-  testEmail: z
-    .string()
-    .email()
-    .optional(),
+  testMode: z.boolean().optional().default(false),
+  testEmail: z.string().email().optional(),
 });
 
 /**
  * Send SMS capability announcement to all registered users
  */
 router.post(
-  "/send-sms-announcement",
+  '/send-sms-announcement',
   isAuthenticated,
-  requirePermission("USERS_EDIT"),
+  requirePermission('USERS_EDIT'),
   async (req, res) => {
     try {
       const { testMode, testEmail } = sendAnnouncementSchema.parse(req.body);
       const senderUser = req.user;
 
       if (!senderUser?.email) {
-        return res.status(400).json({ error: "Sender email not found" });
+        return res.status(400).json({ error: 'Sender email not found' });
       }
 
       // Get all active users with email addresses
       const allUsers = await storage.getAllUsers();
       let recipients = allUsers.filter(
         (user) =>
-          user.email && user.email.includes("@") && user.isActive !== false
+          user.email && user.email.includes('@') && user.isActive !== false
       );
 
       // In test mode, only send to specified test email or sender
@@ -55,13 +49,13 @@ router.post(
 
       if (recipients.length === 0) {
         return res.status(400).json({
-          error: "No valid email recipients found",
+          error: 'No valid email recipients found',
         });
       }
 
       const appUrl = process.env.REPLIT_DOMAIN
         ? `https://${process.env.REPLIT_DOMAIN}`
-        : req.headers.origin || "https://your-app.replit.app";
+        : req.headers.origin || 'https://your-app.replit.app';
 
       const smsOptInUrl = `${appUrl}/sms-opt-in`;
 
@@ -97,7 +91,7 @@ The Sandwich Project Team
 
 ---
 This email was sent to registered users of The Sandwich Project app.
-${testMode ? "\n[THIS IS A TEST EMAIL - No actual announcement was sent]" : ""}
+${testMode ? '\n[THIS IS A TEST EMAIL - No actual announcement was sent]' : ''}
 `;
 
       const htmlContent = `
@@ -156,7 +150,7 @@ ${testMode ? "\n[THIS IS A TEST EMAIL - No actual announcement was sent]" : ""}
         ${
           testMode
             ? '<div class="test-notice">[THIS IS A TEST EMAIL - No actual announcement was sent]</div>'
-            : ""
+            : ''
         }
     </div>
     
@@ -173,7 +167,7 @@ ${testMode ? "\n[THIS IS A TEST EMAIL - No actual announcement was sent]" : ""}
       const errors = [];
 
       // Use Katie's verified email as sender
-      const fromEmail = "katielong2316@gmail.com";
+      const fromEmail = 'katielong2316@gmail.com';
 
       for (const user of recipients) {
         try {
@@ -212,9 +206,9 @@ ${testMode ? "\n[THIS IS A TEST EMAIL - No actual announcement was sent]" : ""}
       console.log(`📧 SMS announcement results:`, result);
       res.json(result);
     } catch (error) {
-      console.error("Error sending SMS announcement:", error);
+      console.error('Error sending SMS announcement:', error);
       res.status(500).json({
-        error: "Failed to send SMS announcement",
+        error: 'Failed to send SMS announcement',
         message: error.message,
       });
     }

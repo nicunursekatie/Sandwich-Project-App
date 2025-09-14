@@ -1,18 +1,18 @@
-import { useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
-import { useMessaging } from "@/hooks/useMessaging";
-import { Send, X, User, Plus } from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
-import { apiRequest } from "@/lib/queryClient";
+import { useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
+import { useMessaging } from '@/hooks/useMessaging';
+import { Send, X, User, Plus } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { apiRequest } from '@/lib/queryClient';
 
 interface MessageComposerProps {
-  contextType?: "suggestion" | "project" | "task" | "direct";
+  contextType?: 'suggestion' | 'project' | 'task' | 'direct';
   contextId?: string;
   contextTitle?: string;
   defaultRecipients?: Array<{ id: string; name: string; email?: string }>;
@@ -22,13 +22,13 @@ interface MessageComposerProps {
 }
 
 export function MessageComposer({
-  contextType = "direct",
+  contextType = 'direct',
   contextId,
   contextTitle,
   onSent,
   onCancel,
 }: MessageComposerProps) {
-  const [content, setContent] = useState("");
+  const [content, setContent] = useState('');
   const [selectedRecipients, setSelectedRecipients] = useState<string[]>([]);
   const { toast } = useToast();
   const { sendMessage, isSending } = useMessaging();
@@ -36,39 +36,39 @@ export function MessageComposer({
 
   // Fetch all users for direct messaging
   const { data: users = [], isLoading: isLoadingUsers } = useQuery({
-    queryKey: ["/api/users"],
+    queryKey: ['/api/users'],
     queryFn: async () => {
       try {
-        const response = await apiRequest("GET", "/api/users");
+        const response = await apiRequest('GET', '/api/users');
         return Array.isArray(response) ? response : [];
       } catch (error) {
-        console.error("Error fetching users:", error);
+        console.error('Error fetching users:', error);
         return [];
       }
     },
-    enabled: contextType === "direct",
+    enabled: contextType === 'direct',
   });
 
   const handleSend = async () => {
     if (!content.trim()) {
       toast({
-        title: "Message content required",
-        description: "Please enter a message",
-        variant: "destructive",
+        title: 'Message content required',
+        description: 'Please enter a message',
+        variant: 'destructive',
       });
       return;
     }
 
     if (selectedRecipients.length === 0) {
       toast({
-        title: "Recipients required",
-        description: "Please select at least one recipient",
-        variant: "destructive",
+        title: 'Recipients required',
+        description: 'Please select at least one recipient',
+        variant: 'destructive',
       });
       return;
     }
 
-    console.log("Sending message:", {
+    console.log('Sending message:', {
       recipientIds: selectedRecipients,
       content: content.trim(),
       contextType,
@@ -84,21 +84,21 @@ export function MessageComposer({
         contextId,
       });
 
-      setContent("");
+      setContent('');
       setSelectedRecipients([]);
       onSent?.();
 
       toast({
-        description: "Message sent successfully",
+        description: 'Message sent successfully',
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/messages"] }); // Refresh messages
+      queryClient.invalidateQueries({ queryKey: ['/api/messages'] }); // Refresh messages
     } catch (error) {
-      console.error("Failed to send message:", error);
+      console.error('Failed to send message:', error);
       toast({
-        title: "Failed to send message",
+        title: 'Failed to send message',
         description:
-          error instanceof Error ? error.message : "Please try again",
-        variant: "destructive",
+          error instanceof Error ? error.message : 'Please try again',
+        variant: 'destructive',
       });
     }
   };
@@ -109,7 +109,7 @@ export function MessageComposer({
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg">
             Compose Message
-            {contextType !== "direct" && contextTitle && (
+            {contextType !== 'direct' && contextTitle && (
               <span className="text-sm font-normal text-gray-500 ml-2">
                 to {contextTitle}
               </span>
@@ -121,14 +121,14 @@ export function MessageComposer({
             </Button>
           )}
         </div>
-        {contextType !== "direct" && (
+        {contextType !== 'direct' && (
           <Badge variant="secondary" className="w-fit">
             {contextType.charAt(0).toUpperCase() + contextType.slice(1)} Message
           </Badge>
         )}
       </CardHeader>
       <CardContent className="space-y-4">
-        {contextType === "direct" && (
+        {contextType === 'direct' && (
           <div>
             <label className="text-sm font-medium">Recipients</label>
             {isLoadingUsers ? (
@@ -227,12 +227,12 @@ export function MessageComposer({
             disabled={
               !content.trim() ||
               isSending ||
-              (contextType === "direct" && selectedRecipients.length === 0)
+              (contextType === 'direct' && selectedRecipients.length === 0)
             }
             className="flex items-center gap-2"
           >
             <Send className="h-4 w-4" />
-            {isSending ? "Sending..." : "Send Message"}
+            {isSending ? 'Sending...' : 'Send Message'}
           </Button>
         </div>
       </CardContent>

@@ -1,11 +1,32 @@
-import React, { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { BarChart3, Calendar, TrendingUp, Users, Sandwich, MapPin, Clock, Target } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import type { SandwichCollection, Host } from "@shared/schema";
+import React, { useState, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import {
+  BarChart3,
+  Calendar,
+  TrendingUp,
+  Users,
+  Sandwich,
+  MapPin,
+  Clock,
+  Target,
+} from 'lucide-react';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import type { SandwichCollection, Host } from '@shared/schema';
 
 interface HostAnalyticsProps {
   selectedHost?: string;
@@ -21,36 +42,52 @@ interface MonthlyStats {
   groups: string[];
 }
 
-export default function HostAnalytics({ selectedHost, onHostChange }: HostAnalyticsProps) {
-  const [timeRange, setTimeRange] = useState<'3months' | '6months' | '1year' | 'all'>('all');
+export default function HostAnalytics({
+  selectedHost,
+  onHostChange,
+}: HostAnalyticsProps) {
+  const [timeRange, setTimeRange] = useState<
+    '3months' | '6months' | '1year' | 'all'
+  >('all');
 
   // Fetch all collections data
   const { data: collectionsResponse, isLoading } = useQuery({
-    queryKey: ["/api/sandwich-collections", "analytics"],
+    queryKey: ['/api/sandwich-collections', 'analytics'],
     queryFn: async () => {
       const response = await fetch('/api/sandwich-collections?limit=10000');
       if (!response.ok) throw new Error('Failed to fetch collections');
       return response.json();
-    }
+    },
   });
 
   // Fetch hosts list
   const { data: hostsList = [] } = useQuery<Host[]>({
-    queryKey: ["/api/hosts"]
+    queryKey: ['/api/hosts'],
   });
 
   const collections = collectionsResponse?.collections || [];
 
   // Get available hosts from collections data
   const availableHosts = useMemo(() => {
-    const hostNames = Array.from(new Set(collections.map((c: SandwichCollection) => c.hostName).filter(Boolean)));
+    const hostNames = Array.from(
+      new Set(
+        collections.map((c: SandwichCollection) => c.hostName).filter(Boolean)
+      )
+    );
     return hostNames.sort();
   }, [collections]);
 
   // Helper function to calculate group total for a collection
   const calculateGroupTotal = (collection: SandwichCollection) => {
-    if (collection.groupCollections && Array.isArray(collection.groupCollections) && collection.groupCollections.length > 0) {
-      return collection.groupCollections.reduce((total: number, group: any) => total + (group.count || 0), 0);
+    if (
+      collection.groupCollections &&
+      Array.isArray(collection.groupCollections) &&
+      collection.groupCollections.length > 0
+    ) {
+      return collection.groupCollections.reduce(
+        (total: number, group: any) => total + (group.count || 0),
+        0
+      );
     }
     const groupCount1 = (collection as any).group1Count || 0;
     const groupCount2 = (collection as any).group2Count || 0;
@@ -59,7 +96,11 @@ export default function HostAnalytics({ selectedHost, onHostChange }: HostAnalyt
 
   // Helper function to get group collections from a collection
   const getGroupCollections = (collection: SandwichCollection) => {
-    if (collection.groupCollections && Array.isArray(collection.groupCollections) && collection.groupCollections.length > 0) {
+    if (
+      collection.groupCollections &&
+      Array.isArray(collection.groupCollections) &&
+      collection.groupCollections.length > 0
+    ) {
       return collection.groupCollections
         .filter((group: any) => group.name && group.count > 0)
         .map((group: any) => group.name);
@@ -77,8 +118,8 @@ export default function HostAnalytics({ selectedHost, onHostChange }: HostAnalyt
     if (!selectedHost || !collections.length) return null;
 
     // Filter collections for selected host
-    const hostCollections = collections.filter((c: SandwichCollection) => 
-      c.hostName === selectedHost
+    const hostCollections = collections.filter(
+      (c: SandwichCollection) => c.hostName === selectedHost
     );
 
     if (hostCollections.length === 0) return null;
@@ -86,7 +127,7 @@ export default function HostAnalytics({ selectedHost, onHostChange }: HostAnalyt
     // Apply time filter
     const now = new Date();
     let cutoffDate = new Date();
-    
+
     switch (timeRange) {
       case '3months':
         cutoffDate.setMonth(now.getMonth() - 3);
@@ -102,8 +143,8 @@ export default function HostAnalytics({ selectedHost, onHostChange }: HostAnalyt
         break;
     }
 
-    const filteredCollections = hostCollections.filter((c: SandwichCollection) => 
-      new Date(c.collectionDate) >= cutoffDate
+    const filteredCollections = hostCollections.filter(
+      (c: SandwichCollection) => new Date(c.collectionDate) >= cutoffDate
     );
 
     // Calculate overall statistics
@@ -112,23 +153,26 @@ export default function HostAnalytics({ selectedHost, onHostChange }: HostAnalyt
     const allGroups = new Set<string>();
     const dates: string[] = [];
 
-    filteredCollections.forEach(collection => {
+    filteredCollections.forEach((collection) => {
       totalIndividual += collection.individualSandwiches || 0;
       totalGroup += calculateGroupTotal(collection);
       dates.push(collection.collectionDate);
-      
+
       const groups = getGroupCollections(collection);
-      groups.forEach(group => allGroups.add(group));
+      groups.forEach((group) => allGroups.add(group));
     });
 
     // Calculate monthly breakdown
     const monthlyData = new Map<string, MonthlyStats>();
-    
-    filteredCollections.forEach(collection => {
+
+    filteredCollections.forEach((collection) => {
       const date = new Date(collection.collectionDate);
       const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-      const monthName = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-      
+      const monthName = date.toLocaleDateString('en-US', {
+        month: 'short',
+        year: 'numeric',
+      });
+
       if (!monthlyData.has(monthKey)) {
         monthlyData.set(monthKey, {
           month: monthName,
@@ -136,21 +180,21 @@ export default function HostAnalytics({ selectedHost, onHostChange }: HostAnalyt
           individualSandwiches: 0,
           groupSandwiches: 0,
           totalCollections: 0,
-          groups: []
+          groups: [],
         });
       }
-      
+
       const monthStats = monthlyData.get(monthKey)!;
       const individualCount = collection.individualSandwiches || 0;
       const groupCount = calculateGroupTotal(collection);
-      
+
       monthStats.individualSandwiches += individualCount;
       monthStats.groupSandwiches += groupCount;
       monthStats.totalSandwiches += individualCount + groupCount;
       monthStats.totalCollections += 1;
-      
+
       const groups = getGroupCollections(collection);
-      groups.forEach(group => {
+      groups.forEach((group) => {
         if (!monthStats.groups.includes(group)) {
           monthStats.groups.push(group);
         }
@@ -164,10 +208,20 @@ export default function HostAnalytics({ selectedHost, onHostChange }: HostAnalyt
 
     // Calculate date range
     dates.sort();
-    const dateRange = dates.length > 0 ? {
-      earliest: new Date(dates[0]).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-      latest: new Date(dates[dates.length - 1]).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-    } : null;
+    const dateRange =
+      dates.length > 0
+        ? {
+            earliest: new Date(dates[0]).toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric',
+            }),
+            latest: new Date(dates[dates.length - 1]).toLocaleDateString(
+              'en-US',
+              { month: 'short', day: 'numeric', year: 'numeric' }
+            ),
+          }
+        : null;
 
     return {
       totalIndividual,
@@ -177,7 +231,12 @@ export default function HostAnalytics({ selectedHost, onHostChange }: HostAnalyt
       uniqueGroups: Array.from(allGroups).sort(),
       monthlyData: sortedMonthlyData,
       dateRange,
-      averagePerCollection: filteredCollections.length > 0 ? Math.round((totalIndividual + totalGroup) / filteredCollections.length) : 0
+      averagePerCollection:
+        filteredCollections.length > 0
+          ? Math.round(
+              (totalIndividual + totalGroup) / filteredCollections.length
+            )
+          : 0,
     };
   }, [selectedHost, collections, timeRange]);
 
@@ -186,8 +245,11 @@ export default function HostAnalytics({ selectedHost, onHostChange }: HostAnalyt
       <div className="space-y-6">
         <div className="h-8 bg-gray-200 rounded animate-pulse"></div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[1, 2, 3].map(i => (
-            <div key={i} className="h-32 bg-gray-200 rounded animate-pulse"></div>
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="h-32 bg-gray-200 rounded animate-pulse"
+            ></div>
           ))}
         </div>
       </div>
@@ -203,12 +265,14 @@ export default function HostAnalytics({ selectedHost, onHostChange }: HostAnalyt
             <BarChart3 className="w-6 h-6 mr-3 text-teal-600" />
             Host Analytics
           </h2>
-          <p className="text-gray-600 mt-1">View performance metrics for your location</p>
+          <p className="text-gray-600 mt-1">
+            View performance metrics for your location
+          </p>
         </div>
-        
+
         <div className="flex flex-col sm:flex-row gap-3">
           {/* Host Selection */}
-          <Select value={selectedHost || ""} onValueChange={onHostChange}>
+          <Select value={selectedHost || ''} onValueChange={onHostChange}>
             <SelectTrigger className="w-full sm:w-64">
               <SelectValue placeholder="Select a host location" />
             </SelectTrigger>
@@ -226,27 +290,27 @@ export default function HostAnalytics({ selectedHost, onHostChange }: HostAnalyt
 
           {/* Time Range Selection */}
           {selectedHost && (
-            <Select value={timeRange} onValueChange={(value: any) => setTimeRange(value)}>
+            <Select
+              value={timeRange}
+              onValueChange={(value: any) => setTimeRange(value)}
+            >
               <SelectTrigger className="w-full sm:w-40">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="3months">
                   <div className="flex items-center">
-                    <Clock className="w-4 h-4 mr-2" />
-                    3 Months
+                    <Clock className="w-4 h-4 mr-2" />3 Months
                   </div>
                 </SelectItem>
                 <SelectItem value="6months">
                   <div className="flex items-center">
-                    <Clock className="w-4 h-4 mr-2" />
-                    6 Months
+                    <Clock className="w-4 h-4 mr-2" />6 Months
                   </div>
                 </SelectItem>
                 <SelectItem value="1year">
                   <div className="flex items-center">
-                    <Clock className="w-4 h-4 mr-2" />
-                    1 Year
+                    <Clock className="w-4 h-4 mr-2" />1 Year
                   </div>
                 </SelectItem>
                 <SelectItem value="all">
@@ -265,9 +329,12 @@ export default function HostAnalytics({ selectedHost, onHostChange }: HostAnalyt
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <MapPin className="w-12 h-12 text-gray-400 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Select a Host Location</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              Select a Host Location
+            </h3>
             <p className="text-gray-600 text-center max-w-md">
-              Choose a host location from the dropdown above to view detailed analytics and performance metrics.
+              Choose a host location from the dropdown above to view detailed
+              analytics and performance metrics.
             </p>
           </CardContent>
         </Card>
@@ -275,9 +342,12 @@ export default function HostAnalytics({ selectedHost, onHostChange }: HostAnalyt
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <BarChart3 className="w-12 h-12 text-gray-400 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No Data Available</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              No Data Available
+            </h3>
             <p className="text-gray-600 text-center max-w-md">
-              No collection data found for {selectedHost} in the selected time range.
+              No collection data found for {selectedHost} in the selected time
+              range.
             </p>
           </CardContent>
         </Card>
@@ -287,7 +357,9 @@ export default function HostAnalytics({ selectedHost, onHostChange }: HostAnalyt
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Sandwiches</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Total Sandwiches
+                </CardTitle>
                 <Sandwich className="h-4 w-4 text-orange-600" />
               </CardHeader>
               <CardContent>
@@ -295,14 +367,17 @@ export default function HostAnalytics({ selectedHost, onHostChange }: HostAnalyt
                   {hostData.totalSandwiches.toLocaleString()}
                 </div>
                 <p className="text-xs text-gray-600 mt-1">
-                  {hostData.totalIndividual.toLocaleString()} individual + {hostData.totalGroup.toLocaleString()} group
+                  {hostData.totalIndividual.toLocaleString()} individual +{' '}
+                  {hostData.totalGroup.toLocaleString()} group
                 </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Collections</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Collections
+                </CardTitle>
                 <Calendar className="h-4 w-4 text-blue-600" />
               </CardHeader>
               <CardContent>
@@ -317,7 +392,9 @@ export default function HostAnalytics({ selectedHost, onHostChange }: HostAnalyt
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Average per Event</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Average per Event
+                </CardTitle>
                 <Target className="h-4 w-4 text-green-600" />
               </CardHeader>
               <CardContent>
@@ -332,7 +409,9 @@ export default function HostAnalytics({ selectedHost, onHostChange }: HostAnalyt
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Group Partners</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Group Partners
+                </CardTitle>
                 <Users className="h-4 w-4 text-purple-600" />
               </CardHeader>
               <CardContent>
@@ -354,11 +433,18 @@ export default function HostAnalytics({ selectedHost, onHostChange }: HostAnalyt
                   <div className="flex items-center text-sm text-gray-600">
                     <Calendar className="w-4 h-4 mr-2" />
                     <span>
-                      Data from {hostData.dateRange.earliest} to {hostData.dateRange.latest}
+                      Data from {hostData.dateRange.earliest} to{' '}
+                      {hostData.dateRange.latest}
                     </span>
                   </div>
                   <Badge variant="outline" className="w-fit">
-                    {timeRange === 'all' ? 'All Time' : timeRange === '1year' ? '1 Year' : timeRange === '6months' ? '6 Months' : '3 Months'}
+                    {timeRange === 'all'
+                      ? 'All Time'
+                      : timeRange === '1year'
+                        ? '1 Year'
+                        : timeRange === '6months'
+                          ? '6 Months'
+                          : '3 Months'}
                   </Badge>
                 </div>
               </CardContent>
@@ -385,10 +471,11 @@ export default function HostAnalytics({ selectedHost, onHostChange }: HostAnalyt
                         <div>
                           <h4 className="font-medium">{month.month}</h4>
                           <div className="text-sm text-gray-600 mt-1">
-                            {month.totalCollections} collection{month.totalCollections !== 1 ? 's' : ''}
+                            {month.totalCollections} collection
+                            {month.totalCollections !== 1 ? 's' : ''}
                           </div>
                         </div>
-                        
+
                         <div className="flex flex-col sm:flex-row gap-4 text-sm">
                           <div className="text-center">
                             <div className="font-bold text-lg text-orange-600">
@@ -410,13 +497,19 @@ export default function HostAnalytics({ selectedHost, onHostChange }: HostAnalyt
                           </div>
                         </div>
                       </div>
-                      
+
                       {month.groups.length > 0 && (
                         <div className="mt-3">
-                          <div className="text-xs text-gray-600 mb-2">Group Partners:</div>
+                          <div className="text-xs text-gray-600 mb-2">
+                            Group Partners:
+                          </div>
                           <div className="flex flex-wrap gap-1">
-                            {month.groups.map(group => (
-                              <Badge key={group} variant="secondary" className="text-xs">
+                            {month.groups.map((group) => (
+                              <Badge
+                                key={group}
+                                variant="secondary"
+                                className="text-xs"
+                              >
                                 {group}
                               </Badge>
                             ))}
@@ -444,8 +537,12 @@ export default function HostAnalytics({ selectedHost, onHostChange }: HostAnalyt
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
-                  {hostData.uniqueGroups.map(group => (
-                    <Badge key={group} variant="outline" className="text-sm py-1 px-3">
+                  {hostData.uniqueGroups.map((group) => (
+                    <Badge
+                      key={group}
+                      variant="outline"
+                      className="text-sm py-1 px-3"
+                    >
                       {group}
                     </Badge>
                   ))}

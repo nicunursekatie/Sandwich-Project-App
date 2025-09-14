@@ -15,14 +15,20 @@ describe('Meeting Management Integration Tests', () => {
     adminCookie = adminLogin.headers['set-cookie'][0];
 
     const christineLogin = await request(API_BASE)
-      .post('/api/auth/login') 
-      .send({ email: 'christine@thesandwichproject.org', password: 'password123' });
+      .post('/api/auth/login')
+      .send({
+        email: 'christine@thesandwichproject.org',
+        password: 'password123',
+      });
     expect(christineLogin.status).toBe(200);
     christineCookie = christineLogin.headers['set-cookie'][0];
 
     const volunteerLogin = await request(API_BASE)
       .post('/api/auth/login')
-      .send({ email: 'juliet@thesandwichproject.org', password: 'password123' });
+      .send({
+        email: 'juliet@thesandwichproject.org',
+        password: 'password123',
+      });
     expect(volunteerLogin.status).toBe(200);
     volunteerCookie = volunteerLogin.headers['set-cookie'][0];
   });
@@ -35,9 +41,9 @@ describe('Meeting Management Integration Tests', () => {
       .send({
         title: 'Integration Test Project',
         description: 'Test project for permission testing',
-        status: 'planning'
+        status: 'planning',
       });
-    
+
     expect(projectResponse.status).toBe(201);
     testProjectId = projectResponse.body.id;
 
@@ -46,7 +52,7 @@ describe('Meeting Management Integration Tests', () => {
       .patch(`/api/projects/${testProjectId}`)
       .set('Cookie', adminCookie)
       .send({ reviewInNextMeeting: true });
-    
+
     expect(agendaResponse.status).toBe(200);
     expect(agendaResponse.body.reviewInNextMeeting).toBe(true);
 
@@ -54,16 +60,16 @@ describe('Meeting Management Integration Tests', () => {
     const reviewResponse = await request(API_BASE)
       .get('/api/projects/for-review')
       .set('Cookie', adminCookie);
-    
+
     expect(reviewResponse.status).toBe(200);
-    expect(reviewResponse.body.some(p => p.id === testProjectId)).toBe(true);
+    expect(reviewResponse.body.some((p) => p.id === testProjectId)).toBe(true);
 
     // 4. Remove from agenda
     const removeResponse = await request(API_BASE)
       .patch(`/api/projects/${testProjectId}`)
       .set('Cookie', adminCookie)
       .send({ reviewInNextMeeting: false });
-    
+
     expect(removeResponse.status).toBe(200);
     expect(removeResponse.body.reviewInNextMeeting).toBe(false);
   });
@@ -74,7 +80,7 @@ describe('Meeting Management Integration Tests', () => {
       .patch(`/api/projects/${testProjectId}`)
       .set('Cookie', christineCookie)
       .send({ reviewInNextMeeting: true });
-    
+
     expect(agendaResponse.status).toBe(200);
     expect(agendaResponse.body.reviewInNextMeeting).toBe(true);
 
@@ -83,7 +89,7 @@ describe('Meeting Management Integration Tests', () => {
       .patch(`/api/projects/${testProjectId}`)
       .set('Cookie', christineCookie)
       .send({ reviewInNextMeeting: false });
-    
+
     expect(removeResponse.status).toBe(200);
     expect(removeResponse.body.reviewInNextMeeting).toBe(false);
   });
@@ -94,9 +100,11 @@ describe('Meeting Management Integration Tests', () => {
       .patch(`/api/projects/${testProjectId}`)
       .set('Cookie', volunteerCookie)
       .send({ reviewInNextMeeting: true });
-    
+
     expect(agendaResponse.status).toBe(403);
-    expect(agendaResponse.body.message).toContain('meeting management permissions');
+    expect(agendaResponse.body.message).toContain(
+      'meeting management permissions'
+    );
   });
 
   test('Permission separation: agenda vs edit permissions work correctly', async () => {
@@ -105,7 +113,7 @@ describe('Meeting Management Integration Tests', () => {
       .patch(`/api/projects/${testProjectId}`)
       .set('Cookie', christineCookie)
       .send({ reviewInNextMeeting: true });
-    
+
     expect(agendaResponse.status).toBe(200);
 
     // Test that project editing uses different permissions
@@ -113,7 +121,7 @@ describe('Meeting Management Integration Tests', () => {
       .patch(`/api/projects/${testProjectId}`)
       .set('Cookie', christineCookie)
       .send({ title: 'Updated Title', description: 'Updated Description' });
-    
+
     // Christine should also be able to edit since she has MANAGE_ALL_PROJECTS
     expect(editResponse.status).toBe(200);
   });

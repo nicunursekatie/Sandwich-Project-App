@@ -1,35 +1,30 @@
-import React from "react";
-import { Button } from "@/components/ui/button";
+import React from 'react';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { useActivityTracker } from "@/hooks/useActivityTracker";
+} from '@/components/ui/card';
+import { useActivityTracker } from '@/hooks/useActivityTracker';
 
 // Example component showing how to integrate activity tracking
 export function ActivityTrackingExample() {
-  const {
-    trackClick,
-    trackView,
-    trackFormSubmit,
-    trackSearch,
-    trackExport,
-  } = useActivityTracker();
+  const { trackClick, trackView, trackFormSubmit, trackSearch, trackExport } =
+    useActivityTracker();
 
   React.useEffect(() => {
     // Track page/component view
-    trackView("Activity Tracking Demo", "Examples", "Activity Tracker Demo");
+    trackView('Activity Tracking Demo', 'Examples', 'Activity Tracker Demo');
   }, [trackView]);
 
   const handleButtonClick = () => {
     trackClick(
-      "Demo Button",
-      "Examples",
-      "Activity Tracker Demo",
-      "User clicked the demonstration button"
+      'Demo Button',
+      'Examples',
+      'Activity Tracker Demo',
+      'User clicked the demonstration button'
     );
     // Your button logic here
   };
@@ -37,25 +32,25 @@ export function ActivityTrackingExample() {
   const handleFormSubmit = () => {
     // Simulate form submission
     const success = Math.random() > 0.2; // 80% success rate for demo
-    trackFormSubmit("Demo Form", "Examples", "Activity Tracker Demo", success);
+    trackFormSubmit('Demo Form', 'Examples', 'Activity Tracker Demo', success);
 
     if (success) {
-      alert("Form submitted successfully!");
+      alert('Form submitted successfully!');
     } else {
-      alert("Form submission failed!");
+      alert('Form submission failed!');
     }
   };
 
   const handleSearch = () => {
-    const query = "sandwich collections";
+    const query = 'sandwich collections';
     const resultsCount = Math.floor(Math.random() * 50) + 1;
-    trackSearch(query, "Examples", "Activity Tracker Demo", resultsCount);
+    trackSearch(query, 'Examples', 'Activity Tracker Demo', resultsCount);
     alert(`Searched for "${query}" - found ${resultsCount} results`);
   };
 
   const handleExport = () => {
     const recordCount = 25;
-    trackExport("PDF Report", "Examples", "Activity Tracker Demo", recordCount);
+    trackExport('PDF Report', 'Examples', 'Activity Tracker Demo', recordCount);
     alert(`Exported PDF with ${recordCount} records`);
   };
 

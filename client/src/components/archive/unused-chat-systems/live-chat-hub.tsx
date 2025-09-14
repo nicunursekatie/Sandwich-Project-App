@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import {
   Users,
   MessageCircle,
@@ -9,10 +9,10 @@ import {
   Heart,
   Globe,
   Hash,
-} from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
-import { formatDistanceToNow } from "date-fns";
-import io, { Socket } from "socket.io-client";
+} from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { formatDistanceToNow } from 'date-fns';
+import io, { Socket } from 'socket.io-client';
 
 interface ChatMessage {
   id: string;
@@ -42,48 +42,48 @@ interface LiveChatHubProps {
 
 const CHAT_CHANNELS: Omit<
   ChannelPreview,
-  "unreadCount" | "lastMessage" | "activeUsers" | "messages"
+  'unreadCount' | 'lastMessage' | 'activeUsers' | 'messages'
 >[] = [
   {
-    id: "general",
-    name: "General",
-    description: "Open discussion for all team members",
+    id: 'general',
+    name: 'General',
+    description: 'Open discussion for all team members',
     icon: <Hash className="h-4 w-4" />,
   },
   {
-    id: "core-team",
-    name: "Core Team",
-    description: "Private discussions for core team members",
+    id: 'core-team',
+    name: 'Core Team',
+    description: 'Private discussions for core team members',
     icon: <Shield className="h-4 w-4" />,
-    permission: "core_team_chat",
+    permission: 'core_team_chat',
   },
   {
-    id: "committee",
-    name: "Committee",
-    description: "Committee member discussions",
+    id: 'committee',
+    name: 'Committee',
+    description: 'Committee member discussions',
     icon: <Users className="h-4 w-4" />,
-    permission: "committee_chat",
+    permission: 'committee_chat',
   },
   {
-    id: "host",
-    name: "Host Chat",
-    description: "Communication for sandwich collection hosts",
+    id: 'host',
+    name: 'Host Chat',
+    description: 'Communication for sandwich collection hosts',
     icon: <Heart className="h-4 w-4" />,
-    permission: "host_chat",
+    permission: 'host_chat',
   },
   {
-    id: "driver",
-    name: "Driver Chat",
-    description: "Coordination for delivery drivers",
+    id: 'driver',
+    name: 'Driver Chat',
+    description: 'Coordination for delivery drivers',
     icon: <Car className="h-4 w-4" />,
-    permission: "driver_chat",
+    permission: 'driver_chat',
   },
   {
-    id: "recipient",
-    name: "Recipient Chat",
-    description: "Communication for recipient organizations",
+    id: 'recipient',
+    name: 'Recipient Chat',
+    description: 'Communication for recipient organizations',
     icon: <MessageCircle className="h-4 w-4" />,
-    permission: "recipient_chat",
+    permission: 'recipient_chat',
   },
 ];
 
@@ -99,10 +99,10 @@ export default function LiveChatHub({
     if (!user) return;
 
     // Initialize socket connection
-    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const socketUrl = `${protocol}//${window.location.host}`;
     const socketInstance = io(socketUrl, {
-      transports: ["polling", "websocket"],
+      transports: ['polling', 'websocket'],
       upgrade: true,
       rememberUpgrade: false,
     });
@@ -144,15 +144,15 @@ export default function LiveChatHub({
 
     // Auto-join all available channels for previews
     initialChannels.forEach((channel) => {
-      socketInstance.emit("join-channel", {
+      socketInstance.emit('join-channel', {
         channel: channel.id,
-        userId: user?.id || "unknown",
-        userName: user?.firstName || user?.email || "User",
+        userId: user?.id || 'unknown',
+        userName: user?.firstName || user?.email || 'User',
       });
     });
 
     // Listen for message history
-    socketInstance.on("message-history", (history: ChatMessage[]) => {
+    socketInstance.on('message-history', (history: ChatMessage[]) => {
       if (history.length > 0) {
         const channelId = history[0].channel;
         setChannels((prev) =>
@@ -177,7 +177,7 @@ export default function LiveChatHub({
     });
 
     // Listen for new messages
-    socketInstance.on("new-message", (message: ChatMessage) => {
+    socketInstance.on('new-message', (message: ChatMessage) => {
       const formattedMessage = {
         ...message,
         timestamp: new Date(message.timestamp),
@@ -208,9 +208,9 @@ export default function LiveChatHub({
   // Auto-select General channel on mount
   useEffect(() => {
     if (!selectedChannel && channels.length > 0) {
-      const generalChannel = channels.find((ch) => ch.id === "general");
+      const generalChannel = channels.find((ch) => ch.id === 'general');
       if (generalChannel) {
-        onChannelSelect("general");
+        onChannelSelect('general');
       }
     }
   }, [channels, selectedChannel, onChannelSelect]);
@@ -225,14 +225,14 @@ export default function LiveChatHub({
     // Mark messages as read on server
     try {
       const response = await fetch(
-        "/api/message-notifications/mark-chat-read",
+        '/api/message-notifications/mark-chat-read',
         {
-          method: "POST",
+          method: 'POST',
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           },
           body: JSON.stringify({ channel: channelId }),
-          credentials: "include",
+          credentials: 'include',
         }
       );
 
@@ -241,23 +241,23 @@ export default function LiveChatHub({
 
         // Trigger a refresh of notification counts to clear the bell icon
         const notificationRefreshEvent = new CustomEvent(
-          "refreshNotifications"
+          'refreshNotifications'
         );
         window.dispatchEvent(notificationRefreshEvent);
       } else {
-        console.error("Failed to mark chat messages as read:", response.status);
+        console.error('Failed to mark chat messages as read:', response.status);
       }
     } catch (error) {
-      console.error("Error marking chat messages as read:", error);
+      console.error('Error marking chat messages as read:', error);
     }
   };
 
   const formatLastActivity = (lastMessage?: ChatMessage) => {
-    if (!lastMessage) return "No messages yet";
+    if (!lastMessage) return 'No messages yet';
     try {
       return formatDistanceToNow(lastMessage.timestamp, { addSuffix: true });
     } catch {
-      return "Recently";
+      return 'Recently';
     }
   };
 
@@ -273,7 +273,7 @@ export default function LiveChatHub({
       <div className="flex-1 overflow-y-auto p-2 space-y-1">
         {channels.map((channel) => {
           const isSelected = selectedChannel === channel.id;
-          const isCorteTeam = channel.id === "core-team";
+          const isCorteTeam = channel.id === 'core-team';
 
           return (
             <Card
@@ -281,9 +281,9 @@ export default function LiveChatHub({
               className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
                 isSelected
                   ? isCorteTeam
-                    ? "bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200"
-                    : "bg-blue-50 border-blue-200"
-                  : "bg-white border-gray-200 hover:bg-gray-50"
+                    ? 'bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200'
+                    : 'bg-blue-50 border-blue-200'
+                  : 'bg-white border-gray-200 hover:bg-gray-50'
               }`}
               onClick={() => handleChannelClick(channel.id)}
             >
@@ -294,9 +294,9 @@ export default function LiveChatHub({
                       className={`${
                         isSelected
                           ? isCorteTeam
-                            ? "text-amber-600"
-                            : "text-blue-600"
-                          : "text-gray-500"
+                            ? 'text-amber-600'
+                            : 'text-blue-600'
+                          : 'text-gray-500'
                       }`}
                     >
                       {channel.icon}
@@ -305,9 +305,9 @@ export default function LiveChatHub({
                       className={`font-medium ${
                         isSelected
                           ? isCorteTeam
-                            ? "text-amber-900"
-                            : "text-blue-900"
-                          : "text-gray-900"
+                            ? 'text-amber-900'
+                            : 'text-blue-900'
+                          : 'text-gray-900'
                       }`}
                     >
                       {channel.name}
@@ -329,7 +329,7 @@ export default function LiveChatHub({
                     <div className="text-xs text-gray-600 truncate">
                       <span className="font-medium">
                         {channel.lastMessage.userName}:
-                      </span>{" "}
+                      </span>{' '}
                       {channel.lastMessage.content}
                     </div>
                     <div className="text-xs text-gray-400">
@@ -357,7 +357,7 @@ export default function LiveChatHub({
 
       {/* Footer */}
       <div className="p-3 border-t border-gray-200 text-xs text-gray-500">
-        Connected as {user?.firstName || user?.email || "User"}
+        Connected as {user?.firstName || user?.email || 'User'}
       </div>
     </div>
   );

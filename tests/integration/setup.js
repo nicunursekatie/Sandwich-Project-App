@@ -5,7 +5,8 @@
 
 // Set test environment
 process.env.NODE_ENV = 'test';
-process.env.DATABASE_URL = process.env.TEST_DATABASE_URL || process.env.DATABASE_URL;
+process.env.DATABASE_URL =
+  process.env.TEST_DATABASE_URL || process.env.DATABASE_URL;
 
 // Extend Jest timeout for integration tests
 jest.setTimeout(30000);
@@ -14,7 +15,7 @@ jest.setTimeout(30000);
 beforeAll(async () => {
   console.log('🧪 Starting integration tests...');
   // Wait for server to be ready
-  await new Promise(resolve => setTimeout(resolve, 2000));
+  await new Promise((resolve) => setTimeout(resolve, 2000));
 });
 
 afterAll(async () => {
@@ -33,12 +34,13 @@ global.expect.extend({
       };
     } else {
       return {
-        message: () => `expected ${received} to be a valid ID (positive number)`,
+        message: () =>
+          `expected ${received} to be a valid ID (positive number)`,
         pass: false,
       };
     }
   },
-  
+
   toBeISODate(received) {
     const pass = typeof received === 'string' && !isNaN(Date.parse(received));
     if (pass) {
@@ -52,5 +54,5 @@ global.expect.extend({
         pass: false,
       };
     }
-  }
+  },
 });

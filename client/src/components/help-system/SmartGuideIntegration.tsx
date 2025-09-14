@@ -1,10 +1,10 @@
-import React from "react";
+import React from 'react';
 import {
   IntelligentGuideSystem,
   FeatureTooltip,
   TipTooltip,
   InfoTooltip,
-} from "./IntelligentGuideSystem";
+} from './IntelligentGuideSystem';
 
 // Integration wrapper that demonstrates how to use the Smart Contextual Tooltip Guide System
 // throughout the application

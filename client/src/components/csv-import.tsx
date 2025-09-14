@@ -1,17 +1,17 @@
-import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
 import {
   Upload,
   FileText,
   CheckCircle,
   XCircle,
   AlertCircle,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest, queryClient } from '@/lib/queryClient';
 
 interface ImportResult {
   totalRecords: number;
@@ -28,11 +28,11 @@ export default function CSVImport() {
   const importMutation = useMutation({
     mutationFn: async (file: File) => {
       const formData = new FormData();
-      formData.append("csvFile", file);
+      formData.append('csvFile', file);
 
       const response = await apiRequest(
-        "POST",
-        "/api/import-collections",
+        'POST',
+        '/api/import-collections',
         formData
       );
       return response.json();
@@ -40,28 +40,28 @@ export default function CSVImport() {
     onSuccess: (result: ImportResult) => {
       setImportResult(result);
       queryClient.invalidateQueries({
-        queryKey: ["/api/sandwich-collections"],
+        queryKey: ['/api/sandwich-collections'],
       });
 
       if (result.errorCount === 0) {
         toast({
-          title: "Import completed successfully",
+          title: 'Import completed successfully',
           description: `${result.successCount} sandwich collections imported.`,
         });
       } else {
         toast({
-          title: "Import completed with errors",
+          title: 'Import completed with errors',
           description: `${result.successCount} imported, ${result.errorCount} errors.`,
-          variant: "destructive",
+          variant: 'destructive',
         });
       }
     },
     onError: (error) => {
       toast({
-        title: "Import failed",
+        title: 'Import failed',
         description:
-          error instanceof Error ? error.message : "Unknown error occurred",
-        variant: "destructive",
+          error instanceof Error ? error.message : 'Unknown error occurred',
+        variant: 'destructive',
       });
     },
   });
@@ -69,11 +69,11 @@ export default function CSVImport() {
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      if (file.type !== "text/csv" && !file.name.endsWith(".csv")) {
+      if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) {
         toast({
-          title: "Invalid file type",
-          description: "Please select a CSV file.",
-          variant: "destructive",
+          title: 'Invalid file type',
+          description: 'Please select a CSV file.',
+          variant: 'destructive',
         });
         return;
       }
@@ -159,7 +159,7 @@ export default function CSVImport() {
                     disabled={importMutation.isPending}
                     className="btn-tsp-primary"
                   >
-                    {importMutation.isPending ? "Importing..." : "Import Data"}
+                    {importMutation.isPending ? 'Importing...' : 'Import Data'}
                   </Button>
                   <Button variant="outline" onClick={resetImport}>
                     Cancel
@@ -217,13 +217,13 @@ export default function CSVImport() {
             <div className="flex justify-center">
               <Badge
                 variant={
-                  importResult.errorCount === 0 ? "default" : "destructive"
+                  importResult.errorCount === 0 ? 'default' : 'destructive'
                 }
                 className="text-sm"
               >
                 {importResult.errorCount === 0
-                  ? "Import Successful"
-                  : "Import Completed with Errors"}
+                  ? 'Import Successful'
+                  : 'Import Completed with Errors'}
               </Badge>
             </div>
 

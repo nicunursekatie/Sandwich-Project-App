@@ -11,416 +11,416 @@ import {
   decimal,
   unique,
   primaryKey,
-} from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
-import { z } from "zod";
+} from 'drizzle-orm/pg-core';
+import { createInsertSchema } from 'drizzle-zod';
+import { z } from 'zod';
 
 // Session storage table.
 // (IMPORTANT) This table is mandatory for Replit Auth, don't drop it.
 export const sessions = pgTable(
-  "sessions",
+  'sessions',
   {
-    sid: varchar("sid").primaryKey(),
-    sess: jsonb("sess").notNull(),
-    expire: timestamp("expire").notNull(),
+    sid: varchar('sid').primaryKey(),
+    sess: jsonb('sess').notNull(),
+    expire: timestamp('expire').notNull(),
   },
-  (table) => [index("IDX_session_expire").on(table.expire)],
+  (table) => [index('IDX_session_expire').on(table.expire)]
 );
 
 // User storage table.
 // (IMPORTANT) This table is mandatory for Replit Auth, don't drop it.
-export const users = pgTable("users", {
-  id: varchar("id").primaryKey().notNull(),
-  email: varchar("email").unique(),
-  password: varchar("password"), // For custom auth system
-  firstName: varchar("first_name"),
-  lastName: varchar("last_name"),
-  displayName: varchar("display_name"), // User-chosen display name for chat/activities
-  profileImageUrl: varchar("profile_image_url"),
-  role: varchar("role").notNull().default("volunteer"), // 'admin', 'admin_coordinator', 'volunteer', 'viewer'
-  permissions: jsonb("permissions").default("[]"), // Array of specific permissions
-  metadata: jsonb("metadata").default("{}"), // Additional user data (phone, address, availability, etc.)
-  isActive: boolean("is_active").notNull().default(true),
-  lastLoginAt: timestamp("last_login_at"), // Track when user last logged in
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+export const users = pgTable('users', {
+  id: varchar('id').primaryKey().notNull(),
+  email: varchar('email').unique(),
+  password: varchar('password'), // For custom auth system
+  firstName: varchar('first_name'),
+  lastName: varchar('last_name'),
+  displayName: varchar('display_name'), // User-chosen display name for chat/activities
+  profileImageUrl: varchar('profile_image_url'),
+  role: varchar('role').notNull().default('volunteer'), // 'admin', 'admin_coordinator', 'volunteer', 'viewer'
+  permissions: jsonb('permissions').default('[]'), // Array of specific permissions
+  metadata: jsonb('metadata').default('{}'), // Additional user data (phone, address, availability, etc.)
+  isActive: boolean('is_active').notNull().default(true),
+  lastLoginAt: timestamp('last_login_at'), // Track when user last logged in
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
 });
 
 // Audit logging table for tracking all data changes
-export const auditLogs = pgTable("audit_logs", {
-  id: serial("id").primaryKey(),
-  action: varchar("action").notNull(), // CREATE, UPDATE, DELETE, LOGIN, LOGOUT
-  tableName: varchar("table_name").notNull(),
-  recordId: varchar("record_id").notNull(),
-  oldData: text("old_data"), // JSON string of old values
-  newData: text("new_data"), // JSON string of new values
-  userId: varchar("user_id"), // Who made the change
-  ipAddress: varchar("ip_address"),
-  userAgent: text("user_agent"),
-  sessionId: varchar("session_id"),
-  timestamp: timestamp("timestamp").defaultNow().notNull(),
+export const auditLogs = pgTable('audit_logs', {
+  id: serial('id').primaryKey(),
+  action: varchar('action').notNull(), // CREATE, UPDATE, DELETE, LOGIN, LOGOUT
+  tableName: varchar('table_name').notNull(),
+  recordId: varchar('record_id').notNull(),
+  oldData: text('old_data'), // JSON string of old values
+  newData: text('new_data'), // JSON string of new values
+  userId: varchar('user_id'), // Who made the change
+  ipAddress: varchar('ip_address'),
+  userAgent: text('user_agent'),
+  sessionId: varchar('session_id'),
+  timestamp: timestamp('timestamp').defaultNow().notNull(),
 });
 
 // User activity tracking table for detailed usage analytics
 export const userActivityLogs = pgTable(
-  "user_activity_logs",
+  'user_activity_logs',
   {
-    id: serial("id").primaryKey(),
-    userId: varchar("user_id").notNull(),
-    action: varchar("action").notNull(), // PAGE_VIEW, FEATURE_USE, FORM_SUBMIT, DOWNLOAD, SEARCH, etc.
-    section: varchar("section").notNull(), // dashboard, collections, messaging, admin, etc.
-    details: jsonb("details").default("{}"), // Additional context (page, search terms, etc.)
-    sessionId: varchar("session_id"),
-    ipAddress: varchar("ip_address"),
-    userAgent: text("user_agent"),
-    duration: integer("duration"), // Time spent on action in seconds
-    page: varchar("page"), // Specific page or route visited
-    feature: varchar("feature"), // Specific feature used (button clicked, form submitted, etc.)
-    metadata: jsonb("metadata").default("{}"), // Additional context data
-    createdAt: timestamp("created_at").defaultNow().notNull(),
+    id: serial('id').primaryKey(),
+    userId: varchar('user_id').notNull(),
+    action: varchar('action').notNull(), // PAGE_VIEW, FEATURE_USE, FORM_SUBMIT, DOWNLOAD, SEARCH, etc.
+    section: varchar('section').notNull(), // dashboard, collections, messaging, admin, etc.
+    details: jsonb('details').default('{}'), // Additional context (page, search terms, etc.)
+    sessionId: varchar('session_id'),
+    ipAddress: varchar('ip_address'),
+    userAgent: text('user_agent'),
+    duration: integer('duration'), // Time spent on action in seconds
+    page: varchar('page'), // Specific page or route visited
+    feature: varchar('feature'), // Specific feature used (button clicked, form submitted, etc.)
+    metadata: jsonb('metadata').default('{}'), // Additional context data
+    createdAt: timestamp('created_at').defaultNow().notNull(),
   },
   (table) => ({
-    userActionIdx: index("idx_user_activity_user_action").on(
+    userActionIdx: index('idx_user_activity_user_action').on(
       table.userId,
-      table.action,
+      table.action
     ),
-    sectionTimeIdx: index("idx_user_activity_section_time").on(
+    sectionTimeIdx: index('idx_user_activity_section_time').on(
       table.section,
-      table.createdAt,
+      table.createdAt
     ),
-    userTimeIdx: index("idx_user_activity_user_time").on(
+    userTimeIdx: index('idx_user_activity_user_time').on(
       table.userId,
-      table.createdAt,
+      table.createdAt
     ),
-  }),
+  })
 );
 
 // Chat messages table for real-time chat system
-export const chatMessages = pgTable("chat_messages", {
-  id: serial("id").primaryKey(),
-  channel: varchar("channel").notNull().default("general"), // 'general', 'core-team', 'host', 'driver', 'recipient'
-  userId: varchar("user_id").notNull(),
-  userName: varchar("user_name").notNull(),
-  content: text("content").notNull(),
-  editedAt: timestamp("edited_at"),
-  createdAt: timestamp("created_at").defaultNow(),
+export const chatMessages = pgTable('chat_messages', {
+  id: serial('id').primaryKey(),
+  channel: varchar('channel').notNull().default('general'), // 'general', 'core-team', 'host', 'driver', 'recipient'
+  userId: varchar('user_id').notNull(),
+  userName: varchar('user_name').notNull(),
+  content: text('content').notNull(),
+  editedAt: timestamp('edited_at'),
+  createdAt: timestamp('created_at').defaultNow(),
 });
 
 // Chat message likes table for real-time chat system
 export const chatMessageLikes = pgTable(
-  "chat_message_likes",
+  'chat_message_likes',
   {
-    id: serial("id").primaryKey(),
-    messageId: integer("message_id").references(() => chatMessages.id, {
-      onDelete: "cascade",
+    id: serial('id').primaryKey(),
+    messageId: integer('message_id').references(() => chatMessages.id, {
+      onDelete: 'cascade',
     }),
-    userId: varchar("user_id").notNull(),
-    userName: varchar("user_name").notNull(),
-    likedAt: timestamp("liked_at").defaultNow(),
+    userId: varchar('user_id').notNull(),
+    userName: varchar('user_name').notNull(),
+    likedAt: timestamp('liked_at').defaultNow(),
   },
   (table) => ({
     uniqueLike: unique().on(table.messageId, table.userId),
-  }),
+  })
 );
 
 // Chat message reads table for tracking which users have read which messages
 export const chatMessageReads = pgTable(
-  "chat_message_reads",
+  'chat_message_reads',
   {
-    id: serial("id").primaryKey(),
-    messageId: integer("message_id").references(() => chatMessages.id, {
-      onDelete: "cascade",
+    id: serial('id').primaryKey(),
+    messageId: integer('message_id').references(() => chatMessages.id, {
+      onDelete: 'cascade',
     }),
-    userId: varchar("user_id").notNull(),
-    channel: varchar("channel").notNull(),
-    readAt: timestamp("read_at").defaultNow(),
-    createdAt: timestamp("created_at").defaultNow(), // ← MOVE IT HERE
+    userId: varchar('user_id').notNull(),
+    channel: varchar('channel').notNull(),
+    readAt: timestamp('read_at').defaultNow(),
+    createdAt: timestamp('created_at').defaultNow(), // ← MOVE IT HERE
   },
   (table) => ({
     uniqueRead: unique().on(table.messageId, table.userId),
-    userChannelIdx: index("idx_chat_reads_user_channel").on(
+    userChannelIdx: index('idx_chat_reads_user_channel').on(
       table.userId,
-      table.channel,
+      table.channel
     ),
-  }),
+  })
 );
-export const projects = pgTable("projects", {
-  id: serial("id").primaryKey(),
-  title: text("title").notNull(),
-  description: text("description"),
-  status: text("status").notNull(), // 'waiting', 'available', 'in_progress', 'completed'
-  priority: text("priority").notNull().default("medium"), // 'low', 'medium', 'high', 'urgent'
-  category: text("category").notNull().default("technology"), // 'technology', 'events', 'grants', 'outreach'
-  milestone: text("milestone"), // Project milestone information
-  assigneeId: integer("assignee_id"),
-  assigneeName: text("assignee_name"),
-  assigneeIds: jsonb("assignee_ids").default("[]"), // Array of user IDs for multiple assignees
-  assigneeNames: text("assignee_names"), // Comma-separated names for multiple assignees
-  supportPeopleIds: jsonb("support_people_ids").default("[]"), // Array of user IDs for support people
-  supportPeople: text("support_people"), // Support team members - names/emails (Column E in Google Sheets)
-  dueDate: text("due_date"), // ISO date string
-  startDate: text("start_date"), // ISO date string
-  completionDate: text("completion_date"), // ISO date string
-  progressPercentage: integer("progress_percentage").notNull().default(0), // 0-100
-  notes: text("notes"), // Additional project notes
-  requirements: text("requirements"), // Project requirements and specifications
-  deliverables: text("deliverables"), // Expected deliverables/outcomes
-  resources: text("resources"), // Resources needed or available
-  blockers: text("blockers"), // Current blockers or issues
-  tags: text("tags"), // JSON array of tags
-  estimatedHours: integer("estimated_hours"), // Estimated work hours
-  actualHours: integer("actual_hours"), // Actual hours worked
-  budget: varchar("budget"), // Project budget
-  color: text("color").notNull().default("blue"), // for status indicator
-  createdBy: varchar("created_by"), // User ID who created the project
-  createdByName: varchar("created_by_name"), // Display name of creator
+export const projects = pgTable('projects', {
+  id: serial('id').primaryKey(),
+  title: text('title').notNull(),
+  description: text('description'),
+  status: text('status').notNull(), // 'waiting', 'available', 'in_progress', 'completed'
+  priority: text('priority').notNull().default('medium'), // 'low', 'medium', 'high', 'urgent'
+  category: text('category').notNull().default('technology'), // 'technology', 'events', 'grants', 'outreach'
+  milestone: text('milestone'), // Project milestone information
+  assigneeId: integer('assignee_id'),
+  assigneeName: text('assignee_name'),
+  assigneeIds: jsonb('assignee_ids').default('[]'), // Array of user IDs for multiple assignees
+  assigneeNames: text('assignee_names'), // Comma-separated names for multiple assignees
+  supportPeopleIds: jsonb('support_people_ids').default('[]'), // Array of user IDs for support people
+  supportPeople: text('support_people'), // Support team members - names/emails (Column E in Google Sheets)
+  dueDate: text('due_date'), // ISO date string
+  startDate: text('start_date'), // ISO date string
+  completionDate: text('completion_date'), // ISO date string
+  progressPercentage: integer('progress_percentage').notNull().default(0), // 0-100
+  notes: text('notes'), // Additional project notes
+  requirements: text('requirements'), // Project requirements and specifications
+  deliverables: text('deliverables'), // Expected deliverables/outcomes
+  resources: text('resources'), // Resources needed or available
+  blockers: text('blockers'), // Current blockers or issues
+  tags: text('tags'), // JSON array of tags
+  estimatedHours: integer('estimated_hours'), // Estimated work hours
+  actualHours: integer('actual_hours'), // Actual hours worked
+  budget: varchar('budget'), // Project budget
+  color: text('color').notNull().default('blue'), // for status indicator
+  createdBy: varchar('created_by'), // User ID who created the project
+  createdByName: varchar('created_by_name'), // Display name of creator
   // Google Sheets integration fields
-  reviewInNextMeeting: boolean("review_in_next_meeting")
+  reviewInNextMeeting: boolean('review_in_next_meeting')
     .notNull()
     .default(false), // Include in agenda
-  lastDiscussedDate: text("last_discussed_date"), // ISO date string of last meeting where this was discussed
-  meetingDiscussionPoints: text("meeting_discussion_points"), // What needs to be discussed about this project
-  meetingDecisionItems: text("meeting_decision_items"), // What decisions need to be made
-  googleSheetRowId: text("google_sheet_row_id"), // Track which sheet row this corresponds to
-  lastSyncedAt: timestamp("last_synced_at"), // When last synced with Google Sheets
-  syncStatus: text("sync_status").default("unsynced"), // "unsynced", "synced", "conflict", "error"
-  tasksAndOwners: text("tasks_and_owners"), // Parsed from Google Sheets format: "Katie: Design, Chris: Review"
+  lastDiscussedDate: text('last_discussed_date'), // ISO date string of last meeting where this was discussed
+  meetingDiscussionPoints: text('meeting_discussion_points'), // What needs to be discussed about this project
+  meetingDecisionItems: text('meeting_decision_items'), // What decisions need to be made
+  googleSheetRowId: text('google_sheet_row_id'), // Track which sheet row this corresponds to
+  lastSyncedAt: timestamp('last_synced_at'), // When last synced with Google Sheets
+  syncStatus: text('sync_status').default('unsynced'), // "unsynced", "synced", "conflict", "error"
+  tasksAndOwners: text('tasks_and_owners'), // Parsed from Google Sheets format: "Katie: Design, Chris: Review"
   // Additional database columns to prevent deletion during migrations
-  estimatedhours: integer("estimatedhours"),
-  actualhours: integer("actualhours"),
-  startdate: text("startdate"), // Using text to match existing pattern
-  enddate: text("enddate"), // Using text to match existing pattern
-  risklevel: varchar("risklevel"),
-  stakeholders: text("stakeholders"),
-  milestones: text("milestones"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  estimatedhours: integer('estimatedhours'),
+  actualhours: integer('actualhours'),
+  startdate: text('startdate'), // Using text to match existing pattern
+  enddate: text('enddate'), // Using text to match existing pattern
+  risklevel: varchar('risklevel'),
+  stakeholders: text('stakeholders'),
+  milestones: text('milestones'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
 // Archived projects table for completed projects
-export const archivedProjects = pgTable("archived_projects", {
-  id: serial("id").primaryKey(),
-  originalProjectId: integer("original_project_id").notNull(),
-  title: text("title").notNull(),
-  description: text("description"),
-  priority: text("priority").notNull().default("medium"),
-  category: text("category").notNull().default("technology"),
-  assigneeId: integer("assignee_id"),
-  assigneeName: text("assignee_name"),
-  assigneeIds: jsonb("assignee_ids").default("[]"),
-  assigneeNames: text("assignee_names"),
-  dueDate: text("due_date"),
-  startDate: text("start_date"),
-  completionDate: text("completion_date").notNull(),
-  progressPercentage: integer("progress_percentage").notNull().default(100),
-  notes: text("notes"),
-  requirements: text("requirements"),
-  deliverables: text("deliverables"),
-  resources: text("resources"),
-  blockers: text("blockers"),
-  tags: text("tags"),
-  estimatedHours: integer("estimated_hours"),
-  actualHours: integer("actual_hours"),
-  budget: varchar("budget"),
-  color: text("color").notNull().default("blue"),
-  createdBy: varchar("created_by"),
-  createdByName: varchar("created_by_name"),
-  createdAt: timestamp("created_at").notNull(),
-  completedAt: timestamp("completed_at").notNull().defaultNow(),
-  archivedAt: timestamp("archived_at").notNull().defaultNow(),
-  archivedBy: varchar("archived_by"),
-  archivedByName: varchar("archived_by_name"),
+export const archivedProjects = pgTable('archived_projects', {
+  id: serial('id').primaryKey(),
+  originalProjectId: integer('original_project_id').notNull(),
+  title: text('title').notNull(),
+  description: text('description'),
+  priority: text('priority').notNull().default('medium'),
+  category: text('category').notNull().default('technology'),
+  assigneeId: integer('assignee_id'),
+  assigneeName: text('assignee_name'),
+  assigneeIds: jsonb('assignee_ids').default('[]'),
+  assigneeNames: text('assignee_names'),
+  dueDate: text('due_date'),
+  startDate: text('start_date'),
+  completionDate: text('completion_date').notNull(),
+  progressPercentage: integer('progress_percentage').notNull().default(100),
+  notes: text('notes'),
+  requirements: text('requirements'),
+  deliverables: text('deliverables'),
+  resources: text('resources'),
+  blockers: text('blockers'),
+  tags: text('tags'),
+  estimatedHours: integer('estimated_hours'),
+  actualHours: integer('actual_hours'),
+  budget: varchar('budget'),
+  color: text('color').notNull().default('blue'),
+  createdBy: varchar('created_by'),
+  createdByName: varchar('created_by_name'),
+  createdAt: timestamp('created_at').notNull(),
+  completedAt: timestamp('completed_at').notNull().defaultNow(),
+  archivedAt: timestamp('archived_at').notNull().defaultNow(),
+  archivedBy: varchar('archived_by'),
+  archivedByName: varchar('archived_by_name'),
 });
 
-export const projectTasks = pgTable("project_tasks", {
-  id: serial("id").primaryKey(),
-  projectId: integer("project_id").notNull(),
-  title: text("title").notNull(),
-  description: text("description"),
-  status: text("status").notNull().default("pending"), // 'pending', 'in_progress', 'completed'
-  priority: text("priority").notNull().default("medium"), // 'low', 'medium', 'high'
-  assigneeId: text("assignee_id"), // Single assignee - kept for backward compatibility
-  assigneeName: text("assignee_name"), // Single assignee name - kept for backward compatibility
-  assigneeIds: text("assignee_ids").array(), // Multiple assignee IDs as JSON array
-  assigneeNames: text("assignee_names").array(), // Multiple assignee names as JSON array
-  dueDate: text("due_date"),
-  completedAt: timestamp("completed_at"),
-  attachments: text("attachments"), // JSON array of file paths
-  order: integer("order").notNull().default(0), // for task ordering
-  orderNum: integer("order_num").default(0),
+export const projectTasks = pgTable('project_tasks', {
+  id: serial('id').primaryKey(),
+  projectId: integer('project_id').notNull(),
+  title: text('title').notNull(),
+  description: text('description'),
+  status: text('status').notNull().default('pending'), // 'pending', 'in_progress', 'completed'
+  priority: text('priority').notNull().default('medium'), // 'low', 'medium', 'high'
+  assigneeId: text('assignee_id'), // Single assignee - kept for backward compatibility
+  assigneeName: text('assignee_name'), // Single assignee name - kept for backward compatibility
+  assigneeIds: text('assignee_ids').array(), // Multiple assignee IDs as JSON array
+  assigneeNames: text('assignee_names').array(), // Multiple assignee names as JSON array
+  dueDate: text('due_date'),
+  completedAt: timestamp('completed_at'),
+  attachments: text('attachments'), // JSON array of file paths
+  order: integer('order').notNull().default(0), // for task ordering
+  orderNum: integer('order_num').default(0),
   // Additional database columns to prevent deletion during migrations
-  completedBy: text("completed_by"),
-  completedByName: text("completed_by_name"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  completedBy: text('completed_by'),
+  completedByName: text('completed_by_name'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
-export const projectComments = pgTable("project_comments", {
-  id: serial("id").primaryKey(),
-  projectId: integer("project_id").notNull(),
-  authorName: text("author_name").notNull(),
-  content: text("content").notNull(),
-  commentType: text("comment_type").notNull().default("general"), // 'general', 'update', 'blocker', 'completion'
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+export const projectComments = pgTable('project_comments', {
+  id: serial('id').primaryKey(),
+  projectId: integer('project_id').notNull(),
+  authorName: text('author_name').notNull(),
+  content: text('content').notNull(),
+  commentType: text('comment_type').notNull().default('general'), // 'general', 'update', 'blocker', 'completion'
+  createdAt: timestamp('created_at').notNull().defaultNow(),
 });
 
 export const taskCompletions = pgTable(
-  "task_completions",
+  'task_completions',
   {
-    id: serial("id").primaryKey(),
-    taskId: integer("task_id").notNull(),
-    userId: text("user_id").notNull(),
-    userName: text("user_name").notNull(),
-    completedAt: timestamp("completed_at").notNull().defaultNow(),
-    notes: text("notes"),
+    id: serial('id').primaryKey(),
+    taskId: integer('task_id').notNull(),
+    userId: text('user_id').notNull(),
+    userName: text('user_name').notNull(),
+    completedAt: timestamp('completed_at').notNull().defaultNow(),
+    notes: text('notes'),
   },
   (table) => ({
     uniqueTaskUser: unique().on(table.taskId, table.userId),
-  }),
+  })
 );
 
 // User-project assignments for visibility control
-export const projectAssignments = pgTable("project_assignments", {
-  id: serial("id").primaryKey(),
-  projectId: integer("project_id").notNull(),
-  userId: text("user_id").notNull(), // References users.id
-  role: text("role").notNull().default("member"), // 'owner', 'member', 'viewer'
-  assignedAt: timestamp("assigned_at").notNull().defaultNow(),
+export const projectAssignments = pgTable('project_assignments', {
+  id: serial('id').primaryKey(),
+  projectId: integer('project_id').notNull(),
+  userId: text('user_id').notNull(), // References users.id
+  role: text('role').notNull().default('member'), // 'owner', 'member', 'viewer'
+  assignedAt: timestamp('assigned_at').notNull().defaultNow(),
 });
 
 // Committees table for organizing committee information
-export const committees = pgTable("committees", {
-  id: serial("id").primaryKey(), // Auto-incrementing numeric ID
-  name: varchar("name").notNull(), // 'Marketing Committee', 'Grant Committee', etc.
-  description: text("description"),
-  isActive: boolean("is_active").notNull().default(true),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+export const committees = pgTable('committees', {
+  id: serial('id').primaryKey(), // Auto-incrementing numeric ID
+  name: varchar('name').notNull(), // 'Marketing Committee', 'Grant Committee', etc.
+  description: text('description'),
+  isActive: boolean('is_active').notNull().default(true),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
 });
 
 // Committee memberships table for tracking which users belong to which committees
-export const committeeMemberships = pgTable("committee_memberships", {
-  id: serial("id").primaryKey(),
-  userId: varchar("user_id").notNull(),
-  committeeId: integer("committee_id").notNull(), // References committees.id
-  role: varchar("role").notNull().default("member"), // 'chair', 'co-chair', 'member'
-  permissions: jsonb("permissions").default("[]"), // Specific committee permissions
-  joinedAt: timestamp("joined_at").defaultNow(),
-  isActive: boolean("is_active").notNull().default(true),
-  createdAt: timestamp("created_at").defaultNow(),
+export const committeeMemberships = pgTable('committee_memberships', {
+  id: serial('id').primaryKey(),
+  userId: varchar('user_id').notNull(),
+  committeeId: integer('committee_id').notNull(), // References committees.id
+  role: varchar('role').notNull().default('member'), // 'chair', 'co-chair', 'member'
+  permissions: jsonb('permissions').default('[]'), // Specific committee permissions
+  joinedAt: timestamp('joined_at').defaultNow(),
+  isActive: boolean('is_active').notNull().default(true),
+  createdAt: timestamp('created_at').defaultNow(),
 });
 
 // Announcements table for website banners
-export const announcements = pgTable("announcements", {
-  id: serial("id").primaryKey(),
-  title: text("title").notNull(),
-  message: text("message").notNull(),
-  type: varchar("type").notNull().default("general"), // 'event', 'position', 'alert', 'general'
-  priority: varchar("priority").notNull().default("medium"), // 'low', 'medium', 'high', 'urgent'
-  startDate: timestamp("start_date").notNull(),
-  endDate: timestamp("end_date").notNull(),
-  isActive: boolean("is_active").notNull().default(true),
-  link: text("link"), // Optional external link
-  linkText: text("link_text"), // Text for the link
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+export const announcements = pgTable('announcements', {
+  id: serial('id').primaryKey(),
+  title: text('title').notNull(),
+  message: text('message').notNull(),
+  type: varchar('type').notNull().default('general'), // 'event', 'position', 'alert', 'general'
+  priority: varchar('priority').notNull().default('medium'), // 'low', 'medium', 'high', 'urgent'
+  startDate: timestamp('start_date').notNull(),
+  endDate: timestamp('end_date').notNull(),
+  isActive: boolean('is_active').notNull().default(true),
+  link: text('link'), // Optional external link
+  linkText: text('link_text'), // Text for the link
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
 });
 
 // SIMPLE MESSAGING SYSTEM - 3 tables only
 
 // 1. Conversations - stores all conversation types
-export const conversations = pgTable("conversations", {
-  id: serial("id").primaryKey(),
-  type: text("type").notNull(), // 'direct', 'group', 'channel'
-  name: text("name"), // NULL for direct messages, required for groups/channels
-  createdAt: timestamp("created_at").defaultNow(),
+export const conversations = pgTable('conversations', {
+  id: serial('id').primaryKey(),
+  type: text('type').notNull(), // 'direct', 'group', 'channel'
+  name: text('name'), // NULL for direct messages, required for groups/channels
+  createdAt: timestamp('created_at').defaultNow(),
 });
 
 // 2. Conversation participants - who's in each conversation
 export const conversationParticipants = pgTable(
-  "conversation_participants",
+  'conversation_participants',
   {
-    conversationId: integer("conversation_id")
+    conversationId: integer('conversation_id')
       .notNull()
-      .references(() => conversations.id, { onDelete: "cascade" }),
-    userId: text("user_id").notNull(),
-    joinedAt: timestamp("joined_at").defaultNow(),
-    lastReadAt: timestamp("last_read_at").defaultNow(),
+      .references(() => conversations.id, { onDelete: 'cascade' }),
+    userId: text('user_id').notNull(),
+    joinedAt: timestamp('joined_at').defaultNow(),
+    lastReadAt: timestamp('last_read_at').defaultNow(),
   },
   (table) => ({
     pk: primaryKey({ columns: [table.conversationId, table.userId] }),
-  }),
+  })
 );
 
 // 3. Messages - for chat messages only
-export const messages = pgTable("messages", {
-  id: serial("id").primaryKey(),
-  conversationId: integer("conversation_id").references(
+export const messages = pgTable('messages', {
+  id: serial('id').primaryKey(),
+  conversationId: integer('conversation_id').references(
     () => conversations.id,
-    { onDelete: "cascade" },
+    { onDelete: 'cascade' }
   ),
-  userId: text("user_id").notNull(),
-  senderId: text("sender_id").notNull(),
-  content: text("content").notNull(),
-  sender: text("sender"), // Display name of sender
-  contextType: text("context_type"), // 'suggestion', 'project', 'task', 'direct'
-  contextId: text("context_id"),
-  read: boolean("read").notNull().default(false), // Simple read status
-  editedAt: timestamp("edited_at"),
-  editedContent: text("edited_content"),
-  deletedAt: timestamp("deleted_at"),
-  deletedBy: text("deleted_by"),
+  userId: text('user_id').notNull(),
+  senderId: text('sender_id').notNull(),
+  content: text('content').notNull(),
+  sender: text('sender'), // Display name of sender
+  contextType: text('context_type'), // 'suggestion', 'project', 'task', 'direct'
+  contextId: text('context_id'),
+  read: boolean('read').notNull().default(false), // Simple read status
+  editedAt: timestamp('edited_at'),
+  editedContent: text('edited_content'),
+  deletedAt: timestamp('deleted_at'),
+  deletedBy: text('deleted_by'),
   // Reply functionality
-  replyToMessageId: integer("reply_to_message_id"),
-  replyToContent: text("reply_to_content"), // Store original message content for display
-  replyToSender: text("reply_to_sender"), // Store sender name for display
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+  replyToMessageId: integer('reply_to_message_id'),
+  replyToContent: text('reply_to_content'), // Store original message content for display
+  replyToSender: text('reply_to_sender'), // Store sender name for display
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
 });
 
 // 4. Message Recipients - track read status per recipient
 export const messageRecipients = pgTable(
-  "message_recipients",
+  'message_recipients',
   {
-    id: serial("id").primaryKey(),
-    messageId: integer("message_id").references(() => messages.id, {
-      onDelete: "cascade",
+    id: serial('id').primaryKey(),
+    messageId: integer('message_id').references(() => messages.id, {
+      onDelete: 'cascade',
     }),
-    recipientId: text("recipient_id").notNull(),
-    read: boolean("read").notNull().default(false),
-    readAt: timestamp("read_at"),
-    notificationSent: boolean("notification_sent").notNull().default(false),
-    emailSentAt: timestamp("email_sent_at"),
-    contextAccessRevoked: boolean("context_access_revoked").default(false),
-    initiallyNotified: boolean("initially_notified").notNull().default(false),
-    initiallyNotifiedAt: timestamp("initially_notified_at"),
-    createdAt: timestamp("created_at").defaultNow(),
+    recipientId: text('recipient_id').notNull(),
+    read: boolean('read').notNull().default(false),
+    readAt: timestamp('read_at'),
+    notificationSent: boolean('notification_sent').notNull().default(false),
+    emailSentAt: timestamp('email_sent_at'),
+    contextAccessRevoked: boolean('context_access_revoked').default(false),
+    initiallyNotified: boolean('initially_notified').notNull().default(false),
+    initiallyNotifiedAt: timestamp('initially_notified_at'),
+    createdAt: timestamp('created_at').defaultNow(),
   },
   (table) => ({
     uniqueRecipient: unique().on(table.messageId, table.recipientId),
-    unreadIdx: index("idx_message_recipients_unread").on(
+    unreadIdx: index('idx_message_recipients_unread').on(
       table.recipientId,
-      table.read,
+      table.read
     ),
-  }),
+  })
 );
 
 // THREADING REMOVED: No message threads table needed for simplified Gmail functionality
 
 // 6. Kudos Tracking - prevent spam by tracking sent kudos
 export const kudosTracking = pgTable(
-  "kudos_tracking",
+  'kudos_tracking',
   {
-    id: serial("id").primaryKey(),
-    senderId: text("sender_id").notNull(),
-    recipientId: text("recipient_id").notNull(),
-    contextType: text("context_type").notNull(), // 'project' or 'task'
-    contextId: text("context_id").notNull(),
-    entityName: text("entity_name").notNull().default("Legacy Entry"), // Store the project/task name for display
-    messageId: integer("message_id").references(() => messages.id, {
-      onDelete: "cascade",
+    id: serial('id').primaryKey(),
+    senderId: text('sender_id').notNull(),
+    recipientId: text('recipient_id').notNull(),
+    contextType: text('context_type').notNull(), // 'project' or 'task'
+    contextId: text('context_id').notNull(),
+    entityName: text('entity_name').notNull().default('Legacy Entry'), // Store the project/task name for display
+    messageId: integer('message_id').references(() => messages.id, {
+      onDelete: 'cascade',
     }),
-    sentAt: timestamp("sent_at").defaultNow(),
+    sentAt: timestamp('sent_at').defaultNow(),
   },
   (table) => ({
     // Ensure one kudos per sender-recipient-context combination
@@ -428,30 +428,30 @@ export const kudosTracking = pgTable(
       table.senderId,
       table.recipientId,
       table.contextType,
-      table.contextId,
+      table.contextId
     ),
-    senderIdx: index("idx_kudos_sender").on(table.senderId),
-  }),
+    senderIdx: index('idx_kudos_sender').on(table.senderId),
+  })
 );
 
 // 5. Message Likes - track who liked which messages
 export const messageLikes = pgTable(
-  "message_likes",
+  'message_likes',
   {
-    id: serial("id").primaryKey(),
-    messageId: integer("message_id")
-      .references(() => messages.id, { onDelete: "cascade" })
+    id: serial('id').primaryKey(),
+    messageId: integer('message_id')
+      .references(() => messages.id, { onDelete: 'cascade' })
       .notNull(),
-    userId: text("user_id").notNull(),
-    userName: text("user_name"), // Store user display name for tooltip
-    likedAt: timestamp("liked_at").defaultNow(),
+    userId: text('user_id').notNull(),
+    userName: text('user_name'), // Store user display name for tooltip
+    likedAt: timestamp('liked_at').defaultNow(),
   },
   (table) => ({
     // Ensure each user can only like a message once
     uniqueLike: unique().on(table.messageId, table.userId),
-    messageIdx: index("idx_message_likes_message").on(table.messageId),
-    userIdx: index("idx_message_likes_user").on(table.userId),
-  }),
+    messageIdx: index('idx_message_likes_message').on(table.messageId),
+    userIdx: index('idx_message_likes_user').on(table.userId),
+  })
 );
 
 // All complex messaging tables removed - using enhanced messaging system above
@@ -459,451 +459,451 @@ export const messageLikes = pgTable(
 // SIMPLIFIED Email-style messaging table - NO THREADING COMPLEXITY
 // Simple Gmail-like inbox with send/receive, read/unread, reply, archive, delete operations only
 export const emailMessages = pgTable(
-  "email_messages",
+  'email_messages',
   {
-    id: serial("id").primaryKey(),
-    senderId: varchar("sender_id").notNull(),
-    senderName: varchar("sender_name").notNull(),
-    senderEmail: varchar("sender_email").notNull(),
-    recipientId: varchar("recipient_id").notNull(),
-    recipientName: varchar("recipient_name").notNull(),
-    recipientEmail: varchar("recipient_email").notNull(),
-    subject: text("subject").notNull(),
-    content: text("content").notNull(),
-    isRead: boolean("is_read").notNull().default(false),
-    isStarred: boolean("is_starred").notNull().default(false),
-    isArchived: boolean("is_archived").notNull().default(false),
-    isTrashed: boolean("is_trashed").notNull().default(false),
-    isDraft: boolean("is_draft").notNull().default(false),
-    parentMessageId: integer("parent_message_id"), // Reference to parent message for threading
-    contextType: varchar("context_type"), // 'project', 'task', 'suggestion', etc.
-    contextId: varchar("context_id"), // ID of the related entity
-    contextTitle: varchar("context_title"), // Display name of related entity
-    readAt: timestamp("read_at"),
-    createdAt: timestamp("created_at").defaultNow(),
-    updatedAt: timestamp("updated_at").defaultNow(),
+    id: serial('id').primaryKey(),
+    senderId: varchar('sender_id').notNull(),
+    senderName: varchar('sender_name').notNull(),
+    senderEmail: varchar('sender_email').notNull(),
+    recipientId: varchar('recipient_id').notNull(),
+    recipientName: varchar('recipient_name').notNull(),
+    recipientEmail: varchar('recipient_email').notNull(),
+    subject: text('subject').notNull(),
+    content: text('content').notNull(),
+    isRead: boolean('is_read').notNull().default(false),
+    isStarred: boolean('is_starred').notNull().default(false),
+    isArchived: boolean('is_archived').notNull().default(false),
+    isTrashed: boolean('is_trashed').notNull().default(false),
+    isDraft: boolean('is_draft').notNull().default(false),
+    parentMessageId: integer('parent_message_id'), // Reference to parent message for threading
+    contextType: varchar('context_type'), // 'project', 'task', 'suggestion', etc.
+    contextId: varchar('context_id'), // ID of the related entity
+    contextTitle: varchar('context_title'), // Display name of related entity
+    readAt: timestamp('read_at'),
+    createdAt: timestamp('created_at').defaultNow(),
+    updatedAt: timestamp('updated_at').defaultNow(),
   },
   (table) => ({
-    senderIdx: index("idx_email_sender").on(table.senderId),
-    recipientIdx: index("idx_email_recipient").on(table.recipientId),
-    readIdx: index("idx_email_read").on(table.isRead),
-    trashedIdx: index("idx_email_trashed").on(table.isTrashed),
-    draftIdx: index("idx_email_draft").on(table.isDraft),
-  }),
+    senderIdx: index('idx_email_sender').on(table.senderId),
+    recipientIdx: index('idx_email_recipient').on(table.recipientId),
+    readIdx: index('idx_email_read').on(table.isRead),
+    trashedIdx: index('idx_email_trashed').on(table.isTrashed),
+    draftIdx: index('idx_email_draft').on(table.isDraft),
+  })
 );
 
 // Drafts table for email-style drafts functionality
 export const emailDrafts = pgTable(
-  "email_drafts",
+  'email_drafts',
   {
-    id: serial("id").primaryKey(),
-    userId: varchar("user_id").notNull(),
-    recipientId: varchar("recipient_id").notNull(),
-    recipientName: varchar("recipient_name").notNull(),
-    subject: text("subject").notNull(),
-    content: text("content").notNull(),
-    lastSaved: timestamp("last_saved").defaultNow(),
-    createdAt: timestamp("created_at").defaultNow(),
+    id: serial('id').primaryKey(),
+    userId: varchar('user_id').notNull(),
+    recipientId: varchar('recipient_id').notNull(),
+    recipientName: varchar('recipient_name').notNull(),
+    subject: text('subject').notNull(),
+    content: text('content').notNull(),
+    lastSaved: timestamp('last_saved').defaultNow(),
+    createdAt: timestamp('created_at').defaultNow(),
   },
   (table) => ({
-    userIdx: index("idx_drafts_user").on(table.userId),
-  }),
+    userIdx: index('idx_drafts_user').on(table.userId),
+  })
 );
 
-export const weeklyReports = pgTable("weekly_reports", {
-  id: serial("id").primaryKey(),
-  weekEnding: text("week_ending").notNull(), // date string
-  sandwichCount: integer("sandwich_count").notNull(),
-  notes: text("notes"),
-  submittedBy: text("submitted_by").notNull(),
-  submittedAt: timestamp("submitted_at").notNull().defaultNow(),
+export const weeklyReports = pgTable('weekly_reports', {
+  id: serial('id').primaryKey(),
+  weekEnding: text('week_ending').notNull(), // date string
+  sandwichCount: integer('sandwich_count').notNull(),
+  notes: text('notes'),
+  submittedBy: text('submitted_by').notNull(),
+  submittedAt: timestamp('submitted_at').notNull().defaultNow(),
 });
 
 // Sandwich distribution tracking - tracks how many sandwiches go from each host to each recipient org each week
 export const sandwichDistributions = pgTable(
-  "sandwich_distributions",
+  'sandwich_distributions',
   {
-    id: serial("id").primaryKey(),
-    distributionDate: text("distribution_date").notNull(), // Date of distribution (YYYY-MM-DD format)
-    weekEnding: text("week_ending").notNull(), // Week ending date for grouping (YYYY-MM-DD format)
-    hostId: integer("host_id").notNull(), // ID of host location
-    hostName: text("host_name").notNull(), // Name of host location (denormalized for reporting)
-    recipientId: integer("recipient_id").notNull(), // ID of recipient organization
-    recipientName: text("recipient_name").notNull(), // Name of recipient org (denormalized for reporting)
-    sandwichCount: integer("sandwich_count").notNull(), // Number of sandwiches distributed
-    notes: text("notes"), // Optional notes about the distribution
-    createdBy: text("created_by").notNull(), // User ID who created this entry
-    createdByName: text("created_by_name").notNull(), // Display name of creator
-    createdAt: timestamp("created_at").defaultNow(),
-    updatedAt: timestamp("updated_at").defaultNow(),
+    id: serial('id').primaryKey(),
+    distributionDate: text('distribution_date').notNull(), // Date of distribution (YYYY-MM-DD format)
+    weekEnding: text('week_ending').notNull(), // Week ending date for grouping (YYYY-MM-DD format)
+    hostId: integer('host_id').notNull(), // ID of host location
+    hostName: text('host_name').notNull(), // Name of host location (denormalized for reporting)
+    recipientId: integer('recipient_id').notNull(), // ID of recipient organization
+    recipientName: text('recipient_name').notNull(), // Name of recipient org (denormalized for reporting)
+    sandwichCount: integer('sandwich_count').notNull(), // Number of sandwiches distributed
+    notes: text('notes'), // Optional notes about the distribution
+    createdBy: text('created_by').notNull(), // User ID who created this entry
+    createdByName: text('created_by_name').notNull(), // Display name of creator
+    createdAt: timestamp('created_at').defaultNow(),
+    updatedAt: timestamp('updated_at').defaultNow(),
   },
   (table) => ({
     // Indexes for efficient querying
-    weekEndingIdx: index("idx_distributions_week_ending").on(table.weekEnding),
-    hostIdx: index("idx_distributions_host").on(table.hostId),
-    recipientIdx: index("idx_distributions_recipient").on(table.recipientId),
-    dateIdx: index("idx_distributions_date").on(table.distributionDate),
+    weekEndingIdx: index('idx_distributions_week_ending').on(table.weekEnding),
+    hostIdx: index('idx_distributions_host').on(table.hostId),
+    recipientIdx: index('idx_distributions_recipient').on(table.recipientId),
+    dateIdx: index('idx_distributions_date').on(table.distributionDate),
     // Ensure no duplicate entries for same host+recipient+date
     uniqueDistribution: unique().on(
       table.hostId,
       table.recipientId,
-      table.distributionDate,
+      table.distributionDate
     ),
-  }),
+  })
 );
 
-export const sandwichCollections = pgTable("sandwich_collections", {
-  id: serial("id").primaryKey(),
-  collectionDate: text("collection_date").notNull(), // The date sandwiches were actually collected
-  hostName: text("host_name").notNull(),
-  individualSandwiches: integer("individual_sandwiches").notNull().default(0),
+export const sandwichCollections = pgTable('sandwich_collections', {
+  id: serial('id').primaryKey(),
+  collectionDate: text('collection_date').notNull(), // The date sandwiches were actually collected
+  hostName: text('host_name').notNull(),
+  individualSandwiches: integer('individual_sandwiches').notNull().default(0),
   // Group collection columns (Phase 5: JSON column for unlimited groups)
-  group1Name: text("group1_name"), // Name of first group (nullable) - LEGACY, use groupCollections
-  group1Count: integer("group1_count"), // Count for first group (nullable) - LEGACY, use groupCollections
-  group2Name: text("group2_name"), // Name of second group (nullable) - LEGACY, use groupCollections
-  group2Count: integer("group2_count"), // Count for second group (nullable) - LEGACY, use groupCollections
+  group1Name: text('group1_name'), // Name of first group (nullable) - LEGACY, use groupCollections
+  group1Count: integer('group1_count'), // Count for first group (nullable) - LEGACY, use groupCollections
+  group2Name: text('group2_name'), // Name of second group (nullable) - LEGACY, use groupCollections
+  group2Count: integer('group2_count'), // Count for second group (nullable) - LEGACY, use groupCollections
   // New JSON column for unlimited groups
-  groupCollections: jsonb("group_collections").notNull().default("[]"), // Array of {name: string, count: number}
-  createdBy: text("created_by"), // User ID who created this entry
-  createdByName: text("created_by_name"), // Display name of creator
-  submittedAt: timestamp("submitted_at").notNull().defaultNow(), // When form was submitted
+  groupCollections: jsonb('group_collections').notNull().default('[]'), // Array of {name: string, count: number}
+  createdBy: text('created_by'), // User ID who created this entry
+  createdByName: text('created_by_name'), // Display name of creator
+  submittedAt: timestamp('submitted_at').notNull().defaultNow(), // When form was submitted
   // Add field to track if this was submitted via walkthrough
-  submissionMethod: text("submission_method").default("standard"), // 'standard' or 'walkthrough'
+  submissionMethod: text('submission_method').default('standard'), // 'standard' or 'walkthrough'
 });
 
-export const meetingMinutes = pgTable("meeting_minutes", {
-  id: serial("id").primaryKey(),
-  title: text("title").notNull(),
-  date: text("date").notNull(), // date string
-  summary: text("summary").notNull(),
-  color: text("color").notNull().default("blue"), // for border color
-  fileName: text("file_name"), // original uploaded file name
-  filePath: text("file_path"), // stored file path
-  fileType: text("file_type"), // 'pdf', 'docx', 'google_docs', 'text'
-  mimeType: text("mime_type"), // file mime type
-  committeeType: text("committee_type"), // Committee this minute belongs to - "core_group", "marketing_committee", etc.
+export const meetingMinutes = pgTable('meeting_minutes', {
+  id: serial('id').primaryKey(),
+  title: text('title').notNull(),
+  date: text('date').notNull(), // date string
+  summary: text('summary').notNull(),
+  color: text('color').notNull().default('blue'), // for border color
+  fileName: text('file_name'), // original uploaded file name
+  filePath: text('file_path'), // stored file path
+  fileType: text('file_type'), // 'pdf', 'docx', 'google_docs', 'text'
+  mimeType: text('mime_type'), // file mime type
+  committeeType: text('committee_type'), // Committee this minute belongs to - "core_group", "marketing_committee", etc.
 });
 
-export const driveLinks = pgTable("drive_links", {
-  id: serial("id").primaryKey(),
-  title: text("title").notNull(),
-  description: text("description").notNull(),
-  url: text("url").notNull(),
-  icon: text("icon").notNull(), // icon name
-  iconColor: text("icon_color").notNull(),
+export const driveLinks = pgTable('drive_links', {
+  id: serial('id').primaryKey(),
+  title: text('title').notNull(),
+  description: text('description').notNull(),
+  url: text('url').notNull(),
+  icon: text('icon').notNull(), // icon name
+  iconColor: text('icon_color').notNull(),
 });
 
-export const agendaItems = pgTable("agenda_items", {
-  id: serial("id").primaryKey(),
-  meetingId: integer("meeting_id").notNull(), // Links to specific meeting
-  submittedBy: text("submitted_by").notNull(),
-  title: text("title").notNull(),
-  description: text("description"),
-  status: text("status").notNull().default("pending"), // "pending", "approved", "rejected", "postponed"
-  submittedAt: timestamp("submitted_at").defaultNow().notNull(),
+export const agendaItems = pgTable('agenda_items', {
+  id: serial('id').primaryKey(),
+  meetingId: integer('meeting_id').notNull(), // Links to specific meeting
+  submittedBy: text('submitted_by').notNull(),
+  title: text('title').notNull(),
+  description: text('description'),
+  status: text('status').notNull().default('pending'), // "pending", "approved", "rejected", "postponed"
+  submittedAt: timestamp('submitted_at').defaultNow().notNull(),
 });
 
-export const meetings = pgTable("meetings", {
-  id: serial("id").primaryKey(),
-  title: text("title").notNull(),
-  type: text("type").notNull(), // "weekly", "marketing_committee", "grant_committee", "core_group", "all_team"
-  date: text("date").notNull(),
-  time: text("time").notNull(),
-  location: text("location"),
-  description: text("description"),
-  finalAgenda: text("final_agenda"),
-  status: text("status").notNull().default("planning"), // "planning", "agenda_set", "completed"
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+export const meetings = pgTable('meetings', {
+  id: serial('id').primaryKey(),
+  title: text('title').notNull(),
+  type: text('type').notNull(), // "weekly", "marketing_committee", "grant_committee", "core_group", "all_team"
+  date: text('date').notNull(),
+  time: text('time').notNull(),
+  location: text('location'),
+  description: text('description'),
+  finalAgenda: text('final_agenda'),
+  status: text('status').notNull().default('planning'), // "planning", "agenda_set", "completed"
+  createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
-export const compiledAgendas = pgTable("compiled_agendas", {
-  id: serial("id").primaryKey(),
-  meetingId: integer("meeting_id").notNull(), // Links to meeting
-  title: text("title").notNull(),
-  date: text("date").notNull(),
-  status: text("status").notNull().default("draft"), // "draft", "finalized", "published"
-  sections: jsonb("sections").notNull().default("[]"), // Array of agenda sections with items
-  deferredItems: jsonb("deferred_items").notNull().default("[]"), // Items deferred to next meeting
-  compiledBy: text("compiled_by").notNull(), // User who compiled the agenda
-  compiledAt: timestamp("compiled_at").defaultNow().notNull(),
-  finalizedAt: timestamp("finalized_at"),
-  publishedAt: timestamp("published_at"),
+export const compiledAgendas = pgTable('compiled_agendas', {
+  id: serial('id').primaryKey(),
+  meetingId: integer('meeting_id').notNull(), // Links to meeting
+  title: text('title').notNull(),
+  date: text('date').notNull(),
+  status: text('status').notNull().default('draft'), // "draft", "finalized", "published"
+  sections: jsonb('sections').notNull().default('[]'), // Array of agenda sections with items
+  deferredItems: jsonb('deferred_items').notNull().default('[]'), // Items deferred to next meeting
+  compiledBy: text('compiled_by').notNull(), // User who compiled the agenda
+  compiledAt: timestamp('compiled_at').defaultNow().notNull(),
+  finalizedAt: timestamp('finalized_at'),
+  publishedAt: timestamp('published_at'),
 });
 
-export const agendaSections = pgTable("agenda_sections", {
-  id: serial("id").primaryKey(),
-  compiledAgendaId: integer("compiled_agenda_id").notNull(),
-  title: text("title").notNull(), // "Old Business", "Urgent Items", "Housekeeping", "New Business"
-  orderIndex: integer("order_index").notNull(), // For ordering sections
-  items: jsonb("items").notNull().default("[]"), // Array of agenda items in this section
+export const agendaSections = pgTable('agenda_sections', {
+  id: serial('id').primaryKey(),
+  compiledAgendaId: integer('compiled_agenda_id').notNull(),
+  title: text('title').notNull(), // "Old Business", "Urgent Items", "Housekeeping", "New Business"
+  orderIndex: integer('order_index').notNull(), // For ordering sections
+  items: jsonb('items').notNull().default('[]'), // Array of agenda items in this section
 });
 
-export const drivers = pgTable("drivers", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull(),
-  phone: text("phone"),
-  email: text("email"),
-  address: text("address"),
-  notes: text("notes"),
-  isActive: boolean("is_active").notNull().default(true),
-  vehicleType: text("vehicle_type"),
-  licenseNumber: text("license_number"),
-  availability: text("availability").default("available"), // "available", "busy", "off-duty"
-  zone: text("zone"), // Keep for migration compatibility
-  area: text("area"), // Geographic area for driver coverage
-  routeDescription: text("route_description"), // New field to preserve route info like "SS to Dunwoody"
-  hostLocation: text("host_location"), // Connect to specific host locations
-  hostId: integer("host_id"), // Reference to hosts table for directory connection
-  vanApproved: boolean("van_approved").notNull().default(false),
-  homeAddress: text("home_address"),
-  availabilityNotes: text("availability_notes"),
-  emailAgreementSent: boolean("email_agreement_sent").notNull().default(false),
-  voicemailLeft: boolean("voicemail_left").notNull().default(false),
-  inactiveReason: text("inactive_reason"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+export const drivers = pgTable('drivers', {
+  id: serial('id').primaryKey(),
+  name: text('name').notNull(),
+  phone: text('phone'),
+  email: text('email'),
+  address: text('address'),
+  notes: text('notes'),
+  isActive: boolean('is_active').notNull().default(true),
+  vehicleType: text('vehicle_type'),
+  licenseNumber: text('license_number'),
+  availability: text('availability').default('available'), // "available", "busy", "off-duty"
+  zone: text('zone'), // Keep for migration compatibility
+  area: text('area'), // Geographic area for driver coverage
+  routeDescription: text('route_description'), // New field to preserve route info like "SS to Dunwoody"
+  hostLocation: text('host_location'), // Connect to specific host locations
+  hostId: integer('host_id'), // Reference to hosts table for directory connection
+  vanApproved: boolean('van_approved').notNull().default(false),
+  homeAddress: text('home_address'),
+  availabilityNotes: text('availability_notes'),
+  emailAgreementSent: boolean('email_agreement_sent').notNull().default(false),
+  voicemailLeft: boolean('voicemail_left').notNull().default(false),
+  inactiveReason: text('inactive_reason'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
-export const volunteers = pgTable("volunteers", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull(),
-  phone: text("phone"),
-  email: text("email"),
-  address: text("address"),
-  notes: text("notes"),
-  isActive: boolean("is_active").notNull().default(true),
-  vehicleType: text("vehicle_type"),
-  licenseNumber: text("license_number"),
-  availability: text("availability").default("available"), // "available", "busy", "off-duty"
-  zone: text("zone"), // Keep for migration compatibility
-  routeDescription: text("route_description"), // New field to preserve route info like "SS to Dunwoody"
-  hostLocation: text("host_location"), // Connect to specific host locations
-  hostId: integer("host_id"), // Reference to hosts table for directory connection
-  vanApproved: boolean("van_approved").notNull().default(false),
-  homeAddress: text("home_address"),
-  availabilityNotes: text("availability_notes"),
-  emailAgreementSent: boolean("email_agreement_sent").notNull().default(false),
-  voicemailLeft: boolean("voicemail_left").notNull().default(false),
-  inactiveReason: text("inactive_reason"),
-  volunteerType: text("volunteer_type").notNull().default("general"), // 'general', 'former_driver', 'driver_candidate', etc.
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+export const volunteers = pgTable('volunteers', {
+  id: serial('id').primaryKey(),
+  name: text('name').notNull(),
+  phone: text('phone'),
+  email: text('email'),
+  address: text('address'),
+  notes: text('notes'),
+  isActive: boolean('is_active').notNull().default(true),
+  vehicleType: text('vehicle_type'),
+  licenseNumber: text('license_number'),
+  availability: text('availability').default('available'), // "available", "busy", "off-duty"
+  zone: text('zone'), // Keep for migration compatibility
+  routeDescription: text('route_description'), // New field to preserve route info like "SS to Dunwoody"
+  hostLocation: text('host_location'), // Connect to specific host locations
+  hostId: integer('host_id'), // Reference to hosts table for directory connection
+  vanApproved: boolean('van_approved').notNull().default(false),
+  homeAddress: text('home_address'),
+  availabilityNotes: text('availability_notes'),
+  emailAgreementSent: boolean('email_agreement_sent').notNull().default(false),
+  voicemailLeft: boolean('voicemail_left').notNull().default(false),
+  inactiveReason: text('inactive_reason'),
+  volunteerType: text('volunteer_type').notNull().default('general'), // 'general', 'former_driver', 'driver_candidate', etc.
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
-export const driverAgreements = pgTable("driver_agreements", {
-  id: serial("id").primaryKey(),
-  submittedBy: text("submitted_by").notNull(),
-  email: text("email").notNull(),
-  phone: text("phone").notNull(),
-  licenseNumber: text("license_number").notNull(),
-  vehicleInfo: text("vehicle_info").notNull(),
-  emergencyContact: text("emergency_contact").notNull(),
-  emergencyPhone: text("emergency_phone").notNull(),
-  agreementAccepted: boolean("agreement_accepted").notNull().default(false),
-  submittedAt: timestamp("submitted_at").defaultNow().notNull(),
+export const driverAgreements = pgTable('driver_agreements', {
+  id: serial('id').primaryKey(),
+  submittedBy: text('submitted_by').notNull(),
+  email: text('email').notNull(),
+  phone: text('phone').notNull(),
+  licenseNumber: text('license_number').notNull(),
+  vehicleInfo: text('vehicle_info').notNull(),
+  emergencyContact: text('emergency_contact').notNull(),
+  emergencyPhone: text('emergency_phone').notNull(),
+  agreementAccepted: boolean('agreement_accepted').notNull().default(false),
+  submittedAt: timestamp('submitted_at').defaultNow().notNull(),
 });
 
-export const hosts = pgTable("hosts", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull(), // Location name (e.g., "Alpharetta", "Roswell Community Center")
-  address: text("address"),
-  email: text("email"),
-  phone: text("phone"),
-  status: text("status").notNull().default("active"), // 'active', 'inactive'
-  notes: text("notes"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+export const hosts = pgTable('hosts', {
+  id: serial('id').primaryKey(),
+  name: text('name').notNull(), // Location name (e.g., "Alpharetta", "Roswell Community Center")
+  address: text('address'),
+  email: text('email'),
+  phone: text('phone'),
+  status: text('status').notNull().default('active'), // 'active', 'inactive'
+  notes: text('notes'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
-export const hostContacts = pgTable("host_contacts", {
-  id: serial("id").primaryKey(),
-  hostId: integer("host_id").notNull(),
-  name: text("name").notNull(), // Contact person name
-  role: text("role").notNull(), // 'Lead', 'host', 'alternate', 'volunteer', 'head of school'
-  phone: text("phone").notNull(),
-  email: text("email"),
-  isPrimary: boolean("is_primary").notNull().default(false),
-  notes: text("notes"),
-  hostLocation: text("host_location"), // Location name for grouping contacts
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+export const hostContacts = pgTable('host_contacts', {
+  id: serial('id').primaryKey(),
+  hostId: integer('host_id').notNull(),
+  name: text('name').notNull(), // Contact person name
+  role: text('role').notNull(), // 'Lead', 'host', 'alternate', 'volunteer', 'head of school'
+  phone: text('phone').notNull(),
+  email: text('email'),
+  isPrimary: boolean('is_primary').notNull().default(false),
+  notes: text('notes'),
+  hostLocation: text('host_location'), // Location name for grouping contacts
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
-export const recipients = pgTable("recipients", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull(),
-  contactName: text("contact_name"), // Contact person name (legacy field)
-  phone: text("phone").notNull(),
-  email: text("email"),
-  website: text("website"), // Organization website URL
-  instagramHandle: text("instagram_handle"), // Instagram handle for social media tracking
-  address: text("address"), // Actual street address
-  region: text("region"), // Geographic region/area (e.g., "Downtown", "Sandy Springs")
-  preferences: text("preferences"), // Legacy field - keeping for backward compatibility
-  weeklyEstimate: integer("weekly_estimate"), // Estimated weekly sandwich count
-  focusArea: text("focus_area"), // What group they focus on (e.g., "youth", "veterans", "seniors", "families")
-  status: text("status").notNull().default("active"), // 'active', 'inactive'
+export const recipients = pgTable('recipients', {
+  id: serial('id').primaryKey(),
+  name: text('name').notNull(),
+  contactName: text('contact_name'), // Contact person name (legacy field)
+  phone: text('phone').notNull(),
+  email: text('email'),
+  website: text('website'), // Organization website URL
+  instagramHandle: text('instagram_handle'), // Instagram handle for social media tracking
+  address: text('address'), // Actual street address
+  region: text('region'), // Geographic region/area (e.g., "Downtown", "Sandy Springs")
+  preferences: text('preferences'), // Legacy field - keeping for backward compatibility
+  weeklyEstimate: integer('weekly_estimate'), // Estimated weekly sandwich count
+  focusArea: text('focus_area'), // What group they focus on (e.g., "youth", "veterans", "seniors", "families")
+  status: text('status').notNull().default('active'), // 'active', 'inactive'
   // New detailed contact fields
-  contactPersonName: text("contact_person_name"), // Our contact within the organization
-  contactPersonPhone: text("contact_person_phone"), // Contact person's phone
-  contactPersonEmail: text("contact_person_email"), // Contact person's email
-  contactPersonRole: text("contact_person_role"), // Their role/title (e.g., "Program Director", "Volunteer Coordinator")
+  contactPersonName: text('contact_person_name'), // Our contact within the organization
+  contactPersonPhone: text('contact_person_phone'), // Contact person's phone
+  contactPersonEmail: text('contact_person_email'), // Contact person's email
+  contactPersonRole: text('contact_person_role'), // Their role/title (e.g., "Program Director", "Volunteer Coordinator")
   // Second contact person fields
-  secondContactPersonName: text("second_contact_person_name"), // Second contact within the organization
-  secondContactPersonPhone: text("second_contact_person_phone"), // Second contact person's phone
-  secondContactPersonEmail: text("second_contact_person_email"), // Second contact person's email
-  secondContactPersonRole: text("second_contact_person_role"), // Second contact person's role/title
+  secondContactPersonName: text('second_contact_person_name'), // Second contact within the organization
+  secondContactPersonPhone: text('second_contact_person_phone'), // Second contact person's phone
+  secondContactPersonEmail: text('second_contact_person_email'), // Second contact person's email
+  secondContactPersonRole: text('second_contact_person_role'), // Second contact person's role/title
   // Enhanced fields for operational tracking
-  reportingGroup: text("reporting_group"), // Corresponds to host locations for operational grouping
-  estimatedSandwiches: integer("estimated_sandwiches"), // Estimated number of sandwiches needed
-  sandwichType: text("sandwich_type"), // Type of sandwiches preferred (replaces old "preferences" field)
-  tspContact: text("tsp_contact"), // TSP contact person (may be a user within our app)
-  tspContactUserId: varchar("tsp_contact_user_id"), // Link to users table if TSP contact is an app user
-  contractSigned: boolean("contract_signed").notNull().default(false), // Whether contract has been signed
-  contractSignedDate: timestamp("contract_signed_date"), // When contract was signed
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  reportingGroup: text('reporting_group'), // Corresponds to host locations for operational grouping
+  estimatedSandwiches: integer('estimated_sandwiches'), // Estimated number of sandwiches needed
+  sandwichType: text('sandwich_type'), // Type of sandwiches preferred (replaces old "preferences" field)
+  tspContact: text('tsp_contact'), // TSP contact person (may be a user within our app)
+  tspContactUserId: varchar('tsp_contact_user_id'), // Link to users table if TSP contact is an app user
+  contractSigned: boolean('contract_signed').notNull().default(false), // Whether contract has been signed
+  contractSignedDate: timestamp('contract_signed_date'), // When contract was signed
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
 // New table for managing multiple TSP contacts per recipient
 export const recipientTspContacts = pgTable(
-  "recipient_tsp_contacts",
+  'recipient_tsp_contacts',
   {
-    id: serial("id").primaryKey(),
-    recipientId: integer("recipient_id")
+    id: serial('id').primaryKey(),
+    recipientId: integer('recipient_id')
       .notNull()
-      .references(() => recipients.id, { onDelete: "cascade" }),
+      .references(() => recipients.id, { onDelete: 'cascade' }),
     // For app users
-    userId: varchar("user_id").references(() => users.id, {
-      onDelete: "set null",
+    userId: varchar('user_id').references(() => users.id, {
+      onDelete: 'set null',
     }), // Link to users table if contact is an app user
-    userName: text("user_name"), // Cached user name for display
-    userEmail: text("user_email"), // Cached user email for display
+    userName: text('user_name'), // Cached user name for display
+    userEmail: text('user_email'), // Cached user email for display
     // For external contacts (non-app users)
-    contactName: text("contact_name"), // Name if not an app user
-    contactEmail: text("contact_email"), // Email if not an app user
-    contactPhone: text("contact_phone"), // Phone if not an app user
+    contactName: text('contact_name'), // Name if not an app user
+    contactEmail: text('contact_email'), // Email if not an app user
+    contactPhone: text('contact_phone'), // Phone if not an app user
     // Common fields
-    role: text("role").notNull().default("tsp_contact"), // All contacts are TSP contacts
-    notes: text("notes"), // Additional notes about this contact relationship
-    isActive: boolean("is_active").notNull().default(true),
-    isPrimary: boolean("is_primary").notNull().default(false), // Only one primary contact per recipient
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+    role: text('role').notNull().default('tsp_contact'), // All contacts are TSP contacts
+    notes: text('notes'), // Additional notes about this contact relationship
+    isActive: boolean('is_active').notNull().default(true),
+    isPrimary: boolean('is_primary').notNull().default(false), // Only one primary contact per recipient
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
   },
   (table) => ({
-    recipientIdx: index("idx_recipient_tsp_contacts_recipient").on(
-      table.recipientId,
+    recipientIdx: index('idx_recipient_tsp_contacts_recipient').on(
+      table.recipientId
     ),
-    userIdx: index("idx_recipient_tsp_contacts_user").on(table.userId),
-    primaryIdx: index("idx_recipient_tsp_contacts_primary").on(
+    userIdx: index('idx_recipient_tsp_contacts_user').on(table.userId),
+    primaryIdx: index('idx_recipient_tsp_contacts_primary').on(
       table.recipientId,
-      table.isPrimary,
+      table.isPrimary
     ),
-  }),
+  })
 );
 
-export const projectDocuments = pgTable("project_documents", {
-  id: serial("id").primaryKey(),
-  projectId: integer("project_id").notNull(),
-  fileName: text("file_name").notNull(),
-  originalName: text("original_name").notNull(),
-  fileSize: integer("file_size").notNull(),
-  mimeType: text("mime_type").notNull(),
-  uploadedBy: text("uploaded_by").notNull(),
-  uploadedAt: timestamp("uploaded_at").notNull().defaultNow(),
+export const projectDocuments = pgTable('project_documents', {
+  id: serial('id').primaryKey(),
+  projectId: integer('project_id').notNull(),
+  fileName: text('file_name').notNull(),
+  originalName: text('original_name').notNull(),
+  fileSize: integer('file_size').notNull(),
+  mimeType: text('mime_type').notNull(),
+  uploadedBy: text('uploaded_by').notNull(),
+  uploadedAt: timestamp('uploaded_at').notNull().defaultNow(),
 });
 
 // General document management system with granular permissions
 export const documents = pgTable(
-  "documents",
+  'documents',
   {
-    id: serial("id").primaryKey(),
-    title: text("title").notNull(),
-    description: text("description"),
-    fileName: text("file_name").notNull(),
-    originalName: text("original_name").notNull(),
-    filePath: text("file_path").notNull(), // Storage path
-    fileSize: integer("file_size").notNull(),
-    mimeType: text("mime_type").notNull(),
-    category: text("category").notNull().default("general"), // 'governance', 'operations', 'training', 'confidential', 'general'
-    isActive: boolean("is_active").notNull().default(true),
-    uploadedBy: varchar("uploaded_by").notNull(),
-    uploadedByName: text("uploaded_by_name").notNull(),
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+    id: serial('id').primaryKey(),
+    title: text('title').notNull(),
+    description: text('description'),
+    fileName: text('file_name').notNull(),
+    originalName: text('original_name').notNull(),
+    filePath: text('file_path').notNull(), // Storage path
+    fileSize: integer('file_size').notNull(),
+    mimeType: text('mime_type').notNull(),
+    category: text('category').notNull().default('general'), // 'governance', 'operations', 'training', 'confidential', 'general'
+    isActive: boolean('is_active').notNull().default(true),
+    uploadedBy: varchar('uploaded_by').notNull(),
+    uploadedByName: text('uploaded_by_name').notNull(),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
   },
   (table) => ({
-    categoryIdx: index("idx_documents_category").on(table.category),
-    uploadedByIdx: index("idx_documents_uploaded_by").on(table.uploadedBy),
-    activeIdx: index("idx_documents_active").on(table.isActive),
-  }),
+    categoryIdx: index('idx_documents_category').on(table.category),
+    uploadedByIdx: index('idx_documents_uploaded_by').on(table.uploadedBy),
+    activeIdx: index('idx_documents_active').on(table.isActive),
+  })
 );
 
 // Document access permissions - granular control over who can access specific documents
 export const documentPermissions = pgTable(
-  "document_permissions",
+  'document_permissions',
   {
-    id: serial("id").primaryKey(),
-    documentId: integer("document_id")
+    id: serial('id').primaryKey(),
+    documentId: integer('document_id')
       .notNull()
-      .references(() => documents.id, { onDelete: "cascade" }),
-    userId: varchar("user_id")
+      .references(() => documents.id, { onDelete: 'cascade' }),
+    userId: varchar('user_id')
       .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    permissionType: text("permission_type").notNull(), // 'view', 'download', 'edit', 'admin'
-    grantedBy: varchar("granted_by").notNull(), // Who granted this permission
-    grantedByName: text("granted_by_name").notNull(),
-    grantedAt: timestamp("granted_at").notNull().defaultNow(),
-    expiresAt: timestamp("expires_at"), // Optional expiration date
-    notes: text("notes"), // Reason for granting permission
-    isActive: boolean("is_active").notNull().default(true),
+      .references(() => users.id, { onDelete: 'cascade' }),
+    permissionType: text('permission_type').notNull(), // 'view', 'download', 'edit', 'admin'
+    grantedBy: varchar('granted_by').notNull(), // Who granted this permission
+    grantedByName: text('granted_by_name').notNull(),
+    grantedAt: timestamp('granted_at').notNull().defaultNow(),
+    expiresAt: timestamp('expires_at'), // Optional expiration date
+    notes: text('notes'), // Reason for granting permission
+    isActive: boolean('is_active').notNull().default(true),
   },
   (table) => ({
-    documentUserIdx: index("idx_document_permissions_doc_user").on(
+    documentUserIdx: index('idx_document_permissions_doc_user').on(
       table.documentId,
-      table.userId,
+      table.userId
     ),
-    userPermissionIdx: index("idx_document_permissions_user").on(
+    userPermissionIdx: index('idx_document_permissions_user').on(
       table.userId,
-      table.permissionType,
+      table.permissionType
     ),
-    documentPermissionIdx: index("idx_document_permissions_doc").on(
+    documentPermissionIdx: index('idx_document_permissions_doc').on(
       table.documentId,
-      table.permissionType,
+      table.permissionType
     ),
     uniquePermission: unique().on(
       table.documentId,
       table.userId,
-      table.permissionType,
+      table.permissionType
     ),
-  }),
+  })
 );
 
 // Document access log for audit trail
 export const documentAccessLogs = pgTable(
-  "document_access_logs",
+  'document_access_logs',
   {
-    id: serial("id").primaryKey(),
-    documentId: integer("document_id")
+    id: serial('id').primaryKey(),
+    documentId: integer('document_id')
       .notNull()
-      .references(() => documents.id, { onDelete: "cascade" }),
-    userId: varchar("user_id").notNull(),
-    userName: text("user_name").notNull(),
-    action: text("action").notNull(), // 'view', 'download', 'upload', 'delete', 'share'
-    ipAddress: varchar("ip_address"),
-    userAgent: text("user_agent"),
-    sessionId: varchar("session_id"),
-    accessedAt: timestamp("accessed_at").notNull().defaultNow(),
+      .references(() => documents.id, { onDelete: 'cascade' }),
+    userId: varchar('user_id').notNull(),
+    userName: text('user_name').notNull(),
+    action: text('action').notNull(), // 'view', 'download', 'upload', 'delete', 'share'
+    ipAddress: varchar('ip_address'),
+    userAgent: text('user_agent'),
+    sessionId: varchar('session_id'),
+    accessedAt: timestamp('accessed_at').notNull().defaultNow(),
   },
   (table) => ({
-    documentIdx: index("idx_document_access_doc").on(table.documentId),
-    userIdx: index("idx_document_access_user").on(table.userId),
-    actionTimeIdx: index("idx_document_access_action_time").on(
+    documentIdx: index('idx_document_access_doc').on(table.documentId),
+    userIdx: index('idx_document_access_user').on(table.userId),
+    actionTimeIdx: index('idx_document_access_action_time').on(
       table.action,
-      table.accessedAt,
+      table.accessedAt
     ),
-  }),
+  })
 );
 
 // Insert schemas
@@ -919,7 +919,7 @@ export const insertProjectSchema = createInsertSchema(projects)
     actualHours: z.number().int().nullable().optional(),
   });
 export const insertArchivedProjectSchema = createInsertSchema(
-  archivedProjects,
+  archivedProjects
 ).omit({ id: true, archivedAt: true });
 export const insertMessageSchema = createInsertSchema(messages).omit({
   id: true,
@@ -927,18 +927,18 @@ export const insertMessageSchema = createInsertSchema(messages).omit({
   updatedAt: true,
 });
 export const insertMessageRecipientSchema = createInsertSchema(
-  messageRecipients,
+  messageRecipients
 ).omit({ id: true, createdAt: true });
 // REMOVED: insertMessageThreadSchema - Threading functionality removed
 export const insertKudosTrackingSchema = createInsertSchema(kudosTracking).omit(
-  { id: true, sentAt: true },
+  { id: true, sentAt: true }
 );
 export const insertWeeklyReportSchema = createInsertSchema(weeklyReports).omit({
   id: true,
   submittedAt: true,
 });
 export const insertSandwichCollectionSchema = createInsertSchema(
-  sandwichCollections,
+  sandwichCollections
 )
   .omit({ id: true, submittedAt: true })
   .extend({
@@ -948,13 +948,13 @@ export const insertSandwichCollectionSchema = createInsertSchema(
         z.object({
           name: z.string().trim().min(1).max(120),
           count: z.number().int().min(0),
-        }),
+        })
       )
       .max(100)
       .optional(),
   });
 export const insertMeetingMinutesSchema = createInsertSchema(
-  meetingMinutes,
+  meetingMinutes
 ).omit({ id: true });
 export const insertDriveLinkSchema = createInsertSchema(driveLinks).omit({
   id: true,
@@ -968,13 +968,13 @@ export const insertMeetingSchema = createInsertSchema(meetings).omit({
   createdAt: true,
 });
 export const insertCompiledAgendaSchema = createInsertSchema(
-  compiledAgendas,
+  compiledAgendas
 ).omit({ id: true, compiledAt: true, finalizedAt: true, publishedAt: true });
 export const insertAgendaSectionSchema = createInsertSchema(
-  agendaSections,
+  agendaSections
 ).omit({ id: true });
 export const insertDriverAgreementSchema = createInsertSchema(
-  driverAgreements,
+  driverAgreements
 ).omit({ id: true, submittedAt: true });
 export const insertDriverSchema = createInsertSchema(drivers).omit({
   id: true,
@@ -991,11 +991,11 @@ export const insertHostSchema = createInsertSchema(hosts)
   .extend({
     name: z
       .string()
-      .min(1, "Host name is required")
+      .min(1, 'Host name is required')
       .trim()
       .refine(
         (name) => name.length > 0,
-        "Host name cannot be empty or just whitespace",
+        'Host name cannot be empty or just whitespace'
       ),
   });
 export const insertHostContactSchema = createInsertSchema(hostContacts).omit({
@@ -1009,7 +1009,7 @@ export const insertRecipientSchema = createInsertSchema(recipients)
     // Convert estimatedSandwiches from string to number or null
     estimatedSandwiches: z
       .union([
-        z.string().transform((val) => (val === "" ? null : parseInt(val, 10))),
+        z.string().transform((val) => (val === '' ? null : parseInt(val, 10))),
         z.number(),
         z.null(),
       ])
@@ -1017,17 +1017,17 @@ export const insertRecipientSchema = createInsertSchema(recipients)
     // Convert contractSignedDate from string to Date or null
     contractSignedDate: z
       .union([
-        z.string().transform((val) => (val === "" ? null : new Date(val))),
+        z.string().transform((val) => (val === '' ? null : new Date(val))),
         z.date(),
         z.null(),
       ])
       .optional(),
   });
 export const insertRecipientTspContactSchema = createInsertSchema(
-  recipientTspContacts,
+  recipientTspContacts
 ).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertProjectDocumentSchema = createInsertSchema(
-  projectDocuments,
+  projectDocuments
 ).omit({ id: true, uploadedAt: true });
 export const insertDocumentSchema = createInsertSchema(documents).omit({
   id: true,
@@ -1035,10 +1035,10 @@ export const insertDocumentSchema = createInsertSchema(documents).omit({
   updatedAt: true,
 });
 export const insertDocumentPermissionSchema = createInsertSchema(
-  documentPermissions,
+  documentPermissions
 ).omit({ id: true, grantedAt: true });
 export const insertDocumentAccessLogSchema = createInsertSchema(
-  documentAccessLogs,
+  documentAccessLogs
 ).omit({ id: true, accessedAt: true });
 export const insertProjectTaskSchema = createInsertSchema(projectTasks).omit({
   id: true,
@@ -1046,13 +1046,13 @@ export const insertProjectTaskSchema = createInsertSchema(projectTasks).omit({
   updatedAt: true,
 });
 export const insertProjectCommentSchema = createInsertSchema(
-  projectComments,
+  projectComments
 ).omit({ id: true, createdAt: true });
 export const insertProjectAssignmentSchema = createInsertSchema(
-  projectAssignments,
+  projectAssignments
 ).omit({ id: true, assignedAt: true });
 export const insertTaskCompletionSchema = createInsertSchema(
-  taskCompletions,
+  taskCompletions
 ).omit({ id: true, completedAt: true });
 
 // Types
@@ -1135,21 +1135,21 @@ export type TaskCompletion = typeof taskCompletions.$inferSelect;
 export type InsertTaskCompletion = z.infer<typeof insertTaskCompletionSchema>;
 
 // Hosted Files table
-export const hostedFiles = pgTable("hosted_files", {
-  id: serial("id").primaryKey(),
-  title: text("title").notNull(),
-  description: text("description"),
-  fileName: text("file_name").notNull(),
-  originalName: text("original_name").notNull(),
-  filePath: text("file_path").notNull(),
-  fileSize: integer("file_size").notNull(),
-  mimeType: text("mime_type").notNull(),
-  category: text("category").notNull().default("general"), // toolkit, forms, guides, etc.
-  uploadedBy: text("uploaded_by").notNull(),
-  isPublic: boolean("is_public").notNull().default(true),
-  downloadCount: integer("download_count").notNull().default(0),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+export const hostedFiles = pgTable('hosted_files', {
+  id: serial('id').primaryKey(),
+  title: text('title').notNull(),
+  description: text('description'),
+  fileName: text('file_name').notNull(),
+  originalName: text('original_name').notNull(),
+  filePath: text('file_path').notNull(),
+  fileSize: integer('file_size').notNull(),
+  mimeType: text('mime_type').notNull(),
+  category: text('category').notNull().default('general'), // toolkit, forms, guides, etc.
+  uploadedBy: text('uploaded_by').notNull(),
+  isPublic: boolean('is_public').notNull().default(true),
+  downloadCount: integer('download_count').notNull().default(0),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
 export const insertHostedFileSchema = createInsertSchema(hostedFiles).omit({
@@ -1163,20 +1163,20 @@ export type HostedFile = typeof hostedFiles.$inferSelect;
 export type InsertHostedFile = z.infer<typeof insertHostedFileSchema>;
 
 // General Contacts table (for people who aren't hosts or recipients)
-export const contacts = pgTable("contacts", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull(),
-  organization: text("organization"),
-  role: text("role"),
-  phone: text("phone").notNull(),
-  email: text("email"),
-  address: text("address"),
-  notes: text("notes"),
-  category: text("category").notNull().default("general"), // volunteer, board, vendor, donor, etc.
-  status: text("status").notNull().default("active"), // active, inactive
-  isActive: boolean("is_active").default(true),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+export const contacts = pgTable('contacts', {
+  id: serial('id').primaryKey(),
+  name: text('name').notNull(),
+  organization: text('organization'),
+  role: text('role'),
+  phone: text('phone').notNull(),
+  email: text('email'),
+  address: text('address'),
+  notes: text('notes'),
+  category: text('category').notNull().default('general'), // volunteer, board, vendor, donor, etc.
+  status: text('status').notNull().default('active'), // active, inactive
+  isActive: boolean('is_active').default(true),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
 export const insertContactSchema = createInsertSchema(contacts).omit({
@@ -1204,17 +1204,17 @@ export type Volunteer = typeof volunteers.$inferSelect;
 export type InsertVolunteer = z.infer<typeof insertVolunteerSchema>;
 
 // Notifications table for celebrations and system notifications
-export const notifications = pgTable("notifications", {
-  id: serial("id").primaryKey(),
-  userId: varchar("user_id").notNull(), // Who receives the notification
-  type: varchar("type").notNull(), // 'celebration', 'reminder', 'achievement', etc.
-  title: text("title").notNull(),
-  message: text("message").notNull(),
-  isRead: boolean("is_read").notNull().default(false),
-  relatedType: varchar("related_type"), // 'task', 'project', 'collection', etc.
-  relatedId: integer("related_id"), // ID of related record
-  celebrationData: jsonb("celebration_data"), // Extra data for celebrations (emojis, achievements, etc.)
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+export const notifications = pgTable('notifications', {
+  id: serial('id').primaryKey(),
+  userId: varchar('user_id').notNull(), // Who receives the notification
+  type: varchar('type').notNull(), // 'celebration', 'reminder', 'achievement', etc.
+  title: text('title').notNull(),
+  message: text('message').notNull(),
+  isRead: boolean('is_read').notNull().default(false),
+  relatedType: varchar('related_type'), // 'task', 'project', 'collection', etc.
+  relatedId: integer('related_id'), // ID of related record
+  celebrationData: jsonb('celebration_data'), // Extra data for celebrations (emojis, achievements, etc.)
+  createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
 export const insertNotificationSchema = createInsertSchema(notifications).omit({
@@ -1235,7 +1235,7 @@ export type Committee = typeof committees.$inferSelect;
 export type InsertCommittee = z.infer<typeof insertCommitteeSchema>;
 
 export const insertCommitteeMembershipSchema = createInsertSchema(
-  committeeMemberships,
+  committeeMemberships
 ).omit({
   id: true,
   joinedAt: true,
@@ -1268,7 +1268,7 @@ export const insertChatMessageSchema = createInsertSchema(chatMessages).omit({
 
 // Chat message likes schema types
 export const insertChatMessageLikeSchema = createInsertSchema(
-  chatMessageLikes,
+  chatMessageLikes
 ).omit({
   id: true,
   likedAt: true,
@@ -1284,7 +1284,7 @@ export const insertConversationSchema = createInsertSchema(conversations).omit({
 });
 
 export const insertConversationParticipantSchema = createInsertSchema(
-  conversationParticipants,
+  conversationParticipants
 ).omit({
   joinedAt: true,
   lastReadAt: true,
@@ -1317,24 +1317,24 @@ export type InsertEmailMessage = z.infer<typeof insertEmailMessageSchema>;
 export type InsertEmailDraft = z.infer<typeof insertEmailDraftSchema>;
 
 // Wishlist suggestions table for Amazon wishlist item requests
-export const wishlistSuggestions = pgTable("wishlist_suggestions", {
-  id: serial("id").primaryKey(),
-  item: text("item").notNull(),
-  reason: text("reason"),
-  priority: varchar("priority").notNull().default("medium"), // high, medium, low
-  suggestedBy: varchar("suggested_by").notNull(), // user ID who suggested it
-  status: varchar("status").notNull().default("pending"), // pending, approved, rejected, added
-  adminNotes: text("admin_notes"), // Notes from admin review
-  amazonUrl: text("amazon_url"), // URL if added to actual Amazon wishlist
-  estimatedCost: decimal("estimated_cost", { precision: 10, scale: 2 }),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-  reviewedAt: timestamp("reviewed_at"),
-  reviewedBy: varchar("reviewed_by"), // user ID who reviewed it
+export const wishlistSuggestions = pgTable('wishlist_suggestions', {
+  id: serial('id').primaryKey(),
+  item: text('item').notNull(),
+  reason: text('reason'),
+  priority: varchar('priority').notNull().default('medium'), // high, medium, low
+  suggestedBy: varchar('suggested_by').notNull(), // user ID who suggested it
+  status: varchar('status').notNull().default('pending'), // pending, approved, rejected, added
+  adminNotes: text('admin_notes'), // Notes from admin review
+  amazonUrl: text('amazon_url'), // URL if added to actual Amazon wishlist
+  estimatedCost: decimal('estimated_cost', { precision: 10, scale: 2 }),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  reviewedAt: timestamp('reviewed_at'),
+  reviewedBy: varchar('reviewed_by'), // user ID who reviewed it
 });
 
 export const insertWishlistSuggestionSchema = createInsertSchema(
-  wishlistSuggestions,
+  wishlistSuggestions
 ).omit({
   id: true,
   createdAt: true,
@@ -1349,246 +1349,246 @@ export type InsertWishlistSuggestion = z.infer<
 
 // Event Requests table for tracking organization event planning
 export const eventRequests = pgTable(
-  "event_requests",
+  'event_requests',
   {
-    id: serial("id").primaryKey(),
+    id: serial('id').primaryKey(),
     // Submitter information
-    firstName: varchar("first_name").notNull(),
-    lastName: varchar("last_name").notNull(),
-    email: varchar("email").notNull(),
-    phone: varchar("phone"),
+    firstName: varchar('first_name').notNull(),
+    lastName: varchar('last_name').notNull(),
+    email: varchar('email').notNull(),
+    phone: varchar('phone'),
 
     // Organization information
-    organizationName: varchar("organization_name").notNull(),
-    department: varchar("department"),
+    organizationName: varchar('organization_name').notNull(),
+    department: varchar('department'),
 
     // Event details
-    desiredEventDate: timestamp("desired_event_date"),
-    message: text("message"), // Other relevant info about the group
+    desiredEventDate: timestamp('desired_event_date'),
+    message: text('message'), // Other relevant info about the group
 
     // Previous hosting experience
-    previouslyHosted: varchar("previously_hosted")
+    previouslyHosted: varchar('previously_hosted')
       .notNull()
-      .default("i_dont_know"), // 'yes', 'no', 'i_dont_know'
+      .default('i_dont_know'), // 'yes', 'no', 'i_dont_know'
 
     // System tracking
-    status: varchar("status").notNull().default("new"), // 'new', 'followed_up', 'in_process', 'scheduled', 'completed', 'declined'
-    assignedTo: varchar("assigned_to"), // User ID of person handling this request
+    status: varchar('status').notNull().default('new'), // 'new', 'followed_up', 'in_process', 'scheduled', 'completed', 'declined'
+    assignedTo: varchar('assigned_to'), // User ID of person handling this request
 
     // Follow-up tracking fields
-    followUpMethod: varchar("follow_up_method"), // 'email', 'call'
-    updatedEmail: varchar("updated_email"), // Email address collected during follow-up call
-    followUpDate: timestamp("follow_up_date"), // When follow-up was completed
-    scheduledCallDate: timestamp("scheduled_call_date"), // When a follow-up call is scheduled
+    followUpMethod: varchar('follow_up_method'), // 'email', 'call'
+    updatedEmail: varchar('updated_email'), // Email address collected during follow-up call
+    followUpDate: timestamp('follow_up_date'), // When follow-up was completed
+    scheduledCallDate: timestamp('scheduled_call_date'), // When a follow-up call is scheduled
 
     // Timeline tracking
-    contactedAt: timestamp("contacted_at"), // When initial contact was completed
+    contactedAt: timestamp('contacted_at'), // When initial contact was completed
 
     // Contact completion details (collected when marking contacted)
-    communicationMethod: varchar("communication_method"), // 'phone', 'email', 'video_meeting'
-    contactCompletionNotes: text("contact_completion_notes"), // Free text notes from the contact
-    eventAddress: text("event_address"), // Event location address collected
-    estimatedSandwichCount: integer("estimated_sandwich_count"), // Number of sandwiches planned
-    hasRefrigeration: boolean("has_refrigeration"), // Whether site has refrigeration
-    completedByUserId: varchar("completed_by_user_id"), // User ID who completed the contact
+    communicationMethod: varchar('communication_method'), // 'phone', 'email', 'video_meeting'
+    contactCompletionNotes: text('contact_completion_notes'), // Free text notes from the contact
+    eventAddress: text('event_address'), // Event location address collected
+    estimatedSandwichCount: integer('estimated_sandwich_count'), // Number of sandwiches planned
+    hasRefrigeration: boolean('has_refrigeration'), // Whether site has refrigeration
+    completedByUserId: varchar('completed_by_user_id'), // User ID who completed the contact
 
     // Advanced event planning fields (for scheduled/in_planning status)
-    tspContactAssigned: varchar("tsp_contact_assigned"), // TSP team member assigned to this event
-    tspContact: varchar("tsp_contact"), // Primary TSP contact for the event
-    additionalTspContacts: text("additional_tsp_contacts"), // Additional TSP contacts (legacy field)
-    additionalContact1: varchar("additional_contact_1"), // Third TSP contact (user ID)
-    additionalContact2: varchar("additional_contact_2"), // Fourth TSP contact (user ID)
-    customTspContact: text("custom_tsp_contact"), // Custom TSP contact information
-    toolkitSent: boolean("toolkit_sent").default(false), // Whether toolkit has been sent
-    toolkitSentDate: timestamp("toolkit_sent_date"), // When toolkit was sent
-    toolkitStatus: varchar("toolkit_status").default("not_sent"), // 'not_sent', 'sent', 'received_confirmed', 'not_needed'
-    eventStartTime: varchar("event_start_time"), // Event start time (stored as string for flexibility)
-    eventEndTime: varchar("event_end_time"), // Event end time
-    pickupTime: varchar("pickup_time"), // Driver pickup time for sandwiches
-    additionalRequirements: text("additional_requirements"), // Special requirements or notes
-    planningNotes: text("planning_notes"), // General planning notes
+    tspContactAssigned: varchar('tsp_contact_assigned'), // TSP team member assigned to this event
+    tspContact: varchar('tsp_contact'), // Primary TSP contact for the event
+    additionalTspContacts: text('additional_tsp_contacts'), // Additional TSP contacts (legacy field)
+    additionalContact1: varchar('additional_contact_1'), // Third TSP contact (user ID)
+    additionalContact2: varchar('additional_contact_2'), // Fourth TSP contact (user ID)
+    customTspContact: text('custom_tsp_contact'), // Custom TSP contact information
+    toolkitSent: boolean('toolkit_sent').default(false), // Whether toolkit has been sent
+    toolkitSentDate: timestamp('toolkit_sent_date'), // When toolkit was sent
+    toolkitStatus: varchar('toolkit_status').default('not_sent'), // 'not_sent', 'sent', 'received_confirmed', 'not_needed'
+    eventStartTime: varchar('event_start_time'), // Event start time (stored as string for flexibility)
+    eventEndTime: varchar('event_end_time'), // Event end time
+    pickupTime: varchar('pickup_time'), // Driver pickup time for sandwiches
+    additionalRequirements: text('additional_requirements'), // Special requirements or notes
+    planningNotes: text('planning_notes'), // General planning notes
 
     // Additional event details
-    sandwichTypes: jsonb("sandwich_types"), // Array of {type: string, quantity: number} objects
-    deliveryDestination: text("delivery_destination"), // Organization/host location where sandwiches will be delivered
+    sandwichTypes: jsonb('sandwich_types'), // Array of {type: string, quantity: number} objects
+    deliveryDestination: text('delivery_destination'), // Organization/host location where sandwiches will be delivered
     // Driver, speaker, and volunteer requirements
-    driversNeeded: integer("drivers_needed").default(0), // How many drivers this event needs
-    speakersNeeded: integer("speakers_needed").default(0), // How many speakers this event needs
-    volunteersNeeded: boolean("volunteers_needed").default(false), // Whether volunteers are needed for this event
-    volunteerNotes: text("volunteer_notes"), // General notes about volunteer requirements
+    driversNeeded: integer('drivers_needed').default(0), // How many drivers this event needs
+    speakersNeeded: integer('speakers_needed').default(0), // How many speakers this event needs
+    volunteersNeeded: boolean('volunteers_needed').default(false), // Whether volunteers are needed for this event
+    volunteerNotes: text('volunteer_notes'), // General notes about volunteer requirements
 
     // Driver, speaker, and volunteer assignments
-    assignedDriverIds: text("assigned_driver_ids").array(), // Array of assigned driver IDs/names
-    driverPickupTime: varchar("driver_pickup_time"), // Pickup time for drivers
-    driverNotes: text("driver_notes"), // Notes for drivers
-    driversArranged: boolean("drivers_arranged").default(false), // Whether drivers are confirmed
-    assignedSpeakerIds: text("assigned_speaker_ids").array(), // Array of assigned speaker IDs/names
-    assignedDriverSpeakers: text("assigned_driver_speakers").array(), // Array of driver IDs who are also speakers
-    assignedVolunteerIds: text("assigned_volunteer_ids").array(), // Array of assigned volunteer IDs/names
+    assignedDriverIds: text('assigned_driver_ids').array(), // Array of assigned driver IDs/names
+    driverPickupTime: varchar('driver_pickup_time'), // Pickup time for drivers
+    driverNotes: text('driver_notes'), // Notes for drivers
+    driversArranged: boolean('drivers_arranged').default(false), // Whether drivers are confirmed
+    assignedSpeakerIds: text('assigned_speaker_ids').array(), // Array of assigned speaker IDs/names
+    assignedDriverSpeakers: text('assigned_driver_speakers').array(), // Array of driver IDs who are also speakers
+    assignedVolunteerIds: text('assigned_volunteer_ids').array(), // Array of assigned volunteer IDs/names
 
     // Van driver assignment
-    vanDriverNeeded: boolean("van_driver_needed").default(false), // Whether a van driver is required
-    assignedVanDriverId: text("assigned_van_driver_id"), // Van driver ID from database
-    customVanDriverName: text("custom_van_driver_name"), // Custom van driver name (text entry)
-    vanDriverNotes: text("van_driver_notes"), // Special notes for van driver
+    vanDriverNeeded: boolean('van_driver_needed').default(false), // Whether a van driver is required
+    assignedVanDriverId: text('assigned_van_driver_id'), // Van driver ID from database
+    customVanDriverName: text('custom_van_driver_name'), // Custom van driver name (text entry)
+    vanDriverNotes: text('van_driver_notes'), // Special notes for van driver
 
     // Follow-up tracking for completed events
-    followUpOneDayCompleted: boolean("follow_up_one_day_completed").default(
-      false,
+    followUpOneDayCompleted: boolean('follow_up_one_day_completed').default(
+      false
     ), // 1-day follow-up completed
-    followUpOneDayDate: timestamp("follow_up_one_day_date"), // When 1-day follow-up was completed
-    followUpOneMonthCompleted: boolean("follow_up_one_month_completed").default(
-      false,
+    followUpOneDayDate: timestamp('follow_up_one_day_date'), // When 1-day follow-up was completed
+    followUpOneMonthCompleted: boolean('follow_up_one_month_completed').default(
+      false
     ), // 1-month follow-up completed
-    followUpOneMonthDate: timestamp("follow_up_one_month_date"), // When 1-month follow-up was completed
-    followUpNotes: text("follow_up_notes"), // Notes from follow-up communications
+    followUpOneMonthDate: timestamp('follow_up_one_month_date'), // When 1-month follow-up was completed
+    followUpNotes: text('follow_up_notes'), // Notes from follow-up communications
 
     // Social media post tracking for past events
-    socialMediaPostRequested: boolean("social_media_post_requested").default(
-      false,
+    socialMediaPostRequested: boolean('social_media_post_requested').default(
+      false
     ), // Whether we asked them to make a post tagging us
-    socialMediaPostRequestedDate: timestamp("social_media_post_requested_date"), // When we asked for the post
-    socialMediaPostCompleted: boolean("social_media_post_completed").default(
-      false,
+    socialMediaPostRequestedDate: timestamp('social_media_post_requested_date'), // When we asked for the post
+    socialMediaPostCompleted: boolean('social_media_post_completed').default(
+      false
     ), // Whether they completed the post
-    socialMediaPostCompletedDate: timestamp("social_media_post_completed_date"), // When they completed the post
-    socialMediaPostNotes: text("social_media_post_notes"), // Notes about social media posts
+    socialMediaPostCompletedDate: timestamp('social_media_post_completed_date'), // When they completed the post
+    socialMediaPostNotes: text('social_media_post_notes'), // Notes about social media posts
 
     // Actual sandwich count and distribution tracking for completed events
-    actualSandwichCount: integer("actual_sandwich_count"), // Final count of sandwiches made
-    actualSandwichTypes: jsonb("actual_sandwich_types"), // Array of {type: string, quantity: number} for actual sandwiches made
+    actualSandwichCount: integer('actual_sandwich_count'), // Final count of sandwiches made
+    actualSandwichTypes: jsonb('actual_sandwich_types'), // Array of {type: string, quantity: number} for actual sandwiches made
     actualSandwichCountRecordedDate: timestamp(
-      "actual_sandwich_count_recorded_date",
+      'actual_sandwich_count_recorded_date'
     ), // When final count was recorded
-    actualSandwichCountRecordedBy: varchar("actual_sandwich_count_recorded_by"), // User ID who recorded final count
-    sandwichDistributions: jsonb("sandwich_distributions"), // Array of {destination: string, sandwichTypes: [{type: string, quantity: number}], totalCount: number} for distribution tracking
-    distributionRecordedDate: timestamp("distribution_recorded_date"), // When distribution was recorded
-    distributionRecordedBy: varchar("distribution_recorded_by"), // User ID who recorded distribution
-    distributionNotes: text("distribution_notes"), // Notes about sandwich distribution
+    actualSandwichCountRecordedBy: varchar('actual_sandwich_count_recorded_by'), // User ID who recorded final count
+    sandwichDistributions: jsonb('sandwich_distributions'), // Array of {destination: string, sandwichTypes: [{type: string, quantity: number}], totalCount: number} for distribution tracking
+    distributionRecordedDate: timestamp('distribution_recorded_date'), // When distribution was recorded
+    distributionRecordedBy: varchar('distribution_recorded_by'), // User ID who recorded distribution
+    distributionNotes: text('distribution_notes'), // Notes about sandwich distribution
 
     // Duplicate detection flags
-    organizationExists: boolean("organization_exists").notNull().default(false), // Flag if we found a match in our database
-    duplicateCheckDate: timestamp("duplicate_check_date"), // When we last checked for duplicates
-    duplicateNotes: text("duplicate_notes"), // Notes about potential matches
+    organizationExists: boolean('organization_exists').notNull().default(false), // Flag if we found a match in our database
+    duplicateCheckDate: timestamp('duplicate_check_date'), // When we last checked for duplicates
+    duplicateNotes: text('duplicate_notes'), // Notes about potential matches
 
     // Unresponsive contact tracking
-    contactAttempts: integer("contact_attempts").default(0), // Number of contact attempts made
-    lastContactAttempt: timestamp("last_contact_attempt"), // When we last tried to contact them
-    isUnresponsive: boolean("is_unresponsive").default(false), // Flag indicating they're not responding
-    markedUnresponsiveAt: timestamp("marked_unresponsive_at"), // When marked as unresponsive
-    markedUnresponsiveBy: varchar("marked_unresponsive_by"), // User ID who marked as unresponsive
-    unresponsiveReason: text("unresponsive_reason"), // Why they were marked unresponsive
-    contactMethod: varchar("contact_method"), // 'phone', 'email', 'both' - preferred contact method
-    nextFollowUpDate: timestamp("next_follow_up_date"), // Scheduled next attempt date
-    unresponsiveNotes: text("unresponsive_notes"), // Detailed notes about unresponsive status
+    contactAttempts: integer('contact_attempts').default(0), // Number of contact attempts made
+    lastContactAttempt: timestamp('last_contact_attempt'), // When we last tried to contact them
+    isUnresponsive: boolean('is_unresponsive').default(false), // Flag indicating they're not responding
+    markedUnresponsiveAt: timestamp('marked_unresponsive_at'), // When marked as unresponsive
+    markedUnresponsiveBy: varchar('marked_unresponsive_by'), // User ID who marked as unresponsive
+    unresponsiveReason: text('unresponsive_reason'), // Why they were marked unresponsive
+    contactMethod: varchar('contact_method'), // 'phone', 'email', 'both' - preferred contact method
+    nextFollowUpDate: timestamp('next_follow_up_date'), // Scheduled next attempt date
+    unresponsiveNotes: text('unresponsive_notes'), // Detailed notes about unresponsive status
 
     // Google Sheets sync tracking
-    lastSyncedAt: timestamp("last_synced_at"), // When this record was last synced with Google Sheets
-    driverDetails: jsonb("driver_details"), // Additional driver assignment details
-    speakerDetails: jsonb("speaker_details"), // Additional speaker assignment details
+    lastSyncedAt: timestamp('last_synced_at'), // When this record was last synced with Google Sheets
+    driverDetails: jsonb('driver_details'), // Additional driver assignment details
+    speakerDetails: jsonb('speaker_details'), // Additional speaker assignment details
 
     // Audit tracking
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
-    createdBy: varchar("created_by"), // User ID who created this record (if manually entered)
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+    createdBy: varchar('created_by'), // User ID who created this record (if manually entered)
   },
   (table) => ({
-    orgNameIdx: index("idx_event_requests_org_name").on(table.organizationName),
-    statusIdx: index("idx_event_requests_status").on(table.status),
-    emailIdx: index("idx_event_requests_email").on(table.email),
-    desiredDateIdx: index("idx_event_requests_desired_date").on(
-      table.desiredEventDate,
+    orgNameIdx: index('idx_event_requests_org_name').on(table.organizationName),
+    statusIdx: index('idx_event_requests_status').on(table.status),
+    emailIdx: index('idx_event_requests_email').on(table.email),
+    desiredDateIdx: index('idx_event_requests_desired_date').on(
+      table.desiredEventDate
     ),
-  }),
+  })
 );
 
 // Organization tracking for duplicate detection
 export const organizations = pgTable(
-  "organizations",
+  'organizations',
   {
-    id: serial("id").primaryKey(),
-    name: varchar("name").notNull(),
-    alternateNames: text("alternate_names").array(), // Array of variations/aliases
-    addresses: text("addresses").array(), // Array of known addresses
-    domains: text("domains").array(), // Array of email domains associated with this org
+    id: serial('id').primaryKey(),
+    name: varchar('name').notNull(),
+    alternateNames: text('alternate_names').array(), // Array of variations/aliases
+    addresses: text('addresses').array(), // Array of known addresses
+    domains: text('domains').array(), // Array of email domains associated with this org
 
     // Event history
-    totalEvents: integer("total_events").notNull().default(0),
-    lastEventDate: timestamp("last_event_date"),
+    totalEvents: integer('total_events').notNull().default(0),
+    lastEventDate: timestamp('last_event_date'),
 
     // Tracking
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },
   (table) => ({
-    nameIdx: index("idx_organizations_name").on(table.name),
-  }),
+    nameIdx: index('idx_organizations_name').on(table.name),
+  })
 );
 
 // Event volunteers table for managing volunteer assignments to events
 export const eventVolunteers = pgTable(
-  "event_volunteers",
+  'event_volunteers',
   {
-    id: serial("id").primaryKey(),
-    eventRequestId: integer("event_request_id").notNull(), // Reference to event_requests.id
-    volunteerUserId: varchar("volunteer_user_id"), // Reference to users.id for registered users
-    volunteerName: varchar("volunteer_name"), // Name for non-registered volunteers
-    volunteerEmail: varchar("volunteer_email"), // Email for non-registered volunteers
-    volunteerPhone: varchar("volunteer_phone"), // Phone for non-registered volunteers
-    role: varchar("role").notNull(), // 'driver', 'speaker', 'general'
-    status: varchar("status").notNull().default("pending"), // 'pending', 'confirmed', 'declined', 'assigned'
-    notes: text("notes"), // Special notes or requirements
-    assignedBy: varchar("assigned_by"), // User ID who assigned this volunteer
-    signedUpAt: timestamp("signed_up_at").defaultNow().notNull(),
-    confirmedAt: timestamp("confirmed_at"),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    id: serial('id').primaryKey(),
+    eventRequestId: integer('event_request_id').notNull(), // Reference to event_requests.id
+    volunteerUserId: varchar('volunteer_user_id'), // Reference to users.id for registered users
+    volunteerName: varchar('volunteer_name'), // Name for non-registered volunteers
+    volunteerEmail: varchar('volunteer_email'), // Email for non-registered volunteers
+    volunteerPhone: varchar('volunteer_phone'), // Phone for non-registered volunteers
+    role: varchar('role').notNull(), // 'driver', 'speaker', 'general'
+    status: varchar('status').notNull().default('pending'), // 'pending', 'confirmed', 'declined', 'assigned'
+    notes: text('notes'), // Special notes or requirements
+    assignedBy: varchar('assigned_by'), // User ID who assigned this volunteer
+    signedUpAt: timestamp('signed_up_at').defaultNow().notNull(),
+    confirmedAt: timestamp('confirmed_at'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },
   (table) => ({
-    eventIdIdx: index("idx_event_volunteers_event_id").on(table.eventRequestId),
-    volunteerIdx: index("idx_event_volunteers_volunteer").on(
-      table.volunteerUserId,
+    eventIdIdx: index('idx_event_volunteers_event_id').on(table.eventRequestId),
+    volunteerIdx: index('idx_event_volunteers_volunteer').on(
+      table.volunteerUserId
     ),
-    roleStatusIdx: index("idx_event_volunteers_role_status").on(
+    roleStatusIdx: index('idx_event_volunteers_role_status').on(
       table.role,
-      table.status,
+      table.status
     ),
-  }),
+  })
 );
 
 // Event reminders table for tracking follow-ups and to-dos related to events
 export const eventReminders = pgTable(
-  "event_reminders",
+  'event_reminders',
   {
-    id: serial("id").primaryKey(),
-    eventRequestId: integer("event_request_id").notNull(), // Reference to event_requests.id
-    title: varchar("title").notNull(), // Brief description of the reminder
-    description: text("description"), // Detailed notes about what needs to be done
-    reminderType: varchar("reminder_type").notNull(), // 'follow_up', 'toolkit_send', 'post_event', 'postponed_followup', 'custom'
-    dueDate: timestamp("due_date").notNull(), // When this reminder should trigger
-    assignedToUserId: varchar("assigned_to_user_id"), // User ID responsible for this task
-    assignedToName: varchar("assigned_to_name"), // Name of assigned person
-    status: varchar("status").notNull().default("pending"), // 'pending', 'in_progress', 'completed', 'cancelled'
-    priority: varchar("priority").notNull().default("medium"), // 'low', 'medium', 'high', 'urgent'
-    completedAt: timestamp("completed_at"),
-    completedBy: varchar("completed_by"), // User ID who completed the task
-    completionNotes: text("completion_notes"), // Notes about completion
-    createdBy: varchar("created_by").notNull(), // User ID who created this reminder
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    id: serial('id').primaryKey(),
+    eventRequestId: integer('event_request_id').notNull(), // Reference to event_requests.id
+    title: varchar('title').notNull(), // Brief description of the reminder
+    description: text('description'), // Detailed notes about what needs to be done
+    reminderType: varchar('reminder_type').notNull(), // 'follow_up', 'toolkit_send', 'post_event', 'postponed_followup', 'custom'
+    dueDate: timestamp('due_date').notNull(), // When this reminder should trigger
+    assignedToUserId: varchar('assigned_to_user_id'), // User ID responsible for this task
+    assignedToName: varchar('assigned_to_name'), // Name of assigned person
+    status: varchar('status').notNull().default('pending'), // 'pending', 'in_progress', 'completed', 'cancelled'
+    priority: varchar('priority').notNull().default('medium'), // 'low', 'medium', 'high', 'urgent'
+    completedAt: timestamp('completed_at'),
+    completedBy: varchar('completed_by'), // User ID who completed the task
+    completionNotes: text('completion_notes'), // Notes about completion
+    createdBy: varchar('created_by').notNull(), // User ID who created this reminder
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },
   (table) => ({
-    eventIdIdx: index("idx_event_reminders_event_id").on(table.eventRequestId),
-    dueDateIdx: index("idx_event_reminders_due_date").on(table.dueDate),
-    statusIdx: index("idx_event_reminders_status").on(table.status),
-    assignedIdx: index("idx_event_reminders_assigned").on(
-      table.assignedToUserId,
+    eventIdIdx: index('idx_event_reminders_event_id').on(table.eventRequestId),
+    dueDateIdx: index('idx_event_reminders_due_date').on(table.dueDate),
+    statusIdx: index('idx_event_reminders_status').on(table.status),
+    assignedIdx: index('idx_event_reminders_assigned').on(
+      table.assignedToUserId
     ),
-    typeStatusIdx: index("idx_event_reminders_type_status").on(
+    typeStatusIdx: index('idx_event_reminders_type_status').on(
       table.reminderType,
-      table.status,
+      table.status
     ),
-  }),
+  })
 );
 
 export const insertEventRequestSchema = createInsertSchema(eventRequests)
@@ -1623,7 +1623,7 @@ export const insertEventRequestSchema = createInsertSchema(eventRequests)
         z.object({
           type: z.string(),
           quantity: z.number().min(0),
-        }),
+        })
       )
       .nullable()
       .optional(),
@@ -1668,17 +1668,17 @@ export type Organization = typeof organizations.$inferSelect;
 export type InsertOrganization = z.infer<typeof insertOrganizationSchema>;
 
 // Google Sheets integration table
-export const googleSheets = pgTable("google_sheets", {
-  id: serial("id").primaryKey(),
-  name: varchar("name").notNull(),
-  description: text("description"),
-  sheetId: varchar("sheet_id").notNull(), // Google Sheets document ID
-  isPublic: boolean("is_public").notNull().default(true),
-  embedUrl: text("embed_url").notNull(),
-  directUrl: text("direct_url").notNull(),
-  createdBy: varchar("created_by").references(() => users.id),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+export const googleSheets = pgTable('google_sheets', {
+  id: serial('id').primaryKey(),
+  name: varchar('name').notNull(),
+  description: text('description'),
+  sheetId: varchar('sheet_id').notNull(), // Google Sheets document ID
+  isPublic: boolean('is_public').notNull().default(true),
+  embedUrl: text('embed_url').notNull(),
+  directUrl: text('direct_url').notNull(),
+  createdBy: varchar('created_by').references(() => users.id),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
 export const insertGoogleSheetSchema = createInsertSchema(googleSheets).omit({
@@ -1706,105 +1706,105 @@ export type InsertGoogleSheet = z.infer<typeof insertGoogleSheetSchema>;
 // - messages
 
 // Stream Chat integration tables - Track metadata for Stream messages
-export const streamUsers = pgTable("stream_users", {
-  id: serial("id").primaryKey(),
-  userId: varchar("user_id").notNull(), // Your app's user ID
-  streamUserId: varchar("stream_user_id").unique().notNull(), // Stream's user ID
-  streamToken: text("stream_token"), // For authentication
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+export const streamUsers = pgTable('stream_users', {
+  id: serial('id').primaryKey(),
+  userId: varchar('user_id').notNull(), // Your app's user ID
+  streamUserId: varchar('stream_user_id').unique().notNull(), // Stream's user ID
+  streamToken: text('stream_token'), // For authentication
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
-export const streamChannels = pgTable("stream_channels", {
-  id: serial("id").primaryKey(),
-  channelId: varchar("channel_id").unique().notNull(), // Stream's channel ID
-  userId: varchar("user_id").notNull(), // Which user has access
-  folder: varchar("folder").notNull().default("inbox"), // 'inbox', 'sent', 'trash'
-  lastRead: timestamp("last_read"),
-  customData: jsonb("custom_data").default("{}"), // Subject lines, etc
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+export const streamChannels = pgTable('stream_channels', {
+  id: serial('id').primaryKey(),
+  channelId: varchar('channel_id').unique().notNull(), // Stream's channel ID
+  userId: varchar('user_id').notNull(), // Which user has access
+  folder: varchar('folder').notNull().default('inbox'), // 'inbox', 'sent', 'trash'
+  lastRead: timestamp('last_read'),
+  customData: jsonb('custom_data').default('{}'), // Subject lines, etc
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
-export const streamMessages = pgTable("stream_messages", {
-  id: serial("id").primaryKey(),
-  streamMessageId: varchar("stream_message_id").unique().notNull(), // Reference to Stream's message
-  channelId: varchar("channel_id").notNull(), // Stream's channel ID
-  userId: varchar("user_id").notNull(), // User who this metadata belongs to
-  isStarred: boolean("is_starred").notNull().default(false),
-  isDraft: boolean("is_draft").notNull().default(false),
-  folder: varchar("folder").notNull().default("inbox"), // User's folder assignment
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+export const streamMessages = pgTable('stream_messages', {
+  id: serial('id').primaryKey(),
+  streamMessageId: varchar('stream_message_id').unique().notNull(), // Reference to Stream's message
+  channelId: varchar('channel_id').notNull(), // Stream's channel ID
+  userId: varchar('user_id').notNull(), // User who this metadata belongs to
+  isStarred: boolean('is_starred').notNull().default(false),
+  isDraft: boolean('is_draft').notNull().default(false),
+  folder: varchar('folder').notNull().default('inbox'), // User's folder assignment
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
-export const streamThreads = pgTable("stream_threads", {
-  id: serial("id").primaryKey(),
-  streamThreadId: varchar("stream_thread_id").unique().notNull(), // Stream's thread ID
-  parentMessageId: integer("parent_message_id").references(
+export const streamThreads = pgTable('stream_threads', {
+  id: serial('id').primaryKey(),
+  streamThreadId: varchar('stream_thread_id').unique().notNull(), // Stream's thread ID
+  parentMessageId: integer('parent_message_id').references(
     () => streamMessages.id,
-    { onDelete: "set null" },
+    { onDelete: 'set null' }
   ),
-  title: text("title"), // Thread title (usually "Re: ...")
-  participants: jsonb("participants").notNull().default("[]"), // Array of user IDs in thread
-  lastReplyAt: timestamp("last_reply_at"),
-  replyCount: integer("reply_count").notNull().default(0),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  title: text('title'), // Thread title (usually "Re: ...")
+  participants: jsonb('participants').notNull().default('[]'), // Array of user IDs in thread
+  lastReplyAt: timestamp('last_reply_at'),
+  replyCount: integer('reply_count').notNull().default(0),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
-export const workLogs = pgTable("work_logs", {
-  id: serial("id").primaryKey(),
-  userId: varchar("user_id").notNull(),
-  description: text("description").notNull(),
-  hours: integer("hours").notNull().default(0),
-  minutes: integer("minutes").notNull().default(0),
-  workDate: timestamp("work_date", { withTimezone: true }).notNull(), // Date when the work was actually performed
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(), // When the log entry was created
-  status: varchar("status", { length: 20 }).default("pending"), // for future approval
-  approvedBy: varchar("approved_by"), // for future approval
-  approvedAt: timestamp("approved_at", { withTimezone: true }), // for future approval
-  visibility: varchar("visibility", { length: 20 }).default("private"), // "private", "team", "department", "public"
-  sharedWith: jsonb("shared_with").$type<string[]>().default([]), // specific user IDs who can view
-  department: varchar("department", { length: 50 }), // for department-based visibility
-  teamId: varchar("team_id"), // for team-based visibility
+export const workLogs = pgTable('work_logs', {
+  id: serial('id').primaryKey(),
+  userId: varchar('user_id').notNull(),
+  description: text('description').notNull(),
+  hours: integer('hours').notNull().default(0),
+  minutes: integer('minutes').notNull().default(0),
+  workDate: timestamp('work_date', { withTimezone: true }).notNull(), // Date when the work was actually performed
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(), // When the log entry was created
+  status: varchar('status', { length: 20 }).default('pending'), // for future approval
+  approvedBy: varchar('approved_by'), // for future approval
+  approvedAt: timestamp('approved_at', { withTimezone: true }), // for future approval
+  visibility: varchar('visibility', { length: 20 }).default('private'), // "private", "team", "department", "public"
+  sharedWith: jsonb('shared_with').$type<string[]>().default([]), // specific user IDs who can view
+  department: varchar('department', { length: 50 }), // for department-based visibility
+  teamId: varchar('team_id'), // for team-based visibility
 });
 
 export type WorkLog = typeof workLogs.$inferSelect;
 export type InsertWorkLog = typeof workLogs.$inferInsert;
 
 // Suggestions portal for user feedback and feature requests
-export const suggestions = pgTable("suggestions", {
-  id: serial("id").primaryKey(),
-  title: text("title").notNull(),
-  description: text("description").notNull(),
-  category: text("category").notNull().default("general"), // 'general', 'feature', 'bug', 'improvement', 'ui_ux'
-  priority: text("priority").notNull().default("medium"), // 'low', 'medium', 'high', 'urgent'
-  status: text("status").notNull().default("submitted"), // 'submitted', 'under_review', 'in_progress', 'completed', 'rejected', 'needs_clarification'
-  submittedBy: varchar("submitted_by").notNull(),
-  submitterEmail: varchar("submitter_email"),
-  submitterName: text("submitter_name"),
-  isAnonymous: boolean("is_anonymous").notNull().default(false),
-  upvotes: integer("upvotes").notNull().default(0),
-  tags: text("tags").array().default([]),
-  implementationNotes: text("implementation_notes"), // Admin notes on how this was/will be implemented
-  estimatedEffort: text("estimated_effort"), // 'small', 'medium', 'large', 'epic'
-  assignedTo: varchar("assigned_to"), // Admin user who is handling this suggestion
-  completedAt: timestamp("completed_at"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+export const suggestions = pgTable('suggestions', {
+  id: serial('id').primaryKey(),
+  title: text('title').notNull(),
+  description: text('description').notNull(),
+  category: text('category').notNull().default('general'), // 'general', 'feature', 'bug', 'improvement', 'ui_ux'
+  priority: text('priority').notNull().default('medium'), // 'low', 'medium', 'high', 'urgent'
+  status: text('status').notNull().default('submitted'), // 'submitted', 'under_review', 'in_progress', 'completed', 'rejected', 'needs_clarification'
+  submittedBy: varchar('submitted_by').notNull(),
+  submitterEmail: varchar('submitter_email'),
+  submitterName: text('submitter_name'),
+  isAnonymous: boolean('is_anonymous').notNull().default(false),
+  upvotes: integer('upvotes').notNull().default(0),
+  tags: text('tags').array().default([]),
+  implementationNotes: text('implementation_notes'), // Admin notes on how this was/will be implemented
+  estimatedEffort: text('estimated_effort'), // 'small', 'medium', 'large', 'epic'
+  assignedTo: varchar('assigned_to'), // Admin user who is handling this suggestion
+  completedAt: timestamp('completed_at'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
 // Communication thread between admins and suggestion submitters
-export const suggestionResponses = pgTable("suggestion_responses", {
-  id: serial("id").primaryKey(),
-  suggestionId: integer("suggestion_id").notNull(),
-  message: text("message").notNull(),
-  isAdminResponse: boolean("is_admin_response").notNull().default(false),
-  respondedBy: varchar("responded_by").notNull(),
-  respondentName: text("respondent_name"),
-  isInternal: boolean("is_internal").notNull().default(false), // Internal admin notes not visible to submitter
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+export const suggestionResponses = pgTable('suggestion_responses', {
+  id: serial('id').primaryKey(),
+  suggestionId: integer('suggestion_id').notNull(),
+  message: text('message').notNull(),
+  isAdminResponse: boolean('is_admin_response').notNull().default(false),
+  respondedBy: varchar('responded_by').notNull(),
+  respondentName: text('respondent_name'),
+  isInternal: boolean('is_internal').notNull().default(false), // Internal admin notes not visible to submitter
+  createdAt: timestamp('created_at').notNull().defaultNow(),
 });
 
 // Schema types for suggestions
@@ -1820,7 +1820,7 @@ export const insertSuggestionSchema = createInsertSchema(suggestions).omit({
 });
 
 export const insertSuggestionResponseSchema = createInsertSchema(
-  suggestionResponses,
+  suggestionResponses
 ).omit({
   id: true,
   createdAt: true,
@@ -1835,7 +1835,7 @@ export type InsertSuggestionResponse = z.infer<
 
 // Sandwich distribution tracking schema types
 export const insertSandwichDistributionSchema = createInsertSchema(
-  sandwichDistributions,
+  sandwichDistributions
 ).omit({
   id: true,
   createdAt: true,
@@ -1855,7 +1855,7 @@ export const insertStreamUserSchema = createInsertSchema(streamUsers).omit({
 });
 
 export const insertStreamChannelSchema = createInsertSchema(
-  streamChannels,
+  streamChannels
 ).omit({
   id: true,
   createdAt: true,
@@ -1863,7 +1863,7 @@ export const insertStreamChannelSchema = createInsertSchema(
 });
 
 export const insertStreamMessageSchema = createInsertSchema(
-  streamMessages,
+  streamMessages
 ).omit({
   id: true,
   createdAt: true,
@@ -1878,7 +1878,7 @@ export const insertStreamThreadSchema = createInsertSchema(streamThreads).omit({
 
 // User activity tracking schemas
 export const insertUserActivityLogSchema = createInsertSchema(
-  userActivityLogs,
+  userActivityLogs
 ).omit({
   id: true,
   createdAt: true,
@@ -1898,7 +1898,7 @@ export type InsertStreamThread = z.infer<typeof insertStreamThreadSchema>;
 
 // Event volunteers schema types
 export const insertEventVolunteerSchema = createInsertSchema(
-  eventVolunteers,
+  eventVolunteers
 ).omit({
   id: true,
   createdAt: true,

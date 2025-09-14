@@ -1,14 +1,14 @@
-import React from "react";
-import { SmartTooltipGuide } from "./SmartTooltipGuide";
+import React from 'react';
+import { SmartTooltipGuide } from './SmartTooltipGuide';
 import {
   ContextualTooltip,
   InfoTooltip,
   FeatureTooltip,
   TipTooltip,
-} from "./ContextualTooltip";
-import { useSmartGuide } from "./useSmartGuide";
-import { HelpProvider } from "./HelpProvider";
-import { HelpToggle } from "./HelpToggle";
+} from './ContextualTooltip';
+import { useSmartGuide } from './useSmartGuide';
+import { HelpProvider } from './HelpProvider';
+import { HelpToggle } from './HelpToggle';
 
 // Main intelligent guide system that combines all tooltip and guide functionality
 interface IntelligentGuideSystemProps {
@@ -22,7 +22,7 @@ export function IntelligentGuideSystem({
   children,
   enableSmartGuides = true,
   enableContextualTooltips = true,
-  className = "",
+  className = '',
 }: IntelligentGuideSystemProps) {
   // Help system completely disabled - just return children without any help features
   return <div className={className}>{children}</div>;

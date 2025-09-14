@@ -1,30 +1,30 @@
-import { Router } from "express";
-import { z } from "zod";
-import { isAuthenticated } from "../temp-auth";
-import { requirePermission } from "../middleware/auth";
-import { storage } from "../storage-wrapper";
-import { sendEmail } from "../services/sendgrid";
+import { Router } from 'express';
+import { z } from 'zod';
+import { isAuthenticated } from '../temp-auth';
+import { requirePermission } from '../middleware/auth';
+import { storage } from '../storage-wrapper';
+import { sendEmail } from '../services/sendgrid';
 
 const router = Router();
 
 // Test SendGrid configuration endpoint
 router.post(
-  "/test",
+  '/test',
   isAuthenticated,
-  requirePermission("USERS_EDIT"),
+  requirePermission('USERS_EDIT'),
   async (req, res) => {
     try {
-      console.log("🧪 Testing SendGrid configuration...");
+      console.log('🧪 Testing SendGrid configuration...');
 
       // Test with user's email
-      const testEmail = req.user?.email || "admin@sandwich.project";
+      const testEmail = req.user?.email || 'admin@sandwich.project';
 
       // Try different "from" addresses to identify the issue
       const fromAddresses = [
-        "katielong2316@gmail.com",
-        "no-reply@thesandwichproject.org",
-        "alerts@thesandwichproject.org",
-        "admin@thesandwichproject.org",
+        'katielong2316@gmail.com',
+        'no-reply@thesandwichproject.org',
+        'alerts@thesandwichproject.org',
+        'admin@thesandwichproject.org',
       ];
 
       const results = [];
@@ -35,16 +35,16 @@ router.post(
           await sendEmail({
             to: testEmail,
             from: fromAddress,
-            subject: "SendGrid Test - TSP Platform",
+            subject: 'SendGrid Test - TSP Platform',
             text: `This is a test email from ${fromAddress} to verify SendGrid configuration.`,
             html: `<p>This is a test email from <strong>${fromAddress}</strong> to verify SendGrid configuration.</p>`,
           });
-          results.push({ from: fromAddress, status: "success" });
+          results.push({ from: fromAddress, status: 'success' });
           console.log(`✅ Success with ${fromAddress}`);
         } catch (error) {
           results.push({
             from: fromAddress,
-            status: "failed",
+            status: 'failed',
             error: error.message,
             details: error.response?.body,
           });
@@ -54,15 +54,15 @@ router.post(
 
       res.json({
         success: true,
-        message: "SendGrid test completed",
+        message: 'SendGrid test completed',
         results,
         apiKeyConfigured: !!process.env.SENDGRID_API_KEY,
         testRecipient: testEmail,
       });
     } catch (error) {
-      console.error("SendGrid test error:", error);
+      console.error('SendGrid test error:', error);
       res.status(500).json({
-        error: "SendGrid test failed",
+        error: 'SendGrid test failed',
         message: error.message,
         apiKeyConfigured: !!process.env.SENDGRID_API_KEY,
       });
@@ -72,16 +72,16 @@ router.post(
 
 // Schemas
 const sendShoutoutSchema = z.object({
-  subject: z.string().min(1, "Subject is required"),
-  message: z.string().min(1, "Message is required"),
+  subject: z.string().min(1, 'Subject is required'),
+  message: z.string().min(1, 'Message is required'),
   recipientGroup: z.enum([
-    "all",
-    "super_admins",
-    "admins",
-    "hosts",
-    "volunteers",
-    "committee",
-    "custom",
+    'all',
+    'super_admins',
+    'admins',
+    'hosts',
+    'volunteers',
+    'committee',
+    'custom',
   ]),
   templateName: z.string().optional(),
   customRecipients: z.array(z.string()).optional(), // Array of user IDs for custom selection
@@ -89,9 +89,9 @@ const sendShoutoutSchema = z.object({
 
 // Send shoutout endpoint
 router.post(
-  "/send",
+  '/send',
   isAuthenticated,
-  requirePermission("USERS_EDIT"),
+  requirePermission('USERS_EDIT'),
   async (req, res) => {
     try {
       const {
@@ -108,31 +108,31 @@ router.post(
       // Filter recipients based on group selection
       let recipients: any[] = [];
       switch (recipientGroup) {
-        case "all":
+        case 'all':
           recipients = allUsers;
           break;
-        case "super_admins":
-          recipients = allUsers.filter((user) => user.role === "super_admin");
+        case 'super_admins':
+          recipients = allUsers.filter((user) => user.role === 'super_admin');
           break;
-        case "admins":
-          recipients = allUsers.filter((user) => user.role === "admin");
+        case 'admins':
+          recipients = allUsers.filter((user) => user.role === 'admin');
           break;
-        case "hosts":
-          recipients = allUsers.filter((user) => user.role === "host");
+        case 'hosts':
+          recipients = allUsers.filter((user) => user.role === 'host');
           break;
-        case "volunteers":
-          recipients = allUsers.filter((user) => user.role === "volunteer");
+        case 'volunteers':
+          recipients = allUsers.filter((user) => user.role === 'volunteer');
           break;
-        case "committee":
+        case 'committee':
           recipients = allUsers.filter(
-            (user) => user.role === "committee_member"
+            (user) => user.role === 'committee_member'
           );
           break;
-        case "custom":
+        case 'custom':
           if (!customRecipients || customRecipients.length === 0) {
             return res.status(400).json({
               error:
-                "Custom recipients list is required when using custom selection",
+                'Custom recipients list is required when using custom selection',
             });
           }
           recipients = allUsers.filter((user) =>
@@ -145,12 +145,12 @@ router.post(
 
       // Filter out users without email addresses
       const validRecipients = recipients.filter(
-        (user) => user.email && user.email.includes("@")
+        (user) => user.email && user.email.includes('@')
       );
 
       if (validRecipients.length === 0) {
         return res.status(400).json({
-          error: "No valid email recipients found in the selected group",
+          error: 'No valid email recipients found in the selected group',
         });
       }
 
@@ -161,10 +161,10 @@ router.post(
 
       // Try different verified sender addresses (prioritize Katie's verified email)
       const verifiedSenders = [
-        "katielong2316@gmail.com",
-        "no-reply@thesandwichproject.org",
-        "alerts@thesandwichproject.org",
-        "admin@thesandwichproject.org",
+        'katielong2316@gmail.com',
+        'no-reply@thesandwichproject.org',
+        'alerts@thesandwichproject.org',
+        'admin@thesandwichproject.org',
       ];
 
       let workingSender = null;
@@ -178,7 +178,7 @@ router.post(
               from: sender,
               subject: subject,
               text: message,
-              html: message.replace(/\n/g, "<br>"),
+              html: message.replace(/\n/g, '<br>'),
             });
             workingSender = sender;
             successCount++;
@@ -188,7 +188,7 @@ router.post(
             console.log(`❌ Failed with sender ${sender}: ${error.message}`);
             if (error.response?.body) {
               console.error(
-                "SendGrid error details:",
+                'SendGrid error details:',
                 JSON.stringify(error.response.body, null, 2)
               );
               errors.push(
@@ -207,9 +207,9 @@ router.post(
 
       if (!workingSender) {
         return res.status(500).json({
-          error: "Failed to send shoutout to any recipients",
+          error: 'Failed to send shoutout to any recipients',
           details: [
-            "No verified sender address is working with SendGrid. Please check SendGrid configuration and sender verification.",
+            'No verified sender address is working with SendGrid. Please check SendGrid configuration and sender verification.',
           ],
           debugInfo: errors,
         });
@@ -224,7 +224,7 @@ router.post(
             from: workingSender,
             subject: subject,
             text: message,
-            html: message.replace(/\n/g, "<br>"),
+            html: message.replace(/\n/g, '<br>'),
           });
           successCount++;
         } catch (error) {
@@ -240,23 +240,23 @@ router.post(
       // Log the shoutout for history
       try {
         await storage.createShoutoutLog({
-          templateName: templateName || "Custom Message",
+          templateName: templateName || 'Custom Message',
           subject,
           message,
           recipientCount: validRecipients.length,
           sentAt: new Date().toISOString(),
           status:
             failureCount === 0
-              ? "sent"
+              ? 'sent'
               : successCount === 0
-              ? "failed"
-              : "partial",
-          sentBy: req.user?.email || "unknown",
+                ? 'failed'
+                : 'partial',
+          sentBy: req.user?.email || 'unknown',
           successCount,
           failureCount,
         });
       } catch (logError) {
-        console.error("Failed to log shoutout:", logError);
+        console.error('Failed to log shoutout:', logError);
         // Don't fail the request if logging fails
       }
 
@@ -269,7 +269,7 @@ router.post(
         });
       } else if (successCount === 0) {
         res.status(500).json({
-          error: "Failed to send shoutout to any recipients",
+          error: 'Failed to send shoutout to any recipients',
           details: errors,
         });
       } else {
@@ -281,17 +281,17 @@ router.post(
         });
       }
     } catch (error) {
-      console.error("Error sending shoutout:", error);
+      console.error('Error sending shoutout:', error);
 
       if (error instanceof z.ZodError) {
         return res.status(400).json({
-          error: "Invalid request data",
+          error: 'Invalid request data',
           details: error.errors,
         });
       }
 
       res.status(500).json({
-        error: "Failed to send shoutout",
+        error: 'Failed to send shoutout',
         message: error.message,
       });
     }
@@ -300,17 +300,17 @@ router.post(
 
 // Get shoutout history
 router.get(
-  "/history",
+  '/history',
   isAuthenticated,
-  requirePermission("USERS_EDIT"),
+  requirePermission('USERS_EDIT'),
   async (req, res) => {
     try {
       const history = await storage.getShoutoutHistory();
       res.json(history);
     } catch (error) {
-      console.error("Error fetching shoutout history:", error);
+      console.error('Error fetching shoutout history:', error);
       res.status(500).json({
-        error: "Failed to fetch shoutout history",
+        error: 'Failed to fetch shoutout history',
         message: error.message,
       });
     }

@@ -1,22 +1,22 @@
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import {
   ExternalLink,
   Calendar,
   Users,
   Clock,
   AlertCircle,
-} from "lucide-react";
+} from 'lucide-react';
 
 export default function SignUpGeniusViewer() {
   const signupUrl =
-    "https://www.signupgenius.com/go/5080A4BA5AA22A7F94-50444894-thesandwich#/";
+    'https://www.signupgenius.com/go/5080A4BA5AA22A7F94-50444894-thesandwich#/';
   // SignUp Genius blocks iframe embedding, so show fallback immediately
   const [iframeError, setIframeError] = useState(true);
 
   const handleOpenExternal = () => {
-    window.open(signupUrl, "_blank");
+    window.open(signupUrl, '_blank');
   };
 
   const handleIframeError = () => {

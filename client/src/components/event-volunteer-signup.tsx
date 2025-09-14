@@ -1,8 +1,8 @@
-import React, { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import React, { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import {
   Dialog,
   DialogContent,
@@ -10,20 +10,20 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Users, Plus, UserPlus, Car, Mic, Heart, X } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
-import { apiRequest } from "@/lib/queryClient";
+} from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Users, Plus, UserPlus, Car, Mic, Heart, X } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import { apiRequest } from '@/lib/queryClient';
 
 interface EventVolunteerSignupProps {
   eventId: number;
@@ -38,8 +38,8 @@ interface EventVolunteer {
   volunteerUserId?: string;
   volunteerName?: string;
   volunteerEmail?: string;
-  role: "driver" | "speaker";
-  status: "pending" | "confirmed" | "cancelled";
+  role: 'driver' | 'speaker';
+  status: 'pending' | 'confirmed' | 'cancelled';
   signedUpAt: Date;
 }
 
@@ -49,8 +49,8 @@ const roleIcons = {
 };
 
 const roleLabels = {
-  driver: "Driver",
-  speaker: "Speaker",
+  driver: 'Driver',
+  speaker: 'Speaker',
 };
 
 export default function EventVolunteerSignup({
@@ -64,53 +64,53 @@ export default function EventVolunteerSignup({
   const queryClient = useQueryClient();
   const [showSignupDialog, setShowSignupDialog] = useState(false);
   const [showAssignDialog, setShowAssignDialog] = useState(false);
-  const [signupRole, setSignupRole] = useState<"driver" | "speaker">("driver");
-  const [assignRole, setAssignRole] = useState<"driver" | "speaker">("driver");
-  const [selectedDriverId, setSelectedDriverId] = useState<string>("");
+  const [signupRole, setSignupRole] = useState<'driver' | 'speaker'>('driver');
+  const [assignRole, setAssignRole] = useState<'driver' | 'speaker'>('driver');
+  const [selectedDriverId, setSelectedDriverId] = useState<string>('');
   const [volunteerName, setVolunteerName] = useState(
     (user as any)?.firstName && (user as any)?.lastName
       ? `${(user as any).firstName} ${(user as any).lastName}`
-      : ""
+      : ''
   );
   const [volunteerEmail, setVolunteerEmail] = useState(
-    (user as any)?.email || ""
+    (user as any)?.email || ''
   );
 
   // Fetch existing volunteers for this event
   const { data: volunteers = [], isLoading } = useQuery({
-    queryKey: ["/api/event-requests/volunteers", eventId],
+    queryKey: ['/api/event-requests/volunteers', eventId],
     queryFn: () =>
-      apiRequest("GET", `/api/event-requests/volunteers/${eventId}`),
+      apiRequest('GET', `/api/event-requests/volunteers/${eventId}`),
   });
 
   // Fetch available drivers for manual assignment
   const { data: availableDrivers = [] } = useQuery({
-    queryKey: ["/api/event-requests/drivers/available"],
-    queryFn: () => apiRequest("GET", "/api/event-requests/drivers/available"),
+    queryKey: ['/api/event-requests/drivers/available'],
+    queryFn: () => apiRequest('GET', '/api/event-requests/drivers/available'),
   });
 
   // Sign up mutation
   const signupMutation = useMutation({
     mutationFn: (data: any) =>
-      apiRequest("POST", "/api/event-requests/volunteers", data),
+      apiRequest('POST', '/api/event-requests/volunteers', data),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["/api/event-requests/volunteers", eventId],
+        queryKey: ['/api/event-requests/volunteers', eventId],
       });
       setShowSignupDialog(false);
       setVolunteerName(
         (user as any)?.firstName && (user as any)?.lastName
           ? `${(user as any).firstName} ${(user as any).lastName}`
-          : ""
+          : ''
       );
-      setVolunteerEmail((user as any)?.email || "");
-      toast({ title: "Successfully signed up as volunteer!" });
+      setVolunteerEmail((user as any)?.email || '');
+      toast({ title: 'Successfully signed up as volunteer!' });
     },
     onError: (error: any) => {
       toast({
-        title: "Error signing up",
+        title: 'Error signing up',
         description: error.message,
-        variant: "destructive",
+        variant: 'destructive',
       });
     },
   });
@@ -118,18 +118,18 @@ export default function EventVolunteerSignup({
   // Remove volunteer mutation
   const removeMutation = useMutation({
     mutationFn: (volunteerId: number) =>
-      apiRequest("DELETE", `/api/event-requests/volunteers/${volunteerId}`),
+      apiRequest('DELETE', `/api/event-requests/volunteers/${volunteerId}`),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["/api/event-requests/volunteers", eventId],
+        queryKey: ['/api/event-requests/volunteers', eventId],
       });
-      toast({ title: "Volunteer removed successfully" });
+      toast({ title: 'Volunteer removed successfully' });
     },
     onError: (error: any) => {
       toast({
-        title: "Error removing volunteer",
+        title: 'Error removing volunteer',
         description: error.message,
-        variant: "destructive",
+        variant: 'destructive',
       });
     },
   });
@@ -139,10 +139,10 @@ export default function EventVolunteerSignup({
   }
 
   const driverVolunteers = (volunteers || []).filter(
-    (v: EventVolunteer) => v.role === "driver" && v.status !== "cancelled"
+    (v: EventVolunteer) => v.role === 'driver' && v.status !== 'cancelled'
   );
   const speakerVolunteers = (volunteers || []).filter(
-    (v: EventVolunteer) => v.role === "speaker" && v.status !== "cancelled"
+    (v: EventVolunteer) => v.role === 'speaker' && v.status !== 'cancelled'
   );
 
   const availableDriverSpots = Math.max(
@@ -156,7 +156,7 @@ export default function EventVolunteerSignup({
 
   const handleSignup = () => {
     if (!volunteerName.trim()) {
-      toast({ title: "Please enter your name", variant: "destructive" });
+      toast({ title: 'Please enter your name', variant: 'destructive' });
       return;
     }
 
@@ -166,7 +166,7 @@ export default function EventVolunteerSignup({
       volunteerUserId: (user as any)?.id || null,
       volunteerName: volunteerName.trim(),
       volunteerEmail: volunteerEmail.trim() || null,
-      status: "confirmed",
+      status: 'confirmed',
     };
 
     signupMutation.mutate(data);
@@ -174,7 +174,7 @@ export default function EventVolunteerSignup({
 
   const handleAssign = () => {
     if (!selectedDriverId) {
-      toast({ title: "Please select a driver", variant: "destructive" });
+      toast({ title: 'Please select a driver', variant: 'destructive' });
       return;
     }
 
@@ -182,7 +182,7 @@ export default function EventVolunteerSignup({
       (d: any) => d.id.toString() === selectedDriverId
     );
     if (!selectedDriver) {
-      toast({ title: "Driver not found", variant: "destructive" });
+      toast({ title: 'Driver not found', variant: 'destructive' });
       return;
     }
 
@@ -192,12 +192,12 @@ export default function EventVolunteerSignup({
       volunteerUserId: null, // Manual assignment, not user signup
       volunteerName: selectedDriver.name,
       volunteerEmail: selectedDriver.email || null,
-      status: "confirmed",
+      status: 'confirmed',
     };
 
     signupMutation.mutate(data);
     setShowAssignDialog(false);
-    setSelectedDriverId("");
+    setSelectedDriverId('');
   };
 
   return (
@@ -220,7 +220,7 @@ export default function EventVolunteerSignup({
               {availableDriverSpots > 0 && (
                 <Badge variant="outline" className="bg-orange-50">
                   {availableDriverSpots} spot
-                  {availableDriverSpots !== 1 ? "s" : ""} available
+                  {availableDriverSpots !== 1 ? 's' : ''} available
                 </Badge>
               )}
             </div>
@@ -255,10 +255,10 @@ export default function EventVolunteerSignup({
               {availableDriverSpots > 0 && (
                 <div className="grid grid-cols-2 gap-2">
                   <Dialog
-                    open={showSignupDialog && signupRole === "driver"}
+                    open={showSignupDialog && signupRole === 'driver'}
                     onOpenChange={(open) => {
                       if (open) {
-                        setSignupRole("driver");
+                        setSignupRole('driver');
                         setShowSignupDialog(true);
                       } else {
                         setShowSignupDialog(false);
@@ -310,18 +310,18 @@ export default function EventVolunteerSignup({
                           disabled={signupMutation.isPending}
                         >
                           {signupMutation.isPending
-                            ? "Signing up..."
-                            : "Sign Up"}
+                            ? 'Signing up...'
+                            : 'Sign Up'}
                         </Button>
                       </DialogFooter>
                     </DialogContent>
                   </Dialog>
 
                   <Dialog
-                    open={showAssignDialog && assignRole === "driver"}
+                    open={showAssignDialog && assignRole === 'driver'}
                     onOpenChange={(open) => {
                       if (open) {
-                        setAssignRole("driver");
+                        setAssignRole('driver');
                         setShowAssignDialog(true);
                       } else {
                         setShowAssignDialog(false);
@@ -342,7 +342,7 @@ export default function EventVolunteerSignup({
                         <div>
                           <Label htmlFor="driverSelect">Select Driver</Label>
                           <Select
-                            value={selectedDriverId || ""}
+                            value={selectedDriverId || ''}
                             onValueChange={setSelectedDriverId}
                           >
                             <SelectTrigger>
@@ -358,7 +358,7 @@ export default function EventVolunteerSignup({
                                     key={driver.id}
                                     value={driver.id.toString()}
                                   >
-                                    {driver.name}{" "}
+                                    {driver.name}{' '}
                                     {driver.email && `(${driver.email})`}
                                   </SelectItem>
                                 ))}
@@ -378,8 +378,8 @@ export default function EventVolunteerSignup({
                           disabled={signupMutation.isPending}
                         >
                           {signupMutation.isPending
-                            ? "Assigning..."
-                            : "Assign Driver"}
+                            ? 'Assigning...'
+                            : 'Assign Driver'}
                         </Button>
                       </DialogFooter>
                     </DialogContent>
@@ -401,7 +401,7 @@ export default function EventVolunteerSignup({
               {availableSpeakerSpots > 0 && (
                 <Badge variant="outline" className="bg-teal-50">
                   {availableSpeakerSpots} spot
-                  {availableSpeakerSpots !== 1 ? "s" : ""} available
+                  {availableSpeakerSpots !== 1 ? 's' : ''} available
                 </Badge>
               )}
             </div>
@@ -436,10 +436,10 @@ export default function EventVolunteerSignup({
               {availableSpeakerSpots > 0 && (
                 <div className="grid grid-cols-2 gap-2">
                   <Dialog
-                    open={showSignupDialog && signupRole === "speaker"}
+                    open={showSignupDialog && signupRole === 'speaker'}
                     onOpenChange={(open) => {
                       if (open) {
-                        setSignupRole("speaker");
+                        setSignupRole('speaker');
                         setShowSignupDialog(true);
                       } else {
                         setShowSignupDialog(false);
@@ -491,18 +491,18 @@ export default function EventVolunteerSignup({
                           disabled={signupMutation.isPending}
                         >
                           {signupMutation.isPending
-                            ? "Signing up..."
-                            : "Sign Up"}
+                            ? 'Signing up...'
+                            : 'Sign Up'}
                         </Button>
                       </DialogFooter>
                     </DialogContent>
                   </Dialog>
 
                   <Dialog
-                    open={showAssignDialog && assignRole === "speaker"}
+                    open={showAssignDialog && assignRole === 'speaker'}
                     onOpenChange={(open) => {
                       if (open) {
-                        setAssignRole("speaker");
+                        setAssignRole('speaker');
                         setShowAssignDialog(true);
                       } else {
                         setShowAssignDialog(false);
@@ -523,7 +523,7 @@ export default function EventVolunteerSignup({
                         <div>
                           <Label htmlFor="speakerSelect">Select Person</Label>
                           <Select
-                            value={selectedDriverId || ""}
+                            value={selectedDriverId || ''}
                             onValueChange={setSelectedDriverId}
                           >
                             <SelectTrigger>
@@ -539,7 +539,7 @@ export default function EventVolunteerSignup({
                                     key={driver.id}
                                     value={driver.id.toString()}
                                   >
-                                    {driver.name}{" "}
+                                    {driver.name}{' '}
                                     {driver.email && `(${driver.email})`}
                                   </SelectItem>
                                 ))}
@@ -559,8 +559,8 @@ export default function EventVolunteerSignup({
                           disabled={signupMutation.isPending}
                         >
                           {signupMutation.isPending
-                            ? "Assigning..."
-                            : "Assign Speaker"}
+                            ? 'Assigning...'
+                            : 'Assign Speaker'}
                         </Button>
                       </DialogFooter>
                     </DialogContent>

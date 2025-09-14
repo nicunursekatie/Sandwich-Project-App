@@ -1,13 +1,13 @@
-import { useCallback, useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useCallback, useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
 import {
   DynamicErrorManager,
   DynamicErrorMessage,
   ErrorContext,
-} from "@shared/error-management";
-import { useAuth } from "./useAuth";
-import { useToast } from "./use-toast";
-import { apiRequest } from "@/lib/queryClient";
+} from '@shared/error-management';
+import { useAuth } from './useAuth';
+import { useToast } from './use-toast';
+import { apiRequest } from '@/lib/queryClient';
 
 export interface ErrorHandlerOptions {
   showToast?: boolean;
@@ -30,11 +30,11 @@ export function useErrorHandler() {
       userAgent?: string;
       timestamp: string;
     }) => {
-      return apiRequest("POST", "/api/error-logs", errorData);
+      return apiRequest('POST', '/api/error-logs', errorData);
     },
     onError: (error) => {
       // Silent fail for error logging - don't create infinite loops
-      console.warn("Failed to log error to server:", error);
+      console.warn('Failed to log error to server:', error);
     },
   });
 
@@ -58,9 +58,9 @@ export function useErrorHandler() {
       setCurrentError(errorMessage);
 
       // Show toast notification for user-friendly errors
-      if (showToast && errorMessage.severity !== "low") {
+      if (showToast && errorMessage.severity !== 'low') {
         const toastVariant =
-          errorMessage.severity === "critical" ? "destructive" : "default";
+          errorMessage.severity === 'critical' ? 'destructive' : 'default';
 
         toast({
           variant: toastVariant,
@@ -68,14 +68,14 @@ export function useErrorHandler() {
             errorMessage.category
           )} ${errorMessage.title}`,
           description: errorMessage.userFriendlyExplanation,
-          duration: errorMessage.severity === "critical" ? 0 : 5000, // Critical errors don't auto-dismiss
+          duration: errorMessage.severity === 'critical' ? 0 : 5000, // Critical errors don't auto-dismiss
         });
       }
 
       // Log error for monitoring and analytics
       if (logError) {
         logErrorMutation.mutate({
-          error: typeof error === "string" ? error : error.message,
+          error: typeof error === 'string' ? error : error.message,
           context: enhancedContext,
           userAgent: navigator.userAgent,
           timestamp: new Date().toISOString(),
@@ -84,10 +84,10 @@ export function useErrorHandler() {
 
       // Console log for development
       if (import.meta.env.DEV) {
-        console.group("🚨 Dynamic Error Handler");
-        console.log("Error:", error);
-        console.log("Context:", enhancedContext);
-        console.log("Generated Message:", errorMessage);
+        console.group('🚨 Dynamic Error Handler');
+        console.log('Error:', error);
+        console.log('Context:', enhancedContext);
+        console.log('Generated Message:', errorMessage);
         console.groupEnd();
       }
     },
@@ -98,7 +98,7 @@ export function useErrorHandler() {
     (error: Error | string, formData?: Record<string, any>) => {
       handleError(error, {
         context: {
-          attemptedAction: "form submission",
+          attemptedAction: 'form submission',
           formData,
         },
       });
@@ -110,7 +110,7 @@ export function useErrorHandler() {
     (error: Error | string) => {
       handleError(error, {
         context: {
-          attemptedAction: "network request",
+          attemptedAction: 'network request',
         },
       });
     },
@@ -119,7 +119,7 @@ export function useErrorHandler() {
 
   const handlePermissionError = useCallback(
     (action: string) => {
-      handleError("PERMISSION_DENIED", {
+      handleError('PERMISSION_DENIED', {
         context: {
           attemptedAction: action,
         },
@@ -136,10 +136,10 @@ export function useErrorHandler() {
     (action: any) => {
       // Handle common custom actions
       switch (action.target) {
-        case "scrollToErrors":
+        case 'scrollToErrors':
           const firstError = document.querySelector('[aria-invalid="true"]');
           if (firstError) {
-            firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+            firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
             // Focus on the error field
             if (firstError instanceof HTMLElement) {
               firstError.focus();
@@ -147,32 +147,32 @@ export function useErrorHandler() {
           }
           break;
 
-        case "resetForm":
-          const forms = document.querySelectorAll("form");
+        case 'resetForm':
+          const forms = document.querySelectorAll('form');
           forms.forEach((form) => {
             if (form instanceof HTMLFormElement) {
               form.reset();
             }
           });
           toast({
-            title: "Form Reset",
+            title: 'Form Reset',
             description:
-              "The form has been cleared and reset to default values.",
+              'The form has been cleared and reset to default values.',
           });
           break;
 
-        case "goBack":
+        case 'goBack':
           if (window.history.length > 1) {
             window.history.back();
           } else {
-            window.location.href = "/dashboard";
+            window.location.href = '/dashboard';
           }
           break;
 
-        case "saveLocal":
+        case 'saveLocal':
           try {
             const formData: Record<string, string> = {};
-            const inputs = document.querySelectorAll("input, textarea, select");
+            const inputs = document.querySelectorAll('input, textarea, select');
 
             inputs.forEach((input: any) => {
               if (input.value && (input.name || input.id)) {
@@ -186,93 +186,93 @@ export function useErrorHandler() {
                 JSON.stringify(formData)
               );
               toast({
-                title: "Data Saved",
+                title: 'Data Saved',
                 description:
-                  "Your form data has been saved locally as a backup.",
+                  'Your form data has been saved locally as a backup.',
               });
             } else {
               toast({
-                title: "No Data to Save",
-                description: "No form data was found to back up.",
+                title: 'No Data to Save',
+                description: 'No form data was found to back up.',
               });
             }
           } catch (error) {
             toast({
-              variant: "destructive",
-              title: "Save Failed",
-              description: "Could not save your data locally.",
+              variant: 'destructive',
+              title: 'Save Failed',
+              description: 'Could not save your data locally.',
             });
           }
           break;
 
-        case "checkNetworkStatus":
-          fetch("/api/health-check")
+        case 'checkNetworkStatus':
+          fetch('/api/health-check')
             .then((res) => {
               if (res.ok) {
                 toast({
-                  title: "Network Status",
-                  description: "Your network connection is working properly.",
+                  title: 'Network Status',
+                  description: 'Your network connection is working properly.',
                 });
               } else {
-                throw new Error("Health check failed");
+                throw new Error('Health check failed');
               }
             })
             .catch(() => {
               toast({
-                variant: "destructive",
-                title: "Network Issue",
+                variant: 'destructive',
+                title: 'Network Issue',
                 description:
-                  "Network connection appears to be having problems.",
+                  'Network connection appears to be having problems.',
               });
             });
           break;
 
-        case "selectNewFile":
+        case 'selectNewFile':
           const fileInputs = document.querySelectorAll('input[type="file"]');
           if (fileInputs.length > 0) {
             (fileInputs[0] as HTMLInputElement).click();
           }
           break;
 
-        case "showFileHelp":
+        case 'showFileHelp':
           toast({
-            title: "File Upload Requirements",
+            title: 'File Upload Requirements',
             description:
-              "Supported formats: PDF, DOC, DOCX, JPG, PNG. Maximum size: 10MB.",
+              'Supported formats: PDF, DOC, DOCX, JPG, PNG. Maximum size: 10MB.',
           });
           break;
 
-        case "showAlternatives":
+        case 'showAlternatives':
           toast({
-            title: "Alternative Options",
+            title: 'Alternative Options',
             description:
-              "Try using a different feature or contact support for assistance.",
+              'Try using a different feature or contact support for assistance.',
           });
           break;
 
-        case "checkServiceStatus":
+        case 'checkServiceStatus':
           // Could integrate with a status page or service monitoring API
           toast({
-            title: "Service Status",
+            title: 'Service Status',
             description:
-              "Checking external service status... Please try again in a few minutes.",
+              'Checking external service status... Please try again in a few minutes.',
           });
           break;
 
-        case "scheduleRetry":
+        case 'scheduleRetry':
           setTimeout(() => {
             window.location.reload();
           }, 60000); // Retry after 1 minute
 
           toast({
-            title: "Retry Scheduled",
+            title: 'Retry Scheduled',
             description:
               "We'll automatically retry this operation in 1 minute.",
           });
           break;
 
         default:
-          console.warn("Unhandled custom error action:", action.target);
+          console.warn('Unhandled custom error action:', action.target);
           break;
       }
     },
@@ -315,12 +315,12 @@ export function createFormErrorHandler(
     const errorCount = Object.keys(errors).length;
     const errorMessage =
       errorCount === 1
-        ? "Please correct the highlighted field."
+        ? 'Please correct the highlighted field.'
         : `Please correct the ${errorCount} highlighted fields.`;
 
-    handleError("VALIDATION_ERROR", {
+    handleError('VALIDATION_ERROR', {
       context: {
-        attemptedAction: "form validation",
+        attemptedAction: 'form validation',
         formData,
       },
     });
@@ -329,7 +329,7 @@ export function createFormErrorHandler(
     setTimeout(() => {
       const firstError = document.querySelector('[aria-invalid="true"]');
       if (firstError) {
-        firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     }, 100);
   };

@@ -1,60 +1,60 @@
-import { useState } from "react";
+import { useState } from 'react';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Download, FileText, Eye, ExternalLink } from "lucide-react";
-import { DocumentPreview } from "./document-preview";
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Download, FileText, Eye, ExternalLink } from 'lucide-react';
+import { DocumentPreview } from './document-preview';
 
 interface GovernanceDocument {
   name: string;
   path: string;
-  type: "pdf" | "xlsx" | "docx" | "txt" | "other";
+  type: 'pdf' | 'xlsx' | 'docx' | 'txt' | 'other';
   category: string;
   description?: string;
 }
 
 const governanceDocuments: GovernanceDocument[] = [
   {
-    name: "Articles of Incorporation",
-    path: "/attached_assets/Articles of Incorporation.pdf",
-    type: "pdf",
-    category: "Legal Foundation",
+    name: 'Articles of Incorporation',
+    path: '/attached_assets/Articles of Incorporation.pdf',
+    type: 'pdf',
+    category: 'Legal Foundation',
     description:
-      "Official Articles of Incorporation establishing The Sandwich Project as a legal entity",
+      'Official Articles of Incorporation establishing The Sandwich Project as a legal entity',
   },
   {
-    name: "2020 Georgia Code Title 51",
-    path: "/attached_assets/2020 Georgia Code Title 51.pdf",
-    type: "pdf",
-    category: "Legal Reference",
+    name: '2020 Georgia Code Title 51',
+    path: '/attached_assets/2020 Georgia Code Title 51.pdf',
+    type: 'pdf',
+    category: 'Legal Reference',
     description:
-      "Georgia state code governing nonprofit organizations and corporate governance",
+      'Georgia state code governing nonprofit organizations and corporate governance',
   },
   {
-    name: "IRS Tax Exempt Letter",
-    path: "/attached_assets/IRS Tax Exempt Letter (Contains EIN).pdf",
-    type: "pdf",
-    category: "Tax Status",
+    name: 'IRS Tax Exempt Letter',
+    path: '/attached_assets/IRS Tax Exempt Letter (Contains EIN).pdf',
+    type: 'pdf',
+    category: 'Tax Status',
     description:
-      "IRS determination letter granting 501(c)(3) tax-exempt status with EIN information",
+      'IRS determination letter granting 501(c)(3) tax-exempt status with EIN information',
   },
 ];
 
 const getFileIcon = (type: string) => {
   switch (type) {
-    case "pdf":
+    case 'pdf':
       return <FileText className="h-5 w-5 text-red-500" />;
-    case "xlsx":
+    case 'xlsx':
       return <FileText className="h-5 w-5 text-green-500" />;
-    case "docx":
+    case 'docx':
       return <FileText className="h-5 w-5 text-blue-500" />;
-    case "txt":
+    case 'txt':
       return <FileText className="h-5 w-5 text-gray-500" />;
     default:
       return <FileText className="h-5 w-5 text-gray-500" />;
@@ -63,31 +63,29 @@ const getFileIcon = (type: string) => {
 
 const getCategoryColor = (category: string) => {
   switch (category) {
-    case "Legal Foundation":
-      return "bg-purple-100 text-purple-800";
-    case "Legal Reference":
-      return "bg-blue-100 text-blue-800";
-    case "Tax Status":
-      return "bg-green-100 text-green-800";
+    case 'Legal Foundation':
+      return 'bg-purple-100 text-purple-800';
+    case 'Legal Reference':
+      return 'bg-blue-100 text-blue-800';
+    case 'Tax Status':
+      return 'bg-green-100 text-green-800';
     default:
-      return "bg-gray-100 text-gray-800";
+      return 'bg-gray-100 text-gray-800';
   }
 };
 
 export function GovernanceDocuments() {
-  const [selectedCategory, setSelectedCategory] = useState<string>("All");
-  const [
-    previewDocument,
-    setPreviewDocument,
-  ] = useState<GovernanceDocument | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [previewDocument, setPreviewDocument] =
+    useState<GovernanceDocument | null>(null);
 
   const categories = [
-    "All",
+    'All',
     ...Array.from(new Set(governanceDocuments.map((doc) => doc.category))),
   ];
 
   const filteredDocuments =
-    selectedCategory === "All"
+    selectedCategory === 'All'
       ? governanceDocuments
       : governanceDocuments.filter((doc) => doc.category === selectedCategory);
 
@@ -96,7 +94,7 @@ export function GovernanceDocuments() {
   };
 
   const handleDownload = (document: GovernanceDocument) => {
-    const link = window.document.createElement("a");
+    const link = window.document.createElement('a');
     link.href = document.path;
     link.download = document.name;
     window.document.body.appendChild(link);
@@ -105,7 +103,7 @@ export function GovernanceDocuments() {
   };
 
   const handleExternalOpen = (document: GovernanceDocument) => {
-    window.open(document.path, "_blank");
+    window.open(document.path, '_blank');
   };
 
   return (
@@ -124,7 +122,7 @@ export function GovernanceDocuments() {
         {categories.map((category) => (
           <Button
             key={category}
-            variant={selectedCategory === category ? "default" : "outline"}
+            variant={selectedCategory === category ? 'default' : 'outline'}
             size="sm"
             onClick={() => setSelectedCategory(category)}
             className="text-sm"

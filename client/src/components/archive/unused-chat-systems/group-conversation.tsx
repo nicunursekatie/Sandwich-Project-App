@@ -247,7 +247,7 @@ export function GroupConversation({ groupId, groupName, groupDescription, onBack
   return (
     <div className="flex flex-col h-full">
       {/* Group header */}
-      <div className="p-4 border-b bg-white"
+      <div className="p-4 border-b bg-white">>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="icon" onClick={onBack}>
@@ -280,7 +280,7 @@ export function GroupConversation({ groupId, groupName, groupDescription, onBack
                             {member.firstName?.[0] || member.email?.[0] || '?'}
                           </AvatarFallback>
                         </Avatar>
-                        <span className="text-gray-700"
+                        <span className="text-gray-700">
                           {member.firstName && member.lastName 
                             ? `${member.firstName} ${member.lastName}`
                             : member.firstName || member.email?.split('@')[0] || 'Member'

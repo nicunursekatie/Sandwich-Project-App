@@ -1,18 +1,45 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Users, Clock, CheckCircle, AlertCircle, FolderOpen, Edit2, Trash2 } from 'lucide-react';
+import {
+  Plus,
+  Users,
+  Clock,
+  CheckCircle,
+  AlertCircle,
+  FolderOpen,
+  Edit2,
+  Trash2,
+} from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
-import { useLocation } from "wouter";
+import { useLocation } from 'wouter';
 import { ProjectAssigneeSelector } from '@/components/project-assignee-selector';
 import { SendKudosButton } from '@/components/send-kudos-button';
 import { useAuth } from '@/hooks/useAuth';
@@ -31,12 +58,16 @@ interface Project {
   updatedAt: string;
 }
 
-export default function ProjectsPage({ isEmbedded = false }: { isEmbedded?: boolean }) {
+export default function ProjectsPage({
+  isEmbedded = false,
+}: {
+  isEmbedded?: boolean;
+}) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
   const { user } = useAuth();
-  
+
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [newProject, setNewProject] = useState({
@@ -45,53 +76,77 @@ export default function ProjectsPage({ isEmbedded = false }: { isEmbedded?: bool
     priority: 'medium' as 'low' | 'medium' | 'high',
     assignedTo: '',
     assigneeIds: [] as string[],
-    dueDate: ''
+    dueDate: '',
   });
 
   // Fetch projects
-  const { data: projects = [], isLoading, refetch } = useQuery({
+  const {
+    data: projects = [],
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: ['/api/projects'],
     staleTime: 0, // Always refetch to avoid stale data issues
   });
 
   // Create project mutation
   const createMutation = useMutation({
-    mutationFn: async (projectData: any) => 
+    mutationFn: async (projectData: any) =>
       apiRequest('POST', '/api/projects', projectData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
       refetch(); // Force immediate refetch
       setIsAddModalOpen(false);
-      setNewProject({ title: '', description: '', priority: 'medium', assignedTo: '', assigneeIds: [], dueDate: '' });
+      setNewProject({
+        title: '',
+        description: '',
+        priority: 'medium',
+        assignedTo: '',
+        assigneeIds: [],
+        dueDate: '',
+      });
       toast({ description: 'Project created successfully!' });
     },
     onError: (error: any) => {
       console.error('Project creation error:', error);
-      toast({ description: 'Failed to create project', variant: 'destructive' });
-    }
+      toast({
+        description: 'Failed to create project',
+        variant: 'destructive',
+      });
+    },
   });
 
-  // Update project mutation  
+  // Update project mutation
   const updateMutation = useMutation({
-    mutationFn: async ({ id, ...data }: any) => 
+    mutationFn: async ({ id, ...data }: any) =>
       apiRequest('PATCH', `/api/projects/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
       refetch(); // Force immediate refetch
       setEditingProject(null);
       setIsAddModalOpen(false);
-      setNewProject({ title: '', description: '', priority: 'medium', assignedTo: '', assigneeIds: [], dueDate: '' });
+      setNewProject({
+        title: '',
+        description: '',
+        priority: 'medium',
+        assignedTo: '',
+        assigneeIds: [],
+        dueDate: '',
+      });
       toast({ description: 'Project updated successfully!' });
     },
     onError: (error: any) => {
       console.error('Project update error:', error);
-      toast({ description: 'Failed to update project', variant: 'destructive' });
-    }
+      toast({
+        description: 'Failed to update project',
+        variant: 'destructive',
+      });
+    },
   });
 
   // Delete project mutation
   const deleteMutation = useMutation({
-    mutationFn: async (id: number) => 
+    mutationFn: async (id: number) =>
       apiRequest('DELETE', `/api/projects/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
@@ -100,13 +155,16 @@ export default function ProjectsPage({ isEmbedded = false }: { isEmbedded?: bool
     },
     onError: (error: any) => {
       console.error('Project delete error:', error);
-      toast({ description: 'Failed to delete project', variant: 'destructive' });
-    }
+      toast({
+        description: 'Failed to delete project',
+        variant: 'destructive',
+      });
+    },
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const projectData = {
       title: newProject.title,
       description: newProject.description,
@@ -117,13 +175,13 @@ export default function ProjectsPage({ isEmbedded = false }: { isEmbedded?: bool
       dueDate: newProject.dueDate || null,
       status: 'available',
       category: 'general',
-      progressPercentage: 0
+      progressPercentage: 0,
     };
 
     if (editingProject) {
       await updateMutation.mutateAsync({
         id: editingProject.id,
-        ...projectData
+        ...projectData,
       });
     } else {
       await createMutation.mutateAsync(projectData);
@@ -138,23 +196,29 @@ export default function ProjectsPage({ isEmbedded = false }: { isEmbedded?: bool
       priority: project.priority as 'low' | 'medium' | 'high',
       assignedTo: project.assigneeName || '',
       assigneeIds: [], // Will be parsed from project data if available
-      dueDate: project.dueDate || ''
+      dueDate: project.dueDate || '',
     });
     setIsAddModalOpen(true);
   };
 
   // Separate projects by status
-  const activeProjects = projects.filter((project: any) => 
-    project.status === 'active' || project.status === 'in_progress'
+  const activeProjects = projects.filter(
+    (project: any) =>
+      project.status === 'active' || project.status === 'in_progress'
   );
-  const availableProjects = projects.filter((project: any) => 
-    project.status === 'available' || project.status === 'not_started'
+  const availableProjects = projects.filter(
+    (project: any) =>
+      project.status === 'available' || project.status === 'not_started'
   );
-  const waitingProjects = projects.filter((project: any) => 
-    project.status === 'waiting' || project.status === 'on_hold' || project.status === 'pending'
+  const waitingProjects = projects.filter(
+    (project: any) =>
+      project.status === 'waiting' ||
+      project.status === 'on_hold' ||
+      project.status === 'pending'
   );
-  const completedProjects = projects.filter((project: any) => 
-    project.status === 'completed' || project.status === 'finished'
+  const completedProjects = projects.filter(
+    (project: any) =>
+      project.status === 'completed' || project.status === 'finished'
   );
 
   if (isLoading) {
@@ -169,8 +233,13 @@ export default function ProjectsPage({ isEmbedded = false }: { isEmbedded?: bool
     <div className="max-w-7xl mx-auto">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Project Management</h1>
-          <p className="text-gray-600">Organize and track all team projects with interactive task management</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Project Management
+          </h1>
+          <p className="text-gray-600">
+            Organize and track all team projects with interactive task
+            management
+          </p>
         </div>
         <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
           <DialogTrigger asChild>
@@ -181,7 +250,9 @@ export default function ProjectsPage({ isEmbedded = false }: { isEmbedded?: bool
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>{editingProject ? 'Edit Project' : 'Create New Project'}</DialogTitle>
+              <DialogTitle>
+                {editingProject ? 'Edit Project' : 'Create New Project'}
+              </DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
@@ -189,7 +260,12 @@ export default function ProjectsPage({ isEmbedded = false }: { isEmbedded?: bool
                 <Input
                   id="title"
                   value={newProject.title}
-                  onChange={(e) => setNewProject(prev => ({ ...prev, title: e.target.value }))}
+                  onChange={(e) =>
+                    setNewProject((prev) => ({
+                      ...prev,
+                      title: e.target.value,
+                    }))
+                  }
                   placeholder="Enter project title"
                   required
                 />
@@ -199,7 +275,12 @@ export default function ProjectsPage({ isEmbedded = false }: { isEmbedded?: bool
                 <Textarea
                   id="description"
                   value={newProject.description}
-                  onChange={(e) => setNewProject(prev => ({ ...prev, description: e.target.value }))}
+                  onChange={(e) =>
+                    setNewProject((prev) => ({
+                      ...prev,
+                      description: e.target.value,
+                    }))
+                  }
                   placeholder="Enter project description"
                   rows={3}
                 />
@@ -207,9 +288,12 @@ export default function ProjectsPage({ isEmbedded = false }: { isEmbedded?: bool
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="priority">Priority</Label>
-                  <Select value={newProject.priority} onValueChange={(value: 'low' | 'medium' | 'high') => 
-                    setNewProject(prev => ({ ...prev, priority: value }))
-                  }>
+                  <Select
+                    value={newProject.priority}
+                    onValueChange={(value: 'low' | 'medium' | 'high') =>
+                      setNewProject((prev) => ({ ...prev, priority: value }))
+                    }
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -223,11 +307,11 @@ export default function ProjectsPage({ isEmbedded = false }: { isEmbedded?: bool
                 <div>
                   <ProjectAssigneeSelector
                     value={newProject.assignedTo}
-                    onChange={(value, userIds) => 
-                      setNewProject(prev => ({ 
-                        ...prev, 
+                    onChange={(value, userIds) =>
+                      setNewProject((prev) => ({
+                        ...prev,
                         assignedTo: value,
-                        assigneeIds: userIds || []
+                        assigneeIds: userIds || [],
                       }))
                     }
                     placeholder="Select team members or enter names"
@@ -241,19 +325,44 @@ export default function ProjectsPage({ isEmbedded = false }: { isEmbedded?: bool
                   id="dueDate"
                   type="date"
                   value={newProject.dueDate || ''}
-                  onChange={(e) => setNewProject(prev => ({ ...prev, dueDate: e.target.value }))}
+                  onChange={(e) =>
+                    setNewProject((prev) => ({
+                      ...prev,
+                      dueDate: e.target.value,
+                    }))
+                  }
                 />
               </div>
               <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={() => {
-                  setIsAddModalOpen(false);
-                  setEditingProject(null);
-                  setNewProject({ title: '', description: '', priority: 'medium', assignedTo: '', assigneeIds: [], dueDate: '' });
-                }}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setIsAddModalOpen(false);
+                    setEditingProject(null);
+                    setNewProject({
+                      title: '',
+                      description: '',
+                      priority: 'medium',
+                      assignedTo: '',
+                      assigneeIds: [],
+                      dueDate: '',
+                    });
+                  }}
+                >
                   Cancel
                 </Button>
-                <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
-                  {createMutation.isPending || updateMutation.isPending ? 'Saving...' : editingProject ? 'Update Project' : 'Create Project'}
+                <Button
+                  type="submit"
+                  disabled={
+                    createMutation.isPending || updateMutation.isPending
+                  }
+                >
+                  {createMutation.isPending || updateMutation.isPending
+                    ? 'Saving...'
+                    : editingProject
+                      ? 'Update Project'
+                      : 'Create Project'}
                 </Button>
               </div>
             </form>
@@ -284,16 +393,26 @@ export default function ProjectsPage({ isEmbedded = false }: { isEmbedded?: bool
         <TabsContent value="active" className="mt-6">
           <div className="grid gap-4">
             {activeProjects.map((project: any) => (
-              <Card key={project.id} className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-                onClick={() => setLocation(`/projects/${project.id}`)}>
+              <Card
+                key={project.id}
+                className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                onClick={() => setLocation(`/projects/${project.id}`)}
+              >
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-lg font-semibold text-gray-900">{project.title}</h3>
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      {project.title}
+                    </h3>
                     <div className="flex items-center gap-2">
-                      <Badge variant={
-                        project.priority === 'high' ? 'destructive' :
-                        project.priority === 'medium' ? 'default' : 'secondary'
-                      }>
+                      <Badge
+                        variant={
+                          project.priority === 'high'
+                            ? 'destructive'
+                            : project.priority === 'medium'
+                              ? 'default'
+                              : 'secondary'
+                        }
+                      >
                         {project.priority} priority
                       </Badge>
                       <Badge variant="outline">active</Badge>
@@ -310,7 +429,11 @@ export default function ProjectsPage({ isEmbedded = false }: { isEmbedded?: bool
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (confirm('Are you sure you want to delete this project?')) {
+                          if (
+                            confirm(
+                              'Are you sure you want to delete this project?'
+                            )
+                          ) {
                             deleteMutation.mutate(project.id);
                           }
                         }}
@@ -321,7 +444,9 @@ export default function ProjectsPage({ isEmbedded = false }: { isEmbedded?: bool
                       </button>
                     </div>
                   </div>
-                  <p className="text-gray-600 text-sm mb-3">{project.description || 'No description provided'}</p>
+                  <p className="text-gray-600 text-sm mb-3">
+                    {project.description || 'No description provided'}
+                  </p>
                   <div className="flex items-center justify-between text-sm text-gray-500 mb-2">
                     <span className="flex items-center gap-1">
                       <Users className="w-4 h-4" />
@@ -340,7 +465,7 @@ export default function ProjectsPage({ isEmbedded = false }: { isEmbedded?: bool
                       <span>{project.progressPercentage || 0}%</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
+                      <div
                         className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                         style={{ width: `${project.progressPercentage || 0}%` }}
                       ></div>
@@ -365,15 +490,25 @@ export default function ProjectsPage({ isEmbedded = false }: { isEmbedded?: bool
         <TabsContent value="available" className="mt-6">
           <div className="grid gap-4">
             {availableProjects.map((project: any) => (
-              <Card key={project.id} className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+              <Card
+                key={project.id}
+                className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
+              >
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-lg font-semibold text-gray-900">{project.title}</h3>
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      {project.title}
+                    </h3>
                     <div className="flex items-center gap-2">
-                      <Badge variant={
-                        project.priority === 'high' ? 'destructive' :
-                        project.priority === 'medium' ? 'default' : 'secondary'
-                      }>
+                      <Badge
+                        variant={
+                          project.priority === 'high'
+                            ? 'destructive'
+                            : project.priority === 'medium'
+                              ? 'default'
+                              : 'secondary'
+                        }
+                      >
                         {project.priority} priority
                       </Badge>
                       <Badge variant="outline">available</Badge>
@@ -386,7 +521,9 @@ export default function ProjectsPage({ isEmbedded = false }: { isEmbedded?: bool
                       </button>
                     </div>
                   </div>
-                  <p className="text-gray-600 text-sm mb-3">{project.description || 'No description provided'}</p>
+                  <p className="text-gray-600 text-sm mb-3">
+                    {project.description || 'No description provided'}
+                  </p>
                   <div className="flex items-center justify-between text-sm text-gray-500 mb-2">
                     <span className="flex items-center gap-1">
                       <Users className="w-4 h-4" />
@@ -413,15 +550,25 @@ export default function ProjectsPage({ isEmbedded = false }: { isEmbedded?: bool
         <TabsContent value="waiting" className="mt-6">
           <div className="grid gap-4">
             {waitingProjects.map((project: any) => (
-              <Card key={project.id} className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+              <Card
+                key={project.id}
+                className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
+              >
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-lg font-semibold text-gray-900">{project.title}</h3>
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      {project.title}
+                    </h3>
                     <div className="flex items-center gap-2">
-                      <Badge variant={
-                        project.priority === 'high' ? 'destructive' :
-                        project.priority === 'medium' ? 'default' : 'secondary'
-                      }>
+                      <Badge
+                        variant={
+                          project.priority === 'high'
+                            ? 'destructive'
+                            : project.priority === 'medium'
+                              ? 'default'
+                              : 'secondary'
+                        }
+                      >
                         {project.priority} priority
                       </Badge>
                       <Badge variant="outline">waiting</Badge>
@@ -434,7 +581,9 @@ export default function ProjectsPage({ isEmbedded = false }: { isEmbedded?: bool
                       </button>
                     </div>
                   </div>
-                  <p className="text-gray-600 text-sm mb-3">{project.description || 'No description provided'}</p>
+                  <p className="text-gray-600 text-sm mb-3">
+                    {project.description || 'No description provided'}
+                  </p>
                   <div className="flex items-center justify-between text-sm text-gray-500 mb-2">
                     <span className="flex items-center gap-1">
                       <Users className="w-4 h-4" />
@@ -461,28 +610,39 @@ export default function ProjectsPage({ isEmbedded = false }: { isEmbedded?: bool
         <TabsContent value="completed" className="mt-6">
           <div className="grid gap-4">
             {completedProjects.map((project: any) => (
-              <Card key={project.id} className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+              <Card
+                key={project.id}
+                className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
+              >
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-lg font-semibold text-gray-900">{project.title}</h3>
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      {project.title}
+                    </h3>
                     <div className="flex items-center gap-2">
-                      <Badge variant={
-                        project.priority === 'high' ? 'destructive' :
-                        project.priority === 'medium' ? 'default' : 'secondary'
-                      }>
+                      <Badge
+                        variant={
+                          project.priority === 'high'
+                            ? 'destructive'
+                            : project.priority === 'medium'
+                              ? 'default'
+                              : 'secondary'
+                        }
+                      >
                         {project.priority} priority
                       </Badge>
                       <Badge variant="outline">completed</Badge>
-                      {project.assigneeId && project.assigneeId !== user?.id && (
-                        <SendKudosButton
-                          recipientId={project.assigneeId}
-                          recipientName={project.assigneeName}
-                          contextType="project"
-                          contextId={project.id.toString()}
-                          entityName={project.title}
-                          size="sm"
-                        />
-                      )}
+                      {project.assigneeId &&
+                        project.assigneeId !== user?.id && (
+                          <SendKudosButton
+                            recipientId={project.assigneeId}
+                            recipientName={project.assigneeName}
+                            contextType="project"
+                            contextId={project.id.toString()}
+                            entityName={project.title}
+                            size="sm"
+                          />
+                        )}
                       <button
                         onClick={() => handleEdit(project)}
                         className="p-1 text-gray-500 hover:text-blue-600 transition-colors"
@@ -492,7 +652,9 @@ export default function ProjectsPage({ isEmbedded = false }: { isEmbedded?: bool
                       </button>
                     </div>
                   </div>
-                  <p className="text-gray-600 text-sm mb-3">{project.description || 'No description provided'}</p>
+                  <p className="text-gray-600 text-sm mb-3">
+                    {project.description || 'No description provided'}
+                  </p>
                   <div className="flex items-center justify-between text-sm text-gray-500 mb-2">
                     <span className="flex items-center gap-1">
                       <Users className="w-4 h-4" />

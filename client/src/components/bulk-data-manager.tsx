@@ -1,20 +1,20 @@
-import { useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
-import { useAuth } from "@/hooks/useAuth";
-import { hasPermission, PERMISSIONS } from "@shared/auth-utils";
+} from '@/components/ui/dialog';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '@/lib/queryClient';
+import { useAuth } from '@/hooks/useAuth';
+import { hasPermission, PERMISSIONS } from '@shared/auth-utils';
 import {
   Database,
   FileText,
@@ -25,7 +25,7 @@ import {
   Upload,
   Download,
   Scan,
-} from "lucide-react";
+} from 'lucide-react';
 
 interface MappingStats {
   hostName: string;
@@ -56,7 +56,7 @@ export default function BulkDataManager({
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState('overview');
   const [selectedHost, setSelectedHost] = useState<string | null>(null);
   const [showHostRecords, setShowHostRecords] = useState(false);
 
@@ -66,26 +66,26 @@ export default function BulkDataManager({
 
   // Fetch collection statistics
   const { data: stats, isLoading: statsLoading } = useQuery({
-    queryKey: ["/api/collection-stats"],
+    queryKey: ['/api/collection-stats'],
     refetchInterval: 120000, // Reduced from 5 seconds to 2 minutes
   });
 
   // Fetch host mapping distribution
   const { data: mappingStats, isLoading: mappingLoading } = useQuery({
-    queryKey: ["/api/host-mapping-stats"],
+    queryKey: ['/api/host-mapping-stats'],
     refetchInterval: 120000, // Reduced from 5 seconds to 2 minutes
   });
 
   // Fetch collections for selected host
   const { data: hostCollections, isLoading: hostCollectionsLoading } = useQuery(
     {
-      queryKey: ["/api/collections-by-host", selectedHost],
+      queryKey: ['/api/collections-by-host', selectedHost],
       queryFn: async () => {
         if (!selectedHost) return [];
         const response = await fetch(
           `/api/collections-by-host/${encodeURIComponent(selectedHost)}`
         );
-        if (!response.ok) throw new Error("Failed to fetch host collections");
+        if (!response.ok) throw new Error('Failed to fetch host collections');
         return response.json();
       },
       enabled: !!selectedHost,
@@ -95,27 +95,27 @@ export default function BulkDataManager({
   // Run bulk mapping
   const bulkMapMutation = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest("POST", "/api/bulk-map-hosts", {});
+      const response = await apiRequest('POST', '/api/bulk-map-hosts', {});
       return response.json();
     },
     onSuccess: (result) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/collection-stats"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/host-mapping-stats"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/collection-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/host-mapping-stats'] });
       queryClient.invalidateQueries({
-        queryKey: ["/api/sandwich-collections"],
+        queryKey: ['/api/sandwich-collections'],
       });
 
       toast({
-        title: "Bulk mapping completed",
+        title: 'Bulk mapping completed',
         description: `Updated ${result.updatedRecords} collection records`,
       });
     },
     onError: (error) => {
       toast({
-        title: "Mapping failed",
+        title: 'Mapping failed',
         description:
-          error instanceof Error ? error.message : "Unknown error occurred",
-        variant: "destructive",
+          error instanceof Error ? error.message : 'Unknown error occurred',
+        variant: 'destructive',
       });
     },
   });
@@ -124,28 +124,28 @@ export default function BulkDataManager({
   const fixDataMutation = useMutation({
     mutationFn: async () => {
       const response = await apiRequest(
-        "PATCH",
-        "/api/sandwich-collections/fix-data-corruption",
+        'PATCH',
+        '/api/sandwich-collections/fix-data-corruption',
         {}
       );
       return response;
     },
     onSuccess: (data) => {
       toast({
-        title: "Data Issues Fixed",
+        title: 'Data Issues Fixed',
         description: `Successfully fixed ${data.fixedCount} data corruption issues out of ${data.totalChecked} records checked.`,
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/collection-stats"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/collection-stats'] });
       queryClient.invalidateQueries({
-        queryKey: ["/api/sandwich-collections"],
+        queryKey: ['/api/sandwich-collections'],
       });
     },
     onError: (error) => {
-      console.error("Data fix failed:", error);
+      console.error('Data fix failed:', error);
       toast({
-        title: "Fix Failed",
-        description: "There was an error fixing data issues. Please try again.",
-        variant: "destructive",
+        title: 'Fix Failed',
+        description: 'There was an error fixing data issues. Please try again.',
+        variant: 'destructive',
       });
     },
   });
@@ -190,8 +190,8 @@ export default function BulkDataManager({
               <CardContent>
                 <div className="text-2xl font-bold">
                   {statsLoading
-                    ? "..."
-                    : stats?.totalRecords?.toLocaleString() || "0"}
+                    ? '...'
+                    : stats?.totalRecords?.toLocaleString() || '0'}
                 </div>
                 <p className="text-xs text-muted-foreground">
                   Historical sandwich collection records
@@ -209,8 +209,8 @@ export default function BulkDataManager({
               <CardContent>
                 <div className="text-2xl font-bold text-green-600">
                   {statsLoading
-                    ? "..."
-                    : stats?.mappedRecords?.toLocaleString() || "0"}
+                    ? '...'
+                    : stats?.mappedRecords?.toLocaleString() || '0'}
                 </div>
                 <p className="text-xs text-muted-foreground">
                   Connected to host locations
@@ -228,8 +228,8 @@ export default function BulkDataManager({
               <CardContent>
                 <div className="text-2xl font-bold text-amber-600">
                   {statsLoading
-                    ? "..."
-                    : stats?.unmappedRecords?.toLocaleString() || "0"}
+                    ? '...'
+                    : stats?.unmappedRecords?.toLocaleString() || '0'}
                 </div>
                 <p className="text-xs text-muted-foreground">
                   Pending host assignment
@@ -300,7 +300,7 @@ export default function BulkDataManager({
                       <div className="flex items-center space-x-3">
                         <div
                           className="w-3 h-3 rounded-full"
-                          style={{ backgroundColor: "var(--tsp-teal)" }}
+                          style={{ backgroundColor: 'var(--tsp-teal)' }}
                         ></div>
                         <span className="font-medium">{stat.hostName}</span>
                         {stat.mapped && (
@@ -455,7 +455,7 @@ export default function BulkDataManager({
                       <RefreshCw className="w-4 h-4 animate-spin" />
                     )}
                     <span>
-                      {bulkMapMutation.isPending ? "Mapping..." : "Run Mapping"}
+                      {bulkMapMutation.isPending ? 'Mapping...' : 'Run Mapping'}
                     </span>
                   </Button>
                 </div>

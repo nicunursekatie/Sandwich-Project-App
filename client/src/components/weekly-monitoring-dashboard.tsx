@@ -1,16 +1,16 @@
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+} from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   CheckCircle,
   XCircle,
@@ -28,9 +28,9 @@ import {
   Settings,
   Send,
   Download,
-} from "lucide-react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+} from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
 
 interface WeeklySubmissionStatus {
   location: string;
@@ -83,7 +83,7 @@ export default function WeeklyMonitoringDashboard() {
   const [selectedWeek, setSelectedWeek] = useState(0); // 0 = current week, 1 = last week, etc.
   const [reportWeeks, setReportWeeks] = useState(4); // Number of weeks for multi-week report
   const [showSMSTest, setShowSMSTest] = useState(false);
-  const [testPhoneNumber, setTestPhoneNumber] = useState("");
+  const [testPhoneNumber, setTestPhoneNumber] = useState('');
   const [showAnnouncementPanel, setShowAnnouncementPanel] = useState(false);
   const [emailingSingleLocation, setEmailingSingleLocation] = useState<
     string | null
@@ -96,48 +96,48 @@ export default function WeeklyMonitoringDashboard() {
     isLoading: statusLoading,
     error: statusError,
   } = useQuery({
-    queryKey: ["/api/monitoring/weekly-status", selectedWeek],
+    queryKey: ['/api/monitoring/weekly-status', selectedWeek],
     queryFn: () =>
-      apiRequest("GET", `/api/monitoring/weekly-status/${selectedWeek}`),
+      apiRequest('GET', `/api/monitoring/weekly-status/${selectedWeek}`),
     refetchInterval: selectedWeek === 0 ? 5 * 60 * 1000 : undefined, // Only auto-refresh for current week
   });
 
   // Get multi-week report
   const { data: multiWeekReport, isLoading: reportLoading } = useQuery({
-    queryKey: ["/api/monitoring/multi-week-report", reportWeeks],
+    queryKey: ['/api/monitoring/multi-week-report', reportWeeks],
     queryFn: () =>
-      apiRequest("GET", `/api/monitoring/multi-week-report/${reportWeeks}`),
+      apiRequest('GET', `/api/monitoring/multi-week-report/${reportWeeks}`),
     enabled: reportWeeks > 0,
   });
 
   // Get monitoring statistics
   const { data: stats, isLoading: statsLoading } = useQuery({
-    queryKey: ["/api/monitoring/stats"],
-    queryFn: () => apiRequest("GET", "/api/monitoring/stats"),
+    queryKey: ['/api/monitoring/stats'],
+    queryFn: () => apiRequest('GET', '/api/monitoring/stats'),
     refetchInterval: 5 * 60 * 1000,
   });
 
   // Manual check mutation for current week
   const manualCheckMutation = useMutation({
-    mutationFn: () => apiRequest("POST", "/api/monitoring/check-now"),
+    mutationFn: () => apiRequest('POST', '/api/monitoring/check-now'),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["/api/monitoring/weekly-status"],
+        queryKey: ['/api/monitoring/weekly-status'],
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/monitoring/stats"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/monitoring/stats'] });
     },
   });
 
   // Check specific week mutation
   const checkWeekMutation = useMutation({
     mutationFn: (weeksAgo: number) =>
-      apiRequest("POST", `/api/monitoring/check-week/${weeksAgo}`),
+      apiRequest('POST', `/api/monitoring/check-week/${weeksAgo}`),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["/api/monitoring/weekly-status"],
+        queryKey: ['/api/monitoring/weekly-status'],
       });
       queryClient.invalidateQueries({
-        queryKey: ["/api/monitoring/multi-week-report"],
+        queryKey: ['/api/monitoring/multi-week-report'],
       });
     },
   });
@@ -145,13 +145,13 @@ export default function WeeklyMonitoringDashboard() {
   // SMS mutations
   const sendSMSRemindersMutation = useMutation({
     mutationFn: (data: { missingLocations: string[]; appUrl?: string }) =>
-      apiRequest("POST", "/api/monitoring/send-sms-reminders", data),
+      apiRequest('POST', '/api/monitoring/send-sms-reminders', data),
   });
 
   const sendSingleSMSMutation = useMutation({
     mutationFn: (data: { location: string; appUrl?: string }) =>
       apiRequest(
-        "POST",
+        'POST',
         `/api/monitoring/send-sms-reminder/${encodeURIComponent(
           data.location
         )}`,
@@ -167,7 +167,7 @@ export default function WeeklyMonitoringDashboard() {
 
   const testSMSMutation = useMutation({
     mutationFn: (data: { phoneNumber: string; appUrl?: string }) =>
-      apiRequest("POST", "/api/monitoring/test-sms", data),
+      apiRequest('POST', '/api/monitoring/test-sms', data),
   });
 
   // Function to generate stylized export of non-reporting groups
@@ -377,31 +377,31 @@ export default function WeeklyMonitoringDashboard() {
                 <div>
                   ${status.location}
                   ${
-                    status.location === "Dunwoody/PTC" && status.dunwoodyStatus
+                    status.location === 'Dunwoody/PTC' && status.dunwoodyStatus
                       ? `<span class="dunwoody-badge">
                       Missing: ${
                         !status.dunwoodyStatus.lisaHiles &&
                         !status.dunwoodyStatus.stephanieOrMarcy
-                          ? "Both Required"
+                          ? 'Both Required'
                           : !status.dunwoodyStatus.lisaHiles
-                          ? "Lisa Hiles"
-                          : "Stephanie/Marcy"
+                            ? 'Lisa Hiles'
+                            : 'Stephanie/Marcy'
                       }
                     </span>`
-                      : ""
+                      : ''
                   }
                   ${
                     status.lastSubmissionDate
                       ? `<br><small style="color: #6b7280;">Last submission: ${new Date(
                           status.lastSubmissionDate
                         ).toLocaleDateString()}</small>`
-                      : ""
+                      : ''
                   }
                 </div>
               </div>
             `
                   )
-                  .join("")
+                  .join('')
           }
         </div>
 
@@ -422,15 +422,15 @@ export default function WeeklyMonitoringDashboard() {
                   ${
                     status.submittedBy && status.submittedBy.length > 0
                       ? `<br><small style="color: #6b7280;">Submitted by: ${status.submittedBy.join(
-                          ", "
+                          ', '
                         )}</small>`
-                      : ""
+                      : ''
                   }
                 </div>
               </div>
             `
                   )
-                  .join("")
+                  .join('')
           }
         </div>
 
@@ -443,12 +443,12 @@ export default function WeeklyMonitoringDashboard() {
     `;
 
     // Create and download the report
-    const blob = new Blob([htmlContent], { type: "text/html" });
+    const blob = new Blob([htmlContent], { type: 'text/html' });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
+    const link = document.createElement('a');
     link.href = url;
-    link.download = `Weekly-Monitoring-${weekLabel.replace(/\s+/g, "-")}-${
-      new Date().toISOString().split("T")[0]
+    link.download = `Weekly-Monitoring-${weekLabel.replace(/\s+/g, '-')}-${
+      new Date().toISOString().split('T')[0]
     }.html`;
     document.body.appendChild(link);
     link.click();
@@ -459,25 +459,25 @@ export default function WeeklyMonitoringDashboard() {
   // SMS announcement mutation
   const sendAnnouncementMutation = useMutation({
     mutationFn: (data: { testMode?: boolean; testEmail?: string }) =>
-      apiRequest("POST", "/api/sms-announcement/send-sms-announcement", data),
+      apiRequest('POST', '/api/sms-announcement/send-sms-announcement', data),
   });
 
   // Get SMS configuration status
   const { data: smsConfig } = useQuery({
-    queryKey: ["/api/monitoring/sms-config"],
-    queryFn: () => apiRequest("GET", "/api/monitoring/sms-config"),
+    queryKey: ['/api/monitoring/sms-config'],
+    queryFn: () => apiRequest('GET', '/api/monitoring/sms-config'),
   });
 
   // Send test email mutation
   const testEmailMutation = useMutation({
-    mutationFn: () => apiRequest("POST", "/api/monitoring/test-email"),
+    mutationFn: () => apiRequest('POST', '/api/monitoring/test-email'),
   });
 
   // Email reminder mutations
   const sendSingleEmailMutation = useMutation({
     mutationFn: (data: { location: string; appUrl?: string }) =>
       apiRequest(
-        "POST",
+        'POST',
         `/api/monitoring/send-email-reminder/${encodeURIComponent(
           data.location
         )}`,
@@ -493,8 +493,8 @@ export default function WeeklyMonitoringDashboard() {
 
   const getStatusColor = (hasSubmitted: boolean) => {
     return hasSubmitted
-      ? "bg-green-100 text-green-800 border-green-200"
-      : "bg-red-100 text-red-800 border-red-200";
+      ? 'bg-green-100 text-green-800 border-green-200'
+      : 'bg-red-100 text-red-800 border-red-200';
   };
 
   const getStatusIcon = (hasSubmitted: boolean) => {
@@ -506,13 +506,13 @@ export default function WeeklyMonitoringDashboard() {
   };
 
   const getWeekLabel = (weeksAgo: number) => {
-    if (weeksAgo === 0) return "This Week";
-    if (weeksAgo === 1) return "Last Week";
+    if (weeksAgo === 0) return 'This Week';
+    if (weeksAgo === 1) return 'Last Week';
     return `${weeksAgo} Weeks Ago`;
   };
 
   const getDunwoodyBadge = (status: WeeklySubmissionStatus) => {
-    if (status.location !== "Dunwoody/PTC" || !status.dunwoodyStatus)
+    if (status.location !== 'Dunwoody/PTC' || !status.dunwoodyStatus)
       return null;
 
     const { lisaHiles, stephanieOrMarcy, complete } = status.dunwoodyStatus;
@@ -526,12 +526,12 @@ export default function WeeklyMonitoringDashboard() {
     }
 
     const missing = [];
-    if (!lisaHiles) missing.push("Lisa Hiles");
-    if (!stephanieOrMarcy) missing.push("Stephanie/Marcy");
+    if (!lisaHiles) missing.push('Lisa Hiles');
+    if (!stephanieOrMarcy) missing.push('Stephanie/Marcy');
 
     return (
       <Badge className="bg-orange-100 text-orange-800 text-xs ml-2">
-        Missing: {missing.join(", ")}
+        Missing: {missing.join(', ')}
       </Badge>
     );
   };
@@ -586,10 +586,10 @@ export default function WeeklyMonitoringDashboard() {
           >
             <Mail className="h-3 w-3 sm:h-4 sm:w-4" />
             <span className="hidden sm:inline">
-              {testEmailMutation.isPending ? "Sending..." : "Test Email"}
+              {testEmailMutation.isPending ? 'Sending...' : 'Test Email'}
             </span>
             <span className="sm:hidden">
-              {testEmailMutation.isPending ? "Send..." : "Email"}
+              {testEmailMutation.isPending ? 'Send...' : 'Email'}
             </span>
           </Button>
 
@@ -616,11 +616,11 @@ export default function WeeklyMonitoringDashboard() {
               <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4" />
               <span className="hidden lg:inline">
                 {sendSMSRemindersMutation.isPending
-                  ? "Sending SMS..."
-                  : "Send SMS Reminders"}
+                  ? 'Sending SMS...'
+                  : 'Send SMS Reminders'}
               </span>
               <span className="lg:hidden">
-                {sendSMSRemindersMutation.isPending ? "SMS..." : "SMS All"}
+                {sendSMSRemindersMutation.isPending ? 'SMS...' : 'SMS All'}
               </span>
             </Button>
           )}
@@ -659,19 +659,19 @@ export default function WeeklyMonitoringDashboard() {
             <RefreshCw
               className={`h-3 w-3 sm:h-4 sm:w-4 ${
                 manualCheckMutation.isPending || checkWeekMutation.isPending
-                  ? "animate-spin"
-                  : ""
+                  ? 'animate-spin'
+                  : ''
               }`}
             />
             <span className="hidden lg:inline">
               {manualCheckMutation.isPending || checkWeekMutation.isPending
-                ? "Checking..."
+                ? 'Checking...'
                 : `Check ${getWeekLabel(selectedWeek)}`}
             </span>
             <span className="lg:hidden">
               {manualCheckMutation.isPending || checkWeekMutation.isPending
-                ? "Check..."
-                : "Check"}
+                ? 'Check...'
+                : 'Check'}
             </span>
           </Button>
         </div>
@@ -843,8 +843,8 @@ export default function WeeklyMonitoringDashboard() {
                     >
                       <MessageSquare className="h-4 w-4" />
                       {testSMSMutation.isPending
-                        ? "Sending..."
-                        : "Send Test SMS"}
+                        ? 'Sending...'
+                        : 'Send Test SMS'}
                     </Button>
                   </div>
                   {testSMSMutation.isSuccess && (
@@ -926,15 +926,15 @@ export default function WeeklyMonitoringDashboard() {
                 >
                   <Mail className="h-4 w-4" />
                   {sendAnnouncementMutation.isPending
-                    ? "Sending..."
-                    : "Send Test (to yourself)"}
+                    ? 'Sending...'
+                    : 'Send Test (to yourself)'}
                 </Button>
 
                 <Button
                   onClick={() => {
                     if (
                       confirm(
-                        "Send SMS announcement to ALL registered users? This cannot be undone."
+                        'Send SMS announcement to ALL registered users? This cannot be undone.'
                       )
                     ) {
                       sendAnnouncementMutation.mutate({ testMode: false });
@@ -945,8 +945,8 @@ export default function WeeklyMonitoringDashboard() {
                 >
                   <Send className="h-4 w-4" />
                   {sendAnnouncementMutation.isPending
-                    ? "Sending..."
-                    : "Send to All Users"}
+                    ? 'Sending...'
+                    : 'Send to All Users'}
                 </Button>
               </div>
 
@@ -1030,7 +1030,7 @@ export default function WeeklyMonitoringDashboard() {
                       <div className="flex items-center gap-3">
                         <div
                           className={`flex items-center justify-center w-8 h-8 rounded-full ${
-                            status.hasSubmitted ? "bg-green-100" : "bg-red-100"
+                            status.hasSubmitted ? 'bg-green-100' : 'bg-red-100'
                           }`}
                         >
                           {getStatusIcon(status.hasSubmitted)}
@@ -1044,14 +1044,14 @@ export default function WeeklyMonitoringDashboard() {
                           </div>
                           {status.lastSubmissionDate && (
                             <p className="text-sm text-gray-600">
-                              Last submission:{" "}
+                              Last submission:{' '}
                               {(() => {
                                 // Handle date without timezone conversion issues
                                 const dateStr = status.lastSubmissionDate;
-                                if (dateStr.includes("-")) {
+                                if (dateStr.includes('-')) {
                                   // Parse YYYY-MM-DD format directly to avoid timezone issues
                                   const [year, month, day] = dateStr
-                                    .split("-")
+                                    .split('-')
                                     .map(Number);
                                   const date = new Date(year, month - 1, day); // month is 0-indexed
                                   return date.toLocaleDateString();
@@ -1063,7 +1063,7 @@ export default function WeeklyMonitoringDashboard() {
                           {status.submittedBy &&
                             status.submittedBy.length > 0 && (
                               <p className="text-sm text-gray-500">
-                                Submitted by: {status.submittedBy.join(", ")}
+                                Submitted by: {status.submittedBy.join(', ')}
                               </p>
                             )}
                         </div>
@@ -1076,7 +1076,7 @@ export default function WeeklyMonitoringDashboard() {
                           )} flex items-center gap-1`}
                         >
                           {getStatusIcon(status.hasSubmitted)}
-                          {status.hasSubmitted ? "Submitted" : "Missing"}
+                          {status.hasSubmitted ? 'Submitted' : 'Missing'}
                         </Badge>
 
                         {!status.hasSubmitted && (
@@ -1098,8 +1098,8 @@ export default function WeeklyMonitoringDashboard() {
                             >
                               <Mail className="h-3 w-3" />
                               {emailingSingleLocation === status.location
-                                ? "Sending..."
-                                : "Email"}
+                                ? 'Sending...'
+                                : 'Email'}
                             </Button>
 
                             {/* SMS Button (only if configured) */}
@@ -1118,8 +1118,8 @@ export default function WeeklyMonitoringDashboard() {
                               >
                                 <MessageSquare className="h-3 w-3" />
                                 {smsingLocation === status.location
-                                  ? "Sending..."
-                                  : "SMS"}
+                                  ? 'Sending...'
+                                  : 'SMS'}
                               </Button>
                             )}
                           </div>
@@ -1130,7 +1130,7 @@ export default function WeeklyMonitoringDashboard() {
                 </div>
               ) : (
                 <div className="text-center py-8 text-gray-500">
-                  No submission data available for this week. (Data:{" "}
+                  No submission data available for this week. (Data:{' '}
                   {JSON.stringify(submissionStatus)})
                 </div>
               )}
@@ -1249,7 +1249,7 @@ export default function WeeklyMonitoringDashboard() {
                                       multiWeekReport.summary.overallStats[
                                         location
                                       ]?.missed
-                                    }{" "}
+                                    }{' '}
                                     missed
                                   </Badge>
                                 </div>
@@ -1269,11 +1269,11 @@ export default function WeeklyMonitoringDashboard() {
                         </h4>
                         <div className="text-sm space-y-1">
                           <p>
-                            Total weeks analyzed:{" "}
+                            Total weeks analyzed:{' '}
                             {multiWeekReport.summary.totalWeeks || 0}
                           </p>
                           <p>
-                            Locations tracked:{" "}
+                            Locations tracked:{' '}
                             {multiWeekReport.summary.locationsTracked?.length ||
                               0}
                           </p>
@@ -1305,30 +1305,31 @@ export default function WeeklyMonitoringDashboard() {
                                       key={status.location}
                                       className={`p-2 rounded text-sm flex items-center gap-2 ${
                                         status.hasSubmitted
-                                          ? "bg-green-50 text-green-800 border border-green-200"
-                                          : "bg-red-50 text-red-800 border border-red-200"
+                                          ? 'bg-green-50 text-green-800 border border-green-200'
+                                          : 'bg-red-50 text-red-800 border border-red-200'
                                       }`}
                                     >
                                       {getStatusIcon(status.hasSubmitted)}
                                       <span className="truncate">
                                         {status.location}
                                       </span>
-                                      {status.location === "Dunwoody/PTC" &&
+                                      {status.location === 'Dunwoody/PTC' &&
                                         status.dunwoodyStatus && (
                                           <div className="text-xs">
                                             {status.dunwoodyStatus.complete
-                                              ? "✓✓"
+                                              ? '✓✓'
                                               : !status.dunwoodyStatus
-                                                  .lisaHiles &&
-                                                !status.dunwoodyStatus
-                                                  .stephanieOrMarcy
-                                              ? "✗"
-                                              : !status.dunwoodyStatus.lisaHiles
-                                              ? "L"
-                                              : !status.dunwoodyStatus
-                                                  .stephanieOrMarcy
-                                              ? "S/M"
-                                              : "✗"}
+                                                    .lisaHiles &&
+                                                  !status.dunwoodyStatus
+                                                    .stephanieOrMarcy
+                                                ? '✗'
+                                                : !status.dunwoodyStatus
+                                                      .lisaHiles
+                                                  ? 'L'
+                                                  : !status.dunwoodyStatus
+                                                        .stephanieOrMarcy
+                                                    ? 'S/M'
+                                                    : '✗'}
                                           </div>
                                         )}
                                     </div>
@@ -1369,25 +1370,25 @@ export default function WeeklyMonitoringDashboard() {
           <div className="space-y-4">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
               {[
-                "East Cobb/Roswell",
-                "Dunwoody/PTC",
-                "Alpharetta",
-                "Sandy Springs",
-                "Intown/Druid Hills",
-                "Dacula",
-                "Flowery Branch",
-                "Collective Learning",
+                'East Cobb/Roswell',
+                'Dunwoody/PTC',
+                'Alpharetta',
+                'Sandy Springs',
+                'Intown/Druid Hills',
+                'Dacula',
+                'Flowery Branch',
+                'Collective Learning',
               ].map((location) => (
                 <div
                   key={location}
                   className={`p-2 rounded-lg text-sm text-center ${
-                    location === "Dunwoody/PTC"
-                      ? "bg-teal-50 border border-teal-200 text-teal-800"
-                      : "bg-teal-50/50 border border-teal-100 text-teal-600"
+                    location === 'Dunwoody/PTC'
+                      ? 'bg-teal-50 border border-teal-200 text-teal-800'
+                      : 'bg-teal-50/50 border border-teal-100 text-teal-600'
                   }`}
                 >
                   {location}
-                  {location === "Dunwoody/PTC" && (
+                  {location === 'Dunwoody/PTC' && (
                     <Info className="h-3 w-3 inline ml-1" />
                   )}
                 </div>
@@ -1457,7 +1458,7 @@ export default function WeeklyMonitoringDashboard() {
         <Alert>
           <CheckCircle className="h-4 w-4" />
           <AlertDescription>
-            Week check completed! {checkWeekMutation.data?.missingCount || 0}{" "}
+            Week check completed! {checkWeekMutation.data?.missingCount || 0}{' '}
             locations missing.
           </AlertDescription>
         </Alert>

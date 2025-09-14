@@ -1,13 +1,18 @@
 /**
  * Users API Integration Tests
- * 
+ *
  * Tests for user management endpoints including authentication,
  * user profiles, and permission management. These tests verify
  * endpoint parity during migration from monolithic routes.
  */
 
 import request from 'supertest';
-import { createTestSession, cleanupTestData, createAuthenticatedRequest, TEST_CONSTANTS } from '../setup';
+import {
+  createTestSession,
+  cleanupTestData,
+  createAuthenticatedRequest,
+  TEST_CONSTANTS,
+} from '../setup';
 
 // TODO: Import actual Express app when available
 // import { app } from '../../server';
@@ -20,7 +25,7 @@ describe('Users API Endpoint Parity Tests', () => {
   beforeAll(async () => {
     // TODO: Initialize test app and database
     // app = await createTestApp();
-    
+
     // Create test sessions for different user roles
     adminSession = await createTestSession(app, 'admin');
     userSession = await createTestSession(app, 'user');
@@ -112,7 +117,7 @@ describe('Users API Endpoint Parity Tests', () => {
       const newUser = {
         email: 'newuser@sandwich.project',
         name: 'New User',
-        role: 'user'
+        role: 'user',
       };
 
       // TODO: Implement when app is available
@@ -133,7 +138,7 @@ describe('Users API Endpoint Parity Tests', () => {
       const newUser = {
         email: 'newuser@sandwich.project',
         name: 'New User',
-        role: 'user'
+        role: 'user',
       };
 
       // TODO: Implement when app is available
@@ -148,7 +153,7 @@ describe('Users API Endpoint Parity Tests', () => {
 
     test('should validate required fields', async () => {
       const invalidUser = {
-        name: 'No Email User'
+        name: 'No Email User',
         // Missing email field
       };
 
@@ -166,7 +171,7 @@ describe('Users API Endpoint Parity Tests', () => {
   describe('PATCH /api/users/:id', () => {
     test('should update user for admin', async () => {
       const updateData = {
-        name: 'Updated Name'
+        name: 'Updated Name',
       };
 
       // TODO: Implement when app is available
@@ -183,7 +188,7 @@ describe('Users API Endpoint Parity Tests', () => {
 
     test('should allow user to update own profile', async () => {
       const updateData = {
-        name: 'Self Updated Name'
+        name: 'Self Updated Name',
       };
 
       // TODO: Implement when app is available
@@ -226,7 +231,7 @@ describe('Users API Endpoint Parity Tests', () => {
       test('should authenticate valid user', async () => {
         const credentials = {
           email: TEST_CONSTANTS.TEST_USER_EMAIL,
-          password: 'test-password-123'
+          password: 'test-password-123',
         };
 
         // TODO: Implement when app is available
@@ -245,7 +250,7 @@ describe('Users API Endpoint Parity Tests', () => {
       test('should reject invalid credentials', async () => {
         const credentials = {
           email: TEST_CONSTANTS.TEST_USER_EMAIL,
-          password: 'wrong-password'
+          password: 'wrong-password',
         };
 
         // TODO: Implement when app is available

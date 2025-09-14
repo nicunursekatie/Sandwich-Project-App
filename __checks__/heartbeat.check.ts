@@ -1,4 +1,4 @@
-import { HeartbeatMonitor } from 'checkly/constructs'
+import { HeartbeatMonitor } from 'checkly/constructs';
 
 // Heartbeat monitors allow you to monitor jobs or recurring tasks.
 // This feature is only available on paid plans.
@@ -13,4 +13,3 @@ import { HeartbeatMonitor } from 'checkly/constructs'
     graceUnit: 'minutes',
 })
  */
-

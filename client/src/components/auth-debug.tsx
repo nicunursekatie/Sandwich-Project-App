@@ -1,15 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { RefreshCw, CheckCircle, XCircle, AlertTriangle } from "lucide-react";
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { RefreshCw, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
 
 interface AuthDebugInfo {
   hasSession: boolean;
@@ -47,8 +47,8 @@ export default function AuthDebug() {
 
     try {
       const [sessionResponse, statusResponse] = await Promise.all([
-        fetch("/api/debug/session"),
-        fetch("/api/debug/auth-status"),
+        fetch('/api/debug/session'),
+        fetch('/api/debug/auth-status'),
       ]);
 
       if (sessionResponse.ok) {
@@ -61,8 +61,8 @@ export default function AuthDebug() {
         setAuthStatus(statusData);
       }
     } catch (err) {
-      setError("Failed to fetch debug information");
-      console.error("Debug fetch error:", err);
+      setError('Failed to fetch debug information');
+      console.error('Debug fetch error:', err);
     } finally {
       setLoading(false);
     }
@@ -86,7 +86,7 @@ export default function AuthDebug() {
     falseText: string
   ) => {
     return (
-      <Badge variant={status ? "default" : "destructive"}>
+      <Badge variant={status ? 'default' : 'destructive'}>
         {status ? trueText : falseText}
       </Badge>
     );
@@ -108,7 +108,7 @@ export default function AuthDebug() {
           <div className="flex gap-2 mb-4">
             <Button onClick={fetchDebugInfo} disabled={loading}>
               <RefreshCw
-                className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`}
+                className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`}
               />
               Refresh Debug Info
             </Button>
@@ -134,7 +134,7 @@ export default function AuthDebug() {
                     <span>Authenticated:</span>
                     <div className="flex items-center gap-2">
                       {getStatusIcon(authStatus.isAuthenticated)}
-                      {getStatusBadge(authStatus.isAuthenticated, "Yes", "No")}
+                      {getStatusBadge(authStatus.isAuthenticated, 'Yes', 'No')}
                     </div>
                   </div>
 
@@ -142,7 +142,7 @@ export default function AuthDebug() {
                     <span>Session Exists:</span>
                     <div className="flex items-center gap-2">
                       {getStatusIcon(authStatus.sessionExists)}
-                      {getStatusBadge(authStatus.sessionExists, "Yes", "No")}
+                      {getStatusBadge(authStatus.sessionExists, 'Yes', 'No')}
                     </div>
                   </div>
 
@@ -150,7 +150,7 @@ export default function AuthDebug() {
                     <span>User in Session:</span>
                     <div className="flex items-center gap-2">
                       {getStatusIcon(authStatus.userInSession)}
-                      {getStatusBadge(authStatus.userInSession, "Yes", "No")}
+                      {getStatusBadge(authStatus.userInSession, 'Yes', 'No')}
                     </div>
                   </div>
 
@@ -180,8 +180,8 @@ export default function AuthDebug() {
                       <span>Session Store:</span>
                       {getStatusBadge(
                         debugInfo.sessionStore,
-                        "PostgreSQL",
-                        "None"
+                        'PostgreSQL',
+                        'None'
                       )}
                     </div>
 
@@ -195,7 +195,7 @@ export default function AuthDebug() {
                         <strong>Session ID:</strong> {debugInfo.sessionId}
                       </div>
                       <div>
-                        <strong>Timestamp:</strong>{" "}
+                        <strong>Timestamp:</strong>{' '}
                         {new Date(debugInfo.timestamp).toLocaleString()}
                       </div>
                     </div>
@@ -225,7 +225,7 @@ export default function AuthDebug() {
                 <div className="mt-2">
                   <Button
                     size="sm"
-                    onClick={() => (window.location.href = "/api/login")}
+                    onClick={() => (window.location.href = '/api/login')}
                   >
                     Go to Login Page
                   </Button>

@@ -1,4 +1,4 @@
-import { db } from "./db";
+import { db } from './db';
 import {
   hosts,
   sandwichCollections,
@@ -11,20 +11,24 @@ import {
   meetings,
   driverAgreements,
   recipients,
-} from "@shared/schema";
-import { eq, count, sql } from "drizzle-orm";
-import { ensureSessionsTable } from "./session-migrate";
+} from '@shared/schema';
+import { eq, count, sql } from 'drizzle-orm';
+import { ensureSessionsTable } from './session-migrate';
+import { createServiceLogger } from './utils/logger.js';
+
+const dbLogger = createServiceLogger('database');
 
 export async function initializeDatabase() {
   try {
-    console.log("Checking database initialization...");
-    console.log("DATABASE_URL exists:", !!process.env.DATABASE_URL);
-    console.log(
-      "DATABASE_URL preview:",
-      process.env.DATABASE_URL
-        ? process.env.DATABASE_URL.substring(0, 20) + "..."
-        : "not set"
-    );
+    dbLogger.info('Checking database initialization...');
+    dbLogger.debug('DATABASE_URL exists', {
+      exists: !!process.env.DATABASE_URL,
+    });
+    dbLogger.debug('DATABASE_URL preview', {
+      preview: process.env.DATABASE_URL
+        ? process.env.DATABASE_URL.substring(0, 20) + '...'
+        : 'not set',
+    });
 
     // Ensure sessions table exists for PostgreSQL session storage
     // This resolves the "MemoryStore is not designed for a production environment" warning
@@ -43,24 +47,24 @@ export async function initializeDatabase() {
       .from(recipients);
 
     console.log(
-      "Table counts - Hosts:",
+      'Table counts - Hosts:',
       hostsCount.count,
-      "Projects:",
+      'Projects:',
       projectsCount.count,
-      "Messages:",
+      'Messages:',
       messagesCount.count,
-      "Collections:",
+      'Collections:',
       collectionsCount.count,
-      "Recipients:",
+      'Recipients:',
       recipientsCount.count
     );
 
     // No seeding - all data should be added manually or via import
-    console.log("Database ready - no sample data seeded");
+    console.log('Database ready - no sample data seeded');
 
-    console.log("Database initialization complete");
+    console.log('Database initialization complete');
   } catch (error) {
-    console.error("Database initialization failed:", error);
+    console.error('Database initialization failed:', error);
     // Don't throw - allow app to continue with fallback storage
   }
 }

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useState } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import {
   Plus,
   Upload,
@@ -10,16 +10,16 @@ import {
   Users,
   Shield,
   Clock,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Table,
   TableBody,
@@ -27,21 +27,21 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { queryClient } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
+} from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { queryClient } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
 
 interface Document {
   id: number;
@@ -86,61 +86,61 @@ interface DocumentAccessLog {
 }
 
 const CATEGORIES = [
-  { value: "governance", label: "Governance" },
-  { value: "operations", label: "Operations" },
-  { value: "training", label: "Training" },
-  { value: "confidential", label: "Confidential" },
-  { value: "general", label: "General" },
+  { value: 'governance', label: 'Governance' },
+  { value: 'operations', label: 'Operations' },
+  { value: 'training', label: 'Training' },
+  { value: 'confidential', label: 'Confidential' },
+  { value: 'general', label: 'General' },
 ];
 
 const PERMISSION_TYPES = [
-  { value: "view", label: "View", description: "Can view document details" },
+  { value: 'view', label: 'View', description: 'Can view document details' },
   {
-    value: "download",
-    label: "Download",
-    description: "Can download and view",
+    value: 'download',
+    label: 'Download',
+    description: 'Can download and view',
   },
-  { value: "edit", label: "Edit", description: "Can modify document" },
+  { value: 'edit', label: 'Edit', description: 'Can modify document' },
   {
-    value: "admin",
-    label: "Admin",
-    description: "Full access including permissions",
+    value: 'admin',
+    label: 'Admin',
+    description: 'Full access including permissions',
   },
 ];
 
 function DocumentUploadDialog({ onSuccess }: { onSuccess: () => void }) {
   const [open, setOpen] = useState(false);
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [category, setCategory] = useState("general");
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [category, setCategory] = useState('general');
   const [file, setFile] = useState<File | null>(null);
   const { toast } = useToast();
 
   const uploadMutation = useMutation({
     mutationFn: async (data: FormData) => {
-      const response = await fetch("/api/documents", {
-        method: "POST",
+      const response = await fetch('/api/documents', {
+        method: 'POST',
         body: data,
       });
       if (!response.ok) {
-        throw new Error("Failed to upload document");
+        throw new Error('Failed to upload document');
       }
       return response.json();
     },
     onSuccess: () => {
-      toast({ title: "Document uploaded successfully" });
+      toast({ title: 'Document uploaded successfully' });
       setOpen(false);
-      setTitle("");
-      setDescription("");
-      setCategory("general");
+      setTitle('');
+      setDescription('');
+      setCategory('general');
       setFile(null);
       onSuccess();
     },
     onError: (error) => {
       toast({
-        title: "Upload failed",
-        description: error instanceof Error ? error.message : "Unknown error",
-        variant: "destructive",
+        title: 'Upload failed',
+        description: error instanceof Error ? error.message : 'Unknown error',
+        variant: 'destructive',
       });
     },
   });
@@ -150,15 +150,15 @@ function DocumentUploadDialog({ onSuccess }: { onSuccess: () => void }) {
     if (!file || !title) return;
 
     const formData = new FormData();
-    formData.append("file", file);
-    formData.append("title", title);
-    formData.append("description", description);
-    formData.append("category", category);
-    formData.append("fileName", file.name);
-    formData.append("originalName", file.name);
-    formData.append("filePath", `/uploads/${file.name}`);
-    formData.append("fileSize", file.size.toString());
-    formData.append("mimeType", file.type);
+    formData.append('file', file);
+    formData.append('title', title);
+    formData.append('description', description);
+    formData.append('category', category);
+    formData.append('fileName', file.name);
+    formData.append('originalName', file.name);
+    formData.append('filePath', `/uploads/${file.name}`);
+    formData.append('fileSize', file.size.toString());
+    formData.append('mimeType', file.type);
 
     uploadMutation.mutate(formData);
   };
@@ -237,7 +237,7 @@ function DocumentUploadDialog({ onSuccess }: { onSuccess: () => void }) {
               Cancel
             </Button>
             <Button type="submit" disabled={uploadMutation.isPending}>
-              {uploadMutation.isPending ? "Uploading..." : "Upload"}
+              {uploadMutation.isPending ? 'Uploading...' : 'Upload'}
             </Button>
           </div>
         </form>
@@ -254,17 +254,17 @@ function DocumentPermissionsDialog({
   onClose: () => void;
 }) {
   const { toast } = useToast();
-  const [newUserId, setNewUserId] = useState("");
-  const [newPermissionType, setNewPermissionType] = useState("view");
-  const [notes, setNotes] = useState("");
+  const [newUserId, setNewUserId] = useState('');
+  const [newPermissionType, setNewPermissionType] = useState('view');
+  const [notes, setNotes] = useState('');
 
   const { data: permissions = [] } = useQuery<DocumentPermission[]>({
-    queryKey: ["/api/documents", document.id, "permissions"],
+    queryKey: ['/api/documents', document.id, 'permissions'],
     enabled: !!document,
   });
 
   const { data: accessLogs = [] } = useQuery({
-    queryKey: ["/api/documents", document.id, "access-logs"],
+    queryKey: ['/api/documents', document.id, 'access-logs'],
     enabled: !!document,
   });
 
@@ -273,28 +273,28 @@ function DocumentPermissionsDialog({
       const response = await fetch(
         `/api/documents/${document.id}/permissions`,
         {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data),
         }
       );
-      if (!response.ok) throw new Error("Failed to grant permission");
+      if (!response.ok) throw new Error('Failed to grant permission');
       return response.json();
     },
     onSuccess: () => {
-      toast({ title: "Permission granted successfully" });
+      toast({ title: 'Permission granted successfully' });
       queryClient.invalidateQueries({
-        queryKey: ["/api/documents", document.id, "permissions"],
+        queryKey: ['/api/documents', document.id, 'permissions'],
       });
-      setNewUserId("");
-      setNewPermissionType("view");
-      setNotes("");
+      setNewUserId('');
+      setNewPermissionType('view');
+      setNotes('');
     },
     onError: (error) => {
       toast({
-        title: "Failed to grant permission",
-        description: error instanceof Error ? error.message : "Unknown error",
-        variant: "destructive",
+        title: 'Failed to grant permission',
+        description: error instanceof Error ? error.message : 'Unknown error',
+        variant: 'destructive',
       });
     },
   });
@@ -309,14 +309,14 @@ function DocumentPermissionsDialog({
     }) => {
       const response = await fetch(
         `/api/documents/${document.id}/permissions/${userId}/${permissionType}`,
-        { method: "DELETE" }
+        { method: 'DELETE' }
       );
-      if (!response.ok) throw new Error("Failed to revoke permission");
+      if (!response.ok) throw new Error('Failed to revoke permission');
     },
     onSuccess: () => {
-      toast({ title: "Permission revoked successfully" });
+      toast({ title: 'Permission revoked successfully' });
       queryClient.invalidateQueries({
-        queryKey: ["/api/documents", document.id, "permissions"],
+        queryKey: ['/api/documents', document.id, 'permissions'],
       });
     },
   });
@@ -333,16 +333,16 @@ function DocumentPermissionsDialog({
 
   const getCategoryBadgeVariant = (category: string) => {
     switch (category) {
-      case "confidential":
-        return "destructive";
-      case "governance":
-        return "secondary";
-      case "operations":
-        return "default";
-      case "training":
-        return "outline";
+      case 'confidential':
+        return 'destructive';
+      case 'governance':
+        return 'secondary';
+      case 'operations':
+        return 'default';
+      case 'training':
+        return 'outline';
       default:
-        return "secondary";
+        return 'secondary';
     }
   };
 
@@ -523,7 +523,7 @@ function DocumentPermissionsDialog({
                             {new Date(log.accessedAt).toLocaleString()}
                           </TableCell>
                           <TableCell className="text-muted-foreground">
-                            {log.ipAddress || "Unknown"}
+                            {log.ipAddress || 'Unknown'}
                           </TableCell>
                         </TableRow>
                       ))}
@@ -605,30 +605,30 @@ export default function DocumentManagement() {
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(
     null
   );
-  const [searchTerm, setSearchTerm] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('all');
   const { toast } = useToast();
 
   const { data: documents = [], refetch } = useQuery({
-    queryKey: ["/api/documents"],
+    queryKey: ['/api/documents'],
   });
 
   const deleteDocumentMutation = useMutation({
     mutationFn: async (id: number) => {
       const response = await fetch(`/api/documents/${id}`, {
-        method: "DELETE",
+        method: 'DELETE',
       });
-      if (!response.ok) throw new Error("Failed to delete document");
+      if (!response.ok) throw new Error('Failed to delete document');
     },
     onSuccess: () => {
-      toast({ title: "Document deleted successfully" });
+      toast({ title: 'Document deleted successfully' });
       refetch();
     },
     onError: (error) => {
       toast({
-        title: "Failed to delete document",
-        description: error instanceof Error ? error.message : "Unknown error",
-        variant: "destructive",
+        title: 'Failed to delete document',
+        description: error instanceof Error ? error.message : 'Unknown error',
+        variant: 'destructive',
       });
     },
   });
@@ -638,22 +638,22 @@ export default function DocumentManagement() {
       doc.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       doc.description?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory =
-      categoryFilter === "all" || doc.category === categoryFilter;
+      categoryFilter === 'all' || doc.category === categoryFilter;
     return matchesSearch && matchesCategory;
   });
 
   const getCategoryBadgeVariant = (category: string) => {
     switch (category) {
-      case "confidential":
-        return "destructive";
-      case "governance":
-        return "secondary";
-      case "operations":
-        return "default";
-      case "training":
-        return "outline";
+      case 'confidential':
+        return 'destructive';
+      case 'governance':
+        return 'secondary';
+      case 'operations':
+        return 'default';
+      case 'training':
+        return 'outline';
       default:
-        return "secondary";
+        return 'secondary';
     }
   };
 
@@ -754,7 +754,7 @@ export default function DocumentManagement() {
                           onClick={() =>
                             window.open(
                               `/api/documents/${document.id}/download`,
-                              "_blank"
+                              '_blank'
                             )
                           }
                         >

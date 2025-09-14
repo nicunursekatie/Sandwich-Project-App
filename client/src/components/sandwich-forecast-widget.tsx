@@ -1,23 +1,23 @@
-import { useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Calendar, TrendingUp, Users, AlertTriangle } from "lucide-react";
+import { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Calendar, TrendingUp, Users, AlertTriangle } from 'lucide-react';
 
 interface EventRequest {
   id: number;
   organizationName: string;
   desiredEventDate?: string;
   estimatedSandwichCount?: number;
-  status: "new" | "contact_completed" | "scheduled" | "completed" | "declined";
+  status: 'new' | 'contact_completed' | 'scheduled' | 'completed' | 'declined';
 }
 
 export default function SandwichForecastWidget() {
   const { data: eventRequests, isLoading } = useQuery<EventRequest[]>({
-    queryKey: ["/api/event-requests/all"],
+    queryKey: ['/api/event-requests/all'],
     queryFn: async () => {
-      const response = await fetch("/api/event-requests?all=true");
-      if (!response.ok) throw new Error("Failed to fetch event requests");
+      const response = await fetch('/api/event-requests?all=true');
+      if (!response.ok) throw new Error('Failed to fetch event requests');
       return response.json();
     },
   });
@@ -79,7 +79,7 @@ export default function SandwichForecastWidget() {
 
       // Only include events that are likely to happen
       if (
-        !["contact_completed", "scheduled", "completed"].includes(
+        !['contact_completed', 'scheduled', 'completed'].includes(
           request.status
         )
       ) {
@@ -102,24 +102,24 @@ export default function SandwichForecastWidget() {
         const eventDate = new Date(request.desiredEventDate!);
         const distributionThursday = getDistributionThursday(eventDate);
         const prepWednesday = getPrepWednesday(distributionThursday);
-        const weekKey = distributionThursday.toISOString().split("T")[0];
+        const weekKey = distributionThursday.toISOString().split('T')[0];
 
         if (!weeklyData[weekKey]) {
           weeklyData[weekKey] = {
-            weekStartDate: prepWednesday.toLocaleDateString("en-US", {
-              weekday: "short",
-              month: "short",
-              day: "numeric",
+            weekStartDate: prepWednesday.toLocaleDateString('en-US', {
+              weekday: 'short',
+              month: 'short',
+              day: 'numeric',
             }),
-            weekEndDate: distributionThursday.toLocaleDateString("en-US", {
-              weekday: "short",
-              month: "short",
-              day: "numeric",
+            weekEndDate: distributionThursday.toLocaleDateString('en-US', {
+              weekday: 'short',
+              month: 'short',
+              day: 'numeric',
             }),
-            distributionDate: distributionThursday.toLocaleDateString("en-US", {
-              weekday: "long",
-              month: "long",
-              day: "numeric",
+            distributionDate: distributionThursday.toLocaleDateString('en-US', {
+              weekday: 'long',
+              month: 'long',
+              day: 'numeric',
             }),
             events: [],
             totalEstimated: 0,
@@ -132,7 +132,7 @@ export default function SandwichForecastWidget() {
         weeklyData[weekKey].totalEstimated +=
           request.estimatedSandwichCount || 0;
 
-        if (request.status === "completed" || request.status === "scheduled") {
+        if (request.status === 'completed' || request.status === 'scheduled') {
           weeklyData[weekKey].confirmedCount +=
             request.estimatedSandwichCount || 0;
         } else {
@@ -140,7 +140,7 @@ export default function SandwichForecastWidget() {
             request.estimatedSandwichCount || 0;
         }
       } catch (error) {
-        console.warn("Error processing event date:", request.desiredEventDate);
+        console.warn('Error processing event date:', request.desiredEventDate);
       }
     });
 
@@ -227,17 +227,17 @@ export default function SandwichForecastWidget() {
                   key={week.weekKey}
                   className={`rounded-lg p-3 border ${
                     index === 0
-                      ? "bg-gradient-to-r from-[#236383] to-[#007E8C] text-white border-[#236383]"
-                      : "bg-gray-50 border-gray-200"
+                      ? 'bg-gradient-to-r from-[#236383] to-[#007E8C] text-white border-[#236383]'
+                      : 'bg-gray-50 border-gray-200'
                   }`}
                 >
                   <div className="text-center">
                     <div
                       className={`text-xs font-medium ${
-                        index === 0 ? "opacity-90" : "text-gray-600"
+                        index === 0 ? 'opacity-90' : 'text-gray-600'
                       }`}
                     >
-                      {index === 0 ? "UPCOMING WEEK" : week.distributionDate}
+                      {index === 0 ? 'UPCOMING WEEK' : week.distributionDate}
                     </div>
                     {index === 0 && (
                       <div className="text-sm font-bold mt-1">
@@ -246,18 +246,18 @@ export default function SandwichForecastWidget() {
                     )}
                     <div
                       className={`text-2xl font-bold mt-1 ${
-                        index === 0 ? "text-white" : "text-[#236383]"
+                        index === 0 ? 'text-white' : 'text-[#236383]'
                       }`}
                     >
                       {(week.totalEstimated || 0).toLocaleString()}
                     </div>
                     <div
                       className={`text-xs ${
-                        index === 0 ? "opacity-90" : "text-gray-600"
+                        index === 0 ? 'opacity-90' : 'text-gray-600'
                       }`}
                     >
                       {week.events?.length || 0} event
-                      {(week.events?.length || 0) !== 1 ? "s" : ""}
+                      {(week.events?.length || 0) !== 1 ? 's' : ''}
                     </div>
                   </div>
                 </div>
@@ -282,7 +282,7 @@ export default function SandwichForecastWidget() {
                           {week.distributionDate}
                         </h5>
                         <p className="text-sm text-gray-600">
-                          Prep: {week.weekStartDate} • Distribute:{" "}
+                          Prep: {week.weekStartDate} • Distribute:{' '}
                           {week.weekEndDate}
                         </p>
                       </div>
@@ -292,7 +292,7 @@ export default function SandwichForecastWidget() {
                         </div>
                         <div className="text-sm text-gray-600">
                           {week.events?.length || 0} group event
-                          {(week.events?.length || 0) !== 1 ? "s" : ""}
+                          {(week.events?.length || 0) !== 1 ? 's' : ''}
                         </div>
                       </div>
                     </div>
@@ -303,8 +303,8 @@ export default function SandwichForecastWidget() {
                         {week.events.map((event, eventIndex) => {
                           const eventDate = new Date(event.desiredEventDate!);
                           const dayName = eventDate.toLocaleDateString(
-                            "en-US",
-                            { weekday: "long" }
+                            'en-US',
+                            { weekday: 'long' }
                           );
 
                           return (

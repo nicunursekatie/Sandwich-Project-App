@@ -65,6 +65,9 @@ export class QueryOptimizer {
 }
 
 // Auto-cleanup every 5 minutes
-setInterval(() => {
-  QueryOptimizer.cleanupCache();
-}, 5 * 60 * 1000);
+setInterval(
+  () => {
+    QueryOptimizer.cleanupCache();
+  },
+  5 * 60 * 1000
+);

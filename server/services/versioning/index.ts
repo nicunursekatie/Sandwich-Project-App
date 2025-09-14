@@ -2,7 +2,7 @@
  * Versioning Service - Wraps version control functionality for routes
  */
 
-import { VersionControl } from "../../middleware/version-control";
+import { VersionControl } from '../../middleware/version-control';
 
 export class VersioningService {
   /**

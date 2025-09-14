@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useState } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import {
   Calendar,
   Clock,
@@ -16,29 +16,29 @@ import {
   List,
   ChevronLeft,
   ChevronRight,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+} from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest, queryClient } from '@/lib/queryClient';
 
 interface Meeting {
   id: number;
@@ -48,85 +48,85 @@ interface Meeting {
   time: string;
   location?: string;
   description?: string;
-  status: "planning" | "agenda_set" | "completed";
+  status: 'planning' | 'agenda_set' | 'completed';
   finalAgenda?: string;
 }
 
 const meetingTypes = [
   {
-    value: "weekly",
-    label: "Weekly Team Meeting",
-    color: "bg-blue-100 text-blue-800",
+    value: 'weekly',
+    label: 'Weekly Team Meeting',
+    color: 'bg-blue-100 text-blue-800',
   },
   {
-    value: "marketing_committee",
-    label: "Marketing Committee",
-    color: "bg-purple-100 text-purple-800",
+    value: 'marketing_committee',
+    label: 'Marketing Committee',
+    color: 'bg-purple-100 text-purple-800',
   },
   {
-    value: "grant_committee",
-    label: "Grant Committee",
-    color: "bg-green-100 text-green-800",
+    value: 'grant_committee',
+    label: 'Grant Committee',
+    color: 'bg-green-100 text-green-800',
   },
   {
-    value: "core_group",
-    label: "Core Group Meeting",
-    color: "bg-orange-100 text-orange-800",
+    value: 'core_group',
+    label: 'Core Group Meeting',
+    color: 'bg-orange-100 text-orange-800',
   },
   {
-    value: "all_team",
-    label: "All Team Meeting",
-    color: "bg-red-100 text-red-800",
+    value: 'all_team',
+    label: 'All Team Meeting',
+    color: 'bg-red-100 text-red-800',
   },
 ];
 
 export default function MeetingsCalendar() {
   const { toast } = useToast();
-  const [selectedType, setSelectedType] = useState<string>("all");
+  const [selectedType, setSelectedType] = useState<string>('all');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [selectedMeeting, setSelectedMeeting] = useState<Meeting | null>(null);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [viewMode, setViewMode] = useState<"calendar" | "list">("calendar");
+  const [viewMode, setViewMode] = useState<'calendar' | 'list'>('calendar');
   const [currentDate, setCurrentDate] = useState(new Date());
   const [newMeeting, setNewMeeting] = useState({
-    title: "",
-    type: "",
-    date: "",
-    time: "",
-    location: "",
-    description: "",
+    title: '',
+    type: '',
+    date: '',
+    time: '',
+    location: '',
+    description: '',
   });
 
   const { data: allMeetings = [], isLoading } = useQuery({
-    queryKey: ["/api/meetings"],
-    queryFn: () => fetch("/api/meetings").then((res) => res.json()),
+    queryKey: ['/api/meetings'],
+    queryFn: () => fetch('/api/meetings').then((res) => res.json()),
   });
 
   const createMeetingMutation = useMutation({
     mutationFn: async (data: typeof newMeeting) => {
-      const response = await fetch("/api/meetings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/api/meetings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      if (!response.ok) throw new Error("Failed to create meeting");
+      if (!response.ok) throw new Error('Failed to create meeting');
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/meetings"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/meetings'] });
       setNewMeeting({
-        title: "",
-        type: "",
-        date: "",
-        time: "",
-        location: "",
-        description: "",
+        title: '',
+        type: '',
+        date: '',
+        time: '',
+        location: '',
+        description: '',
       });
       setIsCreateModalOpen(false);
       toast({
-        title: "Meeting created",
-        description: "New meeting has been scheduled successfully.",
+        title: 'Meeting created',
+        description: 'New meeting has been scheduled successfully.',
       });
     },
   });
@@ -140,22 +140,22 @@ export default function MeetingsCalendar() {
       file: File;
     }) => {
       const formData = new FormData();
-      formData.append("agenda", file);
+      formData.append('agenda', file);
       const response = await fetch(`/api/meetings/${meetingId}/upload-agenda`, {
-        method: "POST",
+        method: 'POST',
         body: formData,
       });
-      if (!response.ok) throw new Error("Failed to upload agenda");
+      if (!response.ok) throw new Error('Failed to upload agenda');
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/meetings"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/meetings'] });
       setIsUploadModalOpen(false);
       setUploadedFile(null);
       setSelectedMeeting(null);
       toast({
-        title: "Agenda uploaded",
-        description: "The meeting agenda has been uploaded successfully.",
+        title: 'Agenda uploaded',
+        description: 'The meeting agenda has been uploaded successfully.',
       });
     },
   });
@@ -169,9 +169,9 @@ export default function MeetingsCalendar() {
       !newMeeting.time
     ) {
       toast({
-        title: "Missing information",
-        description: "Please fill in all required fields.",
-        variant: "destructive",
+        title: 'Missing information',
+        description: 'Please fill in all required fields.',
+        variant: 'destructive',
       });
       return;
     }
@@ -199,7 +199,7 @@ export default function MeetingsCalendar() {
       meetingTypes.find((t) => t.value === type) || {
         value: type,
         label: type,
-        color: "bg-gray-100 text-gray-800",
+        color: 'bg-gray-100 text-gray-800',
       }
     );
   };
@@ -231,7 +231,7 @@ export default function MeetingsCalendar() {
   };
 
   const getMeetingsForDate = (date: Date) => {
-    const dateString = date.toISOString().split("T")[0];
+    const dateString = date.toISOString().split('T')[0];
     return filteredMeetings.filter(
       (meeting: Meeting) => meeting.date === dateString
     );
@@ -246,14 +246,14 @@ export default function MeetingsCalendar() {
     return date.toDateString() === today.toDateString();
   };
 
-  const navigateMonth = (direction: "prev" | "next") => {
+  const navigateMonth = (direction: 'prev' | 'next') => {
     const newDate = new Date(currentDate);
-    newDate.setMonth(newDate.getMonth() + (direction === "prev" ? -1 : 1));
+    newDate.setMonth(newDate.getMonth() + (direction === 'prev' ? -1 : 1));
     setCurrentDate(newDate);
   };
 
   const filteredMeetings =
-    selectedType === "all"
+    selectedType === 'all'
       ? allMeetings
       : allMeetings.filter((meeting: Meeting) => meeting.type === selectedType);
 
@@ -374,7 +374,7 @@ export default function MeetingsCalendar() {
                       setNewMeeting({ ...newMeeting, date: e.target.value })
                     }
                     className="mt-1"
-                    min={new Date().toISOString().split("T")[0]}
+                    min={new Date().toISOString().split('T')[0]}
                   />
                 </div>
                 <div>
@@ -450,8 +450,8 @@ export default function MeetingsCalendar() {
                   className="bg-blue-600 hover:bg-blue-700"
                 >
                   {createMeetingMutation.isPending
-                    ? "Scheduling..."
-                    : "Schedule Meeting"}
+                    ? 'Scheduling...'
+                    : 'Schedule Meeting'}
                 </Button>
               </div>
             </form>
@@ -486,24 +486,24 @@ export default function MeetingsCalendar() {
         <div className="flex items-center gap-4">
           <div className="text-sm text-slate-600">
             {filteredMeetings.length} meeting
-            {filteredMeetings.length !== 1 ? "s" : ""} found
+            {filteredMeetings.length !== 1 ? 's' : ''} found
           </div>
 
           {/* View Toggle */}
           <div className="flex items-center bg-slate-100 rounded-lg p-1">
             <Button
-              variant={viewMode === "calendar" ? "default" : "ghost"}
+              variant={viewMode === 'calendar' ? 'default' : 'ghost'}
               size="sm"
-              onClick={() => setViewMode("calendar")}
+              onClick={() => setViewMode('calendar')}
               className="h-8 px-3"
             >
               <Grid className="w-4 h-4 mr-1" />
               Calendar
             </Button>
             <Button
-              variant={viewMode === "list" ? "default" : "ghost"}
+              variant={viewMode === 'list' ? 'default' : 'ghost'}
               size="sm"
-              onClick={() => setViewMode("list")}
+              onClick={() => setViewMode('list')}
               className="h-8 px-3"
             >
               <List className="w-4 h-4 mr-1" />
@@ -514,21 +514,21 @@ export default function MeetingsCalendar() {
       </div>
 
       {/* Calendar View */}
-      {viewMode === "calendar" && (
+      {viewMode === 'calendar' && (
         <div className="space-y-4">
           {/* Calendar Navigation */}
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-slate-900">
-              {currentDate.toLocaleDateString("en-US", {
-                month: "long",
-                year: "numeric",
+              {currentDate.toLocaleDateString('en-US', {
+                month: 'long',
+                year: 'numeric',
               })}
             </h2>
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => navigateMonth("prev")}
+                onClick={() => navigateMonth('prev')}
                 className="h-8 w-8 p-0"
               >
                 <ChevronLeft className="w-4 h-4" />
@@ -544,7 +544,7 @@ export default function MeetingsCalendar() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => navigateMonth("next")}
+                onClick={() => navigateMonth('next')}
                 className="h-8 w-8 p-0"
               >
                 <ChevronRight className="w-4 h-4" />
@@ -556,7 +556,7 @@ export default function MeetingsCalendar() {
           <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
             {/* Header */}
             <div className="grid grid-cols-7 bg-slate-50 border-b border-slate-200">
-              {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
                 <div
                   key={day}
                   className="p-3 text-center text-sm font-medium text-slate-600"
@@ -577,17 +577,17 @@ export default function MeetingsCalendar() {
                   <div
                     key={index}
                     className={`min-h-[120px] border-r border-b border-slate-200 last:border-r-0 ${
-                      !isCurrentMonthDay ? "bg-slate-50" : ""
-                    } ${isTodayDay ? "bg-blue-50" : ""}`}
+                      !isCurrentMonthDay ? 'bg-slate-50' : ''
+                    } ${isTodayDay ? 'bg-blue-50' : ''}`}
                   >
                     <div className="p-2">
                       <div
                         className={`text-sm font-medium mb-2 ${
                           !isCurrentMonthDay
-                            ? "text-slate-400"
+                            ? 'text-slate-400'
                             : isTodayDay
-                            ? "text-blue-600"
-                            : "text-slate-900"
+                              ? 'text-blue-600'
+                              : 'text-slate-900'
                         }`}
                       >
                         {date.getDate()}
@@ -630,7 +630,7 @@ export default function MeetingsCalendar() {
       )}
 
       {/* List View */}
-      {viewMode === "list" && (
+      {viewMode === 'list' && (
         <>
           {/* Upcoming Meetings */}
           <div className="space-y-4">
@@ -644,8 +644,8 @@ export default function MeetingsCalendar() {
                   No upcoming meetings
                 </h3>
                 <p className="text-slate-500 mb-6 max-w-md mx-auto">
-                  {selectedType === "all"
-                    ? "Ready to schedule your first meeting? Click the button below to get started."
+                  {selectedType === 'all'
+                    ? 'Ready to schedule your first meeting? Click the button below to get started.'
                     : `No upcoming ${getTypeConfig(
                         selectedType
                       ).label.toLowerCase()} meetings found. Schedule a new one to get organized.`}
@@ -682,14 +682,14 @@ export default function MeetingsCalendar() {
                           </div>
                           <Badge
                             variant={
-                              meeting.status === "completed"
-                                ? "default"
-                                : meeting.status === "agenda_set"
-                                ? "secondary"
-                                : "outline"
+                              meeting.status === 'completed'
+                                ? 'default'
+                                : meeting.status === 'agenda_set'
+                                  ? 'secondary'
+                                  : 'outline'
                             }
                           >
-                            {meeting.status.replace("_", " ")}
+                            {meeting.status.replace('_', ' ')}
                           </Badge>
                         </div>
                       </CardHeader>
@@ -698,7 +698,7 @@ export default function MeetingsCalendar() {
                           <div className="flex items-center gap-2">
                             <Calendar className="w-4 h-4" />
                             {new Date(
-                              meeting.date + "T00:00:00"
+                              meeting.date + 'T00:00:00'
                             ).toLocaleDateString()}
                           </div>
                           <div className="flex items-center gap-2">
@@ -707,7 +707,7 @@ export default function MeetingsCalendar() {
                           </div>
                           {meeting.location && (
                             <div className="flex items-center gap-2">
-                              {meeting.location.includes("meet.google.com") ? (
+                              {meeting.location.includes('meet.google.com') ? (
                                 <>
                                   <Video className="w-4 h-4" />
                                   <a
@@ -793,7 +793,7 @@ export default function MeetingsCalendar() {
                           <div className="flex items-center gap-2">
                             <Calendar className="w-4 h-4" />
                             {new Date(
-                              meeting.date + "T00:00:00"
+                              meeting.date + 'T00:00:00'
                             ).toLocaleDateString()}
                           </div>
                           <div className="flex items-center gap-2">
@@ -878,8 +878,8 @@ export default function MeetingsCalendar() {
                 disabled={!uploadedFile || uploadAgendaMutation.isPending}
               >
                 {uploadAgendaMutation.isPending
-                  ? "Uploading..."
-                  : "Upload Agenda"}
+                  ? 'Uploading...'
+                  : 'Upload Agenda'}
               </Button>
             </div>
           </div>

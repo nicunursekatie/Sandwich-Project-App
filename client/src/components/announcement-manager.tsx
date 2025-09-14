@@ -1,32 +1,32 @@
-import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
+import { useState } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+} from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Switch } from "@/components/ui/switch";
+} from '@/components/ui/dialog';
+import { Switch } from '@/components/ui/switch';
 import {
   Plus,
   Edit,
@@ -36,16 +36,16 @@ import {
   AlertCircle,
   Eye,
   EyeOff,
-} from "lucide-react";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
+} from 'lucide-react';
+import { apiRequest, queryClient } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
 
 interface Announcement {
   id: number;
   title: string;
   message: string;
-  type: "event" | "position" | "alert" | "general";
-  priority: "low" | "medium" | "high" | "urgent";
+  type: 'event' | 'position' | 'alert' | 'general';
+  priority: 'low' | 'medium' | 'high' | 'urgent';
   startDate: string;
   endDate: string;
   isActive: boolean;
@@ -58,25 +58,23 @@ interface Announcement {
 export default function AnnouncementManager() {
   const { toast } = useToast();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [
-    editingAnnouncement,
-    setEditingAnnouncement,
-  ] = useState<Announcement | null>(null);
+  const [editingAnnouncement, setEditingAnnouncement] =
+    useState<Announcement | null>(null);
   const [newAnnouncement, setNewAnnouncement] = useState({
-    title: "",
-    message: "",
-    type: "general" as const,
-    priority: "medium" as const,
-    startDate: new Date().toISOString().split("T")[0],
-    endDate: "",
+    title: '',
+    message: '',
+    type: 'general' as const,
+    priority: 'medium' as const,
+    startDate: new Date().toISOString().split('T')[0],
+    endDate: '',
     isActive: true,
-    link: "",
-    linkText: "",
+    link: '',
+    linkText: '',
   });
 
   // Fetch announcements
   const { data: announcements = [], isLoading } = useQuery<Announcement[]>({
-    queryKey: ["/api/announcements"],
+    queryKey: ['/api/announcements'],
   });
 
   // Create announcement mutation
@@ -89,22 +87,22 @@ export default function AnnouncementManager() {
         link: data.link?.trim() || undefined,
         linkText: data.linkText?.trim() || undefined,
       };
-      return apiRequest("POST", "/api/announcements", formattedData);
+      return apiRequest('POST', '/api/announcements', formattedData);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/announcements"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/announcements'] });
       setShowCreateDialog(false);
       resetForm();
       toast({
-        title: "Announcement created!",
-        description: "The announcement has been added successfully.",
+        title: 'Announcement created!',
+        description: 'The announcement has been added successfully.',
       });
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to create announcement. Please try again.",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to create announcement. Please try again.',
+        variant: 'destructive',
       });
     },
   });
@@ -119,27 +117,27 @@ export default function AnnouncementManager() {
       if (data.endDate) {
         formattedData.endDate = new Date(data.endDate).toISOString();
       }
-      if ("link" in data) {
+      if ('link' in data) {
         formattedData.link = data.link?.trim() || undefined;
       }
-      if ("linkText" in data) {
+      if ('linkText' in data) {
         formattedData.linkText = data.linkText?.trim() || undefined;
       }
-      return apiRequest("PATCH", `/api/announcements/${id}`, formattedData);
+      return apiRequest('PATCH', `/api/announcements/${id}`, formattedData);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/announcements"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/announcements'] });
       setEditingAnnouncement(null);
       toast({
-        title: "Announcement updated!",
-        description: "The announcement has been updated successfully.",
+        title: 'Announcement updated!',
+        description: 'The announcement has been updated successfully.',
       });
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to update announcement. Please try again.",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to update announcement. Please try again.',
+        variant: 'destructive',
       });
     },
   });
@@ -147,34 +145,34 @@ export default function AnnouncementManager() {
   // Delete announcement mutation
   const deleteAnnouncementMutation = useMutation({
     mutationFn: (id: number) =>
-      apiRequest("DELETE", `/api/announcements/${id}`),
+      apiRequest('DELETE', `/api/announcements/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/announcements"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/announcements'] });
       toast({
-        title: "Announcement deleted!",
-        description: "The announcement has been removed successfully.",
+        title: 'Announcement deleted!',
+        description: 'The announcement has been removed successfully.',
       });
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to delete announcement. Please try again.",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to delete announcement. Please try again.',
+        variant: 'destructive',
       });
     },
   });
 
   const resetForm = () => {
     setNewAnnouncement({
-      title: "",
-      message: "",
-      type: "general",
-      priority: "medium",
-      startDate: new Date().toISOString().split("T")[0],
-      endDate: "",
+      title: '',
+      message: '',
+      type: 'general',
+      priority: 'medium',
+      startDate: new Date().toISOString().split('T')[0],
+      endDate: '',
       isActive: true,
-      link: "",
-      linkText: "",
+      link: '',
+      linkText: '',
     });
   };
 
@@ -182,9 +180,9 @@ export default function AnnouncementManager() {
     e.preventDefault();
     if (!newAnnouncement.title.trim() || !newAnnouncement.message.trim()) {
       toast({
-        title: "Error",
-        description: "Title and message are required.",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Title and message are required.',
+        variant: 'destructive',
       });
       return;
     }
@@ -194,8 +192,8 @@ export default function AnnouncementManager() {
   const handleEdit = (announcement: Announcement) => {
     setEditingAnnouncement({
       ...announcement,
-      startDate: announcement.startDate.split("T")[0],
-      endDate: announcement.endDate.split("T")[0],
+      startDate: announcement.startDate.split('T')[0],
+      endDate: announcement.endDate.split('T')[0],
     });
   };
 
@@ -218,11 +216,11 @@ export default function AnnouncementManager() {
 
   const getTypeIcon = (type: string) => {
     switch (type) {
-      case "event":
+      case 'event':
         return <Calendar className="w-4 h-4" />;
-      case "position":
+      case 'position':
         return <Users className="w-4 h-4" />;
-      case "alert":
+      case 'alert':
         return <AlertCircle className="w-4 h-4" />;
       default:
         return <AlertCircle className="w-4 h-4" />;
@@ -231,16 +229,16 @@ export default function AnnouncementManager() {
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case "urgent":
-        return "bg-red-100 text-red-800";
-      case "high":
-        return "bg-orange-100 text-orange-800";
-      case "medium":
-        return "bg-blue-100 text-blue-800";
-      case "low":
-        return "bg-gray-100 text-gray-800";
+      case 'urgent':
+        return 'bg-red-100 text-red-800';
+      case 'high':
+        return 'bg-orange-100 text-orange-800';
+      case 'medium':
+        return 'bg-blue-100 text-blue-800';
+      case 'low':
+        return 'bg-gray-100 text-gray-800';
       default:
-        return "bg-gray-100 text-gray-800";
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -430,8 +428,8 @@ export default function AnnouncementManager() {
                   disabled={createAnnouncementMutation.isPending}
                 >
                   {createAnnouncementMutation.isPending
-                    ? "Creating..."
-                    : "Create Announcement"}
+                    ? 'Creating...'
+                    : 'Create Announcement'}
                 </Button>
               </div>
             </form>
@@ -457,7 +455,7 @@ export default function AnnouncementManager() {
             <Card
               key={announcement.id}
               className={`${
-                isCurrentlyActive(announcement) ? "ring-2 ring-blue-500" : ""
+                isCurrentlyActive(announcement) ? 'ring-2 ring-blue-500' : ''
               }`}
             >
               <CardHeader>
@@ -491,7 +489,7 @@ export default function AnnouncementManager() {
                 <div className="flex items-center justify-between">
                   <div className="text-sm text-slate-600">
                     <div>
-                      Start:{" "}
+                      Start:{' '}
                       {new Date(announcement.startDate).toLocaleDateString()}
                     </div>
                     <div>
@@ -499,14 +497,14 @@ export default function AnnouncementManager() {
                     </div>
                     {announcement.link && (
                       <div>
-                        Link:{" "}
+                        Link:{' '}
                         <a
                           href={announcement.link}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-blue-600 hover:underline"
                         >
-                          {announcement.linkText || "View"}
+                          {announcement.linkText || 'View'}
                         </a>
                       </div>
                     )}
@@ -663,7 +661,7 @@ export default function AnnouncementManager() {
                   <Label htmlFor="edit-link">Link (optional)</Label>
                   <Input
                     id="edit-link"
-                    value={editingAnnouncement.link || ""}
+                    value={editingAnnouncement.link || ''}
                     onChange={(e) =>
                       setEditingAnnouncement((prev) =>
                         prev ? { ...prev, link: e.target.value } : null
@@ -677,7 +675,7 @@ export default function AnnouncementManager() {
                   <Label htmlFor="edit-linkText">Link Text</Label>
                   <Input
                     id="edit-linkText"
-                    value={editingAnnouncement.linkText || ""}
+                    value={editingAnnouncement.linkText || ''}
                     onChange={(e) =>
                       setEditingAnnouncement((prev) =>
                         prev ? { ...prev, linkText: e.target.value } : null
@@ -701,8 +699,8 @@ export default function AnnouncementManager() {
                   disabled={updateAnnouncementMutation.isPending}
                 >
                   {updateAnnouncementMutation.isPending
-                    ? "Updating..."
-                    : "Update Announcement"}
+                    ? 'Updating...'
+                    : 'Update Announcement'}
                 </Button>
               </div>
             </form>

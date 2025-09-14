@@ -1,6 +1,6 @@
-import { useEffect, useRef } from "react";
-import { useLocation } from "wouter";
-import { trackEvent, trackPageView } from "../lib/analytics";
+import { useEffect, useRef } from 'react';
+import { useLocation } from 'wouter';
+import { trackEvent, trackPageView } from '../lib/analytics';
 
 interface TrackingData {
   section: string;
@@ -13,7 +13,7 @@ interface TrackingData {
 export const useEnhancedTracking = () => {
   const [location] = useLocation();
   const startTimeRef = useRef<number>(Date.now());
-  const currentSectionRef = useRef<string>("");
+  const currentSectionRef = useRef<string>('');
 
   useEffect(() => {
     // Track page view when location changes
@@ -26,19 +26,19 @@ export const useEnhancedTracking = () => {
     if (currentSectionRef.current && timeSpent > 2) {
       // Only track if spent more than 2 seconds
       trackEvent(
-        "page_duration",
-        "engagement",
+        'page_duration',
+        'engagement',
         currentSectionRef.current,
         timeSpent
       );
 
       // Also send to our backend
-      fetch("/api/enhanced-user-activity/track", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
+      fetch('/api/enhanced-user-activity/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
-          action: "Page View",
+          action: 'Page View',
           section: getSectionFromPath(currentSectionRef.current),
           page: currentSectionRef.current,
           duration: timeSpent,
@@ -61,10 +61,10 @@ export const useEnhancedTracking = () => {
     trackEvent(data.action, data.section, data.feature);
 
     // Track in our backend
-    fetch("/api/enhanced-user-activity/track", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
+    fetch('/api/enhanced-user-activity/track', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify({
         action: data.action,
         section: data.section,
@@ -82,7 +82,7 @@ export const useEnhancedTracking = () => {
   const trackButtonClick = (buttonName: string, section: string) => {
     trackUserAction({
       section,
-      action: "Button Click",
+      action: 'Button Click',
       feature: buttonName,
       metadata: { buttonName, location },
     });
@@ -91,7 +91,7 @@ export const useEnhancedTracking = () => {
   const trackFormSubmit = (formName: string, section: string) => {
     trackUserAction({
       section,
-      action: "Form Submit",
+      action: 'Form Submit',
       feature: formName,
       metadata: { formName, location },
     });
@@ -104,8 +104,8 @@ export const useEnhancedTracking = () => {
   ) => {
     trackUserAction({
       section,
-      action: "Search",
-      feature: "Search",
+      action: 'Search',
+      feature: 'Search',
       metadata: { searchTerm, resultsCount, location },
     });
   };
@@ -113,8 +113,8 @@ export const useEnhancedTracking = () => {
   const trackDownload = (fileName: string, section: string) => {
     trackUserAction({
       section,
-      action: "Download",
-      feature: "File Download",
+      action: 'Download',
+      feature: 'File Download',
       metadata: { fileName, location },
     });
   };
@@ -129,18 +129,18 @@ export const useEnhancedTracking = () => {
 };
 
 const getSectionFromPath = (path: string): string => {
-  if (path === "/") return "Dashboard";
-  if (path.startsWith("/inbox")) return "Communication";
-  if (path.startsWith("/messages")) return "Communication";
-  if (path.startsWith("/projects")) return "Projects";
-  if (path.startsWith("/hosts")) return "Directory";
-  if (path.startsWith("/recipients")) return "Directory";
-  if (path.startsWith("/drivers")) return "Directory";
-  if (path.startsWith("/meetings")) return "Meetings";
-  if (path.startsWith("/suggestions")) return "Suggestions";
-  if (path.startsWith("/governance")) return "Governance";
-  if (path.startsWith("/toolkit")) return "Toolkit";
-  if (path.startsWith("/reports")) return "Analytics";
-  if (path.includes("admin")) return "Admin";
-  return "Other";
+  if (path === '/') return 'Dashboard';
+  if (path.startsWith('/inbox')) return 'Communication';
+  if (path.startsWith('/messages')) return 'Communication';
+  if (path.startsWith('/projects')) return 'Projects';
+  if (path.startsWith('/hosts')) return 'Directory';
+  if (path.startsWith('/recipients')) return 'Directory';
+  if (path.startsWith('/drivers')) return 'Directory';
+  if (path.startsWith('/meetings')) return 'Meetings';
+  if (path.startsWith('/suggestions')) return 'Suggestions';
+  if (path.startsWith('/governance')) return 'Governance';
+  if (path.startsWith('/toolkit')) return 'Toolkit';
+  if (path.startsWith('/reports')) return 'Analytics';
+  if (path.includes('admin')) return 'Admin';
+  return 'Other';
 };

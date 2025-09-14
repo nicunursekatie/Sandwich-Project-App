@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useRef } from "react";
-import { io, Socket } from "socket.io-client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Send, Trash2 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
-import { MentionInput, MessageWithMentions } from "@/components/mention-input";
+import React, { useState, useEffect, useRef } from 'react';
+import { io, Socket } from 'socket.io-client';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Send, Trash2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import { MentionInput, MessageWithMentions } from '@/components/mention-input';
 
 interface ChatMessage {
   id: string;
@@ -24,7 +24,7 @@ interface SimpleChatProps {
 }
 
 export default function SimpleChat({ channel, title, icon }: SimpleChatProps) {
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
@@ -34,7 +34,7 @@ export default function SimpleChat({ channel, title, icon }: SimpleChatProps) {
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   // Initialize Socket.IO connection
@@ -44,42 +44,42 @@ export default function SimpleChat({ channel, title, icon }: SimpleChatProps) {
     const socketUrl = window.location.origin;
 
     const socketInstance = io(socketUrl, {
-      path: "/socket.io/",
-      transports: ["polling"],
+      path: '/socket.io/',
+      transports: ['polling'],
       autoConnect: true,
       timeout: 10000,
     });
 
     setSocket(socketInstance);
 
-    socketInstance.on("connect", () => {
-      console.log("Connected to Socket.IO chat server");
+    socketInstance.on('connect', () => {
+      console.log('Connected to Socket.IO chat server');
       setIsConnected(true);
       // Send user info when joining a channel
-      socketInstance.emit("join-channel", {
+      socketInstance.emit('join-channel', {
         channel,
         userId: user.id,
-        userName: user.firstName || user.email || "User",
+        userName: user.firstName || user.email || 'User',
       });
     });
 
-    socketInstance.on("disconnect", () => {
-      console.log("Disconnected from Socket.IO chat server");
+    socketInstance.on('disconnect', () => {
+      console.log('Disconnected from Socket.IO chat server');
       setIsConnected(false);
     });
 
     socketInstance.on(
-      "joined-channel",
+      'joined-channel',
       ({ channel: joinedChannel, userName }) => {
         console.log(`Joined channel: ${joinedChannel} as ${userName}`);
       }
     );
 
-    socketInstance.on("new-message", (newMessage: ChatMessage) => {
+    socketInstance.on('new-message', (newMessage: ChatMessage) => {
       setMessages((prev) => [...prev, newMessage]);
     });
 
-    socketInstance.on("message-history", (history: ChatMessage[]) => {
+    socketInstance.on('message-history', (history: ChatMessage[]) => {
       console.log(`Loaded ${history.length} messages from history`);
       setMessages((prev) => {
         // Merge history with any existing messages, avoiding duplicates
@@ -89,19 +89,19 @@ export default function SimpleChat({ channel, title, icon }: SimpleChatProps) {
       });
     });
 
-    socketInstance.on("error", (error: { message: string }) => {
+    socketInstance.on('error', (error: { message: string }) => {
       toast({
-        title: "Chat Error",
+        title: 'Chat Error',
         description: error.message,
-        variant: "destructive",
+        variant: 'destructive',
       });
     });
 
     return () => {
-      socketInstance.emit("leave-channel", {
+      socketInstance.emit('leave-channel', {
         channel,
         userId: user.id,
-        userName: user.firstName || user.email || "User",
+        userName: user.firstName || user.email || 'User',
       });
       socketInstance.disconnect();
     };
@@ -110,16 +110,16 @@ export default function SimpleChat({ channel, title, icon }: SimpleChatProps) {
   const sendMessage = () => {
     if (!socket || !message.trim() || !isConnected) return;
 
-    socket.emit("send-message", {
+    socket.emit('send-message', {
       channel,
       content: message.trim(),
     });
 
-    setMessage("");
+    setMessage('');
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
     }
@@ -144,11 +144,11 @@ export default function SimpleChat({ channel, title, icon }: SimpleChatProps) {
           <span
             className={`ml-auto text-xs px-2 py-1 rounded ${
               isConnected
-                ? "bg-green-100 text-green-700"
-                : "bg-red-100 text-red-700"
+                ? 'bg-green-100 text-green-700'
+                : 'bg-red-100 text-red-700'
             }`}
           >
-            {isConnected ? "Connected" : "Disconnected"}
+            {isConnected ? 'Connected' : 'Disconnected'}
           </span>
         </CardTitle>
       </CardHeader>
@@ -187,7 +187,7 @@ export default function SimpleChat({ channel, title, icon }: SimpleChatProps) {
             onChange={setMessage}
             onSend={sendMessage}
             placeholder={
-              isConnected ? "Type @ to mention someone..." : "Connecting..."
+              isConnected ? 'Type @ to mention someone...' : 'Connecting...'
             }
             disabled={!isConnected}
           />

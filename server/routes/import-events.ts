@@ -1,10 +1,10 @@
-import { Router } from "express";
-import XLSX from "xlsx";
-import path from "path";
-import { fileURLToPath } from "url";
-import { isAuthenticated } from "../temp-auth";
-import { storage } from "../storage";
-import { isValid, parseISO } from "date-fns";
+import { Router } from 'express';
+import XLSX from 'xlsx';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { isAuthenticated } from '../temp-auth';
+import { storage } from '../storage';
+import { isValid, parseISO } from 'date-fns';
 
 const router = Router();
 
@@ -13,15 +13,15 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Import past events that are already completed
-router.post("/import-past-events", isAuthenticated, async (req, res) => {
+router.post('/import-past-events', isAuthenticated, async (req, res) => {
   try {
-    console.log("Starting past events import...");
+    console.log('Starting past events import...');
 
     // Parse events data from request body
     const { events: eventData } = req.body;
 
     if (!eventData || !Array.isArray(eventData)) {
-      return res.status(400).json({ error: "No event data provided" });
+      return res.status(400).json({ error: 'No event data provided' });
     }
 
     const events = [];
@@ -34,7 +34,7 @@ router.post("/import-past-events", isAuthenticated, async (req, res) => {
           // TIMEZONE SAFE: Parse as local date by adding noon time
           const dateStr = eventInfo.date.toString().trim();
           if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
-            parsedDate = new Date(dateStr + "T12:00:00");
+            parsedDate = new Date(dateStr + 'T12:00:00');
           } else {
             const tempDate = new Date(dateStr);
             parsedDate = new Date(
@@ -53,29 +53,26 @@ router.post("/import-past-events", isAuthenticated, async (req, res) => {
       }
 
       // Split contact name into first and last name
-      let firstName = "";
-      let lastName = "";
+      let firstName = '';
+      let lastName = '';
       if (eventInfo.contactName) {
-        const nameParts = eventInfo.contactName
-          .toString()
-          .trim()
-          .split(" ");
-        firstName = nameParts[0] || "";
-        lastName = nameParts.slice(1).join(" ") || "";
+        const nameParts = eventInfo.contactName.toString().trim().split(' ');
+        firstName = nameParts[0] || '';
+        lastName = nameParts.slice(1).join(' ') || '';
       }
 
       if (firstName && eventInfo.organizationName && eventInfo.email) {
         events.push({
           firstName: firstName,
-          lastName: lastName || "",
+          lastName: lastName || '',
           email: eventInfo.email,
           phone: eventInfo.phone || null,
           organizationName: eventInfo.organizationName,
           desiredEventDate: parsedDate,
-          status: "completed", // These are past events
+          status: 'completed', // These are past events
           contactedAt: parsedDate, // Use event date as contacted date
-          previouslyHosted: "i_dont_know",
-          message: "Imported past event",
+          previouslyHosted: 'i_dont_know',
+          message: 'Imported past event',
           createdBy: req.user?.id,
           eventStartTime: eventInfo.eventStartTime || null,
           eventEndTime: eventInfo.eventEndTime || null,
@@ -83,7 +80,7 @@ router.post("/import-past-events", isAuthenticated, async (req, res) => {
           eventAddress: eventInfo.eventAddress || null,
           estimatedSandwichCount: eventInfo.estimatedSandwichCount || null,
           toolkitSent: eventInfo.toolkitSent || false,
-          toolkitStatus: eventInfo.toolkitSent ? "sent" : "not_sent",
+          toolkitStatus: eventInfo.toolkitSent ? 'sent' : 'not_sent',
           additionalRequirements: eventInfo.notes || null,
           planningNotes: eventInfo.tspContact || null,
           tspContactAssigned: eventInfo.tspContact || null,
@@ -139,28 +136,28 @@ router.post("/import-past-events", isAuthenticated, async (req, res) => {
       skipped: skippedDuplicates.length,
     });
   } catch (error) {
-    console.error("❌ Error importing past events:", error);
+    console.error('❌ Error importing past events:', error);
     res.status(500).json({
-      error: "Failed to import past events",
-      details: error instanceof Error ? error.message : "Unknown error",
+      error: 'Failed to import past events',
+      details: error instanceof Error ? error.message : 'Unknown error',
     });
   }
 });
 
 // Import historical 2024 events from attached Excel/CSV file
-router.post("/import-historical", isAuthenticated, async (req, res) => {
+router.post('/import-historical', isAuthenticated, async (req, res) => {
   try {
-    console.log("Starting historical 2024 event import...");
+    console.log('Starting historical 2024 event import...');
 
     // Read the 2024 historical data file
     const filePath = path.join(
       __dirname,
-      "..",
-      "..",
-      "attached_assets",
-      "2024 Groups_1756753446666.xlsx"
+      '..',
+      '..',
+      'attached_assets',
+      '2024 Groups_1756753446666.xlsx'
     );
-    console.log("Reading historical file:", filePath);
+    console.log('Reading historical file:', filePath);
 
     const workbook = XLSX.readFile(filePath);
     const sheetName = workbook.SheetNames[0];
@@ -169,7 +166,7 @@ router.post("/import-historical", isAuthenticated, async (req, res) => {
     // Convert to JSON with proper headers
     const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][];
 
-    console.log("Historical headers:", data[0]);
+    console.log('Historical headers:', data[0]);
     console.log(`Total historical rows: ${data.length}`);
 
     // Skip header row and process data
@@ -184,10 +181,7 @@ router.post("/import-historical", isAuthenticated, async (req, res) => {
       const possibleGroupName = row[3];
       if (
         !possibleGroupName ||
-        possibleGroupName
-          .toString()
-          .toLowerCase()
-          .includes("group name")
+        possibleGroupName.toString().toLowerCase().includes('group name')
       )
         continue;
 
@@ -211,7 +205,7 @@ router.post("/import-historical", isAuthenticated, async (req, res) => {
       let parsedDate = null;
       if (eventDateStr) {
         try {
-          if (typeof eventDateStr === "number") {
+          if (typeof eventDateStr === 'number') {
             // Excel numeric date - TIMEZONE SAFE
             const excelEpoch = new Date(1899, 11, 30);
             const tempDate = new Date(
@@ -237,7 +231,7 @@ router.post("/import-historical", isAuthenticated, async (req, res) => {
               );
             } else if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
               // YYYY-MM-DD format - add noon time
-              parsedDate = new Date(dateStr + "T12:00:00");
+              parsedDate = new Date(dateStr + 'T12:00:00');
             } else {
               // Fallback: parse and convert to local date
               const tempDate = new Date(dateStr);
@@ -261,25 +255,22 @@ router.post("/import-historical", isAuthenticated, async (req, res) => {
       }
 
       // Split contact name into first and last name
-      let firstName = "";
-      let lastName = "";
+      let firstName = '';
+      let lastName = '';
       if (contactName) {
-        const nameParts = contactName
-          .toString()
-          .trim()
-          .split(" ");
-        firstName = nameParts[0] || "";
-        lastName = nameParts.slice(1).join(" ") || "";
+        const nameParts = contactName.toString().trim().split(' ');
+        firstName = nameParts[0] || '';
+        lastName = nameParts.slice(1).join(' ') || '';
       }
 
       // Parse toolkit sent status
       const toolkitSentStatus =
-        toolkitSent && toolkitSent.toString().toLowerCase() === "yes";
+        toolkitSent && toolkitSent.toString().toLowerCase() === 'yes';
 
       // Parse estimated sandwich count
       let parsedSandwichCount = null;
       if (sandwichCount) {
-        const countStr = sandwichCount.toString().replace(/[^\d]/g, ""); // Remove non-digits
+        const countStr = sandwichCount.toString().replace(/[^\d]/g, ''); // Remove non-digits
         if (countStr && !isNaN(parseInt(countStr))) {
           parsedSandwichCount = parseInt(countStr);
         }
@@ -300,19 +291,19 @@ router.post("/import-historical", isAuthenticated, async (req, res) => {
       if (firstName && groupName && email) {
         events.push({
           firstName: firstName,
-          lastName: lastName || "",
+          lastName: lastName || '',
           email: email.toString(),
           phone: phone ? phone.toString() : null,
           organizationName: groupName.toString(),
           desiredEventDate: parsedDate,
-          status: "completed", // Historical events are completed
+          status: 'completed', // Historical events are completed
           contactedAt: parsedDate, // Use event date as contacted date
-          previouslyHosted: "yes", // These are past hosts
-          message: "Imported historical 2024 event",
+          previouslyHosted: 'yes', // These are past hosts
+          message: 'Imported historical 2024 event',
           createdBy: req.user?.id,
           estimatedSandwichCount: parsedSandwichCount,
           toolkitSent: toolkitSentStatus,
-          toolkitStatus: toolkitSentStatus ? "sent" : "not_sent",
+          toolkitStatus: toolkitSentStatus ? 'sent' : 'not_sent',
           planningNotes: notes ? notes.toString() : null,
           tspContactAssigned: tspContact ? tspContact.toString() : null,
           additionalRequirements: deliveryLocation
@@ -338,7 +329,7 @@ router.post("/import-historical", isAuthenticated, async (req, res) => {
     console.log(`\nPrepared ${events.length} historical events for import`);
 
     if (events.length > 0) {
-      console.log("First 3 prepared events:");
+      console.log('First 3 prepared events:');
       events.slice(0, 3).forEach((event, idx) => {
         console.log(
           `  ${idx + 1}. ${event.firstName} ${event.lastName} - ${
@@ -351,7 +342,7 @@ router.post("/import-historical", isAuthenticated, async (req, res) => {
     if (events.length === 0) {
       return res
         .status(400)
-        .json({ error: "No valid historical events found to import" });
+        .json({ error: 'No valid historical events found to import' });
     }
 
     // Import with duplicate checking
@@ -413,27 +404,27 @@ router.post("/import-historical", isAuthenticated, async (req, res) => {
       })),
     });
   } catch (error) {
-    console.error("❌ Error importing historical events:", error);
+    console.error('❌ Error importing historical events:', error);
     res.status(500).json({
-      error: "Failed to import historical events",
-      details: error instanceof Error ? error.message : "Unknown error",
+      error: 'Failed to import historical events',
+      details: error instanceof Error ? error.message : 'Unknown error',
     });
   }
 });
 
-router.post("/import-excel", isAuthenticated, async (req, res) => {
+router.post('/import-excel', isAuthenticated, async (req, res) => {
   try {
-    console.log("Starting Excel event import...");
+    console.log('Starting Excel event import...');
 
     // Read the Excel file
     const filePath = path.join(
       __dirname,
-      "..",
-      "..",
-      "attached_assets",
-      "Events January - May_1756610094691.xlsx"
+      '..',
+      '..',
+      'attached_assets',
+      'Events January - May_1756610094691.xlsx'
     );
-    console.log("Reading file:", filePath);
+    console.log('Reading file:', filePath);
 
     const workbook = XLSX.readFile(filePath);
     const sheetName = workbook.SheetNames[0]; // Get first sheet
@@ -442,7 +433,7 @@ router.post("/import-excel", isAuthenticated, async (req, res) => {
     // Convert to JSON with proper headers
     const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][];
 
-    console.log("Headers:", data[0]);
+    console.log('Headers:', data[0]);
     console.log(`Total rows: ${data.length}`);
 
     // Skip header row and process data
@@ -474,29 +465,26 @@ router.post("/import-excel", isAuthenticated, async (req, res) => {
       const notes = row[16]; // Notes
 
       // Split contact name into first and last name
-      let firstName = "";
-      let lastName = "";
+      let firstName = '';
+      let lastName = '';
       if (contactName) {
-        const nameParts = contactName
-          .toString()
-          .trim()
-          .split(" ");
-        firstName = nameParts[0] || "";
-        lastName = nameParts.slice(1).join(" ") || "";
+        const nameParts = contactName.toString().trim().split(' ');
+        firstName = nameParts[0] || '';
+        lastName = nameParts.slice(1).join(' ') || '';
       }
 
       // Helper function to convert Excel time decimal to time string
       const parseExcelTime = (timeValue: any): string | null => {
         if (!timeValue) return null;
 
-        if (typeof timeValue === "number") {
+        if (typeof timeValue === 'number') {
           // Excel time is stored as fraction of day (0.5 = 12:00 PM)
           const totalMinutes = Math.round(timeValue * 24 * 60);
           const hours = Math.floor(totalMinutes / 60);
           const minutes = totalMinutes % 60;
           return `${hours
             .toString()
-            .padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+            .padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
         }
 
         // If it's already a string, return as-is
@@ -508,7 +496,7 @@ router.post("/import-excel", isAuthenticated, async (req, res) => {
       if (eventDate) {
         try {
           // Handle Excel date formats - TIMEZONE SAFE
-          if (typeof eventDate === "number") {
+          if (typeof eventDate === 'number') {
             // Excel numeric date
             const excelEpoch = new Date(1899, 11, 30);
             const tempDate = new Date(
@@ -525,7 +513,7 @@ router.post("/import-excel", isAuthenticated, async (req, res) => {
             const dateStr = eventDate.toString().trim();
             if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
               // Already in YYYY-MM-DD format - add noon time
-              parsedDate = new Date(dateStr + "T12:00:00");
+              parsedDate = new Date(dateStr + 'T12:00:00');
             } else {
               // Try to parse and convert to local date
               const tempDate = new Date(dateStr);
@@ -549,7 +537,7 @@ router.post("/import-excel", isAuthenticated, async (req, res) => {
 
       // Parse toolkit sent status
       const toolkitSentStatus =
-        toolkitSent && toolkitSent.toString().toLowerCase() === "yes";
+        toolkitSent && toolkitSent.toString().toLowerCase() === 'yes';
 
       // Parse estimated sandwich count
       let parsedSandwichCount = null;
@@ -564,15 +552,15 @@ router.post("/import-excel", isAuthenticated, async (req, res) => {
       if (firstName && organization && email) {
         events.push({
           firstName: firstName,
-          lastName: lastName || "",
+          lastName: lastName || '',
           email: email,
           phone: phone ? phone.toString() : null,
           organizationName: organization,
           desiredEventDate: parsedDate,
-          status: "contact_completed",
+          status: 'contact_completed',
           contactedAt: new Date(), // Mark as contacted since these are scheduled events
-          previouslyHosted: "i_dont_know",
-          message: "Imported from Excel file",
+          previouslyHosted: 'i_dont_know',
+          message: 'Imported from Excel file',
           createdBy: req.user?.id, // Mark who imported this
           // Map all Excel fields to database fields with proper time parsing
           eventStartTime: parseExcelTime(eventStartTime),
@@ -581,7 +569,7 @@ router.post("/import-excel", isAuthenticated, async (req, res) => {
           eventAddress: eventAddress ? eventAddress.toString() : null,
           estimatedSandwichCount: parsedSandwichCount,
           toolkitSent: toolkitSentStatus,
-          toolkitStatus: toolkitSentStatus ? "sent" : "not_sent",
+          toolkitStatus: toolkitSentStatus ? 'sent' : 'not_sent',
           additionalRequirements: allDetails ? allDetails.toString() : null,
           planningNotes: notes ? notes.toString() : null,
           tspContactAssigned: tspContact ? tspContact.toString() : null,
@@ -602,7 +590,7 @@ router.post("/import-excel", isAuthenticated, async (req, res) => {
     console.log(`\nPrepared ${events.length} events for import`);
 
     if (events.length === 0) {
-      return res.status(400).json({ error: "No valid events found to import" });
+      return res.status(400).json({ error: 'No valid events found to import' });
     }
 
     // Check for existing events to prevent duplicates
@@ -665,32 +653,32 @@ router.post("/import-excel", isAuthenticated, async (req, res) => {
       })),
     });
   } catch (error) {
-    console.error("❌ Error importing events:", error);
+    console.error('❌ Error importing events:', error);
     res.status(500).json({
-      error: "Failed to import events",
-      details: error instanceof Error ? error.message : "Unknown error",
+      error: 'Failed to import events',
+      details: error instanceof Error ? error.message : 'Unknown error',
     });
   }
 });
 
 // Sync from Google Sheets - proxy to event requests sync endpoint
-router.post("/sync-from-sheets", isAuthenticated, async (req, res) => {
+router.post('/sync-from-sheets', isAuthenticated, async (req, res) => {
   try {
     console.log(
-      "🔄 Proxying sync-from-sheets request to event-requests sync endpoint..."
+      '🔄 Proxying sync-from-sheets request to event-requests sync endpoint...'
     );
 
     // Import the event requests sync service
     const { getEventRequestsGoogleSheetsService } = await import(
-      "../google-sheets-event-requests-sync"
+      '../google-sheets-event-requests-sync'
     );
-    const { storage: storageWrapper } = await import("../storage-wrapper");
+    const { storage: storageWrapper } = await import('../storage-wrapper');
 
     const syncService = getEventRequestsGoogleSheetsService(storageWrapper);
     if (!syncService) {
       return res.status(500).json({
         success: false,
-        message: "Google Sheets service not configured",
+        message: 'Google Sheets service not configured',
       });
     }
 
@@ -701,8 +689,9 @@ router.post("/sync-from-sheets", isAuthenticated, async (req, res) => {
       success: true,
       message:
         result.message ||
-        `Successfully synced from Google Sheets: ${result.created ||
-          0} created, ${result.updated || 0} updated`,
+        `Successfully synced from Google Sheets: ${
+          result.created || 0
+        } created, ${result.updated || 0} updated`,
       total: (result.created || 0) + (result.updated || 0),
       imported: result.created || 0,
       updated: result.updated || 0,
@@ -712,11 +701,11 @@ router.post("/sync-from-sheets", isAuthenticated, async (req, res) => {
 
     res.json(response);
   } catch (error) {
-    console.error("❌ Error syncing from Google Sheets:", error);
+    console.error('❌ Error syncing from Google Sheets:', error);
     res.status(500).json({
       success: false,
-      message: error instanceof Error ? error.message : "Sync failed",
-      error: error instanceof Error ? error.message : "Unknown error",
+      message: error instanceof Error ? error.message : 'Sync failed',
+      error: error instanceof Error ? error.message : 'Unknown error',
     });
   }
 });

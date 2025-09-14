@@ -1,18 +1,18 @@
-import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { BarChart3 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import { BarChart3 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest, queryClient } from '@/lib/queryClient';
 
 export default function WeeklySandwichForm() {
   const { toast } = useToast();
-  const [weekEnding, setWeekEnding] = useState("");
-  const [sandwichCount, setSandwichCount] = useState("");
-  const [notes, setNotes] = useState("");
+  const [weekEnding, setWeekEnding] = useState('');
+  const [sandwichCount, setSandwichCount] = useState('');
+  const [notes, setNotes] = useState('');
 
   const submitReportMutation = useMutation({
     mutationFn: async (data: {
@@ -20,27 +20,27 @@ export default function WeeklySandwichForm() {
       sandwichCount: number;
       notes?: string;
     }) => {
-      const response = await apiRequest("POST", "/api/weekly-reports", {
+      const response = await apiRequest('POST', '/api/weekly-reports', {
         ...data,
-        submittedBy: "John Doe",
+        submittedBy: 'John Doe',
       });
       return response.json();
     },
     onSuccess: () => {
-      setWeekEnding("");
-      setSandwichCount("");
-      setNotes("");
-      queryClient.invalidateQueries({ queryKey: ["/api/weekly-reports"] });
+      setWeekEnding('');
+      setSandwichCount('');
+      setNotes('');
+      queryClient.invalidateQueries({ queryKey: ['/api/weekly-reports'] });
       toast({
-        title: "Weekly total submitted",
-        description: "Your sandwich count has been recorded successfully.",
+        title: 'Weekly total submitted',
+        description: 'Your sandwich count has been recorded successfully.',
       });
     },
     onError: () => {
       toast({
-        title: "Failed to submit report",
-        description: "Please check your input and try again.",
-        variant: "destructive",
+        title: 'Failed to submit report',
+        description: 'Please check your input and try again.',
+        variant: 'destructive',
       });
     },
   });
@@ -50,9 +50,9 @@ export default function WeeklySandwichForm() {
 
     if (!weekEnding || !sandwichCount) {
       toast({
-        title: "Missing information",
-        description: "Please fill in the week ending date and sandwich count.",
-        variant: "destructive",
+        title: 'Missing information',
+        description: 'Please fill in the week ending date and sandwich count.',
+        variant: 'destructive',
       });
       return;
     }
@@ -60,9 +60,9 @@ export default function WeeklySandwichForm() {
     const count = parseInt(sandwichCount);
     if (isNaN(count) || count < 0) {
       toast({
-        title: "Invalid sandwich count",
-        description: "Please enter a valid number.",
-        variant: "destructive",
+        title: 'Invalid sandwich count',
+        description: 'Please enter a valid number.',
+        variant: 'destructive',
       });
       return;
     }
@@ -138,8 +138,8 @@ export default function WeeklySandwichForm() {
             disabled={submitReportMutation.isPending}
           >
             {submitReportMutation.isPending
-              ? "Submitting..."
-              : "Submit Weekly Total"}
+              ? 'Submitting...'
+              : 'Submit Weekly Total'}
           </Button>
         </form>
       </div>

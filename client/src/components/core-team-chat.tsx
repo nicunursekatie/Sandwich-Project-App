@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useState, useEffect, useRef } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import {
   Send,
   Crown,
@@ -8,29 +8,29 @@ import {
   Users,
   Trash2,
   MoreVertical,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { ScrollArea } from "@/components/ui/scroll-area";
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
-import { useMessageReads } from "@/hooks/useMessageReads";
-import { MessageLikeButton } from "./message-like-button";
-import { hasPermission, PERMISSIONS } from "@shared/auth-utils";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { ChatMessage } from "@shared/schema";
+} from '@/components/ui/dropdown-menu';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import { useMessageReads } from '@/hooks/useMessageReads';
+import { MessageLikeButton } from './message-like-button';
+import { hasPermission, PERMISSIONS } from '@shared/auth-utils';
+import { apiRequest, queryClient } from '@/lib/queryClient';
+import { ChatMessage } from '@shared/schema';
 
 export default function CoreTeamChat() {
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState('');
   const { toast } = useToast();
   const { user } = useAuth();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -43,7 +43,7 @@ export default function CoreTeamChat() {
 
   // Fetch all users for name lookups
   const { data: allUsers = [] } = useQuery({
-    queryKey: ["/api/users"],
+    queryKey: ['/api/users'],
   });
 
   // Helper functions for user display
@@ -52,9 +52,9 @@ export default function CoreTeamChat() {
     if (userFound) {
       if (userFound.displayName) return userFound.displayName;
       if (userFound.firstName) return userFound.firstName;
-      if (userFound.email) return userFound.email.split("@")[0];
+      if (userFound.email) return userFound.email.split('@')[0];
     }
-    return "Team Member";
+    return 'Team Member';
   };
 
   const getUserInitials = (userId: string) => {
@@ -70,7 +70,7 @@ export default function CoreTeamChat() {
         return userFound.email[0].toUpperCase();
       }
     }
-    return "TM";
+    return 'TM';
   };
 
   if (!hasCoreTeamAccess) {
@@ -100,20 +100,20 @@ export default function CoreTeamChat() {
     isLoading: messagesLoading,
     error: messagesError,
   } = useQuery<ChatMessage[]>({
-    queryKey: ["/api/team-chat/core-team/messages"],
+    queryKey: ['/api/team-chat/core-team/messages'],
     queryFn: async () => {
-      console.log("[DEBUG] Core Team Chat: Fetching from team chat API...");
-      const data = await apiRequest("GET", "/api/team-chat/core-team/messages");
-      console.log("Core Team messages response:", data);
+      console.log('[DEBUG] Core Team Chat: Fetching from team chat API...');
+      const data = await apiRequest('GET', '/api/team-chat/core-team/messages');
+      console.log('Core Team messages response:', data);
       return Array.isArray(data) ? data : [];
     },
     enabled: !!user && hasCoreTeamAccess,
     refetchInterval: 3000,
   });
 
-  console.log("[DEBUG] Core Team Chat: Messages loading:", messagesLoading);
-  console.log("[DEBUG] Core Team Chat: Messages error:", messagesError);
-  console.log("[DEBUG] Core Team Chat: Messages count:", messages.length);
+  console.log('[DEBUG] Core Team Chat: Messages loading:', messagesLoading);
+  console.log('[DEBUG] Core Team Chat: Messages error:', messagesError);
+  console.log('[DEBUG] Core Team Chat: Messages count:', messages.length);
   const [optimisticMessages, setOptimisticMessages] = useState<
     ChatMessage[] | null
   >(null);
@@ -121,24 +121,24 @@ export default function CoreTeamChat() {
 
   // Display all messages that have content
   const displayedMessages = rawMessages.filter(
-    (msg) => msg && msg.content && msg.content.trim() !== ""
+    (msg) => msg && msg.content && msg.content.trim() !== ''
   );
 
-  console.log("🔧 DEBUG Filtering:");
-  console.log("Raw messages count:", rawMessages?.length);
-  console.log("Displayed messages count:", displayedMessages?.length);
-  console.log("Sample raw message:", rawMessages?.[0]);
-  console.log("Sample displayed message:", displayedMessages?.[0]);
+  console.log('🔧 DEBUG Filtering:');
+  console.log('Raw messages count:', rawMessages?.length);
+  console.log('Displayed messages count:', displayedMessages?.length);
+  console.log('Sample raw message:', rawMessages?.[0]);
+  console.log('Sample displayed message:', displayedMessages?.[0]);
 
   // Auto-mark messages as read when viewing this chat
-  useAutoMarkAsRead("core-team", messages as any[], hasCoreTeamAccess);
+  useAutoMarkAsRead('core-team', messages as any[], hasCoreTeamAccess);
 
   // Mark messages as read when messages are loaded to ensure notification counts update
   useEffect(() => {
     if (messages.length > 0 && hasCoreTeamAccess) {
       // Trigger notification refresh after marking as read
       setTimeout(() => {
-        window.dispatchEvent(new CustomEvent("refreshNotifications"));
+        window.dispatchEvent(new CustomEvent('refreshNotifications'));
       }, 500);
     }
   }, [messages.length, hasCoreTeamAccess]);
@@ -146,19 +146,19 @@ export default function CoreTeamChat() {
   // Send message mutation - uses team chat system
   const sendMessageMutation = useMutation({
     mutationFn: async (content: string) => {
-      console.log("[DEBUG] Core Team Chat: Sending message via team chat API");
-      return await apiRequest("POST", "/api/team-chat/core-team/messages", {
+      console.log('[DEBUG] Core Team Chat: Sending message via team chat API');
+      return await apiRequest('POST', '/api/team-chat/core-team/messages', {
         content,
       });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["/api/team-chat/core-team/messages"],
+        queryKey: ['/api/team-chat/core-team/messages'],
       });
-      setMessage("");
+      setMessage('');
     },
     onError: () => {
-      toast({ title: "Failed to send message", variant: "destructive" });
+      toast({ title: 'Failed to send message', variant: 'destructive' });
     },
   });
 
@@ -166,7 +166,7 @@ export default function CoreTeamChat() {
   const deleteMessageMutation = useMutation({
     mutationFn: async (messageId: number) => {
       return await apiRequest(
-        "DELETE",
+        'DELETE',
         `/api/team-chat/core-team/messages/${messageId}`
       );
     },
@@ -178,38 +178,38 @@ export default function CoreTeamChat() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["/api/team-chat/core-team/messages"],
+        queryKey: ['/api/team-chat/core-team/messages'],
       });
       setOptimisticMessages(null);
       toast({
-        title: "Message deleted",
-        description: "The message has been removed",
+        title: 'Message deleted',
+        description: 'The message has been removed',
       });
     },
     onError: () => {
       setOptimisticMessages(null);
       queryClient.invalidateQueries({
-        queryKey: ["/api/team-chat/core-team/messages"],
+        queryKey: ['/api/team-chat/core-team/messages'],
       });
       toast({
-        title: "Error",
-        description: "Failed to delete message",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to delete message',
+        variant: 'destructive',
       });
     },
   });
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   useEffect(() => {
     setOptimisticMessages(null);
     // Reset optimistic messages when component mounts
-    console.log("🔥 INVALIDATING Core Team messages cache");
+    console.log('🔥 INVALIDATING Core Team messages cache');
     queryClient.invalidateQueries({
-      queryKey: ["/api/team-chat/core-team/messages"],
+      queryKey: ['/api/team-chat/core-team/messages'],
     });
   }, [queryClient]);
 
@@ -220,7 +220,7 @@ export default function CoreTeamChat() {
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
     }
@@ -234,7 +234,7 @@ export default function CoreTeamChat() {
     );
 
     // Show "now" for very recent messages
-    if (diffInMinutes < 1) return "now";
+    if (diffInMinutes < 1) return 'now';
 
     // Show relative time for very recent messages
     if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
@@ -243,8 +243,8 @@ export default function CoreTeamChat() {
     const isToday = date.toDateString() === now.toDateString();
     if (isToday) {
       return date.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
+        hour: '2-digit',
+        minute: '2-digit',
       });
     }
 
@@ -254,8 +254,8 @@ export default function CoreTeamChat() {
     const isYesterday = date.toDateString() === yesterday.toDateString();
     if (isYesterday) {
       return `Yesterday ${date.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
+        hour: '2-digit',
+        minute: '2-digit',
       })}`;
     }
 
@@ -264,18 +264,18 @@ export default function CoreTeamChat() {
     weekAgo.setDate(weekAgo.getDate() - 7);
     if (date > weekAgo) {
       return `${date.toLocaleDateString([], {
-        weekday: "short",
+        weekday: 'short',
       })} ${date.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
+        hour: '2-digit',
+        minute: '2-digit',
       })}`;
     }
 
     // For older messages, show full date and time
     return `${date.toLocaleDateString([], {
-      month: "short",
-      day: "numeric",
-    })} ${date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+      month: 'short',
+      day: 'numeric',
+    })} ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
   };
 
   const getRelativeTimeLabel = (timestamp: string) => {
@@ -287,7 +287,7 @@ export default function CoreTeamChat() {
     const diffInDays = Math.floor(diffInHours / 24);
 
     // Less than 1 minute
-    if (diffInMinutes < 1) return "now";
+    if (diffInMinutes < 1) return 'now';
 
     // Less than 1 hour - show minutes
     if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
@@ -296,18 +296,18 @@ export default function CoreTeamChat() {
     if (diffInHours < 24) return `${diffInHours}h ago`;
 
     // Yesterday
-    if (diffInDays === 1) return "Yesterday";
+    if (diffInDays === 1) return 'Yesterday';
 
     // Today (should not happen given the logic above, but safety check)
-    if (date.toDateString() === now.toDateString()) return "Today";
+    if (date.toDateString() === now.toDateString()) return 'Today';
 
     // Less than a week - show day name
     if (diffInDays < 7) {
-      return date.toLocaleDateString("en-US", { weekday: "long" });
+      return date.toLocaleDateString('en-US', { weekday: 'long' });
     }
 
     // More than a week - show date
-    return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
   // Group messages by relative time periods using filtered displayedMessages
@@ -366,7 +366,7 @@ export default function CoreTeamChat() {
                   <div key={msg.id} className="flex items-start space-x-3 mb-4">
                     <Avatar className="w-8 h-8">
                       <AvatarFallback className="bg-orange-100 text-orange-700 text-xs">
-                        {getUserInitials(msg.userId || "")}
+                        {getUserInitials(msg.userId || '')}
                       </AvatarFallback>
                     </Avatar>
 
@@ -375,7 +375,7 @@ export default function CoreTeamChat() {
                         <div className="flex items-center space-x-2">
                           <span className="font-medium text-sm text-slate-900">
                             {msg.userName ||
-                              getUserDisplayName(msg.userId || "")}
+                              getUserDisplayName(msg.userId || '')}
                           </span>
                           <Badge variant="secondary" className="text-xs">
                             <Crown className="w-3 h-3 mr-1" />
@@ -384,9 +384,9 @@ export default function CoreTeamChat() {
                           <span className="text-xs text-slate-500">
                             {new Date(
                               msg.createdAt || new Date()
-                            ).toLocaleTimeString("en-US", {
-                              hour: "numeric",
-                              minute: "2-digit",
+                            ).toLocaleTimeString('en-US', {
+                              hour: 'numeric',
+                              minute: '2-digit',
                               hour12: true,
                             })}
                           </span>
@@ -394,7 +394,7 @@ export default function CoreTeamChat() {
 
                         {/* Show dropdown only for message owner or moderators */}
                         {(msg.userId === user?.id ||
-                          hasPermission(user, "moderate_messages")) && (
+                          hasPermission(user, 'moderate_messages')) && (
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button

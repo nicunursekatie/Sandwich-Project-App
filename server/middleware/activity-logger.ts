@@ -6,15 +6,30 @@ interface ActivityLoggerOptions {
 }
 
 // Map routes to readable section names with detailed features
-const routeToSectionAndFeature: Record<string, { section: string; feature: string }> = {
-  '/api/sandwich-collections': { section: 'Collections', feature: 'Collection Management' },
-  '/api/sandwich-collections/clean': { section: 'Collections', feature: 'Data Cleanup' },
-  '/api/sandwich-collections/export': { section: 'Collections', feature: 'Data Export' },
+const routeToSectionAndFeature: Record<
+  string,
+  { section: string; feature: string }
+> = {
+  '/api/sandwich-collections': {
+    section: 'Collections',
+    feature: 'Collection Management',
+  },
+  '/api/sandwich-collections/clean': {
+    section: 'Collections',
+    feature: 'Data Cleanup',
+  },
+  '/api/sandwich-collections/export': {
+    section: 'Collections',
+    feature: 'Data Export',
+  },
   '/api/hosts': { section: 'Directory', feature: 'Host Management' },
   '/api/recipients': { section: 'Directory', feature: 'Recipient Management' },
   '/api/drivers': { section: 'Directory', feature: 'Driver Management' },
   '/api/projects': { section: 'Projects', feature: 'Project Management' },
-  '/api/projects/assign-user': { section: 'Projects', feature: 'User Assignment' },
+  '/api/projects/assign-user': {
+    section: 'Projects',
+    feature: 'User Assignment',
+  },
   '/api/meetings': { section: 'Meetings', feature: 'Meeting Management' },
   '/api/meetings/agenda': { section: 'Meetings', feature: 'Agenda Management' },
   '/api/messages': { section: 'Communication', feature: 'Messaging' },
@@ -27,20 +42,29 @@ const routeToSectionAndFeature: Record<string, { section: string; feature: strin
   '/api/announcements': { section: 'Admin', feature: 'Announcements' },
   '/api/users': { section: 'Admin', feature: 'User Management' },
   '/api/meeting-minutes': { section: 'Meetings', feature: 'Meeting Minutes' },
-  '/api/meeting-minutes/': { section: 'Meetings', feature: 'Meeting Documents' },
+  '/api/meeting-minutes/': {
+    section: 'Meetings',
+    feature: 'Meeting Documents',
+  },
   '/api/emails': { section: 'Communication', feature: 'Email System' },
-  '/api/enhanced-user-activity': { section: 'Analytics', feature: 'User Analytics' },
+  '/api/enhanced-user-activity': {
+    section: 'Analytics',
+    feature: 'User Analytics',
+  },
   '/track': { section: 'Collections', feature: 'Collection Tracking' },
-  '/kudos': { section: 'Communication', feature: 'Kudos System' }
+  '/kudos': { section: 'Communication', feature: 'Kudos System' },
 };
 
 // Map HTTP methods to readable actions with context
-const methodToActionDetails: Record<string, { action: string; description: string }> = {
-  'GET': { action: 'View', description: 'Viewed content' },
-  'POST': { action: 'Create', description: 'Created new item' },
-  'PUT': { action: 'Update', description: 'Updated existing item' },
-  'PATCH': { action: 'Update', description: 'Modified item' },
-  'DELETE': { action: 'Delete', description: 'Deleted item' }
+const methodToActionDetails: Record<
+  string,
+  { action: string; description: string }
+> = {
+  GET: { action: 'View', description: 'Viewed content' },
+  POST: { action: 'Create', description: 'Created new item' },
+  PUT: { action: 'Update', description: 'Updated existing item' },
+  PATCH: { action: 'Update', description: 'Modified item' },
+  DELETE: { action: 'Delete', description: 'Deleted item' },
 };
 
 export function createActivityLogger(options: ActivityLoggerOptions) {
@@ -52,11 +76,12 @@ export function createActivityLogger(options: ActivityLoggerOptions) {
       '/api/emails/unread-count',
       '/api/messaging/unread',
       '/unread',
-      '/api/user-activity' // Don't log activity API calls themselves
+      '/api/user-activity', // Don't log activity API calls themselves
     ];
 
-    const shouldSkip = skipPaths.some(path => req.path.includes(path)) || 
-                      req.method === 'OPTIONS';
+    const shouldSkip =
+      skipPaths.some((path) => req.path.includes(path)) ||
+      req.method === 'OPTIONS';
 
     if (shouldSkip) {
       return next();
@@ -64,31 +89,35 @@ export function createActivityLogger(options: ActivityLoggerOptions) {
 
     // Store original end method
     const originalEnd = res.end;
-    
+
     // Override end method to log after response
-    res.end = function(chunk?: any, encoding?: any) {
+    res.end = function (chunk?: any, encoding?: any) {
       // Log the activity after response is sent
       setImmediate(async () => {
         try {
           const user = (req as any).user;
           const sessionUser = (req as any).session?.user;
-          
+
           // Only log missing user context for API calls (not static assets)
           if (!user?.id && req.path.startsWith('/api/')) {
-            console.log(`🚨 Activity Logger: No user context for ${req.method} ${req.path}`);
+            console.log(
+              `🚨 Activity Logger: No user context for ${req.method} ${req.path}`
+            );
             console.log(`   - req.user exists: ${!!user}`);
             console.log(`   - Session user exists: ${!!sessionUser}`);
             console.log(`   - Status code: ${res.statusCode}`);
           }
-          
+
           if (user?.id && res.statusCode < 400) {
             // Determine section and feature from URL path
             let section = 'General';
             let feature = 'Unknown';
             let page = req.path;
-            
+
             // Find the best matching route with better pattern matching
-            for (const [route, details] of Object.entries(routeToSectionAndFeature)) {
+            for (const [route, details] of Object.entries(
+              routeToSectionAndFeature
+            )) {
               if (req.path.startsWith(route)) {
                 section = details.section;
                 feature = details.feature;
@@ -118,12 +147,18 @@ export function createActivityLogger(options: ActivityLoggerOptions) {
                 feature = 'User Management';
               } else {
                 // Extract meaningful names from path
-                const pathParts = req.path.split('/').filter(part => part && part !== 'api');
+                const pathParts = req.path
+                  .split('/')
+                  .filter((part) => part && part !== 'api');
                 if (pathParts.length > 0) {
-                  section = pathParts[0].charAt(0).toUpperCase() + pathParts[0].slice(1).replace('-', ' ');
-                  feature = pathParts.length > 1 
-                    ? pathParts[1].charAt(0).toUpperCase() + pathParts[1].slice(1).replace('-', ' ')
-                    : section + ' Activity';
+                  section =
+                    pathParts[0].charAt(0).toUpperCase() +
+                    pathParts[0].slice(1).replace('-', ' ');
+                  feature =
+                    pathParts.length > 1
+                      ? pathParts[1].charAt(0).toUpperCase() +
+                        pathParts[1].slice(1).replace('-', ' ')
+                      : section + ' Activity';
                 } else {
                   section = 'Platform';
                   feature = 'Platform Navigation';
@@ -158,84 +193,114 @@ export function createActivityLogger(options: ActivityLoggerOptions) {
             }
 
             // Determine action from method
-            const actionDetails = methodToActionDetails[req.method] || { action: 'Unknown', description: 'Unknown action' };
-            
+            const actionDetails = methodToActionDetails[req.method] || {
+              action: 'Unknown',
+              description: 'Unknown action',
+            };
+
             // Build metadata with request details
             const metadata: any = {
               url: req.originalUrl || req.url,
               method: req.method,
               statusCode: res.statusCode,
-              queryParams: Object.keys(req.query).length > 0 ? req.query : undefined,
-              bodySize: req.get('content-length') ? parseInt(req.get('content-length') || '0') : undefined,
+              queryParams:
+                Object.keys(req.query).length > 0 ? req.query : undefined,
+              bodySize: req.get('content-length')
+                ? parseInt(req.get('content-length') || '0')
+                : undefined,
               userAgent: req.get('User-Agent'),
               referer: req.get('Referer'),
-              timestamp: new Date().toISOString()
+              timestamp: new Date().toISOString(),
             };
 
             // Add specific details based on the endpoint
             if (req.path.includes('/collections') && req.method === 'POST') {
               metadata.itemType = 'sandwich_collection';
-            } else if (req.path.includes('/projects') && req.method === 'POST') {
+            } else if (
+              req.path.includes('/projects') &&
+              req.method === 'POST'
+            ) {
               metadata.itemType = 'project';
-            } else if (req.path.includes('/messages') && req.method === 'POST') {
+            } else if (
+              req.path.includes('/messages') &&
+              req.method === 'POST'
+            ) {
               metadata.itemType = 'message';
             }
 
             // Generate meaningful activity details based on the action and endpoint
             let activityDetails = actionDetails.description;
-            
+
             // Enhance details based on specific endpoints and actions
-            if (actionDetails.action === 'Update' || actionDetails.action === 'Create') {
-              if (req.path.includes('/users') || req.path.includes('/user-management')) {
-                activityDetails = actionDetails.action === 'Update' 
-                  ? 'Updated user account settings or permissions'
-                  : 'Created new user account';
+            if (
+              actionDetails.action === 'Update' ||
+              actionDetails.action === 'Create'
+            ) {
+              if (
+                req.path.includes('/users') ||
+                req.path.includes('/user-management')
+              ) {
+                activityDetails =
+                  actionDetails.action === 'Update'
+                    ? 'Updated user account settings or permissions'
+                    : 'Created new user account';
               } else if (req.path.includes('/projects')) {
-                activityDetails = actionDetails.action === 'Update'
-                  ? 'Updated project details, status, or assignments'
-                  : 'Created new project';
+                activityDetails =
+                  actionDetails.action === 'Update'
+                    ? 'Updated project details, status, or assignments'
+                    : 'Created new project';
               } else if (req.path.includes('/collections')) {
-                activityDetails = actionDetails.action === 'Update'
-                  ? 'Updated sandwich collection data or status'
-                  : 'Added new sandwich collection entry';
+                activityDetails =
+                  actionDetails.action === 'Update'
+                    ? 'Updated sandwich collection data or status'
+                    : 'Added new sandwich collection entry';
               } else if (req.path.includes('/meetings')) {
-                activityDetails = actionDetails.action === 'Update'
-                  ? 'Updated meeting details, agenda, or attendees'
-                  : 'Created new meeting';
+                activityDetails =
+                  actionDetails.action === 'Update'
+                    ? 'Updated meeting details, agenda, or attendees'
+                    : 'Created new meeting';
               } else if (req.path.includes('/hosts')) {
-                activityDetails = actionDetails.action === 'Update'
-                  ? 'Updated host organization information or contacts'
-                  : 'Added new host organization';
+                activityDetails =
+                  actionDetails.action === 'Update'
+                    ? 'Updated host organization information or contacts'
+                    : 'Added new host organization';
               } else if (req.path.includes('/recipients')) {
-                activityDetails = actionDetails.action === 'Update'
-                  ? 'Updated recipient organization details or focus areas'
-                  : 'Added new recipient organization';
+                activityDetails =
+                  actionDetails.action === 'Update'
+                    ? 'Updated recipient organization details or focus areas'
+                    : 'Added new recipient organization';
               } else if (req.path.includes('/drivers')) {
-                activityDetails = actionDetails.action === 'Update'
-                  ? 'Updated driver information or agreements'
-                  : 'Added new driver';
+                activityDetails =
+                  actionDetails.action === 'Update'
+                    ? 'Updated driver information or agreements'
+                    : 'Added new driver';
               } else if (req.path.includes('/messages')) {
-                activityDetails = actionDetails.action === 'Update'
-                  ? 'Updated or edited message content'
-                  : 'Sent new message';
+                activityDetails =
+                  actionDetails.action === 'Update'
+                    ? 'Updated or edited message content'
+                    : 'Sent new message';
               } else if (req.path.includes('/announcements')) {
-                activityDetails = actionDetails.action === 'Update'
-                  ? 'Updated announcement content or visibility'
-                  : 'Created new announcement';
+                activityDetails =
+                  actionDetails.action === 'Update'
+                    ? 'Updated announcement content or visibility'
+                    : 'Created new announcement';
               } else if (req.path.includes('/suggestions')) {
-                activityDetails = actionDetails.action === 'Update'
-                  ? 'Updated suggestion details or status'
-                  : 'Submitted new suggestion';
+                activityDetails =
+                  actionDetails.action === 'Update'
+                    ? 'Updated suggestion details or status'
+                    : 'Submitted new suggestion';
               } else if (req.path.includes('/event-requests')) {
                 if (actionDetails.action === 'Update') {
                   // Check if audit details were provided by the route handler
                   if (res.locals?.eventRequestAuditDetails?.auditDetails) {
-                    const auditDetails = res.locals.eventRequestAuditDetails.auditDetails;
+                    const auditDetails =
+                      res.locals.eventRequestAuditDetails.auditDetails;
                     metadata.auditDetails = auditDetails;
                     const changedFields = Object.keys(auditDetails);
-                    activityDetails = changedFields.length > 0 
-                      ? `Updated event request: ${changedFields.join(', ')}`
-                      : 'Updated event request details';
+                    activityDetails =
+                      changedFields.length > 0
+                        ? `Updated event request: ${changedFields.join(', ')}`
+                        : 'Updated event request details';
                   } else {
                     activityDetails = 'Updated event request details';
                   }
@@ -244,11 +309,12 @@ export function createActivityLogger(options: ActivityLoggerOptions) {
                 }
               } else {
                 // Generic fallback with more context
-                activityDetails = actionDetails.action === 'Update'
-                  ? `Updated ${feature.toLowerCase()} information`
-                  : `Created new ${feature.toLowerCase()} entry`;
+                activityDetails =
+                  actionDetails.action === 'Update'
+                    ? `Updated ${feature.toLowerCase()} information`
+                    : `Created new ${feature.toLowerCase()} entry`;
               }
-              
+
               // Add ID from URL if available for more specificity
               const idMatch = req.path.match(/\/(\d+)$/);
               if (idMatch) {
@@ -280,7 +346,7 @@ export function createActivityLogger(options: ActivityLoggerOptions) {
               sessionId: (req as any).sessionID,
               ipAddress: req.ip,
               userAgent: req.get('User-Agent') || 'Unknown',
-              metadata
+              metadata,
             });
 
             // Activity logged silently

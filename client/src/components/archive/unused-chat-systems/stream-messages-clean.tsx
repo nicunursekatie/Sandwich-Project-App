@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { StreamChat } from "stream-chat";
+import { useState, useEffect } from 'react';
+import { StreamChat } from 'stream-chat';
 import {
   Chat,
   Channel,
@@ -10,26 +10,24 @@ import {
   Thread,
   LoadingIndicator,
   ChannelList,
-} from "stream-chat-react";
-import "stream-chat-react/dist/css/v2/index.css";
+} from 'stream-chat-react';
+import 'stream-chat-react/dist/css/v2/index.css';
 
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from '@/hooks/useAuth';
 
 // Type guard for user object
-function isValidUser(
-  user: any
-): user is {
+function isValidUser(user: any): user is {
   id: number;
   firstName?: string;
   lastName?: string;
   email: string;
 } {
-  return user && typeof user.id !== "undefined" && user.email;
+  return user && typeof user.id !== 'undefined' && user.email;
 }
-import { useToast } from "@/hooks/use-toast";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useToast } from '@/hooks/use-toast';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Dialog,
   DialogContent,
@@ -37,9 +35,9 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogDescription,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { MessageCircle, Plus, Users, Hash, Loader2 } from "lucide-react";
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { MessageCircle, Plus, Users, Hash, Loader2 } from 'lucide-react';
 
 export default function StreamMessagesPage() {
   const [client, setClient] = useState<StreamChat | null>(null);
@@ -47,9 +45,9 @@ export default function StreamMessagesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showNewChannel, setShowNewChannel] = useState(false);
-  const [channelName, setChannelName] = useState("");
-  const [channelType, setChannelType] = useState<"messaging" | "team">(
-    "messaging"
+  const [channelName, setChannelName] = useState('');
+  const [channelType, setChannelType] = useState<'messaging' | 'team'>(
+    'messaging'
   );
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [availableUsers, setAvailableUsers] = useState<any[]>([]);
@@ -59,9 +57,9 @@ export default function StreamMessagesPage() {
   // Fetch available users for creating channels
   const fetchAvailableUsers = async () => {
     try {
-      const response = await fetch("/api/users", {
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/api/users', {
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
       });
       if (response.ok) {
         const data = await response.json();
@@ -76,7 +74,7 @@ export default function StreamMessagesPage() {
           .map((dbUser: any) => ({
             id: dbUser.id.toString(),
             name: dbUser.firstName
-              ? `${dbUser.firstName} ${dbUser.lastName || ""}`.trim()
+              ? `${dbUser.firstName} ${dbUser.lastName || ''}`.trim()
               : dbUser.email,
             email: dbUser.email,
           }));
@@ -84,7 +82,7 @@ export default function StreamMessagesPage() {
       }
       return [];
     } catch (error) {
-      console.error("Failed to fetch users:", error);
+      console.error('Failed to fetch users:', error);
       return [];
     }
   };
@@ -96,35 +94,35 @@ export default function StreamMessagesPage() {
 
       try {
         setLoading(true);
-        console.log("🚀 Initializing Stream Chat...");
+        console.log('🚀 Initializing Stream Chat...');
 
         // First sync users to Stream
-        const syncResponse = await fetch("/api/stream/sync-users", {
-          method: "POST",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
+        const syncResponse = await fetch('/api/stream/sync-users', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
         });
 
         if (!syncResponse.ok) {
-          throw new Error("Failed to sync users to Stream");
+          throw new Error('Failed to sync users to Stream');
         }
 
-        console.log("✅ Users synced to Stream successfully");
+        console.log('✅ Users synced to Stream successfully');
 
         // Get Stream token for current user
-        const tokenResponse = await fetch("/api/stream/token", {
-          method: "POST",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
+        const tokenResponse = await fetch('/api/stream/token', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId: user.id.toString() }),
         });
 
         if (!tokenResponse.ok) {
-          throw new Error("Failed to get Stream token");
+          throw new Error('Failed to get Stream token');
         }
 
         const { token, apiKey } = await tokenResponse.json();
-        console.log("✅ Stream token received");
+        console.log('✅ Stream token received');
 
         // Initialize Stream Chat client
         const chatClient = StreamChat.getInstance(apiKey);
@@ -134,13 +132,13 @@ export default function StreamMessagesPage() {
           {
             id: user.id.toString(),
             name: user.firstName
-              ? `${user.firstName} ${user.lastName || ""}`.trim()
+              ? `${user.firstName} ${user.lastName || ''}`.trim()
               : user.email,
           },
           token
         );
 
-        console.log("✅ Connected to Stream Chat");
+        console.log('✅ Connected to Stream Chat');
         setClient(chatClient);
 
         // Fetch available users for creating channels
@@ -149,13 +147,13 @@ export default function StreamMessagesPage() {
 
         setError(null);
       } catch (err) {
-        console.error("Stream Chat initialization failed:", err);
+        console.error('Stream Chat initialization failed:', err);
         setError(err.message);
         toast({
-          title: "Connection Failed",
+          title: 'Connection Failed',
           description:
-            "Unable to connect to messaging service. Please try again.",
-          variant: "destructive",
+            'Unable to connect to messaging service. Please try again.',
+          variant: 'destructive',
         });
       } finally {
         setLoading(false);
@@ -180,7 +178,7 @@ export default function StreamMessagesPage() {
 
       const currentUser = user as any; // Type assertion since we've validated with isValidUser
       let channel;
-      if (channelType === "messaging") {
+      if (channelType === 'messaging') {
         // For messaging channels, use auto-generated ID
         channel = client.channel(channelType, {
           members: [currentUser.id.toString(), ...selectedUsers],
@@ -195,20 +193,21 @@ export default function StreamMessagesPage() {
       await channel.create();
       setActiveChannel(channel);
       setShowNewChannel(false);
-      setChannelName("");
+      setChannelName('');
       setSelectedUsers([]);
 
       toast({
-        title: "Channel Created",
-        description: `${channelName ||
-          "Direct message"} has been created successfully.`,
+        title: 'Channel Created',
+        description: `${
+          channelName || 'Direct message'
+        } has been created successfully.`,
       });
     } catch (err) {
-      console.error("Failed to create channel:", err);
+      console.error('Failed to create channel:', err);
       toast({
-        title: "Creation Failed",
-        description: "Unable to create channel. Please try again.",
-        variant: "destructive",
+        title: 'Creation Failed',
+        description: 'Unable to create channel. Please try again.',
+        variant: 'destructive',
       });
     } finally {
       setLoading(false);
@@ -258,7 +257,7 @@ export default function StreamMessagesPage() {
   }
 
   const filters = {
-    members: { $in: [isValidUser(user) ? user.id.toString() : ""] },
+    members: { $in: [isValidUser(user) ? user.id.toString() : ''] },
   };
   const sort = [{ last_message_at: -1 }] as const;
 
@@ -303,7 +302,7 @@ export default function StreamMessagesPage() {
                   id="channelType"
                   value={channelType}
                   onChange={(e) =>
-                    setChannelType(e.target.value as "messaging" | "team")
+                    setChannelType(e.target.value as 'messaging' | 'team')
                   }
                   className="w-full px-3 py-2 border rounded-md"
                 >
@@ -349,7 +348,7 @@ export default function StreamMessagesPage() {
                     Creating...
                   </>
                 ) : (
-                  "Create Channel"
+                  'Create Channel'
                 )}
               </Button>
             </div>

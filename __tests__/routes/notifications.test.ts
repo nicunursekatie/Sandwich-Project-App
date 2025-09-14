@@ -1,13 +1,18 @@
 /**
  * Notifications API Integration Tests
- * 
+ *
  * Tests for notification system endpoints including email notifications,
  * SMS announcements, shoutouts, and in-app notifications.
  * These tests verify endpoint parity during migration.
  */
 
 import request from 'supertest';
-import { createTestSession, cleanupTestData, createAuthenticatedRequest, TEST_CONSTANTS } from '../setup';
+import {
+  createTestSession,
+  cleanupTestData,
+  createAuthenticatedRequest,
+  TEST_CONSTANTS,
+} from '../setup';
 
 // TODO: Import actual Express app when available
 // import { app } from '../../server';
@@ -20,7 +25,7 @@ describe('Notifications API Endpoint Parity Tests', () => {
   beforeAll(async () => {
     // TODO: Initialize test app and database
     // app = await createTestApp();
-    
+
     adminSession = await createTestSession(app, 'admin');
     userSession = await createTestSession(app, 'user');
   }, TEST_CONSTANTS.TIMEOUT);
@@ -40,7 +45,7 @@ describe('Notifications API Endpoint Parity Tests', () => {
           recipients: ['test@sandwich.project'],
           subject: 'Test Notification',
           message: 'This is a test email notification',
-          type: 'announcement'
+          type: 'announcement',
         };
 
         // TODO: Implement when app is available
@@ -61,7 +66,7 @@ describe('Notifications API Endpoint Parity Tests', () => {
         const emailData = {
           recipients: ['test@sandwich.project'],
           subject: 'Unauthorized Email',
-          message: 'This should not be sent'
+          message: 'This should not be sent',
         };
 
         // TODO: Implement when app is available
@@ -78,7 +83,7 @@ describe('Notifications API Endpoint Parity Tests', () => {
         const invalidEmailData = {
           recipients: ['invalid-email'],
           subject: 'Test',
-          message: 'Test message'
+          message: 'Test message',
         };
 
         // TODO: Implement when app is available
@@ -128,7 +133,7 @@ describe('Notifications API Endpoint Parity Tests', () => {
         const smsData = {
           phoneNumbers: ['+1234567890'],
           message: 'Test SMS notification',
-          type: 'announcement'
+          type: 'announcement',
         };
 
         // TODO: Implement when app is available
@@ -148,7 +153,7 @@ describe('Notifications API Endpoint Parity Tests', () => {
       test('should validate phone numbers', async () => {
         const invalidSmsData = {
           phoneNumbers: ['invalid-phone'],
-          message: 'Test message'
+          message: 'Test message',
         };
 
         // TODO: Implement when app is available
@@ -164,7 +169,7 @@ describe('Notifications API Endpoint Parity Tests', () => {
       test('should enforce message length limits', async () => {
         const longSmsData = {
           phoneNumbers: ['+1234567890'],
-          message: 'A'.repeat(1000) // Very long message
+          message: 'A'.repeat(1000), // Very long message
         };
 
         // TODO: Implement when app is available
@@ -185,7 +190,7 @@ describe('Notifications API Endpoint Parity Tests', () => {
         const shoutoutData = {
           recipientId: 'recipient-user-id',
           message: 'Great job on the project!',
-          category: 'teamwork'
+          category: 'teamwork',
         };
 
         // TODO: Implement when app is available
@@ -206,7 +211,7 @@ describe('Notifications API Endpoint Parity Tests', () => {
       test('should validate shoutout recipients exist', async () => {
         const invalidShoutoutData = {
           recipientId: 'non-existent-user',
-          message: 'Great job!'
+          message: 'Great job!',
         };
 
         // TODO: Implement when app is available
@@ -357,15 +362,15 @@ describe('Notifications API Endpoint Parity Tests', () => {
           email: {
             announcements: true,
             shoutouts: false,
-            projectUpdates: true
+            projectUpdates: true,
           },
           sms: {
             announcements: false,
-            emergencyOnly: true
+            emergencyOnly: true,
           },
           inApp: {
-            all: true
-          }
+            all: true,
+          },
         };
 
         // TODO: Implement when app is available

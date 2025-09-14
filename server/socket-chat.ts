@@ -1,10 +1,10 @@
-import { Server as SocketServer } from "socket.io";
-import { Server as HttpServer } from "http";
-import { storage } from "./storage";
-import { EmailNotificationService } from "./services/email-notification-service";
-import { db } from "./db";
-import { users } from "@shared/schema";
-import { eq } from "drizzle-orm";
+import { Server as SocketServer } from 'socket.io';
+import { Server as HttpServer } from 'http';
+import { storage } from './storage';
+import { EmailNotificationService } from './services/email-notification-service';
+import { db } from './db';
+import { users } from '@shared/schema';
+import { eq } from 'drizzle-orm';
 
 interface ChatMessage {
   id: string;
@@ -26,43 +26,43 @@ interface ConnectedUser {
 export function setupSocketChat(httpServer: HttpServer) {
   const io = new SocketServer(httpServer, {
     cors: {
-      origin: "*",
-      methods: ["GET", "POST"],
+      origin: '*',
+      methods: ['GET', 'POST'],
       credentials: true,
     },
-    path: "/socket.io/",
-    transports: ["websocket", "polling"],
+    path: '/socket.io/',
+    transports: ['websocket', 'polling'],
     allowEIO3: true,
   });
 
-  console.log("✓ Socket.IO server initialized on /socket.io/");
+  console.log('✓ Socket.IO server initialized on /socket.io/');
 
   // Store active users
   const activeUsers = new Map<string, ConnectedUser>();
 
-  io.on("connection", (socket) => {
+  io.on('connection', (socket) => {
     console.log(`✅ Socket.IO client connected: ${socket.id}`);
 
     // Send available rooms to connected client
-    socket.on("get-rooms", () => {
+    socket.on('get-rooms', () => {
       const availableRooms = [
-        { id: "general", name: "General Chat" },
-        { id: "core-team", name: "Core Team" },
-        { id: "grants-committee", name: "Grants Committee" },
-        { id: "events-committee", name: "Events Committee" },
-        { id: "board-chat", name: "Board Chat" },
-        { id: "web-committee", name: "Web Committee" },
-        { id: "volunteer-management", name: "Volunteer Management" },
-        { id: "host", name: "Host Chat" },
-        { id: "driver", name: "Driver Chat" },
-        { id: "recipient", name: "Recipient Chat" },
+        { id: 'general', name: 'General Chat' },
+        { id: 'core-team', name: 'Core Team' },
+        { id: 'grants-committee', name: 'Grants Committee' },
+        { id: 'events-committee', name: 'Events Committee' },
+        { id: 'board-chat', name: 'Board Chat' },
+        { id: 'web-committee', name: 'Web Committee' },
+        { id: 'volunteer-management', name: 'Volunteer Management' },
+        { id: 'host', name: 'Host Chat' },
+        { id: 'driver', name: 'Driver Chat' },
+        { id: 'recipient', name: 'Recipient Chat' },
       ];
-      socket.emit("rooms", { available: availableRooms });
+      socket.emit('rooms', { available: availableRooms });
     });
 
     // Handle joining a channel
     socket.on(
-      "join-channel",
+      'join-channel',
       async (data: { channel: string; userId: string; userName: string }) => {
         try {
           const { channel, userId, userName } = data;
@@ -92,7 +92,7 @@ export function setupSocketChat(httpServer: HttpServer) {
                 room: msg.channel, // Add room property for client compatibility
               }))
               .reverse();
-            socket.emit("message-history", {
+            socket.emit('message-history', {
               room: channel,
               messages: formattedMessages,
             });
@@ -104,30 +104,30 @@ export function setupSocketChat(httpServer: HttpServer) {
                 `Marked all messages in ${channel} as read for user ${userId}`
               );
             } catch (markReadError) {
-              console.error("Error marking messages as read:", markReadError);
+              console.error('Error marking messages as read:', markReadError);
             }
           } catch (error) {
-            console.error("Error loading message history:", error);
-            socket.emit("message-history", []);
+            console.error('Error loading message history:', error);
+            socket.emit('message-history', []);
           }
 
           // Send confirmation
-          socket.emit("joined-channel", { channel, userName });
+          socket.emit('joined-channel', { channel, userName });
         } catch (error) {
-          console.error("Error joining channel:", error);
-          socket.emit("error", { message: "Failed to join channel" });
+          console.error('Error joining channel:', error);
+          socket.emit('error', { message: 'Failed to join channel' });
         }
       }
     );
 
     // Handle sending messages
     socket.on(
-      "send-message",
+      'send-message',
       async ({ channel, content }: { channel: string; content: string }) => {
         try {
           const user = activeUsers.get(socket.id);
           if (!user) {
-            socket.emit("error", { message: "User not found" });
+            socket.emit('error', { message: 'User not found' });
             return;
           }
 
@@ -150,13 +150,13 @@ export function setupSocketChat(httpServer: HttpServer) {
           };
 
           // Broadcast to all users in the channel
-          io.to(channel).emit("new-message", message);
+          io.to(channel).emit('new-message', message);
 
           // Trigger notification system for new messages
           if ((global as any).broadcastNewMessage) {
             (global as any).broadcastNewMessage({
-              type: "notification",
-              message: "New chat message received",
+              type: 'notification',
+              message: 'New chat message received',
               userId: user.id,
               channel: channel,
             });
@@ -172,7 +172,7 @@ export function setupSocketChat(httpServer: HttpServer) {
               .limit(1);
 
             const senderEmail =
-              senderDetails[0]?.email || "unknown@example.com";
+              senderDetails[0]?.email || 'unknown@example.com';
 
             // Process message for mentions and send notifications
             await EmailNotificationService.processChatMessage(
@@ -185,7 +185,7 @@ export function setupSocketChat(httpServer: HttpServer) {
             );
           } catch (notificationError) {
             console.error(
-              "Error processing chat mention notifications:",
+              'Error processing chat mention notifications:',
               notificationError
             );
             // Don't fail the message send if notifications fail
@@ -195,15 +195,15 @@ export function setupSocketChat(httpServer: HttpServer) {
             `Message saved and sent to ${channel} by ${user.userName}: ${content}`
           );
         } catch (error) {
-          console.error("Error sending message:", error);
-          socket.emit("error", { message: "Failed to send message" });
+          console.error('Error sending message:', error);
+          socket.emit('error', { message: 'Failed to send message' });
         }
       }
     );
 
     // Handle message editing
     socket.on(
-      "edit-message",
+      'edit-message',
       async ({
         messageId,
         newContent,
@@ -214,19 +214,19 @@ export function setupSocketChat(httpServer: HttpServer) {
         try {
           const user = activeUsers.get(socket.id);
           if (!user) {
-            socket.emit("error", { message: "User not found" });
+            socket.emit('error', { message: 'User not found' });
             return;
           }
 
           // Get the message to verify ownership
           // Get all messages from all channels to find the specific one
           const allChannels = [
-            "general",
-            "core-team",
-            "committee",
-            "host",
-            "driver",
-            "recipient",
+            'general',
+            'core-team',
+            'committee',
+            'host',
+            'driver',
+            'recipient',
           ];
           let messageToEdit = null;
 
@@ -242,13 +242,13 @@ export function setupSocketChat(httpServer: HttpServer) {
           }
 
           if (!messageToEdit) {
-            socket.emit("error", { message: "Message not found" });
+            socket.emit('error', { message: 'Message not found' });
             return;
           }
 
           if (messageToEdit.userId !== user.id) {
-            socket.emit("error", {
-              message: "You can only edit your own messages",
+            socket.emit('error', {
+              message: 'You can only edit your own messages',
             });
             return;
           }
@@ -268,38 +268,38 @@ export function setupSocketChat(httpServer: HttpServer) {
           };
 
           // Broadcast the updated message to all users in the channel
-          io.to(messageToEdit.channel).emit("message-edited", updatedMessage);
+          io.to(messageToEdit.channel).emit('message-edited', updatedMessage);
 
           console.log(
             `Message ${messageId} edited by ${user.userName} in ${messageToEdit.channel}`
           );
         } catch (error) {
-          console.error("Error editing message:", error);
-          socket.emit("error", { message: "Failed to edit message" });
+          console.error('Error editing message:', error);
+          socket.emit('error', { message: 'Failed to edit message' });
         }
       }
     );
 
     // Handle message deletion
     socket.on(
-      "delete-message",
+      'delete-message',
       async ({ messageId }: { messageId: number }) => {
         try {
           const user = activeUsers.get(socket.id);
           if (!user) {
-            socket.emit("error", { message: "User not found" });
+            socket.emit('error', { message: 'User not found' });
             return;
           }
 
           // Get the message to verify ownership or admin rights
           // Get all messages from all channels to find the specific one
           const allChannels = [
-            "general",
-            "core-team",
-            "committee",
-            "host",
-            "driver",
-            "recipient",
+            'general',
+            'core-team',
+            'committee',
+            'host',
+            'driver',
+            'recipient',
           ];
           let messageToDelete = null;
 
@@ -315,7 +315,7 @@ export function setupSocketChat(httpServer: HttpServer) {
           }
 
           if (!messageToDelete) {
-            socket.emit("error", { message: "Message not found" });
+            socket.emit('error', { message: 'Message not found' });
             return;
           }
 
@@ -323,13 +323,13 @@ export function setupSocketChat(httpServer: HttpServer) {
           const isOwner = messageToDelete.userId === user.id;
           // Check for admin permissions - expand this based on your auth system
           const isAdmin =
-            user.id === "admin@sandwich.project" ||
-            user.userName.toLowerCase().includes("admin") ||
-            user.id === "user_1751071509329_mrkw2z95z"; // Katie's admin account
+            user.id === 'admin@sandwich.project' ||
+            user.userName.toLowerCase().includes('admin') ||
+            user.id === 'user_1751071509329_mrkw2z95z'; // Katie's admin account
 
           if (!isOwner && !isAdmin) {
-            socket.emit("error", {
-              message: "You can only delete your own messages",
+            socket.emit('error', {
+              message: 'You can only delete your own messages',
             });
             return;
           }
@@ -338,7 +338,7 @@ export function setupSocketChat(httpServer: HttpServer) {
           await storage.deleteChatMessage(messageId);
 
           // Broadcast the deletion to all users in the channel
-          io.to(messageToDelete.channel).emit("message-deleted", {
+          io.to(messageToDelete.channel).emit('message-deleted', {
             messageId,
             deletedBy: user.userName,
           });
@@ -347,14 +347,14 @@ export function setupSocketChat(httpServer: HttpServer) {
             `Message ${messageId} deleted by ${user.userName} in ${messageToDelete.channel}`
           );
         } catch (error) {
-          console.error("Error deleting message:", error);
-          socket.emit("error", { message: "Failed to delete message" });
+          console.error('Error deleting message:', error);
+          socket.emit('error', { message: 'Failed to delete message' });
         }
       }
     );
 
     // Get history for a channel
-    socket.on("get-history", async (channel: string) => {
+    socket.on('get-history', async (channel: string) => {
       try {
         const messageHistory = await storage.getChatMessages(channel, 50);
         const formattedMessages = messageHistory
@@ -364,7 +364,7 @@ export function setupSocketChat(httpServer: HttpServer) {
             room: msg.channel,
           }))
           .reverse();
-        socket.emit("message-history", {
+        socket.emit('message-history', {
           room: channel,
           messages: formattedMessages,
         });
@@ -372,14 +372,14 @@ export function setupSocketChat(httpServer: HttpServer) {
           `Sent message history for ${channel}: ${formattedMessages.length} messages`
         );
       } catch (error) {
-        console.error("Error loading message history:", error);
-        socket.emit("message-history", { room: channel, messages: [] });
+        console.error('Error loading message history:', error);
+        socket.emit('message-history', { room: channel, messages: [] });
       }
     });
 
     // Handle leaving a channel
     socket.on(
-      "leave-channel",
+      'leave-channel',
       (data: { channel: string; userId: string; userName: string }) => {
         const { channel, userName } = data;
         socket.leave(channel);
@@ -388,7 +388,7 @@ export function setupSocketChat(httpServer: HttpServer) {
     );
 
     // Handle disconnect
-    socket.on("disconnect", () => {
+    socket.on('disconnect', () => {
       activeUsers.delete(socket.id);
       console.log(`Socket disconnected: ${socket.id}`);
     });

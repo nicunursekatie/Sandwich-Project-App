@@ -1,18 +1,26 @@
-import { useState, useEffect, useRef } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { MessageCircle, Send, User, Crown, Building2, ChevronLeft, Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { useState, useEffect, useRef } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import {
+  MessageCircle,
+  Send,
+  User,
+  Crown,
+  Building2,
+  ChevronLeft,
+  Trash2,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 // import { ScrollArea } from "@/components/ui/scroll-area";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
-import { useMessageReads } from "@/hooks/useMessageReads";
-import { MessageLikeButton } from "./message-like-button";
-import type { Host, Message } from "@shared/schema";
+import { apiRequest, queryClient } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import { useMessageReads } from '@/hooks/useMessageReads';
+import { MessageLikeButton } from './message-like-button';
+import type { Host, Message } from '@shared/schema';
 
 interface HostWithContacts extends Host {
   contacts: any[];
@@ -22,15 +30,15 @@ export default function HostChat() {
   const { toast } = useToast();
   const { user } = useAuth();
   const [selectedHost, setSelectedHost] = useState<Host | null>(null);
-  const [newMessage, setNewMessage] = useState("");
+  const [newMessage, setNewMessage] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  
+
   // Initialize read tracking hook
   const { useAutoMarkAsRead } = useMessageReads();
 
   // Get user profile for display name
   const { data: userProfile } = useQuery({
-    queryKey: ["/api/auth/profile"],
+    queryKey: ['/api/auth/profile'],
     enabled: !!user,
   });
 
@@ -54,10 +62,11 @@ export default function HostChat() {
   const canDeleteMessage = (message: Message) => {
     const currentUser = user as any;
     const isOwner = message.sender === getUserName();
-    const isSuperAdmin = currentUser?.role === "super_admin";
-    const isAdmin = currentUser?.role === "admin";
-    const hasModeratePermission = currentUser?.permissions?.includes("moderate_messages");
-    
+    const isSuperAdmin = currentUser?.role === 'super_admin';
+    const isAdmin = currentUser?.role === 'admin';
+    const hasModeratePermission =
+      currentUser?.permissions?.includes('moderate_messages');
+
     return isOwner || isSuperAdmin || isAdmin || hasModeratePermission;
   };
 
@@ -67,13 +76,13 @@ export default function HostChat() {
 
   // Get or create host conversation
   const { data: hostConversation } = useQuery({
-    queryKey: ["/api/conversations/host", selectedHost?.id],
+    queryKey: ['/api/conversations/host', selectedHost?.id],
     queryFn: async () => {
       if (!selectedHost) return null;
       const response = await apiRequest('POST', '/api/conversations', {
         type: 'host',
         name: `${selectedHost.name} Host Chat`,
-        metadata: { hostId: selectedHost.id }
+        metadata: { hostId: selectedHost.id },
       });
       return response;
     },
@@ -82,45 +91,55 @@ export default function HostChat() {
 
   // Fetch messages for host conversation
   const { data: messages = [] } = useQuery<Message[]>({
-    queryKey: ["/api/conversations", hostConversation?.id, "messages"],
+    queryKey: ['/api/conversations', hostConversation?.id, 'messages'],
     enabled: !!hostConversation,
     refetchInterval: 3000,
   });
-  const [optimisticMessages, setOptimisticMessages] = useState<Message[] | null>(null);
+  const [optimisticMessages, setOptimisticMessages] = useState<
+    Message[] | null
+  >(null);
   const displayedMessages = optimisticMessages || messages;
 
   // Auto-mark messages as read when viewing host chat
   useAutoMarkAsRead(
-    selectedHost ? `host-${selectedHost.id}` : "", 
-    messages, 
+    selectedHost ? `host-${selectedHost.id}` : '',
+    messages,
     !!selectedHost
   );
 
   useEffect(() => {
     setOptimisticMessages(null);
     if (hostConversation?.id) {
-      queryClient.invalidateQueries({ queryKey: ["/api/conversations", hostConversation.id, "messages"] });
+      queryClient.invalidateQueries({
+        queryKey: ['/api/conversations', hostConversation.id, 'messages'],
+      });
     }
   }, [hostConversation?.id]);
 
   const sendMessageMutation = useMutation({
     mutationFn: async (data: { content: string }) => {
-      if (!hostConversation) throw new Error("No conversation available");
-      return await apiRequest('POST', `/api/conversations/${hostConversation.id}/messages`, {
-        content: data.content
-      });
+      if (!hostConversation) throw new Error('No conversation available');
+      return await apiRequest(
+        'POST',
+        `/api/conversations/${hostConversation.id}/messages`,
+        {
+          content: data.content,
+        }
+      );
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/conversations", hostConversation?.id, "messages"] });
-      setNewMessage("");
+      queryClient.invalidateQueries({
+        queryKey: ['/api/conversations', hostConversation?.id, 'messages'],
+      });
+      setNewMessage('');
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to send message",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to send message',
+        variant: 'destructive',
       });
-    }
+    },
   });
 
   const deleteMessageMutation = useMutation({
@@ -134,34 +153,38 @@ export default function HostChat() {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/conversations", hostConversation?.id, "messages"] });
+      queryClient.invalidateQueries({
+        queryKey: ['/api/conversations', hostConversation?.id, 'messages'],
+      });
       setOptimisticMessages(null);
       toast({
-        title: "Message deleted",
-        description: "The message has been removed",
+        title: 'Message deleted',
+        description: 'The message has been removed',
       });
     },
     onError: () => {
       setOptimisticMessages(null);
-      queryClient.invalidateQueries({ queryKey: ["/api/conversations", hostConversation?.id, "messages"] });
-      toast({
-        title: "Error",
-        description: "Failed to delete message",
-        variant: "destructive",
+      queryClient.invalidateQueries({
+        queryKey: ['/api/conversations', hostConversation?.id, 'messages'],
       });
-    }
+      toast({
+        title: 'Error',
+        description: 'Failed to delete message',
+        variant: 'destructive',
+      });
+    },
   });
 
   const handleSendMessage = () => {
     if (!newMessage.trim()) return;
 
     sendMessageMutation.mutate({
-      content: newMessage.trim()
+      content: newMessage.trim(),
     });
   };
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   if (!selectedHost) {
@@ -171,11 +194,11 @@ export default function HostChat() {
           <MessageCircle className="w-6 h-6 mr-2" />
           Host Communication Hub
         </h2>
-        
+
         <div className="grid gap-4">
           {hosts.map((host) => (
-            <Card 
-              key={host.id} 
+            <Card
+              key={host.id}
               className="cursor-pointer hover:shadow-md transition-shadow"
               onClick={() => setSelectedHost(host)}
             >
@@ -183,8 +206,15 @@ export default function HostChat() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
                     <Avatar className="w-10 h-10">
-                      <AvatarFallback className="text-white" style={{backgroundColor: 'var(--tsp-teal)'}}>
-                        {host.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                      <AvatarFallback
+                        className="text-white"
+                        style={{ backgroundColor: 'var(--tsp-teal)' }}
+                      >
+                        {host.name
+                          .split(' ')
+                          .map((n) => n[0])
+                          .join('')
+                          .slice(0, 2)}
                       </AvatarFallback>
                     </Avatar>
                     <div>
@@ -194,11 +224,17 @@ export default function HostChat() {
                           <Crown className="w-4 h-4 ml-2 text-amber-500" />
                         )}
                       </h3>
-                      <p className="text-sm text-gray-600">{host.address || 'No address'}</p>
+                      <p className="text-sm text-gray-600">
+                        {host.address || 'No address'}
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Badge variant={host.status === 'active' ? 'default' : 'secondary'}>
+                    <Badge
+                      variant={
+                        host.status === 'active' ? 'default' : 'secondary'
+                      }
+                    >
                       {host.status}
                     </Badge>
                     <Building2 className="w-4 h-4 text-gray-400" />
@@ -215,7 +251,7 @@ export default function HostChat() {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="p-4 border-b bg-white"
+      <div className="p-4 border-b bg-white">
         <div className="flex items-center space-x-3">
           <Button
             variant="ghost"
@@ -226,8 +262,15 @@ export default function HostChat() {
             <ChevronLeft className="w-4 h-4" />
           </Button>
           <Avatar className="w-8 h-8">
-            <AvatarFallback className="text-white text-sm" style={{backgroundColor: 'var(--tsp-teal)'}}>
-              {selectedHost.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+            <AvatarFallback
+              className="text-white text-sm"
+              style={{ backgroundColor: 'var(--tsp-teal)' }}
+            >
+              {selectedHost.name
+                .split(' ')
+                .map((n) => n[0])
+                .join('')
+                .slice(0, 2)}
             </AvatarFallback>
           </Avatar>
           <div>
@@ -255,13 +298,19 @@ export default function HostChat() {
               <div key={message.id} className="flex space-x-3 group">
                 <Avatar className="w-8 h-8">
                   <AvatarFallback className="bg-gray-500 text-white text-xs">
-                    {message.sender?.split(' ').map(n => n[0]).join('').slice(0, 2) || 'TM'}
+                    {message.sender
+                      ?.split(' ')
+                      .map((n) => n[0])
+                      .join('')
+                      .slice(0, 2) || 'TM'}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center space-x-2">
-                      <span className="font-medium text-sm">{message.sender}</span>
+                      <span className="font-medium text-sm">
+                        {message.sender}
+                      </span>
                       <span className="text-xs text-gray-500">
                         {new Date(message.timestamp).toLocaleTimeString()}
                       </span>
@@ -298,7 +347,9 @@ export default function HostChat() {
       <div className="p-4 border-t bg-white space-y-3">
         <div className="flex items-center space-x-2">
           <span className="text-sm font-medium text-gray-600">Posting as:</span>
-          <span className="text-sm font-semibold text-gray-800">{getUserName()}</span>
+          <span className="text-sm font-semibold text-gray-800">
+            {getUserName()}
+          </span>
         </div>
         <div className="flex space-x-2">
           <Input
@@ -313,7 +364,7 @@ export default function HostChat() {
             }}
             className="flex-1"
           />
-          <Button 
+          <Button
             onClick={handleSendMessage}
             disabled={!newMessage.trim() || sendMessageMutation.isPending}
             size="sm"

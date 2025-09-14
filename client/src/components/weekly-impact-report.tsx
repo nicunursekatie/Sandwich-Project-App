@@ -1,17 +1,17 @@
-import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useState } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '@/lib/queryClient';
 import {
   CalendarDays,
   Download,
@@ -29,10 +29,10 @@ import {
   Target,
   Clock,
   Star,
-} from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
+} from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
 
 interface WeeklyReportData {
   id?: string;
@@ -85,7 +85,7 @@ interface WeeklyReportData {
       individual: number;
       group: number;
       total: number;
-      trend: "up" | "down" | "stable";
+      trend: 'up' | 'down' | 'stable';
     }>;
     needs_attention: Array<{
       name: string;
@@ -136,33 +136,33 @@ interface WeeklyReportData {
 export default function WeeklyImpactReport() {
   const { toast } = useToast();
   const [weekEndingDate, setWeekEndingDate] = useState(
-    new Date().toISOString().split("T")[0]
+    new Date().toISOString().split('T')[0]
   );
   const [reportData, setReportData] = useState<WeeklyReportData | null>(null);
 
   // Generate weekly impact report
   const generateReportMutation = useMutation({
     mutationFn: async (weekEnding: string) => {
-      return apiRequest("POST", "/api/reports/generate", {
-        type: "weekly",
-        reportType: "weekly",
+      return apiRequest('POST', '/api/reports/generate', {
+        type: 'weekly',
+        reportType: 'weekly',
         targetDate: weekEnding,
-        format: "pdf",
+        format: 'pdf',
       });
     },
     onSuccess: (data) => {
       setReportData(data.data);
       toast({
-        title: "Report Generated",
-        description: "Weekly impact report has been successfully generated.",
+        title: 'Report Generated',
+        description: 'Weekly impact report has been successfully generated.',
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Generation Failed",
+        title: 'Generation Failed',
         description:
-          error.message || "Failed to generate weekly impact report.",
-        variant: "destructive",
+          error.message || 'Failed to generate weekly impact report.',
+        variant: 'destructive',
       });
     },
   });
@@ -171,12 +171,12 @@ export default function WeeklyImpactReport() {
   const downloadPdfMutation = useMutation({
     mutationFn: async (reportId: string) => {
       const response = await fetch(`/api/reports/download/${reportId}`);
-      if (!response.ok) throw new Error("Failed to download PDF");
+      if (!response.ok) throw new Error('Failed to download PDF');
       const blob = await response.blob();
 
       // Create download link
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
+      const a = document.createElement('a');
       a.href = url;
       a.download = `weekly-impact-report-${weekEndingDate}.pdf`;
       document.body.appendChild(a);
@@ -186,15 +186,15 @@ export default function WeeklyImpactReport() {
     },
     onSuccess: () => {
       toast({
-        title: "Download Started",
-        description: "Weekly impact report PDF download has started.",
+        title: 'Download Started',
+        description: 'Weekly impact report PDF download has started.',
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Download Failed",
-        description: error.message || "Failed to download PDF report.",
-        variant: "destructive",
+        title: 'Download Failed',
+        description: error.message || 'Failed to download PDF report.',
+        variant: 'destructive',
       });
     },
   });
@@ -209,32 +209,32 @@ export default function WeeklyImpactReport() {
     }
   };
 
-  const getTrendIcon = (trend: "up" | "down" | "stable") => {
+  const getTrendIcon = (trend: 'up' | 'down' | 'stable') => {
     switch (trend) {
-      case "up":
+      case 'up':
         return <ArrowUp className="h-4 w-4 text-green-600" />;
-      case "down":
+      case 'down':
         return <ArrowDown className="h-4 w-4 text-red-600" />;
-      case "stable":
+      case 'stable':
         return <Minus className="h-4 w-4 text-gray-600" />;
     }
   };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "high_performer":
+      case 'high_performer':
         return (
           <Badge className="bg-green-100 text-green-800 border-green-200">
             High Performer
           </Badge>
         );
-      case "needs_attention":
+      case 'needs_attention':
         return (
           <Badge className="bg-red-100 text-red-800 border-red-200">
             Needs Attention
           </Badge>
         );
-      case "steady_contributor":
+      case 'steady_contributor':
         return (
           <Badge className="bg-blue-100 text-blue-800 border-blue-200">
             Steady Contributor
@@ -250,7 +250,7 @@ export default function WeeklyImpactReport() {
   };
 
   const formatPercentage = (num: number) => {
-    return (num * 100).toFixed(1) + "%";
+    return (num * 100).toFixed(1) + '%';
   };
 
   return (
@@ -344,11 +344,11 @@ export default function WeeklyImpactReport() {
                 Executive Summary
               </CardTitle>
               <CardDescription>
-                Collection Week:{" "}
+                Collection Week:{' '}
                 {new Date(
                   reportData.collection_week.start
-                ).toLocaleDateString()}{" "}
-                -{" "}
+                ).toLocaleDateString()}{' '}
+                -{' '}
                 {new Date(reportData.collection_week.end).toLocaleDateString()}
               </CardDescription>
             </CardHeader>
@@ -367,7 +367,7 @@ export default function WeeklyImpactReport() {
                   </div>
                   <div className="text-sm text-gray-600">Active Locations</div>
                   <div className="text-xs text-gray-500 mt-1">
-                    {formatPercentage(reportData.summary.participation_rate)}{" "}
+                    {formatPercentage(reportData.summary.participation_rate)}{' '}
                     participation
                   </div>
                 </div>
@@ -375,11 +375,11 @@ export default function WeeklyImpactReport() {
                   <div
                     className={`text-2xl md:text-3xl font-bold ${
                       reportData.summary.week_over_week_change >= 0
-                        ? "text-green-600"
-                        : "text-red-600"
+                        ? 'text-green-600'
+                        : 'text-red-600'
                     }`}
                   >
-                    {reportData.summary.week_over_week_change >= 0 ? "+" : ""}
+                    {reportData.summary.week_over_week_change >= 0 ? '+' : ''}
                     {formatPercentage(reportData.summary.week_over_week_change)}
                   </div>
                   <div className="text-sm text-gray-600">Week-over-Week</div>
@@ -396,7 +396,7 @@ export default function WeeklyImpactReport() {
                   <div className="text-xs text-gray-500 mt-1">
                     {formatPercentage(
                       reportData.summary.monthly_progress.percentage
-                    )}{" "}
+                    )}{' '}
                     of {formatNumber(reportData.summary.monthly_progress.goal)}
                   </div>
                 </div>
@@ -477,14 +477,14 @@ export default function WeeklyImpactReport() {
                               className={`text-center p-2 md:p-3 font-medium text-sm md:text-base ${
                                 reportData.metrics_table.total_sandwiches
                                   .change >= 0
-                                  ? "text-green-600"
-                                  : "text-red-600"
+                                  ? 'text-green-600'
+                                  : 'text-red-600'
                               }`}
                             >
                               {reportData.metrics_table.total_sandwiches
                                 .change >= 0
-                                ? "+"
-                                : ""}
+                                ? '+'
+                                : ''}
                               {formatNumber(
                                 reportData.metrics_table.total_sandwiches.change
                               )}
@@ -516,14 +516,14 @@ export default function WeeklyImpactReport() {
                               className={`text-center p-3 font-medium ${
                                 reportData.metrics_table.locations_participating
                                   .change >= 0
-                                  ? "text-green-600"
-                                  : "text-red-600"
+                                  ? 'text-green-600'
+                                  : 'text-red-600'
                               }`}
                             >
                               {reportData.metrics_table.locations_participating
                                 .change >= 0
-                                ? "+"
-                                : ""}
+                                ? '+'
+                                : ''}
                               {
                                 reportData.metrics_table.locations_participating
                                   .change
@@ -556,14 +556,14 @@ export default function WeeklyImpactReport() {
                               className={`text-center p-3 font-medium ${
                                 reportData.metrics_table.avg_per_location
                                   .change >= 0
-                                  ? "text-green-600"
-                                  : "text-red-600"
+                                  ? 'text-green-600'
+                                  : 'text-red-600'
                               }`}
                             >
                               {reportData.metrics_table.avg_per_location
                                 .change >= 0
-                                ? "+"
-                                : ""}
+                                ? '+'
+                                : ''}
                               {Math.round(
                                 reportData.metrics_table.avg_per_location.change
                               )}
@@ -595,14 +595,14 @@ export default function WeeklyImpactReport() {
                               className={`text-center p-3 font-medium ${
                                 reportData.metrics_table.group_collections
                                   .change >= 0
-                                  ? "text-green-600"
-                                  : "text-red-600"
+                                  ? 'text-green-600'
+                                  : 'text-red-600'
                               }`}
                             >
                               {reportData.metrics_table.group_collections
                                 .change >= 0
-                                ? "+"
-                                : ""}
+                                ? '+'
+                                : ''}
                               {formatNumber(
                                 reportData.metrics_table.group_collections
                                   .change
@@ -628,38 +628,38 @@ export default function WeeklyImpactReport() {
                             className="bg-gray-50 rounded-lg p-3 border"
                           >
                             <h4 className="font-semibold text-sm mb-2 capitalize">
-                              {key.replace(/_/g, " ")}
+                              {key.replace(/_/g, ' ')}
                             </h4>
                             <div className="grid grid-cols-2 gap-2 text-xs">
                               <div>
                                 <span className="text-gray-600">
                                   This Week:
-                                </span>{" "}
+                                </span>{' '}
                                 <strong>{values.this_week}</strong>
                               </div>
                               <div>
                                 <span className="text-gray-600">
                                   Last Week:
-                                </span>{" "}
+                                </span>{' '}
                                 {values.last_week}
                               </div>
                               <div>
-                                <span className="text-gray-600">Change:</span>{" "}
+                                <span className="text-gray-600">Change:</span>{' '}
                                 <span
                                   className={
                                     values.change >= 0
-                                      ? "text-green-600"
-                                      : "text-red-600"
+                                      ? 'text-green-600'
+                                      : 'text-red-600'
                                   }
                                 >
-                                  {values.change >= 0 ? "+" : ""}
+                                  {values.change >= 0 ? '+' : ''}
                                   {values.change}
                                 </span>
                               </div>
                               <div>
                                 <span className="text-gray-600">
                                   4-Week Avg:
-                                </span>{" "}
+                                </span>{' '}
                                 {values.four_week_avg}
                               </div>
                             </div>
@@ -743,20 +743,21 @@ export default function WeeklyImpactReport() {
                                     Action Required
                                   </span>
                                 </div>
-                                {location.issues && location.issues.length > 0 && (
-                                  <div className="ml-7">
-                                    {location.issues.map(
-                                      (issue, issueIndex) => (
-                                        <div
-                                          key={issueIndex}
-                                          className="text-sm text-gray-600"
-                                        >
-                                          • {issue}
-                                        </div>
-                                      )
-                                    )}
-                                  </div>
-                                )}
+                                {location.issues &&
+                                  location.issues.length > 0 && (
+                                    <div className="ml-7">
+                                      {location.issues.map(
+                                        (issue, issueIndex) => (
+                                          <div
+                                            key={issueIndex}
+                                            className="text-sm text-gray-600"
+                                          >
+                                            • {issue}
+                                          </div>
+                                        )
+                                      )}
+                                    </div>
+                                  )}
                               </div>
                               <div className="text-right">
                                 <div className="font-bold text-red-700">
@@ -783,7 +784,7 @@ export default function WeeklyImpactReport() {
                           {
                             reportData.location_performance.steady_contributors
                               .length
-                          }{" "}
+                          }{' '}
                           locations)
                         </span>
                       </CardTitle>
@@ -811,9 +812,9 @@ export default function WeeklyImpactReport() {
                         {reportData.location_performance.steady_contributors
                           .length > 12 && (
                           <div className="col-span-full text-center text-gray-500 text-sm">
-                            ... and{" "}
+                            ... and{' '}
                             {reportData.location_performance.steady_contributors
-                              .length - 12}{" "}
+                              .length - 12}{' '}
                             more locations
                           </div>
                         )}
@@ -915,7 +916,7 @@ export default function WeeklyImpactReport() {
                           {formatPercentage(
                             reportData.next_week_prep.host_confirmations
                               .percentage
-                          )}{" "}
+                          )}{' '}
                           confirmed
                         </div>
                       </div>
@@ -1065,7 +1066,7 @@ export default function WeeklyImpactReport() {
                           "{reportData.celebrating_success.impact_story.quote}"
                         </blockquote>
                         <cite className="text-sm font-medium text-[#47B3CB]">
-                          —{" "}
+                          —{' '}
                           {
                             reportData.celebrating_success.impact_story
                               .attribution

@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Dialog,
   DialogContent,
@@ -13,9 +13,9 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogDescription,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { ScrollArea } from "@/components/ui/scroll-area";
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   MessageCircle,
   Plus,
@@ -25,8 +25,8 @@ import {
   Loader2,
   Reply,
   User,
-} from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
+} from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
 
 interface Message {
   id: string;
@@ -53,15 +53,15 @@ interface User {
 export default function UnifiedMessagesPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [users, setUsers] = useState<User[]>([]);
-  const [activeTab, setActiveTab] = useState<"inbox" | "sent">("inbox");
+  const [activeTab, setActiveTab] = useState<'inbox' | 'sent'>('inbox');
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const [showCompose, setShowCompose] = useState(false);
   const [loading, setLoading] = useState(true);
 
   // Compose form
-  const [recipientId, setRecipientId] = useState("");
-  const [subject, setSubject] = useState("");
-  const [body, setBody] = useState("");
+  const [recipientId, setRecipientId] = useState('');
+  const [subject, setSubject] = useState('');
+  const [body, setBody] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   const { user } = useAuth();
@@ -74,13 +74,13 @@ export default function UnifiedMessagesPage() {
 
       // Fetch both inbox and sent messages
       const [inboxResponse, sentResponse] = await Promise.all([
-        fetch("/api/messaging/inbox", {
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
+        fetch('/api/messaging/inbox', {
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
         }),
-        fetch("/api/messaging/sent", {
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
+        fetch('/api/messaging/sent', {
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
         }),
       ]);
 
@@ -95,23 +95,24 @@ export default function UnifiedMessagesPage() {
       const combinedMessages = [
         ...(inboxData.messages || []).map((msg: any) => ({
           ...msg,
-          type: "received",
+          type: 'received',
           recipientId: (user as any)?.id,
           recipientName:
-            `${(user as any)?.firstName || ""} ${(user as any)?.lastName ||
-              ""}`.trim() || (user as any)?.email,
+            `${(user as any)?.firstName || ''} ${
+              (user as any)?.lastName || ''
+            }`.trim() || (user as any)?.email,
         })),
         ...(sentData.messages || []).map((msg: any) => ({
           ...msg,
-          type: "sent",
+          type: 'sent',
           // Use actual recipient data from the message
-          recipientId: msg.recipientId || "unknown",
+          recipientId: msg.recipientId || 'unknown',
           recipientName:
-            msg.recipientName || msg.recipient || "Unknown Recipient",
+            msg.recipientName || msg.recipient || 'Unknown Recipient',
         })),
       ];
 
-      console.log("Fetched messages:", {
+      console.log('Fetched messages:', {
         inbox: inboxData.messages?.length || 0,
         sent: sentData.messages?.length || 0,
         total: combinedMessages.length,
@@ -119,7 +120,7 @@ export default function UnifiedMessagesPage() {
 
       setMessages(combinedMessages);
     } catch (error) {
-      console.error("Error fetching messages:", error);
+      console.error('Error fetching messages:', error);
       setMessages([]);
     } finally {
       setLoading(false);
@@ -129,14 +130,14 @@ export default function UnifiedMessagesPage() {
   // Fetch users for recipient selection
   const fetchUsers = async () => {
     try {
-      const response = await fetch("/api/users", {
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/api/users', {
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
       });
 
       if (response.ok) {
         const data = await response.json();
-        console.log("Fetched users:", data);
+        console.log('Fetched users:', data);
         const activeUsers = Array.isArray(data) ? data : data.users || [];
         setUsers(
           activeUsers.filter(
@@ -145,7 +146,7 @@ export default function UnifiedMessagesPage() {
         );
       }
     } catch (error) {
-      console.error("Error fetching users:", error);
+      console.error('Error fetching users:', error);
     }
   };
 
@@ -155,9 +156,9 @@ export default function UnifiedMessagesPage() {
     if (!currentUserId) return [];
 
     switch (activeTab) {
-      case "inbox":
+      case 'inbox':
         return messages.filter((msg) => msg.recipientId === currentUserId);
-      case "sent":
+      case 'sent':
         return messages.filter((msg) => msg.senderId === currentUserId);
       default:
         return messages;
@@ -168,58 +169,58 @@ export default function UnifiedMessagesPage() {
   const handleSendMessage = async () => {
     if (!recipientId || !subject.trim() || !body.trim()) {
       toast({
-        title: "Validation Error",
-        description: "Please fill in all required fields",
-        variant: "destructive",
+        title: 'Validation Error',
+        description: 'Please fill in all required fields',
+        variant: 'destructive',
       });
       return;
     }
 
     try {
       setSubmitting(true);
-      const response = await fetch("/api/messaging/send", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/api/messaging/send', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           recipientIds: [recipientId], // Convert to array format expected by API
           content: `Subject: ${subject}\n\n${body}`, // Combine subject and body
-          contextType: "direct",
+          contextType: 'direct',
         }),
       });
 
       if (response.ok) {
         const result = await response.json();
-        console.log("Message sent:", result);
+        console.log('Message sent:', result);
 
         toast({
-          title: "Message Sent",
-          description: "Your message has been sent successfully",
+          title: 'Message Sent',
+          description: 'Your message has been sent successfully',
         });
 
         // Reset form and close dialog
-        setRecipientId("");
-        setSubject("");
-        setBody("");
+        setRecipientId('');
+        setSubject('');
+        setBody('');
         setShowCompose(false);
 
         // Refresh messages
         await fetchMessages();
       } else {
         const errorData = await response.json();
-        console.error("Send failed:", errorData);
+        console.error('Send failed:', errorData);
         toast({
-          title: "Send Failed",
-          description: errorData.message || "Failed to send message",
-          variant: "destructive",
+          title: 'Send Failed',
+          description: errorData.message || 'Failed to send message',
+          variant: 'destructive',
         });
       }
     } catch (error) {
-      console.error("Error sending message:", error);
+      console.error('Error sending message:', error);
       toast({
-        title: "Error",
-        description: "Failed to send message",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to send message',
+        variant: 'destructive',
       });
     } finally {
       setSubmitting(false);
@@ -273,7 +274,7 @@ export default function UnifiedMessagesPage() {
                   <span>From: {selectedMessage.senderName}</span>
                   <span>To: {selectedMessage.recipientName}</span>
                   <span>
-                    {formatDistanceToNow(new Date(selectedMessage.createdAt))}{" "}
+                    {formatDistanceToNow(new Date(selectedMessage.createdAt))}{' '}
                     ago
                   </span>
                 </div>
@@ -379,8 +380,8 @@ export default function UnifiedMessagesPage() {
       {/* Tab Navigation */}
       <div className="flex gap-2 p-1 bg-muted rounded-lg w-fit">
         <Button
-          variant={activeTab === "inbox" ? "default" : "ghost"}
-          onClick={() => setActiveTab("inbox")}
+          variant={activeTab === 'inbox' ? 'default' : 'ghost'}
+          onClick={() => setActiveTab('inbox')}
           className="gap-2"
         >
           <Inbox className="h-4 w-4" />
@@ -392,8 +393,8 @@ export default function UnifiedMessagesPage() {
           )
         </Button>
         <Button
-          variant={activeTab === "sent" ? "default" : "ghost"}
-          onClick={() => setActiveTab("sent")}
+          variant={activeTab === 'sent' ? 'default' : 'ghost'}
+          onClick={() => setActiveTab('sent')}
           className="gap-2"
         >
           <Send className="h-4 w-4" />
@@ -406,7 +407,7 @@ export default function UnifiedMessagesPage() {
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">
-            {activeTab === "inbox" ? "Received Messages" : "Sent Messages"}
+            {activeTab === 'inbox' ? 'Received Messages' : 'Sent Messages'}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -414,7 +415,7 @@ export default function UnifiedMessagesPage() {
             <div className="text-center py-8 text-muted-foreground">
               <MessageCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p>
-                No {activeTab === "inbox" ? "received" : "sent"} messages found
+                No {activeTab === 'inbox' ? 'received' : 'sent'} messages found
               </p>
             </div>
           ) : (
@@ -432,12 +433,12 @@ export default function UnifiedMessagesPage() {
                           <div className="flex items-center gap-2">
                             <User className="h-4 w-4 text-muted-foreground" />
                             <span className="font-medium text-sm">
-                              {activeTab === "inbox"
+                              {activeTab === 'inbox'
                                 ? message.senderName
                                 : message.recipientName}
                             </span>
                             <span className="text-xs text-muted-foreground">
-                              {formatDistanceToNow(new Date(message.createdAt))}{" "}
+                              {formatDistanceToNow(new Date(message.createdAt))}{' '}
                               ago
                             </span>
                           </div>
@@ -448,7 +449,7 @@ export default function UnifiedMessagesPage() {
                             {message.body}
                           </p>
                         </div>
-                        {activeTab === "inbox" && !message.isRead && (
+                        {activeTab === 'inbox' && !message.isRead && (
                           <Badge variant="secondary" className="ml-2">
                             New
                           </Badge>

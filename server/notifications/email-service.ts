@@ -74,7 +74,14 @@ Download your report: {{downloadLink}}
 
 This is an automated message from The Sandwich Project management system.
       `,
-      variables: ['reportType', 'reportTitle', 'dateRange', 'totalRecords', 'generatedAt', 'downloadLink']
+      variables: [
+        'reportType',
+        'reportTitle',
+        'dateRange',
+        'totalRecords',
+        'generatedAt',
+        'downloadLink',
+      ],
     });
 
     this.registerTemplate({
@@ -130,7 +137,13 @@ Thank you for your continued dedication to The Sandwich Project mission!
 
 View your impact dashboard: {{dashboardLink}}
       `,
-      variables: ['milestoneTitle', 'totalSandwiches', 'activeHosts', 'achievedDate', 'dashboardLink']
+      variables: [
+        'milestoneTitle',
+        'totalSandwiches',
+        'activeHosts',
+        'achievedDate',
+        'dashboardLink',
+      ],
     });
 
     this.registerTemplate({
@@ -197,7 +210,15 @@ Description: {{description}}
 
 View project details: {{projectLink}}
       `,
-      variables: ['projectTitle', 'dueDate', 'priority', 'status', 'assignedTo', 'description', 'projectLink']
+      variables: [
+        'projectTitle',
+        'dueDate',
+        'priority',
+        'status',
+        'assignedTo',
+        'description',
+        'projectLink',
+      ],
     });
 
     this.registerTemplate({
@@ -273,7 +294,14 @@ Upcoming Project Deadlines:
 
 View full dashboard: {{dashboardLink}}
       `,
-      variables: ['weekEnding', 'sandwichesThisWeek', 'collectionsThisWeek', 'topHosts', 'upcomingDeadlines', 'dashboardLink']
+      variables: [
+        'weekEnding',
+        'sandwichesThisWeek',
+        'collectionsThisWeek',
+        'topHosts',
+        'upcomingDeadlines',
+        'dashboardLink',
+      ],
     });
   }
 
@@ -284,7 +312,9 @@ View full dashboard: {{dashboardLink}}
   static async sendEmail(notification: EmailNotification): Promise<boolean> {
     try {
       if (!process.env.SENDGRID_API_KEY) {
-        console.warn('SendGrid API key not configured. Email notification skipped.');
+        console.warn(
+          'SendGrid API key not configured. Email notification skipped.'
+        );
         return false;
       }
 
@@ -295,7 +325,9 @@ View full dashboard: {{dashboardLink}}
         throw new Error(`Email template '${notification.template}' not found`);
       }
 
-      const recipients = Array.isArray(notification.to) ? notification.to : [notification.to];
+      const recipients = Array.isArray(notification.to)
+        ? notification.to
+        : [notification.to];
       const variables = notification.variables || {};
 
       // Process template variables
@@ -310,7 +342,7 @@ View full dashboard: {{dashboardLink}}
         html: htmlContent,
         text: textContent,
         attachments: notification.attachments,
-        priority: notification.priority || 'normal'
+        priority: notification.priority || 'normal',
       };
 
       if (notification.scheduledFor && notification.scheduledFor > new Date()) {
@@ -322,7 +354,6 @@ View full dashboard: {{dashboardLink}}
       const result = await sgMail.send(emailData);
       console.log('Email sent successfully:', result[0].statusCode);
       return true;
-
     } catch (error) {
       console.error('Failed to send email:', error);
       return false;
@@ -337,7 +368,7 @@ View full dashboard: {{dashboardLink}}
     const results = {
       successful: 0,
       failed: 0,
-      errors: [] as string[]
+      errors: [] as string[],
     };
 
     for (const notification of notifications) {
@@ -357,7 +388,10 @@ View full dashboard: {{dashboardLink}}
     return results;
   }
 
-  private static processTemplate(template: string, variables: Record<string, any>): string {
+  private static processTemplate(
+    template: string,
+    variables: Record<string, any>
+  ): string {
     let processed = template;
 
     // Handle simple variable substitution {{variableName}}
@@ -368,27 +402,40 @@ View full dashboard: {{dashboardLink}}
     // Handle formatted numbers {{variableName:number}}
     processed = processed.replace(/\{\{(\w+):number\}\}/g, (match, varName) => {
       const value = variables[varName];
-      return typeof value === 'number' ? value.toLocaleString() : (value?.toString() || '');
+      return typeof value === 'number'
+        ? value.toLocaleString()
+        : value?.toString() || '';
     });
 
     // Handle conditional blocks {{#if variable}}...{{/if}}
-    processed = processed.replace(/\{\{#if (\w+)\}\}([\s\S]*?)\{\{\/if\}\}/g, (match, varName, content) => {
-      return variables[varName] ? content : '';
-    });
+    processed = processed.replace(
+      /\{\{#if (\w+)\}\}([\s\S]*?)\{\{\/if\}\}/g,
+      (match, varName, content) => {
+        return variables[varName] ? content : '';
+      }
+    );
 
     // Handle arrays {{#each array}}...{{/each}}
-    processed = processed.replace(/\{\{#each (\w+)\}\}([\s\S]*?)\{\{\/each\}\}/g, (match, varName, itemTemplate) => {
-      const array = variables[varName];
-      if (!Array.isArray(array)) return '';
-      
-      return array.map(item => {
-        let itemContent = itemTemplate;
-        Object.keys(item).forEach(key => {
-          itemContent = itemContent.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), item[key]?.toString() || '');
-        });
-        return itemContent;
-      }).join('');
-    });
+    processed = processed.replace(
+      /\{\{#each (\w+)\}\}([\s\S]*?)\{\{\/each\}\}/g,
+      (match, varName, itemTemplate) => {
+        const array = variables[varName];
+        if (!Array.isArray(array)) return '';
+
+        return array
+          .map((item) => {
+            let itemContent = itemTemplate;
+            Object.keys(item).forEach((key) => {
+              itemContent = itemContent.replace(
+                new RegExp(`\\{\\{${key}\\}\\}`, 'g'),
+                item[key]?.toString() || ''
+              );
+            });
+            return itemContent;
+          })
+          .join('');
+      }
+    );
 
     return processed;
   }
@@ -397,7 +444,10 @@ View full dashboard: {{dashboardLink}}
     return Array.from(this.templates.values());
   }
 
-  static async sendReportNotification(reportData: any, recipients: string[]): Promise<boolean> {
+  static async sendReportNotification(
+    reportData: any,
+    recipients: string[]
+  ): Promise<boolean> {
     return this.sendEmail({
       to: recipients,
       template: 'report_generated',
@@ -407,12 +457,15 @@ View full dashboard: {{dashboardLink}}
         dateRange: reportData.metadata.dateRange,
         totalRecords: reportData.metadata.totalRecords,
         generatedAt: new Date(reportData.metadata.generatedAt).toLocaleString(),
-        downloadLink: `/api/reports/download/${reportData.id}`
-      }
+        downloadLink: `/api/reports/download/${reportData.id}`,
+      },
     });
   }
 
-  static async sendMilestoneNotification(milestone: any, recipients: string[]): Promise<boolean> {
+  static async sendMilestoneNotification(
+    milestone: any,
+    recipients: string[]
+  ): Promise<boolean> {
     return this.sendEmail({
       to: recipients,
       template: 'milestone_achieved',
@@ -421,12 +474,15 @@ View full dashboard: {{dashboardLink}}
         totalSandwiches: milestone.totalSandwiches,
         activeHosts: milestone.activeHosts,
         achievedDate: new Date().toLocaleDateString(),
-        dashboardLink: '/impact'
-      }
+        dashboardLink: '/impact',
+      },
     });
   }
 
-  static async sendProjectDeadlineReminder(project: any, recipients: string[]): Promise<boolean> {
+  static async sendProjectDeadlineReminder(
+    project: any,
+    recipients: string[]
+  ): Promise<boolean> {
     return this.sendEmail({
       to: recipients,
       template: 'project_deadline_reminder',
@@ -437,12 +493,15 @@ View full dashboard: {{dashboardLink}}
         status: project.status,
         assignedTo: project.assignedTo,
         description: project.description,
-        projectLink: `/projects/${project.id}`
-      }
+        projectLink: `/projects/${project.id}`,
+      },
     });
   }
 
-  static async sendWeeklySummary(summaryData: any, recipients: string[]): Promise<boolean> {
+  static async sendWeeklySummary(
+    summaryData: any,
+    recipients: string[]
+  ): Promise<boolean> {
     return this.sendEmail({
       to: recipients,
       template: 'weekly_summary',
@@ -452,8 +511,8 @@ View full dashboard: {{dashboardLink}}
         collectionsThisWeek: summaryData.collectionsThisWeek,
         topHosts: summaryData.topHosts,
         upcomingDeadlines: summaryData.upcomingDeadlines,
-        dashboardLink: '/'
-      }
+        dashboardLink: '/',
+      },
     });
   }
 }

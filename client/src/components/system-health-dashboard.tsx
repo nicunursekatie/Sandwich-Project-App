@@ -1,11 +1,11 @@
-import React, { useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Progress } from "@/components/ui/progress";
+import React, { useState } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { Progress } from '@/components/ui/progress';
 import {
   Shield,
   CheckCircle2,
@@ -16,7 +16,7 @@ import {
   Users,
   Settings,
   Activity,
-} from "lucide-react";
+} from 'lucide-react';
 
 interface TestResult {
   user: string;
@@ -30,74 +30,74 @@ interface TestResult {
 
 interface TestSuite {
   name: string;
-  status: "pending" | "running" | "passed" | "failed";
+  status: 'pending' | 'running' | 'passed' | 'failed';
   results: TestResult[];
   error?: string;
 }
 
 const TEST_USERS = [
   {
-    email: "admin@sandwich.project",
-    role: "super_admin",
-    description: "Full system access",
+    email: 'admin@sandwich.project',
+    role: 'super_admin',
+    description: 'Full system access',
   },
   {
-    email: "christine@thesandwichproject.org",
-    role: "core_team",
-    description: "Meeting management + project oversight",
+    email: 'christine@thesandwichproject.org',
+    role: 'core_team',
+    description: 'Meeting management + project oversight',
   },
   {
-    email: "juliet@thesandwichproject.org",
-    role: "volunteer",
-    description: "Limited volunteer access",
+    email: 'juliet@thesandwichproject.org',
+    role: 'volunteer',
+    description: 'Limited volunteer access',
   },
   {
-    email: "test2@testing.com",
-    role: "viewer",
-    description: "View-only access",
+    email: 'test2@testing.com',
+    role: 'viewer',
+    description: 'View-only access',
   },
 ];
 
 const CRITICAL_TESTS = [
   {
-    name: "Send to Agenda Permission",
-    description: "Verify meeting management permissions work correctly",
-    endpoint: "PATCH /api/projects/49",
+    name: 'Send to Agenda Permission',
+    description: 'Verify meeting management permissions work correctly',
+    endpoint: 'PATCH /api/projects/49',
     body: { reviewInNextMeeting: true },
     expected_users: [
-      "admin@sandwich.project",
-      "christine@thesandwichproject.org",
+      'admin@sandwich.project',
+      'christine@thesandwichproject.org',
     ],
   },
   {
-    name: "Project Edit Permission",
-    description: "Verify project editing permissions are separate from agenda",
-    endpoint: "PATCH /api/projects/49",
-    body: { title: "Test Update" },
+    name: 'Project Edit Permission',
+    description: 'Verify project editing permissions are separate from agenda',
+    endpoint: 'PATCH /api/projects/49',
+    body: { title: 'Test Update' },
     expected_users: [
-      "admin@sandwich.project",
-      "christine@thesandwichproject.org",
+      'admin@sandwich.project',
+      'christine@thesandwichproject.org',
     ],
   },
   {
-    name: "View Projects",
-    description: "Verify project viewing permissions",
-    endpoint: "GET /api/projects",
+    name: 'View Projects',
+    description: 'Verify project viewing permissions',
+    endpoint: 'GET /api/projects',
     expected_users: [
-      "admin@sandwich.project",
-      "christine@thesandwichproject.org",
-      "juliet@thesandwichproject.org",
-      "test2@testing.com",
+      'admin@sandwich.project',
+      'christine@thesandwichproject.org',
+      'juliet@thesandwichproject.org',
+      'test2@testing.com',
     ],
   },
   {
-    name: "View Meetings",
-    description: "Verify meeting viewing permissions",
-    endpoint: "GET /api/meetings",
+    name: 'View Meetings',
+    description: 'Verify meeting viewing permissions',
+    endpoint: 'GET /api/meetings',
     expected_users: [
-      "admin@sandwich.project",
-      "christine@thesandwichproject.org",
-      "juliet@thesandwichproject.org",
+      'admin@sandwich.project',
+      'christine@thesandwichproject.org',
+      'juliet@thesandwichproject.org',
     ],
   },
 ];
@@ -107,19 +107,19 @@ export function SystemHealthDashboard() {
   const { toast } = useToast();
   const [testSuites, setTestSuites] = useState<TestSuite[]>([]);
   const [isRunning, setIsRunning] = useState(false);
-  const [currentTest, setCurrentTest] = useState<string>("");
+  const [currentTest, setCurrentTest] = useState<string>('');
 
   // Check if user has permission to run tests
-  const canRunTests = user?.role === "super_admin" || user?.role === "admin";
+  const canRunTests = user?.role === 'super_admin' || user?.role === 'admin';
 
   // Old broken test function removed - now using working permission test API
 
   const runAllTests = async () => {
     if (!canRunTests) {
       toast({
-        title: "Permission Denied",
-        description: "Only admins can run system health tests",
-        variant: "destructive",
+        title: 'Permission Denied',
+        description: 'Only admins can run system health tests',
+        variant: 'destructive',
       });
       return;
     }
@@ -129,18 +129,18 @@ export function SystemHealthDashboard() {
 
     try {
       const suite: TestSuite = {
-        name: "Permission Matrix Test",
-        status: "running",
+        name: 'Permission Matrix Test',
+        status: 'running',
         results: [],
       };
 
       setTestSuites([suite]);
-      setCurrentTest("Running comprehensive permission matrix test...");
+      setCurrentTest('Running comprehensive permission matrix test...');
 
       // Use the new working permission test API
-      const response = await fetch("/api/working-permission-test/matrix");
+      const response = await fetch('/api/working-permission-test/matrix');
       if (!response.ok) {
-        throw new Error("Permission test API failed");
+        throw new Error('Permission test API failed');
       }
 
       const testData = await response.json();
@@ -150,10 +150,10 @@ export function SystemHealthDashboard() {
         user: result.user,
         endpoint: `${result.permission} Check`,
         name: result.permission,
-        expected: result.expected ? "ALLOW" : "DENY",
-        actual: result.actual ? "ALLOW" : "DENY",
+        expected: result.expected ? 'ALLOW' : 'DENY',
+        actual: result.actual ? 'ALLOW' : 'DENY',
         status_code:
-          result.status === "PASS" ? 200 : result.status === "FAIL" ? 403 : 500,
+          result.status === 'PASS' ? 200 : result.status === 'FAIL' ? 403 : 500,
         match: result.passed,
       }));
 
@@ -161,28 +161,28 @@ export function SystemHealthDashboard() {
 
       // Determine final status
       const failures = suite.results.filter((r) => !r.match);
-      suite.status = failures.length === 0 ? "passed" : "failed";
+      suite.status = failures.length === 0 ? 'passed' : 'failed';
 
       setTestSuites([suite]);
-      setCurrentTest("");
+      setCurrentTest('');
 
       if (failures.length === 0) {
         toast({
-          title: "All Tests Passed!",
+          title: 'All Tests Passed!',
           description: `${testData.summary.successRate}% success rate - Authentication and permissions are working correctly`,
         });
       } else {
         toast({
           title: `${failures.length} Test Failures`,
           description: `${testData.summary.successRate}% success rate - Check the results below for permission issues`,
-          variant: "destructive",
+          variant: 'destructive',
         });
       }
     } catch (error) {
       toast({
-        title: "Test Suite Failed",
-        description: error.message || "Failed to run tests",
-        variant: "destructive",
+        title: 'Test Suite Failed',
+        description: error.message || 'Failed to run tests',
+        variant: 'destructive',
       });
     } finally {
       setIsRunning(false);
@@ -279,22 +279,22 @@ export function SystemHealthDashboard() {
                 <h3 className="text-lg font-semibold">{suite.name}</h3>
                 <Badge
                   className={
-                    suite.status === "passed"
-                      ? "bg-green-100 text-green-800"
-                      : suite.status === "failed"
-                      ? "bg-red-100 text-red-800"
-                      : suite.status === "running"
-                      ? "bg-blue-100 text-blue-800"
-                      : "bg-gray-100 text-gray-800"
+                    suite.status === 'passed'
+                      ? 'bg-green-100 text-green-800'
+                      : suite.status === 'failed'
+                        ? 'bg-red-100 text-red-800'
+                        : suite.status === 'running'
+                          ? 'bg-blue-100 text-blue-800'
+                          : 'bg-gray-100 text-gray-800'
                   }
                 >
-                  {suite.status === "passed" && (
+                  {suite.status === 'passed' && (
                     <CheckCircle2 className="w-3 h-3 mr-1" />
                   )}
-                  {suite.status === "failed" && (
+                  {suite.status === 'failed' && (
                     <XCircle className="w-3 h-3 mr-1" />
                   )}
-                  {suite.status === "running" && (
+                  {suite.status === 'running' && (
                     <RefreshCw className="w-3 h-3 mr-1 animate-spin" />
                   )}
                   {suite.status.toUpperCase()}
@@ -308,8 +308,8 @@ export function SystemHealthDashboard() {
                       key={idx}
                       className={`p-3 ${
                         result.match
-                          ? "border-green-200 bg-green-50"
-                          : "border-red-200 bg-red-50"
+                          ? 'border-green-200 bg-green-50'
+                          : 'border-red-200 bg-red-50'
                       }`}
                     >
                       <div className="flex items-center justify-between">
@@ -328,13 +328,13 @@ export function SystemHealthDashboard() {
                         </div>
                         <div className="text-right">
                           <div className="text-sm">
-                            Expected:{" "}
+                            Expected:{' '}
                             <span className="font-medium">
                               {result.expected}
                             </span>
                           </div>
                           <div className="text-sm">
-                            Actual:{" "}
+                            Actual:{' '}
                             <span className="font-medium">{result.actual}</span>
                           </div>
                         </div>
@@ -344,7 +344,7 @@ export function SystemHealthDashboard() {
                 </div>
               )}
 
-              {suite.status === "failed" && (
+              {suite.status === 'failed' && (
                 <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
                   <div className="flex items-center gap-2 text-red-800">
                     <AlertTriangle className="w-4 h-4" />
@@ -359,7 +359,7 @@ export function SystemHealthDashboard() {
                 </div>
               )}
 
-              {suite.status === "passed" && (
+              {suite.status === 'passed' && (
                 <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
                   <div className="flex items-center gap-2 text-green-800">
                     <CheckCircle2 className="w-4 h-4" />

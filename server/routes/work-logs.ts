@@ -1,13 +1,13 @@
-import { Router } from "express";
-import { z } from "zod";
-import { sql, eq } from "drizzle-orm";
-import { workLogs } from "@shared/schema";
-import { db } from "../db";
+import { Router } from 'express';
+import { z } from 'zod';
+import { sql, eq } from 'drizzle-orm';
+import { workLogs } from '@shared/schema';
+import { db } from '../db';
 // Import the actual authentication middleware being used in the app
 const isAuthenticated = (req: any, res: any, next: any) => {
   const user = req.user || req.session?.user;
   if (!user) {
-    return res.status(401).json({ error: "Authentication required" });
+    return res.status(401).json({ error: 'Authentication required' });
   }
   req.user = user; // Ensure req.user is set
   next();
@@ -18,44 +18,37 @@ const router = Router();
 // Zod schema for validation
 const insertWorkLogSchema = z.object({
   description: z.string().min(1),
-  hours: z
-    .number()
-    .int()
-    .min(0),
-  minutes: z
-    .number()
-    .int()
-    .min(0)
-    .max(59),
+  hours: z.number().int().min(0),
+  minutes: z.number().int().min(0).max(59),
   workDate: z.string().refine((date) => !isNaN(Date.parse(date)), {
-    message: "Invalid date format",
+    message: 'Invalid date format',
   }),
 });
 
 // Middleware to check if user is super admin or admin
 function isSuperAdmin(req: any) {
-  return req.user?.role === "super_admin" || req.user?.role === "admin";
+  return req.user?.role === 'super_admin' || req.user?.role === 'admin';
 }
 
 // Import permission utilities
-import { hasPermission, PERMISSIONS } from "@shared/auth-utils";
+import { hasPermission, PERMISSIONS } from '@shared/auth-utils';
 import {
   requirePermission,
   requireOwnershipPermission,
-} from "../middleware/auth";
+} from '../middleware/auth';
 
 // Middleware to check if user can log work
 function canLogWork(req: any) {
   // Check for CREATE_WORK_LOGS permission or admin roles for backwards compatibility
   return (
     hasPermission(req.user, PERMISSIONS.CREATE_WORK_LOGS) ||
-    req.user?.role === "admin" ||
-    req.user?.role === "super_admin"
+    req.user?.role === 'admin' ||
+    req.user?.role === 'super_admin'
   );
 }
 
 // Get work logs - Check permissions first
-router.get("/work-logs", isAuthenticated, async (req, res) => {
+router.get('/work-logs', isAuthenticated, async (req, res) => {
   try {
     const userId = req.user?.id;
     const userEmail = req.user?.email;
@@ -68,7 +61,7 @@ router.get("/work-logs", isAuthenticated, async (req, res) => {
     // Check if user has any work log permissions
     const canCreate = hasPermission(req.user, PERMISSIONS.WORK_LOGS_ADD);
     const canViewAll = hasPermission(req.user, PERMISSIONS.WORK_LOGS_VIEW_ALL);
-    const isAdmin = isSuperAdmin(req) || userEmail === "mdlouza@gmail.com";
+    const isAdmin = isSuperAdmin(req) || userEmail === 'mdlouza@gmail.com';
 
     console.log(
       `[WORK LOGS] Permissions - canCreate: ${canCreate}, canViewAll: ${canViewAll}, isAdmin: ${isAdmin}`
@@ -78,7 +71,7 @@ router.get("/work-logs", isAuthenticated, async (req, res) => {
     if (!canCreate && !canViewAll && !isAdmin) {
       return res
         .status(403)
-        .json({ error: "Insufficient permissions to view work logs" });
+        .json({ error: 'Insufficient permissions to view work logs' });
     }
 
     // Only users with explicit WORK_LOGS_VIEW_ALL permission can see ALL work logs
@@ -107,15 +100,15 @@ router.get("/work-logs", isAuthenticated, async (req, res) => {
       return res.json(logs);
     }
   } catch (error) {
-    console.error("Error fetching work logs:", error);
-    res.status(500).json({ error: "Failed to fetch work logs" });
+    console.error('Error fetching work logs:', error);
+    res.status(500).json({ error: 'Failed to fetch work logs' });
   }
 });
 
 // Create a new work log
 router.post(
-  "/work-logs",
-  requirePermission("WORK_LOGS_ADD"),
+  '/work-logs',
+  requirePermission('WORK_LOGS_ADD'),
   async (req, res) => {
     const result = insertWorkLogSchema.safeParse(req.body);
     if (!result.success)
@@ -133,18 +126,18 @@ router.post(
         .returning();
       res.status(201).json(log[0]);
     } catch (error) {
-      console.error("Error creating work log:", error);
-      res.status(500).json({ error: "Failed to create work log" });
+      console.error('Error creating work log:', error);
+      res.status(500).json({ error: 'Failed to create work log' });
     }
   }
 );
 
 // Update a work log (own or any if super admin)
 router.put(
-  "/work-logs/:id",
+  '/work-logs/:id',
   requireOwnershipPermission(
-    "WORK_LOGS_EDIT_OWN",
-    "WORK_LOGS_EDIT_ALL",
+    'WORK_LOGS_EDIT_OWN',
+    'WORK_LOGS_EDIT_ALL',
     async (req) => {
       const logId = parseInt(req.params.id);
       const log = await db
@@ -156,7 +149,7 @@ router.put(
   ),
   async (req, res) => {
     const logId = parseInt(req.params.id);
-    if (isNaN(logId)) return res.status(400).json({ error: "Invalid log ID" });
+    if (isNaN(logId)) return res.status(400).json({ error: 'Invalid log ID' });
     const result = insertWorkLogSchema.safeParse(req.body);
     if (!result.success)
       return res.status(400).json({ error: result.error.message });
@@ -173,17 +166,17 @@ router.put(
         .returning();
       res.json(updated[0]);
     } catch (error) {
-      res.status(500).json({ error: "Failed to update work log" });
+      res.status(500).json({ error: 'Failed to update work log' });
     }
   }
 );
 
 // Delete a work log (own or any if super admin)
 router.delete(
-  "/work-logs/:id",
+  '/work-logs/:id',
   requireOwnershipPermission(
-    "WORK_LOGS_DELETE_OWN",
-    "WORK_LOGS_DELETE_ALL",
+    'WORK_LOGS_DELETE_OWN',
+    'WORK_LOGS_DELETE_ALL',
     async (req) => {
       const logId = parseInt(req.params.id);
       const log = await db
@@ -195,20 +188,20 @@ router.delete(
   ),
   async (req, res) => {
     const logId = parseInt(req.params.id);
-    console.log("[WORK LOGS DELETE] Attempting to delete log ID:", logId);
+    console.log('[WORK LOGS DELETE] Attempting to delete log ID:', logId);
 
-    if (isNaN(logId)) return res.status(400).json({ error: "Invalid log ID" });
+    if (isNaN(logId)) return res.status(400).json({ error: 'Invalid log ID' });
 
     try {
-      console.log("[WORK LOGS DELETE] Deleting log...");
+      console.log('[WORK LOGS DELETE] Deleting log...');
       await db.delete(workLogs).where(eq(workLogs.id, logId));
-      console.log("[WORK LOGS DELETE] Successfully deleted log ID:", logId);
+      console.log('[WORK LOGS DELETE] Successfully deleted log ID:', logId);
 
       res.status(204).send();
     } catch (error) {
-      console.error("[WORK LOGS DELETE] Error:", error);
-      console.error("[WORK LOGS DELETE] Stack trace:", (error as Error).stack);
-      res.status(500).json({ error: "Failed to delete work log" });
+      console.error('[WORK LOGS DELETE] Error:', error);
+      console.error('[WORK LOGS DELETE] Stack trace:', (error as Error).stack);
+      res.status(500).json({ error: 'Failed to delete work log' });
     }
   }
 );

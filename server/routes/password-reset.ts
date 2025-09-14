@@ -1,8 +1,8 @@
-import { Router } from "express";
-import { z } from "zod";
-import { storage } from "../storage-wrapper";
-import crypto from "crypto";
-import sgMail from "@sendgrid/mail";
+import { Router } from 'express';
+import { z } from 'zod';
+import { storage } from '../storage-wrapper';
+import crypto from 'crypto';
+import sgMail from '@sendgrid/mail';
 
 const router = Router();
 
@@ -23,10 +23,10 @@ setInterval(() => {
 }, 60000 * 60); // Clean up every hour
 
 // Request password reset
-router.post("/forgot-password", async (req, res) => {
+router.post('/forgot-password', async (req, res) => {
   try {
     const schema = z.object({
-      email: z.string().email("Please enter a valid email address"),
+      email: z.string().email('Please enter a valid email address'),
     });
 
     const { email } = schema.parse(req.body);
@@ -38,12 +38,12 @@ router.post("/forgot-password", async (req, res) => {
       return res.json({
         success: true,
         message:
-          "If an account with this email exists, you will receive a password reset link.",
+          'If an account with this email exists, you will receive a password reset link.',
       });
     }
 
     // Generate secure reset token
-    const resetToken = crypto.randomBytes(32).toString("hex");
+    const resetToken = crypto.randomBytes(32).toString('hex');
     const expires = Date.now() + 60 * 60 * 1000; // 1 hour
 
     // Store token
@@ -67,7 +67,7 @@ router.post("/forgot-password", async (req, res) => {
         // Use the production domain from REPLIT_DOMAINS or construct the .replit.app domain
         const domains = process.env.REPLIT_DOMAINS;
         if (domains) {
-          baseUrl = `https://${domains.split(",")[0].trim()}`;
+          baseUrl = `https://${domains.split(',')[0].trim()}`;
         } else {
           // Construct the standard Replit app domain
           baseUrl = `https://${process.env.REPL_SLUG}.replit.app`;
@@ -76,12 +76,12 @@ router.post("/forgot-password", async (req, res) => {
       // Development environment
       else {
         // For development, try to use a cleaner URL without port if possible
-        const host = req.get("host") || "localhost:5000";
-        const protocol = req.protocol || "http";
+        const host = req.get('host') || 'localhost:5000';
+        const protocol = req.protocol || 'http';
 
         // If we have REPLIT_DOMAINS in development, use it (cleaner for emails)
         if (process.env.REPLIT_DOMAINS) {
-          const devDomain = process.env.REPLIT_DOMAINS.split(",")[0].trim();
+          const devDomain = process.env.REPLIT_DOMAINS.split(',')[0].trim();
           baseUrl = `https://${devDomain}`;
         } else {
           baseUrl = `${protocol}://${host}`;
@@ -92,15 +92,15 @@ router.post("/forgot-password", async (req, res) => {
 
       // Use SendGrid directly for password reset emails
       if (!process.env.SENDGRID_API_KEY) {
-        throw new Error("SendGrid API key not configured");
+        throw new Error('SendGrid API key not configured');
       }
 
       sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
       await sgMail.send({
         to: email,
-        from: "katie@thesandwichproject.org",
-        subject: "Password Reset - The Sandwich Project",
+        from: 'katie@thesandwichproject.org',
+        subject: 'Password Reset - The Sandwich Project',
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8f9fa;">
             <div style="background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
@@ -176,14 +176,15 @@ To unsubscribe from system notifications, please contact us at katie@thesandwich
 
       console.log(`✅ Password reset email sent successfully to: ${email}`);
     } catch (emailError) {
-      console.error("❌ Failed to send password reset email:", emailError);
+      console.error('❌ Failed to send password reset email:', emailError);
       // For development, log the reset link as fallback
-      if (process.env.NODE_ENV === "development") {
+      if (process.env.NODE_ENV === 'development') {
         console.log(`
 🔧 DEVELOPMENT FALLBACK - Email failed, but reset link available:
 📧 Email: ${email}
-🔗 Reset Link: ${req.protocol}://${req.get("host") ||
-          "localhost:5000"}/reset-password?token=${resetToken}
+🔗 Reset Link: ${req.protocol}://${
+          req.get('host') || 'localhost:5000'
+        }/reset-password?token=${resetToken}
 ⏰ Expires: ${new Date(expires).toLocaleString()}
         `);
       }
@@ -192,34 +193,34 @@ To unsubscribe from system notifications, please contact us at katie@thesandwich
     res.json({
       success: true,
       message:
-        "If an account with this email exists, you will receive a password reset link.",
+        'If an account with this email exists, you will receive a password reset link.',
     });
   } catch (error) {
-    console.error("Forgot password error:", error);
+    console.error('Forgot password error:', error);
     if (error instanceof z.ZodError) {
       return res.status(400).json({
         success: false,
-        message: "Please enter a valid email address",
+        message: 'Please enter a valid email address',
       });
     }
     res.status(500).json({
       success: false,
-      message: "An error occurred. Please try again later.",
+      message: 'An error occurred. Please try again later.',
     });
   }
 });
 
 // Reset password with token
-router.post("/reset-password", async (req, res) => {
+router.post('/reset-password', async (req, res) => {
   try {
     const schema = z.object({
-      token: z.string().min(1, "Reset token is required"),
+      token: z.string().min(1, 'Reset token is required'),
       newPassword: z
         .string()
-        .min(8, "Password must be at least 8 characters")
+        .min(8, 'Password must be at least 8 characters')
         .regex(
           /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-          "Password must contain at least one lowercase letter, one uppercase letter, and one number"
+          'Password must contain at least one lowercase letter, one uppercase letter, and one number'
         ),
     });
 
@@ -231,7 +232,7 @@ router.post("/reset-password", async (req, res) => {
       return res.status(400).json({
         success: false,
         message:
-          "Invalid or expired reset token. Please request a new password reset.",
+          'Invalid or expired reset token. Please request a new password reset.',
       });
     }
 
@@ -241,7 +242,7 @@ router.post("/reset-password", async (req, res) => {
       resetTokens.delete(token);
       return res.status(400).json({
         success: false,
-        message: "User not found",
+        message: 'User not found',
       });
     }
 
@@ -264,10 +265,10 @@ router.post("/reset-password", async (req, res) => {
     res.json({
       success: true,
       message:
-        "Password has been reset successfully. You can now log in with your new password.",
+        'Password has been reset successfully. You can now log in with your new password.',
     });
   } catch (error) {
-    console.error("Reset password error:", error);
+    console.error('Reset password error:', error);
     if (error instanceof z.ZodError) {
       return res.status(400).json({
         success: false,
@@ -277,20 +278,20 @@ router.post("/reset-password", async (req, res) => {
     res.status(500).json({
       success: false,
       message:
-        "An error occurred while resetting your password. Please try again.",
+        'An error occurred while resetting your password. Please try again.',
     });
   }
 });
 
 // Verify reset token (for frontend to check if token is valid)
-router.get("/verify-reset-token/:token", (req, res) => {
+router.get('/verify-reset-token/:token', (req, res) => {
   const { token } = req.params;
   const tokenData = resetTokens.get(token);
 
   if (!tokenData || Date.now() > tokenData.expires) {
     return res.status(400).json({
       valid: false,
-      message: "Invalid or expired reset token",
+      message: 'Invalid or expired reset token',
     });
   }
 

@@ -1,23 +1,23 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Heart,
   MessageCircle,
@@ -25,9 +25,9 @@ import {
   Star,
   PartyPopper,
   ThumbsUp,
-} from "lucide-react";
-import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
+} from 'lucide-react';
+import { apiRequest } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
 
 interface ProjectCongratulationsProps {
   projectId: number;
@@ -55,29 +55,29 @@ export default function ProjectCongratulations({
   isCompleted,
 }: ProjectCongratulationsProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [congratsMessage, setCongratsMessage] = useState("");
+  const [congratsMessage, setCongratsMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
   const { toast } = useToast();
 
   // Fetch congratulations messages for this project
   const { data: congratulations, refetch } = useQuery<CongratulationsMessage[]>(
     {
-      queryKey: ["/api/projects", projectId, "congratulations"],
+      queryKey: ['/api/projects', projectId, 'congratulations'],
       enabled: isCompleted,
     }
   );
 
   const celebrationEmojis = [
-    "🎉",
-    "🌟",
-    "🎊",
-    "🥳",
-    "🏆",
-    "✨",
-    "👏",
-    "💪",
-    "🎯",
-    "🚀",
+    '🎉',
+    '🌟',
+    '🎊',
+    '🥳',
+    '🏆',
+    '✨',
+    '👏',
+    '💪',
+    '🎯',
+    '🚀',
   ];
 
   const handleSendCongratulations = async () => {
@@ -89,38 +89,38 @@ export default function ProjectCongratulations({
         celebrationEmojis[Math.floor(Math.random() * celebrationEmojis.length)];
 
       const congratulationData = {
-        userId: currentUser?.id || "anonymous",
-        type: "congratulations",
-        title: "Project Congratulations!",
+        userId: currentUser?.id || 'anonymous',
+        type: 'congratulations',
+        title: 'Project Congratulations!',
         message: congratsMessage,
-        relatedType: "project",
+        relatedType: 'project',
         relatedId: projectId,
         celebrationData: {
           projectTitle,
           senderName:
-            currentUser?.firstName || currentUser?.displayName || "Team Member",
+            currentUser?.firstName || currentUser?.displayName || 'Team Member',
           emoji: randomEmoji,
           sentAt: new Date().toISOString(),
         },
       };
 
-      await apiRequest("POST", "/api/notifications", congratulationData);
+      await apiRequest('POST', '/api/notifications', congratulationData);
 
       toast({
-        title: "Congratulations sent!",
+        title: 'Congratulations sent!',
         description: `Your message has been added to the project celebration`,
         duration: 3000,
       });
 
-      setCongratsMessage("");
+      setCongratsMessage('');
       setIsOpen(false);
       refetch();
     } catch (error) {
-      console.error("Error sending congratulations:", error);
+      console.error('Error sending congratulations:', error);
       toast({
-        title: "Error sending congratulations",
-        description: "Please try again",
-        variant: "destructive",
+        title: 'Error sending congratulations',
+        description: 'Please try again',
+        variant: 'destructive',
       });
     } finally {
       setIsSending(false);
@@ -143,9 +143,9 @@ export default function ProjectCongratulations({
         <CardDescription className="text-green-700">
           {congratulationsCount > 0
             ? `${congratulationsCount} team ${
-                congratulationsCount === 1 ? "member has" : "members have"
+                congratulationsCount === 1 ? 'member has' : 'members have'
               } congratulated this achievement`
-            : "Be the first to congratulate this achievement"}
+            : 'Be the first to congratulate this achievement'}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -236,7 +236,7 @@ export default function ProjectCongratulations({
                   disabled={isSending || !congratsMessage.trim()}
                   className="bg-teal-600 hover:bg-teal-700"
                 >
-                  {isSending ? "Sending..." : "Send Congratulations"}
+                  {isSending ? 'Sending...' : 'Send Congratulations'}
                 </Button>
               </div>
             </div>

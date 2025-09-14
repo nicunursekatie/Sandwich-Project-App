@@ -4,17 +4,17 @@ interface SVGIconProps {
 }
 
 export function SandwichStackIcon({
-  className = "w-8 h-8",
-  color = "currentColor",
+  className = 'w-8 h-8',
+  color = 'currentColor',
 }: SVGIconProps) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none">
       <defs>
         <linearGradient id="sandwichGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style={{ stopColor: "#FBAD3F", stopOpacity: 1 }} />
+          <stop offset="0%" style={{ stopColor: '#FBAD3F', stopOpacity: 1 }} />
           <stop
             offset="100%"
-            style={{ stopColor: "#f09f2b", stopOpacity: 1 }}
+            style={{ stopColor: '#f09f2b', stopOpacity: 1 }}
           />
         </linearGradient>
       </defs>
@@ -36,17 +36,17 @@ export function SandwichStackIcon({
 }
 
 export function GrowthTrendIcon({
-  className = "w-8 h-8",
-  color = "currentColor",
+  className = 'w-8 h-8',
+  color = 'currentColor',
 }: SVGIconProps) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none">
       <defs>
         <linearGradient id="growthGrad" x1="0%" y1="100%" x2="100%" y2="0%">
-          <stop offset="0%" style={{ stopColor: "#236383", stopOpacity: 1 }} />
+          <stop offset="0%" style={{ stopColor: '#236383', stopOpacity: 1 }} />
           <stop
             offset="100%"
-            style={{ stopColor: "#47B3CB", stopOpacity: 1 }}
+            style={{ stopColor: '#47B3CB', stopOpacity: 1 }}
           />
         </linearGradient>
       </defs>
@@ -72,18 +72,18 @@ export function GrowthTrendIcon({
 }
 
 export function CommunityIcon({
-  className = "w-8 h-8",
-  color = "currentColor",
+  className = 'w-8 h-8',
+  color = 'currentColor',
 }: SVGIconProps) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none">
       <defs>
         <linearGradient id="communityGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style={{ stopColor: "#A31C41", stopOpacity: 1 }} />
-          <stop offset="50%" style={{ stopColor: "#FBAD3F", stopOpacity: 1 }} />
+          <stop offset="0%" style={{ stopColor: '#A31C41', stopOpacity: 1 }} />
+          <stop offset="50%" style={{ stopColor: '#FBAD3F', stopOpacity: 1 }} />
           <stop
             offset="100%"
-            style={{ stopColor: "#236383", stopOpacity: 1 }}
+            style={{ stopColor: '#236383', stopOpacity: 1 }}
           />
         </linearGradient>
       </defs>
@@ -111,21 +111,21 @@ export function CommunityIcon({
 }
 
 export function TargetIcon({
-  className = "w-8 h-8",
-  color = "currentColor",
+  className = 'w-8 h-8',
+  color = 'currentColor',
 }: SVGIconProps) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none">
       <defs>
         <radialGradient id="targetGrad" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" style={{ stopColor: "#FBAD3F", stopOpacity: 1 }} />
+          <stop offset="0%" style={{ stopColor: '#FBAD3F', stopOpacity: 1 }} />
           <stop
             offset="70%"
-            style={{ stopColor: "#236383", stopOpacity: 0.8 }}
+            style={{ stopColor: '#236383', stopOpacity: 0.8 }}
           />
           <stop
             offset="100%"
-            style={{ stopColor: "#A31C41", stopOpacity: 0.6 }}
+            style={{ stopColor: '#A31C41', stopOpacity: 0.6 }}
           />
         </radialGradient>
       </defs>
@@ -156,18 +156,18 @@ export function TargetIcon({
 }
 
 export function SparkleIcon({
-  className = "w-8 h-8",
-  color = "currentColor",
+  className = 'w-8 h-8',
+  color = 'currentColor',
 }: SVGIconProps) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none">
       <defs>
         <linearGradient id="sparkleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style={{ stopColor: "#FBAD3F", stopOpacity: 1 }} />
-          <stop offset="50%" style={{ stopColor: "#fbbf24", stopOpacity: 1 }} />
+          <stop offset="0%" style={{ stopColor: '#FBAD3F', stopOpacity: 1 }} />
+          <stop offset="50%" style={{ stopColor: '#fbbf24', stopOpacity: 1 }} />
           <stop
             offset="100%"
-            style={{ stopColor: "#f59e0b", stopOpacity: 1 }}
+            style={{ stopColor: '#f59e0b', stopOpacity: 1 }}
           />
         </linearGradient>
       </defs>
@@ -204,17 +204,17 @@ export function SparkleIcon({
 }
 
 export function NetworkIcon({
-  className = "w-8 h-8",
-  color = "currentColor",
+  className = 'w-8 h-8',
+  color = 'currentColor',
 }: SVGIconProps) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none">
       <defs>
         <linearGradient id="networkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style={{ stopColor: "#007E8C", stopOpacity: 1 }} />
+          <stop offset="0%" style={{ stopColor: '#007E8C', stopOpacity: 1 }} />
           <stop
             offset="100%"
-            style={{ stopColor: "#47B3CB", stopOpacity: 1 }}
+            style={{ stopColor: '#47B3CB', stopOpacity: 1 }}
           />
         </linearGradient>
       </defs>

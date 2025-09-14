@@ -1,12 +1,12 @@
-import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import {
   FeatureTooltip,
   TipTooltip,
   InfoTooltip,
-} from "./IntelligentGuideSystem";
+} from './IntelligentGuideSystem';
 import {
   FileText,
   Users,
@@ -17,7 +17,7 @@ import {
   Sparkles,
   Target,
   Lightbulb,
-} from "lucide-react";
+} from 'lucide-react';
 
 // Demo component to showcase the Smart Contextual Tooltip Guide System
 export function SmartGuideDemo() {

@@ -1,8 +1,8 @@
-import { useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
+import { useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Dialog,
   DialogContent,
@@ -10,12 +10,12 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import SendKudosButton from "@/components/send-kudos-button";
-import { Label } from "@/components/ui/label";
-import { CheckCircle2, Circle, Users, Clock } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+} from '@/components/ui/dialog';
+import SendKudosButton from '@/components/send-kudos-button';
+import { Label } from '@/components/ui/label';
+import { CheckCircle2, Circle, Users, Clock } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '@/lib/queryClient';
 
 interface TaskCompletion {
   id: number;
@@ -47,19 +47,23 @@ export function MultiUserTaskCompletion({
   taskStatus,
   onStatusChange,
 }: MultiUserTaskCompletionProps) {
-  const [notes, setNotes] = useState("");
+  const [notes, setNotes] = useState('');
   const [showCompletionDialog, setShowCompletionDialog] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   // Fetch task completions
-  const { data: completionsData, isLoading, refetch } = useQuery({
-    queryKey: ["/api/tasks", taskId, "completions"],
+  const {
+    data: completionsData,
+    isLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ['/api/tasks', taskId, 'completions'],
     enabled: !!taskId,
     staleTime: 30000, // Consider data fresh for 30 seconds
     refetchOnWindowFocus: false, // Prevent automatic refetch on window focus
     queryFn: async () => {
-      const data = await apiRequest("GET", `/api/tasks/${taskId}/completions`);
+      const data = await apiRequest('GET', `/api/tasks/${taskId}/completions`);
       // apiRequest already returns parsed data, no need to call .json()
       // Ensure we always return an array
       return Array.isArray(data) ? data : [];
@@ -72,34 +76,34 @@ export function MultiUserTaskCompletion({
   // Mark task complete mutation
   const markCompleteMutation = useMutation({
     mutationFn: async (completionNotes: string) => {
-      return apiRequest("POST", `/api/tasks/${taskId}/complete`, {
+      return apiRequest('POST', `/api/tasks/${taskId}/complete`, {
         notes: completionNotes,
       });
     },
     onSuccess: (data) => {
       // Only invalidate the specific task completions - avoid excessive invalidation
       queryClient.invalidateQueries({
-        queryKey: ["/api/tasks", taskId, "completions"],
+        queryKey: ['/api/tasks', taskId, 'completions'],
       });
       queryClient.invalidateQueries({
-        queryKey: ["/api/projects", projectId, "tasks"],
+        queryKey: ['/api/projects', projectId, 'tasks'],
       });
 
       setShowCompletionDialog(false);
-      setNotes("");
+      setNotes('');
 
       if (data.isFullyCompleted) {
         toast({
-          title: "Task Fully Completed! 🎉",
+          title: 'Task Fully Completed! 🎉',
           description:
-            "All team members have completed this task - task automatically marked complete",
+            'All team members have completed this task - task automatically marked complete',
         });
         onStatusChange?.(true);
       } else {
         const completedCount = (completions.length || 0) + 1; // Add 1 for the just-completed task
         const totalCount = assigneeIds.length;
         toast({
-          title: "Your portion completed",
+          title: 'Your portion completed',
           description: `${completedCount}/${totalCount} team members finished`,
         });
         onStatusChange?.(false);
@@ -107,9 +111,9 @@ export function MultiUserTaskCompletion({
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to mark task complete",
-        variant: "destructive",
+        title: 'Error',
+        description: error.message || 'Failed to mark task complete',
+        variant: 'destructive',
       });
     },
   });
@@ -117,28 +121,28 @@ export function MultiUserTaskCompletion({
   // Remove completion mutation
   const removeCompletionMutation = useMutation({
     mutationFn: async () => {
-      return apiRequest("DELETE", `/api/tasks/${taskId}/complete`);
+      return apiRequest('DELETE', `/api/tasks/${taskId}/complete`);
     },
     onSuccess: () => {
       // Only invalidate the specific task completions - avoid excessive invalidation
       queryClient.invalidateQueries({
-        queryKey: ["/api/tasks", taskId, "completions"],
+        queryKey: ['/api/tasks', taskId, 'completions'],
       });
       queryClient.invalidateQueries({
-        queryKey: ["/api/projects", projectId, "tasks"],
+        queryKey: ['/api/projects', projectId, 'tasks'],
       });
 
       toast({
-        title: "Completion removed",
-        description: "Your completion has been removed from this task",
+        title: 'Completion removed',
+        description: 'Your completion has been removed from this task',
       });
       onStatusChange?.(false);
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to remove completion",
-        variant: "destructive",
+        title: 'Error',
+        description: error.message || 'Failed to remove completion',
+        variant: 'destructive',
       });
     },
   });
@@ -168,7 +172,7 @@ export function MultiUserTaskCompletion({
   // If task has assignees, use individual completion tracking
   const isFullyCompleted =
     totalAssignees === 0
-      ? taskStatus === "completed"
+      ? taskStatus === 'completed'
       : completedCount >= totalAssignees;
 
   // Team progress calculation is working properly
@@ -192,12 +196,12 @@ export function MultiUserTaskCompletion({
           <Circle className="w-4 h-4 text-gray-400" />
         )}
         <span
-          className={`text-sm ${isCurrentUser ? "font-medium" : ""} ${
-            isCompleted ? "line-through text-gray-500" : ""
+          className={`text-sm ${isCurrentUser ? 'font-medium' : ''} ${
+            isCompleted ? 'line-through text-gray-500' : ''
           }`}
         >
           {assigneeName}
-          {isCurrentUser && " (You)"}
+          {isCurrentUser && ' (You)'}
         </span>
         {isCompleted && (
           <>
@@ -233,8 +237,9 @@ export function MultiUserTaskCompletion({
         <span className="text-sm font-medium">
           {totalAssignees === 0
             ? `Task Status: ${taskStatus}`
-            : `Team Progress: ${completions?.length || 0}/${totalAssignees ||
-                0}`}
+            : `Team Progress: ${completions?.length || 0}/${
+                totalAssignees || 0
+              }`}
         </span>
         {isFullyCompleted && (
           <Badge className="bg-green-600 hover:bg-green-700 text-white font-bold">
@@ -249,14 +254,14 @@ export function MultiUserTaskCompletion({
           assigneeIds.map((assigneeId, index) =>
             getAssigneeStatus(
               assigneeId,
-              assigneeNames[index] || "Unknown User"
+              assigneeNames[index] || 'Unknown User'
             )
           )
         ) : (
           <div className="text-sm text-gray-500">
-            {taskStatus === "completed"
-              ? "Task completed without individual tracking"
-              : "No team members assigned"}
+            {taskStatus === 'completed'
+              ? 'Task completed without individual tracking'
+              : 'No team members assigned'}
           </div>
         )}
       </div>
@@ -275,11 +280,11 @@ export function MultiUserTaskCompletion({
               >
                 <Circle className="w-4 h-4 mr-2" />
                 {removeCompletionMutation.isPending
-                  ? "Removing..."
-                  : "Mark Incomplete"}
+                  ? 'Removing...'
+                  : 'Mark Incomplete'}
               </Button>
               <div className="text-xs text-gray-500">
-                Completed{" "}
+                Completed{' '}
                 {new Date(
                   currentUserCompletion.completedAt
                 ).toLocaleDateString()}
@@ -328,8 +333,8 @@ export function MultiUserTaskCompletion({
                       className="bg-green-600 hover:bg-green-700"
                     >
                       {markCompleteMutation.isPending
-                        ? "Marking Complete..."
-                        : "Complete"}
+                        ? 'Marking Complete...'
+                        : 'Complete'}
                     </Button>
                   </div>
                 </div>
@@ -343,7 +348,7 @@ export function MultiUserTaskCompletion({
       {completions.length > 0 && (
         <div className="text-xs text-gray-500">
           <Clock className="w-3 h-3 inline mr-1" />
-          Last activity:{" "}
+          Last activity:{' '}
           {new Date(
             Math.max(
               ...completions.map((c: TaskCompletion) =>

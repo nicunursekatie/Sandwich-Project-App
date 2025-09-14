@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { X, Heart, Star, Trophy, Sparkles } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { X, Heart, Star, Trophy, Sparkles } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface CelebrationToastProps {
   isVisible: boolean;
@@ -17,19 +17,19 @@ export function CelebrationToast({
   isVisible,
   onClose,
   taskTitle,
-  emoji = "🎉",
+  emoji = '🎉',
   onSendThanks,
 }: CelebrationToastProps) {
   const [showThanks, setShowThanks] = useState(false);
-  const [thanksMessage, setThanksMessage] = useState("");
+  const [thanksMessage, setThanksMessage] = useState('');
 
   const thankMessages = [
-    "Great work on completing this task! 🌟",
-    "Thank you for your dedication! 💪",
-    "Awesome job getting this done! 🚀",
+    'Great work on completing this task! 🌟',
+    'Thank you for your dedication! 💪',
+    'Awesome job getting this done! 🚀',
     "You're making a real difference! ❤️",
-    "Amazing teamwork! Keep it up! 🙌",
-    "Your hard work is appreciated! ✨",
+    'Amazing teamwork! Keep it up! 🙌',
+    'Your hard work is appreciated! ✨',
   ];
 
   const handleSendThanks = () => {
@@ -38,7 +38,7 @@ export function CelebrationToast({
       thankMessages[Math.floor(Math.random() * thankMessages.length)];
     onSendThanks?.(message);
     setShowThanks(false);
-    setThanksMessage("");
+    setThanksMessage('');
     onClose();
   };
 
@@ -55,7 +55,7 @@ export function CelebrationToast({
           }}
           exit={{ opacity: 0, y: -100, scale: 0.8 }}
           transition={{
-            type: "spring",
+            type: 'spring',
             stiffness: 300,
             damping: 20,
             duration: 0.6,
@@ -119,7 +119,7 @@ export function CelebrationToast({
               ) : (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
+                  animate={{ opacity: 1, height: 'auto' }}
                   className="space-y-3"
                 >
                   <textarea
@@ -166,12 +166,12 @@ export function useCelebration() {
     taskId?: number;
   }>({
     isVisible: false,
-    taskTitle: "",
-    emoji: "🎉",
+    taskTitle: '',
+    emoji: '🎉',
   });
 
   const triggerCelebration = (taskTitle: string, taskId?: number) => {
-    const celebrationEmojis = ["🎉", "🌟", "🎊", "🥳", "🏆", "✨", "👏", "💪"];
+    const celebrationEmojis = ['🎉', '🌟', '🎊', '🥳', '🏆', '✨', '👏', '💪'];
     const randomEmoji =
       celebrationEmojis[Math.floor(Math.random() * celebrationEmojis.length)];
 

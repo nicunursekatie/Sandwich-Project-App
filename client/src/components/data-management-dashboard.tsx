@@ -1,26 +1,26 @@
-import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
-import { LoadingState } from "@/components/ui/loading";
-import { apiRequest } from "@/lib/queryClient";
+} from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
+import { LoadingState } from '@/components/ui/loading';
+import { apiRequest } from '@/lib/queryClient';
 import {
   Download,
   Search,
@@ -31,23 +31,23 @@ import {
   CheckCircle2,
   RefreshCw,
   Trash2,
-} from "lucide-react";
+} from 'lucide-react';
 
 export function DataManagementDashboard() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchType, setSearchType] = useState<string>("all");
-  const [exportFormat, setExportFormat] = useState<"csv" | "json">("csv");
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchType, setSearchType] = useState<string>('all');
+  const [exportFormat, setExportFormat] = useState<'csv' | 'json'>('csv');
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   // Fetch data summary
   const { data: summary, isLoading: summaryLoading } = useQuery({
-    queryKey: ["/api/data/summary"],
+    queryKey: ['/api/data/summary'],
   });
 
   // Fetch data integrity status
   const { data: integrityData, isLoading: integrityLoading } = useQuery({
-    queryKey: ["/api/data/integrity/check"],
+    queryKey: ['/api/data/integrity/check'],
   });
 
   // Search functionality
@@ -56,7 +56,7 @@ export function DataManagementDashboard() {
     isLoading: searchLoading,
     refetch: performSearch,
   } = useQuery({
-    queryKey: ["/api/search", searchQuery, searchType],
+    queryKey: ['/api/search', searchQuery, searchType],
     enabled: false, // Manual trigger
   });
 
@@ -66,40 +66,40 @@ export function DataManagementDashboard() {
       const response = await fetch(
         `/api/data/export/collections?format=${exportFormat}`
       );
-      if (!response.ok) throw new Error("Export failed");
+      if (!response.ok) throw new Error('Export failed');
 
-      if (exportFormat === "csv") {
+      if (exportFormat === 'csv') {
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
+        const a = document.createElement('a');
         a.href = url;
-        a.download = "sandwich_collections.csv";
+        a.download = 'sandwich_collections.csv';
         a.click();
         window.URL.revokeObjectURL(url);
       } else {
         const data = await response.json();
         const blob = new Blob([JSON.stringify(data, null, 2)], {
-          type: "application/json",
+          type: 'application/json',
         });
         const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
+        const a = document.createElement('a');
         a.href = url;
-        a.download = "sandwich_collections.json";
+        a.download = 'sandwich_collections.json';
         a.click();
         window.URL.revokeObjectURL(url);
       }
     },
     onSuccess: () => {
       toast({
-        title: "Export Complete",
-        description: "Collections data exported successfully",
+        title: 'Export Complete',
+        description: 'Collections data exported successfully',
       });
     },
     onError: () => {
       toast({
-        title: "Export Failed",
-        description: "Failed to export collections data",
-        variant: "destructive",
+        title: 'Export Failed',
+        description: 'Failed to export collections data',
+        variant: 'destructive',
       });
     },
   });
@@ -109,33 +109,33 @@ export function DataManagementDashboard() {
       const response = await fetch(
         `/api/data/export/hosts?format=${exportFormat}`
       );
-      if (!response.ok) throw new Error("Export failed");
+      if (!response.ok) throw new Error('Export failed');
 
-      if (exportFormat === "csv") {
+      if (exportFormat === 'csv') {
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
+        const a = document.createElement('a');
         a.href = url;
-        a.download = "hosts.csv";
+        a.download = 'hosts.csv';
         a.click();
         window.URL.revokeObjectURL(url);
       } else {
         const data = await response.json();
         const blob = new Blob([JSON.stringify(data, null, 2)], {
-          type: "application/json",
+          type: 'application/json',
         });
         const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
+        const a = document.createElement('a');
         a.href = url;
-        a.download = "hosts.json";
+        a.download = 'hosts.json';
         a.click();
         window.URL.revokeObjectURL(url);
       }
     },
     onSuccess: () => {
       toast({
-        title: "Export Complete",
-        description: "Hosts data exported successfully",
+        title: 'Export Complete',
+        description: 'Hosts data exported successfully',
       });
     },
   });
@@ -143,22 +143,22 @@ export function DataManagementDashboard() {
   // Bulk operations
   const deduplicateHostsMutation = useMutation({
     mutationFn: () =>
-      apiRequest("/api/data/bulk/deduplicate-hosts", { method: "POST" }),
+      apiRequest('/api/data/bulk/deduplicate-hosts', { method: 'POST' }),
     onSuccess: (data: any) => {
       toast({
-        title: "Deduplication Complete",
+        title: 'Deduplication Complete',
         description: `Removed ${data.deleted || 0} duplicate hosts`,
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/data/summary"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/data/summary'] });
       queryClient.invalidateQueries({
-        queryKey: ["/api/data/integrity/check"],
+        queryKey: ['/api/data/integrity/check'],
       });
     },
     onError: () => {
       toast({
-        title: "Deduplication Failed",
-        description: "Failed to deduplicate hosts",
-        variant: "destructive",
+        title: 'Deduplication Failed',
+        description: 'Failed to deduplicate hosts',
+        variant: 'destructive',
       });
     },
   });
@@ -248,8 +248,8 @@ export function DataManagementDashboard() {
                       <Badge
                         variant={
                           integrityData.summary.totalIssues > 0
-                            ? "destructive"
-                            : "secondary"
+                            ? 'destructive'
+                            : 'secondary'
                         }
                       >
                         {integrityData.summary.totalIssues}
@@ -260,8 +260,8 @@ export function DataManagementDashboard() {
                       <Badge
                         variant={
                           integrityData.summary.criticalIssues > 0
-                            ? "destructive"
-                            : "secondary"
+                            ? 'destructive'
+                            : 'secondary'
                         }
                       >
                         {integrityData.summary.criticalIssues}
@@ -331,7 +331,7 @@ export function DataManagementDashboard() {
                   placeholder="Search collections, hosts, projects..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                   className="flex-1"
                 />
                 <Select value={searchType} onValueChange={setSearchType}>
@@ -361,7 +361,7 @@ export function DataManagementDashboard() {
                     <Badge variant="secondary">
                       {searchResults.summary?.total ||
                         searchResults.results?.length ||
-                        0}{" "}
+                        0}{' '}
                       results
                     </Badge>
                     {searchResults.summary && (
@@ -441,7 +441,7 @@ export function DataManagementDashboard() {
                   </label>
                   <Select
                     value={exportFormat}
-                    onValueChange={(value: "csv" | "json") =>
+                    onValueChange={(value: 'csv' | 'json') =>
                       setExportFormat(value)
                     }
                   >
@@ -500,27 +500,27 @@ export function DataManagementDashboard() {
                   onClick={async () => {
                     try {
                       const response = await fetch(
-                        "/api/data/export/full-dataset"
+                        '/api/data/export/full-dataset'
                       );
-                      if (!response.ok) throw new Error("Export failed");
+                      if (!response.ok) throw new Error('Export failed');
 
                       const blob = await response.blob();
                       const url = window.URL.createObjectURL(blob);
-                      const a = document.createElement("a");
+                      const a = document.createElement('a');
                       a.href = url;
-                      a.download = "full_dataset.json";
+                      a.download = 'full_dataset.json';
                       a.click();
                       window.URL.revokeObjectURL(url);
 
                       toast({
-                        title: "Export Complete",
-                        description: "Full dataset exported successfully",
+                        title: 'Export Complete',
+                        description: 'Full dataset exported successfully',
                       });
                     } catch (error) {
                       toast({
-                        title: "Export Failed",
-                        description: "Failed to export full dataset",
-                        variant: "destructive",
+                        title: 'Export Failed',
+                        description: 'Failed to export full dataset',
+                        variant: 'destructive',
                       });
                     }
                   }}
@@ -576,7 +576,7 @@ export function DataManagementDashboard() {
                               </Badge>
                             </div>
                             <p className="text-sm text-gray-600 capitalize">
-                              Type: {issue.type.replace(/_/g, " ")}
+                              Type: {issue.type.replace(/_/g, ' ')}
                             </p>
                           </div>
                         </div>

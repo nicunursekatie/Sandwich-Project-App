@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import React, { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { X } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+} from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { X } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 
 interface User {
   id: string;
@@ -41,17 +41,17 @@ interface TaskAssigneeSelectorProps {
 export function TaskAssigneeSelector({
   value,
   onChange,
-  placeholder = "Assign to...",
+  placeholder = 'Assign to...',
   multiple = false,
 }: TaskAssigneeSelectorProps) {
-  const [inputMode, setInputMode] = useState<"user" | "text">("user");
-  const [textInput, setTextInput] = useState("");
+  const [inputMode, setInputMode] = useState<'user' | 'text'>('user');
+  const [textInput, setTextInput] = useState('');
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [selectedNames, setSelectedNames] = useState<string[]>([]);
 
   // Fetch users from the system
   const { data: users = [], isLoading } = useQuery<User[]>({
-    queryKey: ["/api/users"],
+    queryKey: ['/api/users'],
   });
 
   // Initialize state with existing values
@@ -65,20 +65,20 @@ export function TaskAssigneeSelector({
 
       // If we have names but no IDs, switch to text mode
       if (names.length > 0 && ids.length === 0) {
-        setInputMode("text");
-        setTextInput(names.join(", "));
+        setInputMode('text');
+        setTextInput(names.join(', '));
       }
     } else {
       // Single user mode - backward compatibility
       if (value?.assigneeName && !value?.assigneeId) {
         setTextInput(value.assigneeName);
-        setInputMode("text");
+        setInputMode('text');
       }
     }
   }, [value, multiple]);
 
   const handleUserSelect = (userId: string) => {
-    if (userId === "none") {
+    if (userId === 'none') {
       // Clear selection
       if (multiple) {
         setSelectedUsers([]);
@@ -141,7 +141,7 @@ export function TaskAssigneeSelector({
     setTextInput(text);
     if (multiple) {
       const names = text
-        .split(",")
+        .split(',')
         .map((name) => name.trim())
         .filter((name) => name.length > 0);
       setSelectedNames(names);
@@ -175,7 +175,7 @@ export function TaskAssigneeSelector({
   };
 
   const handleClear = () => {
-    setTextInput("");
+    setTextInput('');
     setSelectedUsers([]);
     setSelectedNames([]);
     if (multiple) {
@@ -193,7 +193,7 @@ export function TaskAssigneeSelector({
 
   const getDisplayValue = () => {
     if (multiple) {
-      return ""; // Multi-user display handled separately
+      return ''; // Multi-user display handled separately
     } else {
       // Single user mode
       if (value?.assigneeId) {
@@ -202,7 +202,7 @@ export function TaskAssigneeSelector({
           ? `${user.firstName} ${user.lastName}`.trim() || user.email
           : value.assigneeName;
       }
-      return value?.assigneeName || "";
+      return value?.assigneeName || '';
     }
   };
 
@@ -250,18 +250,18 @@ export function TaskAssigneeSelector({
       <div className="flex gap-2">
         <Button
           type="button"
-          variant={inputMode === "user" ? "default" : "outline"}
+          variant={inputMode === 'user' ? 'default' : 'outline'}
           size="sm"
-          onClick={() => setInputMode("user")}
+          onClick={() => setInputMode('user')}
           className="text-xs"
         >
-          {multiple ? "Select Users" : "Select User"}
+          {multiple ? 'Select Users' : 'Select User'}
         </Button>
         <Button
           type="button"
-          variant={inputMode === "text" ? "default" : "outline"}
+          variant={inputMode === 'text' ? 'default' : 'outline'}
           size="sm"
-          onClick={() => setInputMode("text")}
+          onClick={() => setInputMode('text')}
           className="text-xs"
         >
           Free Text
@@ -279,16 +279,16 @@ export function TaskAssigneeSelector({
         )}
       </div>
 
-      {inputMode === "user" ? (
+      {inputMode === 'user' ? (
         <div className="space-y-2">
           <Select
-            value={multiple ? "none" : value?.assigneeId || "none"}
+            value={multiple ? 'none' : value?.assigneeId || 'none'}
             onValueChange={handleUserSelect}
             disabled={isLoading}
           >
             <SelectTrigger>
               <SelectValue
-                placeholder={isLoading ? "Loading users..." : placeholder}
+                placeholder={isLoading ? 'Loading users...' : placeholder}
               />
             </SelectTrigger>
             <SelectContent>
@@ -321,8 +321,8 @@ export function TaskAssigneeSelector({
             onChange={(e) => handleTextChange(e.target.value)}
             placeholder={
               multiple
-                ? "Enter names separated by commas..."
-                : "Enter assignee name..."
+                ? 'Enter names separated by commas...'
+                : 'Enter assignee name...'
             }
           />
         </div>

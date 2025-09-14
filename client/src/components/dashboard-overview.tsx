@@ -1,6 +1,6 @@
-import { useState } from "react";
-import * as React from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from 'react';
+import * as React from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   FileText,
   TrendingUp,
@@ -20,24 +20,24 @@ import {
   Layers,
   Calculator,
   Share2,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card';
 
-import { useAuth } from "@/hooks/useAuth";
-import { hasPermission, PERMISSIONS } from "@shared/auth-utils";
-import { useToast } from "@/hooks/use-toast";
-import { HelpBubble } from "@/components/help-system";
-import { DocumentPreviewModal } from "@/components/document-preview-modal";
-import CollectionFormSelector from "@/components/collection-form-selector";
-import { AnimatedCounter } from "@/components/modern-dashboard/animated-counter";
+import { useAuth } from '@/hooks/useAuth';
+import { hasPermission, PERMISSIONS } from '@shared/auth-utils';
+import { useToast } from '@/hooks/use-toast';
+import { HelpBubble } from '@/components/help-system';
+import { DocumentPreviewModal } from '@/components/document-preview-modal';
+import CollectionFormSelector from '@/components/collection-form-selector';
+import { AnimatedCounter } from '@/components/modern-dashboard/animated-counter';
 
 // Dark mode toggle removed per user request
 import {
@@ -47,11 +47,11 @@ import {
   TargetIcon,
   SparkleIcon,
   NetworkIcon,
-} from "@/components/modern-dashboard/custom-svg-icons";
-import CMYK_PRINT_TSP_01__2_ from "@assets/CMYK_PRINT_TSP-01 (2).png";
+} from '@/components/modern-dashboard/custom-svg-icons';
+import CMYK_PRINT_TSP_01__2_ from '@assets/CMYK_PRINT_TSP-01 (2).png';
 // Using optimized SVG logos for faster loading
-const tspLogoSvg = "/logo-optimized.svg";
-const sandwichIconSvg = "/sandwich-icon-optimized.svg";
+const tspLogoSvg = '/logo-optimized.svg';
+const sandwichIconSvg = '/sandwich-icon-optimized.svg';
 
 interface DashboardOverviewProps {
   onSectionChange: (section: string) => void;
@@ -72,9 +72,9 @@ export default function DashboardOverview({
   // Modal state for document preview
   const [previewModal, setPreviewModal] = useState({
     isOpen: false,
-    documentPath: "",
-    documentName: "",
-    documentType: "",
+    documentPath: '',
+    documentName: '',
+    documentType: '',
   });
 
   const openPreviewModal = (path: string, name: string, type: string) => {
@@ -89,18 +89,18 @@ export default function DashboardOverview({
   const closePreviewModal = () => {
     setPreviewModal({
       isOpen: false,
-      documentPath: "",
-      documentName: "",
-      documentType: "",
+      documentPath: '',
+      documentName: '',
+      documentType: '',
     });
   };
 
   const handleShareInventoryCalculator = async () => {
     const url =
-      "https://nicunursekatie.github.io/sandwichinventory/inventorycalculator.html";
-    const title = "Inventory Calculator";
+      'https://nicunursekatie.github.io/sandwichinventory/inventorycalculator.html';
+    const title = 'Inventory Calculator';
     const text =
-      "Interactive tool for calculating sandwich inventory and planning quantities for collections";
+      'Interactive tool for calculating sandwich inventory and planning quantities for collections';
 
     if (navigator.share) {
       try {
@@ -123,16 +123,16 @@ export default function DashboardOverview({
     try {
       await navigator.clipboard.writeText(url);
       toast({
-        title: "Link copied!",
+        title: 'Link copied!',
         description:
-          "The inventory calculator link has been copied to your clipboard.",
+          'The inventory calculator link has been copied to your clipboard.',
       });
     } catch (error) {
-      console.error("Failed to copy link:", error);
+      console.error('Failed to copy link:', error);
       toast({
-        title: "Error",
-        description: "Failed to copy link to clipboard.",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to copy link to clipboard.',
+        variant: 'destructive',
       });
     }
   };
@@ -141,10 +141,10 @@ export default function DashboardOverview({
   const [deferredLoad, setDeferredLoad] = useState(false);
 
   const { data: statsData } = useQuery({
-    queryKey: ["/api/sandwich-collections/stats"],
+    queryKey: ['/api/sandwich-collections/stats'],
     queryFn: async () => {
-      const response = await fetch("/api/sandwich-collections/stats");
-      if (!response.ok) throw new Error("Failed to fetch stats");
+      const response = await fetch('/api/sandwich-collections/stats');
+      if (!response.ok) throw new Error('Failed to fetch stats');
       return response.json();
     },
     staleTime: 0,
@@ -161,37 +161,35 @@ export default function DashboardOverview({
   // Key organizational documents from attached assets
   const importantDocuments = [
     {
-      title: "Key Findings: Peak Collection Weeks",
+      title: 'Key Findings: Peak Collection Weeks',
       description:
-        "Comprehensive analysis of peak performance and organizational growth",
-      category: "Strategy",
-      path:
-        "/attached_assets/Key Findings_ Peak Sandwich Collection Weeks_1753498455636.pdf",
+        'Comprehensive analysis of peak performance and organizational growth',
+      category: 'Strategy',
+      path: '/attached_assets/Key Findings_ Peak Sandwich Collection Weeks_1753498455636.pdf',
     },
     {
-      title: "Food Safety Guidelines",
-      description: "Essential safety protocols for volunteers",
-      category: "Operations",
-      path:
-        "/attached_assets/20230525-TSP-Food Safety Volunteers_1749341933308.pdf",
+      title: 'Food Safety Guidelines',
+      description: 'Essential safety protocols for volunteers',
+      category: 'Operations',
+      path: '/attached_assets/20230525-TSP-Food Safety Volunteers_1749341933308.pdf',
     },
     {
-      title: "Volunteer Driver Agreement",
-      description: "Required agreement form for volunteer drivers",
-      category: "Forms",
-      path: "/attached_assets/TSP Volunteer Driver Agreement (1).pdf",
+      title: 'Volunteer Driver Agreement',
+      description: 'Required agreement form for volunteer drivers',
+      category: 'Forms',
+      path: '/attached_assets/TSP Volunteer Driver Agreement (1).pdf',
     },
     {
-      title: "Community Service Hours Form",
-      description: "Form for tracking and documenting community service hours",
-      category: "Forms",
-      path: "/attached_assets/TSP COMMUNITY SERVICE HOURS (1) (1) (1).pdf",
+      title: 'Community Service Hours Form',
+      description: 'Form for tracking and documenting community service hours',
+      category: 'Forms',
+      path: '/attached_assets/TSP COMMUNITY SERVICE HOURS (1) (1) (1).pdf',
     },
     {
-      title: "ACORD Document",
-      description: "Official ACORD documentation for organizational reference",
-      category: "Forms",
-      path: "/attached_assets/ACORD®_1756831296864.pdf",
+      title: 'ACORD Document',
+      description: 'Official ACORD documentation for organizational reference',
+      category: 'Forms',
+      path: '/attached_assets/ACORD®_1756831296864.pdf',
     },
   ];
 
@@ -199,23 +197,23 @@ export default function DashboardOverview({
   const organizationalStats = {
     totalLifetimeSandwiches: statsData
       ? statsData.completeTotalSandwiches?.toLocaleString()
-      : "Loading...",
-    peakWeekRecord: "38,828",
-    peakWeekDate: "November 15, 2023",
-    currentAnnualCapacity: "500,000",
-    weeklyBaseline: "6,000-12,000",
-    surgingCapacity: "25,000-40,000",
-    operationalYears: "5",
-    growthMultiplier: "107x",
+      : 'Loading...',
+    peakWeekRecord: '38,828',
+    peakWeekDate: 'November 15, 2023',
+    currentAnnualCapacity: '500,000',
+    weeklyBaseline: '6,000-12,000',
+    surgingCapacity: '25,000-40,000',
+    operationalYears: '5',
+    growthMultiplier: '107x',
     individualSandwiches:
-      statsData?.individualSandwiches?.toLocaleString() || "Loading...",
+      statsData?.individualSandwiches?.toLocaleString() || 'Loading...',
     groupSandwiches: statsData
       ? (
           (statsData.completeTotalSandwiches || 0) -
           (statsData.individualSandwiches || 0)
         ).toLocaleString()
-      : "Loading...",
-    totalEntries: statsData?.totalEntries?.toLocaleString() || "Loading...",
+      : 'Loading...',
+    totalEntries: statsData?.totalEntries?.toLocaleString() || 'Loading...',
   };
 
   // Remove fake mini chart data - only use real data
@@ -264,12 +262,12 @@ export default function DashboardOverview({
                   onClick={() => setShowCollectionForm(!showCollectionForm)}
                 >
                   {showCollectionForm
-                    ? "Hide Form"
-                    : "Enter New Collection Data"}
+                    ? 'Hide Form'
+                    : 'Enter New Collection Data'}
                 </Button>
                 <Button
                   className="bg-white border border-[#47B3CB] text-[#47B3CB] hover:bg-[#47B3CB] hover:text-white font-medium py-3 sm:py-4 px-6 sm:px-8 rounded-lg transition-colors shadow-sm text-base sm:text-lg md:text-sm min-h-[48px] sm:min-h-[56px] md:min-h-[40px]"
-                  onClick={() => onSectionChange?.("collections")}
+                  onClick={() => onSectionChange?.('collections')}
                 >
                   View Collection History
                 </Button>
@@ -283,10 +281,10 @@ export default function DashboardOverview({
                   onSuccess={() => {
                     setShowCollectionForm(false);
                     queryClient.invalidateQueries({
-                      queryKey: ["/api/sandwich-collections"],
+                      queryKey: ['/api/sandwich-collections'],
                     });
                     queryClient.invalidateQueries({
-                      queryKey: ["/api/sandwich-collections/stats"],
+                      queryKey: ['/api/sandwich-collections/stats'],
                     });
                   }}
                   onCancel={() => setShowCollectionForm(false)}
@@ -460,8 +458,8 @@ export default function DashboardOverview({
                 size="lg"
                 onClick={() =>
                   window.open(
-                    "https://nicunursekatie.github.io/sandwichinventory/inventorycalculator.html",
-                    "_blank"
+                    'https://nicunursekatie.github.io/sandwichinventory/inventorycalculator.html',
+                    '_blank'
                   )
                 }
                 className="bg-[#236383] hover:bg-[#007E8C] text-white font-semibold px-8 py-3 text-base flex-1"
@@ -485,7 +483,7 @@ export default function DashboardOverview({
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <div
               className="action-card bg-white rounded-xl p-4 group cursor-pointer shadow-md hover:shadow-lg transition-all duration-200 border-2 hover:border-[#236383]/20"
-              onClick={() => onSectionChange?.("collections")}
+              onClick={() => onSectionChange?.('collections')}
             >
               <div className="w-12 h-12 bg-[#47B3CB] rounded-lg flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
                 <BarChart3 className="w-6 h-6 text-white" />
@@ -501,7 +499,7 @@ export default function DashboardOverview({
 
             <div
               className="action-card bg-white rounded-xl p-4 group cursor-pointer shadow-md hover:shadow-lg transition-all duration-200 border-2 hover:border-[#236383]/20"
-              onClick={() => onSectionChange?.("analytics")}
+              onClick={() => onSectionChange?.('analytics')}
             >
               <div className="w-12 h-12 bg-[#FBAD3F] rounded-lg flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
                 <TrendingUp className="w-6 h-6 text-white" />
@@ -517,7 +515,7 @@ export default function DashboardOverview({
 
             <div
               className="action-card bg-white rounded-xl p-4 group cursor-pointer shadow-md hover:shadow-lg transition-all duration-200 border-2 hover:border-[#236383]/20"
-              onClick={() => onSectionChange?.("event-requests")}
+              onClick={() => onSectionChange?.('event-requests')}
             >
               <div className="w-12 h-12 bg-[#007E8C] rounded-lg flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
                 <Calendar className="w-6 h-6 text-white" />
@@ -533,7 +531,7 @@ export default function DashboardOverview({
 
             <div
               className="action-card bg-white rounded-xl p-4 group cursor-pointer shadow-md hover:shadow-lg transition-all duration-200 border-2 hover:border-[#236383]/20"
-              onClick={() => onSectionChange?.("messages")}
+              onClick={() => onSectionChange?.('messages')}
             >
               <div className="w-12 h-12 bg-[#A31C41] rounded-lg flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
                 <Calendar className="w-6 h-6 text-white" />
@@ -598,7 +596,7 @@ export default function DashboardOverview({
                       size="sm"
                       variant="outline"
                       onClick={() =>
-                        openPreviewModal(doc.path, doc.title, "pdf")
+                        openPreviewModal(doc.path, doc.title, 'pdf')
                       }
                       className="flex-1 h-8 text-xs border-[#236383]/30 hover:border-[#236383] text-[#236383]"
                     >
@@ -607,7 +605,7 @@ export default function DashboardOverview({
                     </Button>
                     <Button
                       size="sm"
-                      onClick={() => window.open(doc.path, "_blank")}
+                      onClick={() => window.open(doc.path, '_blank')}
                       className="flex-1 h-8 text-xs bg-[#236383] hover:bg-[#007E8C] text-white"
                     >
                       <Download className="h-3 w-3 mr-1" />

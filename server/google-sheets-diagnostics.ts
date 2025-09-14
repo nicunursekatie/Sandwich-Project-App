@@ -1,8 +1,8 @@
-import { google } from "googleapis";
+import { google } from 'googleapis';
 
 export interface DiagnosticResult {
   issue: string;
-  severity: "critical" | "warning" | "info";
+  severity: 'critical' | 'warning' | 'info';
   description: string;
   solution: string;
   detailsFound?: any;
@@ -12,7 +12,7 @@ export class GoogleSheetsDiagnostics {
   async runFullDiagnostics(): Promise<DiagnosticResult[]> {
     const results: DiagnosticResult[] = [];
 
-    console.log("🔍 Starting comprehensive Google Sheets diagnostics...");
+    console.log('🔍 Starting comprehensive Google Sheets diagnostics...');
 
     // Check 1: Environment Variables
     results.push(...this.checkEnvironmentVariables());
@@ -26,7 +26,7 @@ export class GoogleSheetsDiagnostics {
     // Check 4: Project ID and Email Validation
     results.push(...this.validateServiceAccountDetails());
 
-    console.log("🔍 Diagnostics complete. Found", results.length, "issues.");
+    console.log('🔍 Diagnostics complete. Found', results.length, 'issues.');
 
     return results;
   }
@@ -35,11 +35,11 @@ export class GoogleSheetsDiagnostics {
     const results: DiagnosticResult[] = [];
 
     const requiredVars = [
-      "GOOGLE_SERVICE_ACCOUNT_EMAIL",
-      "GOOGLE_PRIVATE_KEY",
-      "GOOGLE_PROJECT_ID",
-      "GOOGLE_SPREADSHEET_ID",
-      "EVENT_REQUESTS_SHEET_ID",
+      'GOOGLE_SERVICE_ACCOUNT_EMAIL',
+      'GOOGLE_PRIVATE_KEY',
+      'GOOGLE_PROJECT_ID',
+      'GOOGLE_SPREADSHEET_ID',
+      'EVENT_REQUESTS_SHEET_ID',
     ];
 
     for (const varName of requiredVars) {
@@ -47,29 +47,29 @@ export class GoogleSheetsDiagnostics {
       if (!value) {
         results.push({
           issue: `Missing Environment Variable: ${varName}`,
-          severity: "critical",
+          severity: 'critical',
           description: `Required environment variable ${varName} is not set`,
           solution: `Set the ${varName} environment variable in your Replit Secrets`,
         });
-      } else if (varName === "GOOGLE_PRIVATE_KEY" && value.length < 1000) {
+      } else if (varName === 'GOOGLE_PRIVATE_KEY' && value.length < 1000) {
         results.push({
-          issue: "Private Key Too Short",
-          severity: "critical",
+          issue: 'Private Key Too Short',
+          severity: 'critical',
           description: `GOOGLE_PRIVATE_KEY appears to be incomplete (${value.length} characters)`,
           solution:
-            "Verify you copied the complete private key from your Google Cloud service account JSON file",
+            'Verify you copied the complete private key from your Google Cloud service account JSON file',
           detailsFound: { length: value.length },
         });
       } else if (
-        varName === "GOOGLE_SERVICE_ACCOUNT_EMAIL" &&
-        !value.includes("@")
+        varName === 'GOOGLE_SERVICE_ACCOUNT_EMAIL' &&
+        !value.includes('@')
       ) {
         results.push({
-          issue: "Invalid Service Account Email",
-          severity: "critical",
+          issue: 'Invalid Service Account Email',
+          severity: 'critical',
           description: `Service account email "${value}" is not a valid email format`,
           solution:
-            "Use the email from your Google Cloud service account (should end with @your-project.iam.gserviceaccount.com)",
+            'Use the email from your Google Cloud service account (should end with @your-project.iam.gserviceaccount.com)',
           detailsFound: { email: value },
         });
       }
@@ -84,22 +84,22 @@ export class GoogleSheetsDiagnostics {
     const privateKey = process.env.GOOGLE_PRIVATE_KEY;
     if (!privateKey) return results;
 
-    console.log("🔍 Analyzing private key format...");
+    console.log('🔍 Analyzing private key format...');
 
     // Check for common formatting issues
-    const hasEscapedNewlines = privateKey.includes("\\n");
-    const hasRealNewlines = privateKey.includes("\n");
-    const hasBeginHeader = privateKey.includes("-----BEGIN PRIVATE KEY-----");
-    const hasEndHeader = privateKey.includes("-----END PRIVATE KEY-----");
+    const hasEscapedNewlines = privateKey.includes('\\n');
+    const hasRealNewlines = privateKey.includes('\n');
+    const hasBeginHeader = privateKey.includes('-----BEGIN PRIVATE KEY-----');
+    const hasEndHeader = privateKey.includes('-----END PRIVATE KEY-----');
     const isWrappedInQuotes =
       (privateKey.startsWith('"') && privateKey.endsWith('"')) ||
       (privateKey.startsWith("'") && privateKey.endsWith("'"));
 
     if (!hasBeginHeader || !hasEndHeader) {
       results.push({
-        issue: "Missing PEM Headers",
-        severity: "critical",
-        description: "Private key is missing proper PEM format headers",
+        issue: 'Missing PEM Headers',
+        severity: 'critical',
+        description: 'Private key is missing proper PEM format headers',
         solution:
           'Ensure your private key starts with "-----BEGIN PRIVATE KEY-----" and ends with "-----END PRIVATE KEY-----"',
         detailsFound: { hasBeginHeader, hasEndHeader },
@@ -108,23 +108,23 @@ export class GoogleSheetsDiagnostics {
 
     if (hasEscapedNewlines && !hasRealNewlines) {
       results.push({
-        issue: "Escaped Newlines in Private Key",
-        severity: "warning",
+        issue: 'Escaped Newlines in Private Key',
+        severity: 'warning',
         description:
-          "Private key contains escaped \\n instead of real newlines",
+          'Private key contains escaped \\n instead of real newlines',
         solution:
-          "The application will auto-convert these, but consider updating your key format",
+          'The application will auto-convert these, but consider updating your key format',
         detailsFound: { hasEscapedNewlines, hasRealNewlines },
       });
     }
 
     if (isWrappedInQuotes) {
       results.push({
-        issue: "Private Key Wrapped in Quotes",
-        severity: "warning",
+        issue: 'Private Key Wrapped in Quotes',
+        severity: 'warning',
         description:
-          "Private key is wrapped in quotes which may cause parsing issues",
-        solution: "Remove surrounding quotes from your private key",
+          'Private key is wrapped in quotes which may cause parsing issues',
+        solution: 'Remove surrounding quotes from your private key',
         detailsFound: { isWrappedInQuotes },
       });
     }
@@ -135,11 +135,11 @@ export class GoogleSheetsDiagnostics {
       .filter((line) => line.trim().length > 0);
     if (lines.length < 25 || lines.length > 35) {
       results.push({
-        issue: "Unusual Private Key Line Count",
-        severity: "warning",
+        issue: 'Unusual Private Key Line Count',
+        severity: 'warning',
         description: `Private key has ${lines.length} lines (expected 25-35 for RSA 2048)`,
         solution:
-          "Verify this is a complete RSA private key. Consider regenerating if suspicious.",
+          'Verify this is a complete RSA private key. Consider regenerating if suspicious.',
         detailsFound: { lineCount: lines.length },
       });
     }
@@ -153,7 +153,7 @@ export class GoogleSheetsDiagnostics {
     const results: DiagnosticResult[] = [];
 
     try {
-      console.log("🔍 Testing service account configuration...");
+      console.log('🔍 Testing service account configuration...');
 
       const clientEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
       const privateKey = process.env.GOOGLE_PRIVATE_KEY;
@@ -165,8 +165,8 @@ export class GoogleSheetsDiagnostics {
 
       // Clean the private key using the same logic as the main service
       let cleanPrivateKey = privateKey;
-      if (cleanPrivateKey.includes("\\n")) {
-        cleanPrivateKey = cleanPrivateKey.replace(/\\n/g, "\n");
+      if (cleanPrivateKey.includes('\\n')) {
+        cleanPrivateKey = cleanPrivateKey.replace(/\\n/g, '\n');
       }
       if (
         (cleanPrivateKey.startsWith('"') && cleanPrivateKey.endsWith('"')) ||
@@ -178,89 +178,89 @@ export class GoogleSheetsDiagnostics {
       // Test token generation without API call
       try {
         const credentials = {
-          type: "service_account",
+          type: 'service_account',
           project_id: projectId,
-          private_key_id: "",
+          private_key_id: '',
           private_key: cleanPrivateKey,
           client_email: clientEmail,
-          client_id: "",
-          auth_uri: "https://accounts.google.com/o/oauth2/auth",
-          token_uri: "https://oauth2.googleapis.com/token",
+          client_id: '',
+          auth_uri: 'https://accounts.google.com/o/oauth2/auth',
+          token_uri: 'https://oauth2.googleapis.com/token',
           auth_provider_x509_cert_url:
-            "https://www.googleapis.com/oauth2/v1/certs",
+            'https://www.googleapis.com/oauth2/v1/certs',
         };
 
         const auth = new google.auth.GoogleAuth({
           credentials: credentials,
-          scopes: ["https://www.googleapis.com/auth/spreadsheets"],
+          scopes: ['https://www.googleapis.com/auth/spreadsheets'],
         });
 
         const authClient = await auth.getClient();
-        console.log("✅ Service account client created successfully");
+        console.log('✅ Service account client created successfully');
 
         // Try to get an access token without making API calls
         const accessToken = await authClient.getAccessToken();
 
         if (accessToken.token) {
-          console.log("✅ Access token generated successfully");
+          console.log('✅ Access token generated successfully');
           results.push({
-            issue: "Service Account Working",
-            severity: "info",
+            issue: 'Service Account Working',
+            severity: 'info',
             description:
-              "Service account can generate access tokens successfully",
-            solution: "No action needed for service account configuration",
+              'Service account can generate access tokens successfully',
+            solution: 'No action needed for service account configuration',
           });
         } else {
           results.push({
-            issue: "Failed to Generate Access Token",
-            severity: "critical",
+            issue: 'Failed to Generate Access Token',
+            severity: 'critical',
             description:
-              "Service account exists but cannot generate access tokens",
+              'Service account exists but cannot generate access tokens',
             solution:
-              "Check if the service account key is expired or revoked in Google Cloud Console",
+              'Check if the service account key is expired or revoked in Google Cloud Console',
           });
         }
       } catch (tokenError) {
-        console.error("❌ Token generation failed:", tokenError.message);
+        console.error('❌ Token generation failed:', tokenError.message);
 
-        if (tokenError.message.includes("invalid_grant")) {
+        if (tokenError.message.includes('invalid_grant')) {
           results.push({
-            issue: "Invalid Service Account Grant",
-            severity: "critical",
-            description: "Google rejected the service account credentials",
+            issue: 'Invalid Service Account Grant',
+            severity: 'critical',
+            description: 'Google rejected the service account credentials',
             solution:
-              "Service account key may be expired, revoked, or from wrong project. Generate new key in Google Cloud Console.",
+              'Service account key may be expired, revoked, or from wrong project. Generate new key in Google Cloud Console.',
             detailsFound: { error: tokenError.message },
           });
         } else if (
-          tokenError.message.includes("DECODER") ||
-          tokenError.message.includes("OSSL_UNSUPPORTED")
+          tokenError.message.includes('DECODER') ||
+          tokenError.message.includes('OSSL_UNSUPPORTED')
         ) {
           results.push({
-            issue: "Private Key Encoding Issue",
-            severity: "critical",
-            description: "Private key format is incompatible with Node.js v20",
+            issue: 'Private Key Encoding Issue',
+            severity: 'critical',
+            description: 'Private key format is incompatible with Node.js v20',
             solution:
-              "Regenerate service account key in Google Cloud Console (newer keys are Node.js v20 compatible)",
+              'Regenerate service account key in Google Cloud Console (newer keys are Node.js v20 compatible)',
             detailsFound: { error: tokenError.message },
           });
         } else {
           results.push({
-            issue: "Unknown Authentication Error",
-            severity: "critical",
+            issue: 'Unknown Authentication Error',
+            severity: 'critical',
             description: `Authentication failed: ${tokenError.message}`,
             solution:
-              "Check Google Cloud Console for service account status and regenerate key if needed",
+              'Check Google Cloud Console for service account status and regenerate key if needed',
             detailsFound: { error: tokenError.message },
           });
         }
       }
     } catch (error) {
       results.push({
-        issue: "Service Account Test Failed",
-        severity: "critical",
+        issue: 'Service Account Test Failed',
+        severity: 'critical',
         description: `Cannot test service account: ${error.message}`,
-        solution: "Verify all credentials are properly set and formatted",
+        solution: 'Verify all credentials are properly set and formatted',
         detailsFound: { error: error.message },
       });
     }
@@ -279,8 +279,8 @@ export class GoogleSheetsDiagnostics {
       const expectedDomain = `${projectId}.iam.gserviceaccount.com`;
       if (!clientEmail.endsWith(expectedDomain)) {
         results.push({
-          issue: "Service Account Email/Project Mismatch",
-          severity: "critical",
+          issue: 'Service Account Email/Project Mismatch',
+          severity: 'critical',
           description: `Service account email "${clientEmail}" does not match project ID "${projectId}"`,
           solution: `Expected email format: *@${expectedDomain}. Verify both values are from the same Google Cloud project.`,
           detailsFound: { projectId, clientEmail, expectedDomain },
@@ -292,15 +292,15 @@ export class GoogleSheetsDiagnostics {
   }
 
   printDiagnosticReport(results: DiagnosticResult[]) {
-    console.log("\n📋 GOOGLE SHEETS AUTHENTICATION DIAGNOSTIC REPORT");
-    console.log("=".repeat(60));
+    console.log('\n📋 GOOGLE SHEETS AUTHENTICATION DIAGNOSTIC REPORT');
+    console.log('='.repeat(60));
 
-    const critical = results.filter((r) => r.severity === "critical");
-    const warnings = results.filter((r) => r.severity === "warning");
-    const info = results.filter((r) => r.severity === "info");
+    const critical = results.filter((r) => r.severity === 'critical');
+    const warnings = results.filter((r) => r.severity === 'warning');
+    const info = results.filter((r) => r.severity === 'info');
 
     if (critical.length === 0) {
-      console.log("✅ No critical issues found");
+      console.log('✅ No critical issues found');
     } else {
       console.log(`❌ ${critical.length} CRITICAL ISSUES FOUND:`);
       critical.forEach((result, i) => {
@@ -329,28 +329,28 @@ export class GoogleSheetsDiagnostics {
       });
     }
 
-    console.log("\n🔧 NEXT STEPS:");
+    console.log('\n🔧 NEXT STEPS:');
     if (critical.length > 0) {
-      console.log("1. Fix all CRITICAL issues listed above");
-      console.log("2. Restart the application to test the fixes");
-      console.log("3. Try a manual sync to verify functionality");
+      console.log('1. Fix all CRITICAL issues listed above');
+      console.log('2. Restart the application to test the fixes');
+      console.log('3. Try a manual sync to verify functionality');
     } else {
-      console.log("1. Address any warnings if needed");
-      console.log("2. Authentication should be working - test manual sync");
+      console.log('1. Address any warnings if needed');
+      console.log('2. Authentication should be working - test manual sync');
     }
 
-    console.log("\n📍 Google Cloud Console Links:");
+    console.log('\n📍 Google Cloud Console Links:');
     console.log(
-      "- Service Accounts: https://console.cloud.google.com/iam-admin/serviceaccounts"
+      '- Service Accounts: https://console.cloud.google.com/iam-admin/serviceaccounts'
     );
     console.log(
-      "- API Credentials: https://console.cloud.google.com/apis/credentials"
+      '- API Credentials: https://console.cloud.google.com/apis/credentials'
     );
     console.log(
-      "- Sheets API: https://console.cloud.google.com/apis/library/sheets.googleapis.com"
+      '- Sheets API: https://console.cloud.google.com/apis/library/sheets.googleapis.com'
     );
 
-    console.log("=".repeat(60));
+    console.log('='.repeat(60));
   }
 }
 

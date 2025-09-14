@@ -16,7 +16,7 @@ const requiredDeps = [
   '@neondatabase/serverless',
   'drizzle-orm',
   'express',
-  'socket.io'
+  'socket.io',
 ];
 
 let allPresent = true;

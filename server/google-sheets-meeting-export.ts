@@ -27,7 +27,7 @@ export class GoogleSheetsMeetingExporter {
       privateKey,
       [
         'https://www.googleapis.com/auth/spreadsheets',
-        'https://www.googleapis.com/auth/drive'
+        'https://www.googleapis.com/auth/drive',
       ]
     );
 
@@ -37,7 +37,10 @@ export class GoogleSheetsMeetingExporter {
   /**
    * Export meeting agenda to Google Sheets using Christine's format
    */
-  async exportMeetingAgenda(meetingId: number, sheetId?: string): Promise<{
+  async exportMeetingAgenda(
+    meetingId: number,
+    sheetId?: string
+  ): Promise<{
     sheetId: string;
     sheetUrl: string;
     exportedRows: number;
@@ -48,43 +51,51 @@ export class GoogleSheetsMeetingExporter {
     }
 
     // Compile the agenda if not already compiled
-    const existingAgendas = await this.storage.getCompiledAgendasByMeeting(meetingId);
+    const existingAgendas =
+      await this.storage.getCompiledAgendasByMeeting(meetingId);
     let compiledAgenda;
-    
+
     if (existingAgendas.length === 0) {
       // Compile new agenda
-      compiledAgenda = await this.agendaCompiler.compileAgenda(meetingId, 'system');
+      compiledAgenda = await this.agendaCompiler.compileAgenda(
+        meetingId,
+        'system'
+      );
       await this.agendaCompiler.saveCompiledAgenda(compiledAgenda, 'system');
     } else {
       // Use most recent compiled agenda
       const latestCompiledId = existingAgendas[0].id;
       compiledAgenda = existingAgendas[0];
-      
+
       // Get sections
-      const sections = await this.storage.getAgendaSectionsByCompiledAgenda(latestCompiledId);
-      compiledAgenda.sections = sections.map(section => ({
+      const sections =
+        await this.storage.getAgendaSectionsByCompiledAgenda(latestCompiledId);
+      compiledAgenda.sections = sections.map((section) => ({
         title: section.title,
         orderIndex: section.orderIndex,
-        items: section.items || []
+        items: section.items || [],
       }));
     }
 
     // Create or update Google Sheet
-    const finalSheetId = sheetId || await this.createNewAgendaSheet(meeting);
-    
+    const finalSheetId = sheetId || (await this.createNewAgendaSheet(meeting));
+
     // Format data for Christine's meeting format
-    const sheetData = this.formatMeetingAgendaForSheets(meeting, compiledAgenda);
-    
+    const sheetData = this.formatMeetingAgendaForSheets(
+      meeting,
+      compiledAgenda
+    );
+
     // Clear existing content and write new data
     await this.clearAndWriteSheetData(finalSheetId, sheetData);
-    
+
     // Apply formatting
     await this.formatMeetingAgendaSheet(finalSheetId, sheetData.length);
 
     return {
       sheetId: finalSheetId,
       sheetUrl: `https://docs.google.com/spreadsheets/d/${finalSheetId}`,
-      exportedRows: sheetData.length
+      exportedRows: sheetData.length,
     };
   }
 
@@ -93,7 +104,7 @@ export class GoogleSheetsMeetingExporter {
    */
   private async createNewAgendaSheet(meeting: any): Promise<string> {
     const sheetTitle = `${meeting.title} - Agenda - ${meeting.date}`;
-    
+
     const response = await this.sheets.spreadsheets.create({
       resource: {
         properties: {
@@ -119,16 +130,19 @@ export class GoogleSheetsMeetingExporter {
   /**
    * Format meeting agenda data to match Christine's Google Sheets format
    */
-  private formatMeetingAgendaForSheets(meeting: any, compiledAgenda: any): any[][] {
+  private formatMeetingAgendaForSheets(
+    meeting: any,
+    compiledAgenda: any
+  ): any[][] {
     const data: any[][] = [];
-    
+
     // Header section
     data.push([meeting.title]); // A1
     data.push([`Date: ${meeting.date}`]); // A2
     data.push([`Time: ${meeting.time}`]); // A3
     data.push([`Location: ${meeting.location || 'TBD'}`]); // A4
     data.push(['']); // A5 - Empty row
-    
+
     // Headers row
     data.push([
       'Section', // A
@@ -142,7 +156,7 @@ export class GoogleSheetsMeetingExporter {
       'Notes', // I
       'Action Items', // J
       'Follow Up', // K
-      'Decision' // L
+      'Decision', // L
     ]);
 
     // Process each agenda section with proper column mapping
@@ -161,7 +175,7 @@ export class GoogleSheetsMeetingExporter {
             '', // I - Notes (empty for user input)
             '', // J - Action items (empty for user input)
             '', // K - Follow up (empty for user input)
-            '' // L - Decision (empty for user input)
+            '', // L - Decision (empty for user input)
           ]);
         });
       } else {
@@ -178,10 +192,10 @@ export class GoogleSheetsMeetingExporter {
           '', // I
           '', // J
           '', // K
-          '' // L
+          '', // L
         ]);
       }
-      
+
       // Add separator row between sections
       data.push(Array(12).fill(''));
     });
@@ -200,7 +214,7 @@ export class GoogleSheetsMeetingExporter {
       '', // I
       '', // J
       '', // K
-      '' // L
+      '', // L
     ]);
 
     return data;
@@ -225,7 +239,7 @@ export class GoogleSheetsMeetingExporter {
     if (item.type === 'project_review') {
       return 'Medium'; // Default for project reviews
     }
-    
+
     // Parse priority from title/description
     const text = `${item.title} ${item.description}`.toLowerCase();
     if (text.includes('urgent') || text.includes('critical')) {
@@ -247,7 +261,7 @@ export class GoogleSheetsMeetingExporter {
     }
 
     const normalizedStatus = status.toLowerCase();
-    
+
     // Map common status values to the required format
     switch (normalizedStatus) {
       case 'completed':
@@ -255,38 +269,38 @@ export class GoogleSheetsMeetingExporter {
       case 'finished':
       case 'resolved':
         return 'Completed';
-        
+
       case 'in_progress':
       case 'in progress':
       case 'active':
       case 'working':
       case 'ongoing':
         return 'In Progress';
-        
+
       case 'blocked':
       case 'stuck':
       case 'waiting':
       case 'on_hold':
       case 'on hold':
         return 'Blocked';
-        
+
       case 'approved':
         // Approved agenda items are ready to discuss (in progress)
         return 'In Progress';
-        
+
       case 'pending':
       case 'new':
       case 'submitted':
       case 'review':
       case 'planning':
         return 'Not Started';
-        
+
       case 'rejected':
       case 'cancelled':
       case 'deferred':
       case 'postponed':
         return 'Blocked';
-        
+
       default:
         // For project reviews, map project statuses
         if (itemType === 'project_review') {
@@ -309,7 +323,7 @@ export class GoogleSheetsMeetingExporter {
               return 'Not Started';
           }
         }
-        
+
         // Default fallback
         return 'Not Started';
     }
@@ -320,7 +334,7 @@ export class GoogleSheetsMeetingExporter {
    */
   private getTotalItemCount(compiledAgenda: any): number {
     if (!compiledAgenda.sections) return 0;
-    
+
     return compiledAgenda.sections.reduce((total: number, section: any) => {
       return total + (section.items?.length || 0);
     }, 0);
@@ -329,7 +343,10 @@ export class GoogleSheetsMeetingExporter {
   /**
    * Smart sync: Preserve manual columns while updating app-managed columns
    */
-  private async clearAndWriteSheetData(sheetId: string, data: any[][]): Promise<void> {
+  private async clearAndWriteSheetData(
+    sheetId: string,
+    data: any[][]
+  ): Promise<void> {
     // First, try to read existing data to preserve manual edits
     let existingData: any[][] = [];
     try {
@@ -339,7 +356,10 @@ export class GoogleSheetsMeetingExporter {
       });
       existingData = response.data.values || [];
     } catch (error) {
-      console.warn('Could not read existing sheet data, proceeding with full overwrite:', error);
+      console.warn(
+        'Could not read existing sheet data, proceeding with full overwrite:',
+        error
+      );
     }
 
     // Merge data intelligently: preserve manual columns (I, J, K, L)
@@ -369,7 +389,7 @@ export class GoogleSheetsMeetingExporter {
    */
   private mergeSheetData(newData: any[][], existingData: any[][]): any[][] {
     const merged: any[][] = [];
-    
+
     // Always use new data for headers and meeting info (first 6 rows)
     for (let i = 0; i < 6 && i < newData.length; i++) {
       merged[i] = [...newData[i]];
@@ -379,32 +399,35 @@ export class GoogleSheetsMeetingExporter {
     for (let i = 6; i < newData.length; i++) {
       const newRow = newData[i] || [];
       const existingRow = existingData[i] || [];
-      
+
       // Create merged row: app data (A-H) + preserved manual data (I-L)
       const mergedRow = [
         // App-managed columns (A-H): Section, Item, Description, Owner, Support, Priority, Time, Status
         newRow[0] || '', // A - Section
         newRow[1] || '', // B - Item
-        newRow[2] || '', // C - Description  
+        newRow[2] || '', // C - Description
         newRow[3] || '', // D - Owner
         newRow[4] || '', // E - Support People
         newRow[5] || '', // F - Priority
         newRow[6] || '', // G - Time Estimate
         newRow[7] || '', // H - Status
-        
+
         // Manual columns (I-L): preserve existing user input
         existingRow[8] || newRow[8] || '', // I - Notes (preserve existing)
         existingRow[9] || newRow[9] || '', // J - Action Items (preserve existing)
         existingRow[10] || newRow[10] || '', // K - Follow Up (preserve existing)
-        existingRow[11] || newRow[11] || ''  // L - Decision (preserve existing)
+        existingRow[11] || newRow[11] || '', // L - Decision (preserve existing)
       ];
-      
+
       merged[i] = mergedRow;
     }
 
     // If existing data has more rows than new data, preserve them
     for (let i = newData.length; i < existingData.length; i++) {
-      if (existingData[i] && existingData[i].some(cell => cell && cell.toString().trim())) {
+      if (
+        existingData[i] &&
+        existingData[i].some((cell) => cell && cell.toString().trim())
+      ) {
         merged[i] = existingData[i];
       }
     }
@@ -415,7 +438,10 @@ export class GoogleSheetsMeetingExporter {
   /**
    * Apply formatting to make the agenda readable
    */
-  private async formatMeetingAgendaSheet(sheetId: string, dataRows: number): Promise<void> {
+  private async formatMeetingAgendaSheet(
+    sheetId: string,
+    dataRows: number
+  ): Promise<void> {
     const requests = [
       // Header formatting (rows 1-4)
       {
@@ -504,7 +530,10 @@ export class GoogleSheetsMeetingExporter {
   /**
    * Export meeting minutes to Google Sheets
    */
-  async exportMeetingMinutes(meetingId: number, sheetId?: string): Promise<{
+  async exportMeetingMinutes(
+    meetingId: number,
+    sheetId?: string
+  ): Promise<{
     sheetId: string;
     sheetUrl: string;
   }> {
@@ -514,17 +543,17 @@ export class GoogleSheetsMeetingExporter {
     }
 
     // Create new sheet if needed
-    const finalSheetId = sheetId || await this.createNewMinutesSheet(meeting);
-    
+    const finalSheetId = sheetId || (await this.createNewMinutesSheet(meeting));
+
     // Format minutes data
     const minutesData = this.formatMeetingMinutesForSheets(meeting);
-    
+
     // Write to sheet
     await this.clearAndWriteSheetData(finalSheetId, minutesData);
-    
+
     return {
       sheetId: finalSheetId,
-      sheetUrl: `https://docs.google.com/spreadsheets/d/${finalSheetId}`
+      sheetUrl: `https://docs.google.com/spreadsheets/d/${finalSheetId}`,
     };
   }
 
@@ -533,7 +562,7 @@ export class GoogleSheetsMeetingExporter {
    */
   private async createNewMinutesSheet(meeting: any): Promise<string> {
     const sheetTitle = `${meeting.title} - Minutes - ${meeting.date}`;
-    
+
     const response = await this.sheets.spreadsheets.create({
       resource: {
         properties: {
@@ -550,14 +579,14 @@ export class GoogleSheetsMeetingExporter {
    */
   private formatMeetingMinutesForSheets(meeting: any): any[][] {
     const data: any[][] = [];
-    
+
     // Header
     data.push([`${meeting.title} - Meeting Minutes`]);
     data.push([`Date: ${meeting.date}`]);
     data.push([`Time: ${meeting.time}`]);
     data.push([`Location: ${meeting.location || 'TBD'}`]);
     data.push(['']);
-    
+
     // Template structure for minutes
     data.push(['Attendees:']);
     data.push(['']);

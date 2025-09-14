@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
 interface AnimatedCounterProps {
   value: number | string;
@@ -11,16 +11,16 @@ interface AnimatedCounterProps {
 export function AnimatedCounter({
   value,
   duration = 2000,
-  className = "",
-  prefix = "",
-  suffix = "",
+  className = '',
+  prefix = '',
+  suffix = '',
 }: AnimatedCounterProps) {
   const [displayValue, setDisplayValue] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
 
   const numericValue =
-    typeof value === "string"
-      ? parseFloat(value.replace(/,/g, "")) || 0
+    typeof value === 'string'
+      ? parseFloat(value.replace(/,/g, '')) || 0
       : value;
 
   useEffect(() => {
@@ -64,7 +64,7 @@ export function AnimatedCounter({
 
   return (
     <span
-      className={`${className} ${isVisible ? "animate-count-up" : "opacity-0"}`}
+      className={`${className} ${isVisible ? 'animate-count-up' : 'opacity-0'}`}
     >
       {prefix}
       {formattedValue}

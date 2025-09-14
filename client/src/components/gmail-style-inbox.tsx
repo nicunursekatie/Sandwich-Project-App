@@ -1,19 +1,19 @@
-import { useState, useEffect } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { hasPermission, PERMISSIONS } from "@shared/auth-utils";
-import { formatDistanceToNow } from "date-fns";
+import { useState, useEffect } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import { apiRequest, queryClient } from '@/lib/queryClient';
+import { hasPermission, PERMISSIONS } from '@shared/auth-utils';
+import { formatDistanceToNow } from 'date-fns';
 import {
   Inbox as InboxIcon,
   Send,
@@ -37,14 +37,14 @@ import {
   RefreshCw,
   Trophy,
   Heart,
-} from "lucide-react";
+} from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 import {
   Dialog,
   DialogContent,
@@ -53,16 +53,16 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { ButtonTooltip } from "@/components/ui/button-tooltip";
-import { KudosInbox } from "@/components/kudos-inbox";
+} from '@/components/ui/select';
+import { ButtonTooltip } from '@/components/ui/button-tooltip';
+import { KudosInbox } from '@/components/kudos-inbox';
 
 interface User {
   id: string;
@@ -109,13 +109,13 @@ interface Draft {
 }
 
 export default function GmailStyleInbox() {
-  console.log("🔍 GmailStyleInbox component is rendering");
+  console.log('🔍 GmailStyleInbox component is rendering');
   const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
 
   // Add early return for loading state
   if (authLoading) {
-    console.log("🔄 Auth is loading, showing loading state");
+    console.log('🔄 Auth is loading, showing loading state');
     return (
       <div className="flex h-full items-center justify-center bg-white">
         <div className="text-center">
@@ -127,7 +127,7 @@ export default function GmailStyleInbox() {
   }
 
   if (!user) {
-    console.log("❌ No user found, showing error");
+    console.log('❌ No user found, showing error');
     return (
       <div className="flex h-full items-center justify-center bg-white">
         <div className="text-center">
@@ -138,22 +138,22 @@ export default function GmailStyleInbox() {
   }
 
   console.log(
-    "✅ User authenticated, rendering inbox for:",
+    '✅ User authenticated, rendering inbox for:',
     (user as any)?.email
   );
 
   // UI State
-  const [activeFolder, setActiveFolder] = useState("inbox");
+  const [activeFolder, setActiveFolder] = useState('inbox');
   const [selectedMessages, setSelectedMessages] = useState<Set<number>>(
     new Set()
   );
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
   const [showCompose, setShowCompose] = useState(false);
   const [showReply, setShowReply] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMessageListCollapsed, setIsMessageListCollapsed] = useState(false);
-  const [screenSize, setScreenSize] = useState("desktop");
+  const [screenSize, setScreenSize] = useState('desktop');
   const [showOldKudos, setShowOldKudos] = useState(false);
 
   // Responsive behavior with comprehensive breakpoint strategy
@@ -163,39 +163,39 @@ export default function GmailStyleInbox() {
 
       if (width < 768) {
         // Mobile (< 768px): Keep sidebar visible by default, allow manual collapse
-        setScreenSize("mobile");
+        setScreenSize('mobile');
         // Don't auto-collapse sidebar on mobile - let users see it exists
         setIsMessageListCollapsed(true);
       } else if (width < 900) {
         // Small tablet (768-899px): Show message list + body, collapse sidebar
-        setScreenSize("small-tablet");
+        setScreenSize('small-tablet');
         setIsSidebarCollapsed(true);
         setIsMessageListCollapsed(false);
       } else if (width < 1200) {
         // Large tablet/small laptop (900-1199px): Show compact sidebar + message list + body
-        setScreenSize("large-tablet");
+        setScreenSize('large-tablet');
         setIsSidebarCollapsed(false);
         setIsMessageListCollapsed(false);
       } else {
         // Desktop (≥ 1200px): Show full sidebar + message list + body
-        setScreenSize("desktop");
+        setScreenSize('desktop');
         setIsSidebarCollapsed(false);
         setIsMessageListCollapsed(false);
       }
     };
 
     checkScreenSize();
-    window.addEventListener("resize", checkScreenSize);
-    return () => window.removeEventListener("resize", checkScreenSize);
+    window.addEventListener('resize', checkScreenSize);
+    return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
 
   // Compose State
-  const [composeRecipient, setComposeRecipient] = useState("");
-  const [composeSubject, setComposeSubject] = useState("");
-  const [composeContent, setComposeContent] = useState("");
+  const [composeRecipient, setComposeRecipient] = useState('');
+  const [composeSubject, setComposeSubject] = useState('');
+  const [composeContent, setComposeContent] = useState('');
 
   // Reply State
-  const [replyContent, setReplyContent] = useState("");
+  const [replyContent, setReplyContent] = useState('');
 
   // Draft State
   const [currentDraft, setCurrentDraft] = useState<Draft | null>(null);
@@ -205,11 +205,11 @@ export default function GmailStyleInbox() {
 
   // Fetch users for compose
   const { data: users = [] } = useQuery<User[]>({
-    queryKey: ["/api/users"],
+    queryKey: ['/api/users'],
   });
 
   // Use email system for Gmail inbox
-  const apiBase = "/api/emails";
+  const apiBase = '/api/emails';
 
   // Fetch messages from email system - simple flat list
   const { data: messages = [], refetch: refetchMessages } = useQuery<any[]>({
@@ -217,7 +217,7 @@ export default function GmailStyleInbox() {
     queryFn: async () => {
       // Get flat email list for simple inbox view
       const response = await apiRequest(
-        "GET",
+        'GET',
         `/api/emails?folder=${activeFolder}`
       );
       const messages = Array.isArray(response)
@@ -233,22 +233,22 @@ export default function GmailStyleInbox() {
 
   // Fetch drafts
   const { data: drafts = [] } = useQuery<Draft[]>({
-    queryKey: ["/api/drafts"],
-    enabled: activeFolder === "drafts",
+    queryKey: ['/api/drafts'],
+    enabled: activeFolder === 'drafts',
   });
 
   // Fetch kudos with proper permission check
   const { data: kudos = [], refetch: refetchKudos } = useQuery({
-    queryKey: ["/api/messaging/kudos/received"],
+    queryKey: ['/api/messaging/kudos/received'],
     queryFn: async () => {
       try {
         const response = await apiRequest(
-          "GET",
-          "/api/messaging/kudos/received"
+          'GET',
+          '/api/messaging/kudos/received'
         );
         return response || [];
       } catch (error) {
-        console.error("Error fetching kudos:", error);
+        console.error('Error fetching kudos:', error);
         return [];
       }
     },
@@ -258,21 +258,21 @@ export default function GmailStyleInbox() {
   // Mark individual kudos as read mutation
   const markKudosAsReadMutation = useMutation({
     mutationFn: async (messageId: number) => {
-      return apiRequest("POST", `/api/emails/${messageId}/read`);
+      return apiRequest('POST', `/api/emails/${messageId}/read`);
     },
     onSuccess: () => {
       refetchKudos();
       queryClient.invalidateQueries({
-        queryKey: ["/api/messaging/kudos/received"],
+        queryKey: ['/api/messaging/kudos/received'],
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/emails"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/emails/unread-count"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/emails'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/emails/unread-count'] });
       queryClient.invalidateQueries({
-        queryKey: ["/api/message-notifications/unread-counts"],
+        queryKey: ['/api/message-notifications/unread-counts'],
       });
     },
     onError: (error) => {
-      console.error("Failed to mark kudos as read:", error);
+      console.error('Failed to mark kudos as read:', error);
     },
   });
 
@@ -284,13 +284,13 @@ export default function GmailStyleInbox() {
   const saveDraftMutation = useMutation({
     mutationFn: async (draft: Partial<Draft>) => {
       if (draft.id) {
-        return await apiRequest("PUT", `/api/drafts/${draft.id}`, draft);
+        return await apiRequest('PUT', `/api/drafts/${draft.id}`, draft);
       } else {
-        return await apiRequest("POST", "/api/drafts", draft);
+        return await apiRequest('POST', '/api/drafts', draft);
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/drafts"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/drafts'] });
     },
   });
 
@@ -302,26 +302,26 @@ export default function GmailStyleInbox() {
         recipientId: messageData.recipientId,
         recipientName: messageData.recipientName,
         recipientEmail: messageData.recipientEmail,
-        subject: messageData.subject || "Project Discussion",
+        subject: messageData.subject || 'Project Discussion',
         content: messageData.content,
         isDraft: messageData.isDraft || false,
       };
-      console.log("Sending email with data:", emailData);
-      return await apiRequest("POST", "/api/emails", emailData);
+      console.log('Sending email with data:', emailData);
+      return await apiRequest('POST', '/api/emails', emailData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [apiBase] });
       // Also invalidate Gmail unread count to update navigation indicator
-      queryClient.invalidateQueries({ queryKey: ["/api/emails/unread-count"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/emails/unread-count'] });
       setShowCompose(false);
       resetCompose();
-      toast({ description: "Message sent successfully" });
+      toast({ description: 'Message sent successfully' });
     },
     onError: (error) => {
-      console.error("Send email error:", error);
+      console.error('Send email error:', error);
       toast({
-        description: "Failed to send message",
-        variant: "destructive",
+        description: 'Failed to send message',
+        variant: 'destructive',
       });
     },
   });
@@ -330,7 +330,7 @@ export default function GmailStyleInbox() {
   const replyMutation = useMutation({
     mutationFn: async (replyData: any) => {
       if (!selectedMessage) {
-        throw new Error("No message selected for reply");
+        throw new Error('No message selected for reply');
       }
 
       // Create simple reply email
@@ -338,29 +338,29 @@ export default function GmailStyleInbox() {
         recipientId: selectedMessage.senderId,
         recipientName: selectedMessage.senderName,
         recipientEmail: selectedMessage.senderEmail,
-        subject: selectedMessage.subject?.startsWith("Re: ")
+        subject: selectedMessage.subject?.startsWith('Re: ')
           ? selectedMessage.subject
-          : `Re: ${selectedMessage.subject || "No Subject"}`,
+          : `Re: ${selectedMessage.subject || 'No Subject'}`,
         content: replyData.content,
         isDraft: false,
       };
 
-      console.log("Sending reply:", replyEmailData);
-      return await apiRequest("POST", "/api/emails", replyEmailData);
+      console.log('Sending reply:', replyEmailData);
+      return await apiRequest('POST', '/api/emails', replyEmailData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [apiBase] });
       // Also invalidate Gmail unread count to update navigation indicator
-      queryClient.invalidateQueries({ queryKey: ["/api/emails/unread-count"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/emails/unread-count'] });
       setShowReply(false);
-      setReplyContent("");
-      toast({ description: "Reply sent successfully" });
+      setReplyContent('');
+      toast({ description: 'Reply sent successfully' });
     },
     onError: (error) => {
-      console.error("Reply error:", error);
+      console.error('Reply error:', error);
       toast({
-        description: "Failed to send reply",
-        variant: "destructive",
+        description: 'Failed to send reply',
+        variant: 'destructive',
       });
     },
   });
@@ -370,21 +370,21 @@ export default function GmailStyleInbox() {
     mutationFn: async (messageIds: number[]) => {
       // Mark each message as read using the email PATCH endpoint
       const promises = messageIds.map((id) =>
-        apiRequest("PATCH", `/api/emails/${id}`, { isRead: true })
+        apiRequest('PATCH', `/api/emails/${id}`, { isRead: true })
       );
       return await Promise.all(promises);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [apiBase] });
       // Also invalidate Gmail unread count to update navigation indicator
-      queryClient.invalidateQueries({ queryKey: ["/api/emails/unread-count"] });
-      toast({ description: "Marked as read" });
+      queryClient.invalidateQueries({ queryKey: ['/api/emails/unread-count'] });
+      toast({ description: 'Marked as read' });
     },
     onError: (error) => {
-      console.error("Mark as read error:", error);
+      console.error('Mark as read error:', error);
       toast({
-        description: "Failed to mark as read",
-        variant: "destructive",
+        description: 'Failed to mark as read',
+        variant: 'destructive',
       });
     },
   });
@@ -399,7 +399,7 @@ export default function GmailStyleInbox() {
       isStarred: boolean;
     }) => {
       console.log(
-        "Star not implemented for conversation messages:",
+        'Star not implemented for conversation messages:',
         messageId,
         isStarred
       );
@@ -415,22 +415,22 @@ export default function GmailStyleInbox() {
     mutationFn: async (messageIds: number[]) => {
       // Mark each message as archived using the email PATCH endpoint
       const promises = messageIds.map((id) =>
-        apiRequest("PATCH", `/api/emails/${id}`, { isArchived: true })
+        apiRequest('PATCH', `/api/emails/${id}`, { isArchived: true })
       );
       return await Promise.all(promises);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [apiBase] });
       // Also invalidate Gmail unread count to update navigation indicator
-      queryClient.invalidateQueries({ queryKey: ["/api/emails/unread-count"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/emails/unread-count'] });
       setSelectedMessages(new Set());
-      toast({ description: "Messages archived successfully" });
+      toast({ description: 'Messages archived successfully' });
     },
     onError: (error) => {
-      console.error("Archive error:", error);
+      console.error('Archive error:', error);
       toast({
-        description: "Failed to archive messages",
-        variant: "destructive",
+        description: 'Failed to archive messages',
+        variant: 'destructive',
       });
     },
   });
@@ -440,22 +440,22 @@ export default function GmailStyleInbox() {
     mutationFn: async (messageIds: number[]) => {
       // Mark each message as trashed using the email PATCH endpoint
       const promises = messageIds.map((id) =>
-        apiRequest("PATCH", `/api/emails/${id}`, { isTrashed: true })
+        apiRequest('PATCH', `/api/emails/${id}`, { isTrashed: true })
       );
       return await Promise.all(promises);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [apiBase] });
       // Also invalidate Gmail unread count to update navigation indicator
-      queryClient.invalidateQueries({ queryKey: ["/api/emails/unread-count"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/emails/unread-count'] });
       setSelectedMessages(new Set());
-      toast({ description: "Messages moved to trash" });
+      toast({ description: 'Messages moved to trash' });
     },
     onError: (error) => {
-      console.error("Trash error:", error);
+      console.error('Trash error:', error);
       toast({
-        description: "Failed to move messages to trash",
-        variant: "destructive",
+        description: 'Failed to move messages to trash',
+        variant: 'destructive',
       });
     },
   });
@@ -465,14 +465,14 @@ export default function GmailStyleInbox() {
     mutationFn: async (messageIds: number[]) => {
       // Delete conversation messages one by one
       const deletePromises = messageIds.map((id) =>
-        apiRequest("DELETE", `/api/messages/${id}`)
+        apiRequest('DELETE', `/api/messages/${id}`)
       );
       return Promise.all(deletePromises);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [apiBase] });
       setSelectedMessages(new Set());
-      toast({ description: "Messages deleted permanently" });
+      toast({ description: 'Messages deleted permanently' });
     },
   });
 
@@ -489,8 +489,8 @@ export default function GmailStyleInbox() {
           recipientId: composeRecipient,
           recipientName:
             users.find((u) => u.id === composeRecipient)?.firstName +
-              " " +
-              users.find((u) => u.id === composeRecipient)?.lastName || "",
+              ' ' +
+              users.find((u) => u.id === composeRecipient)?.lastName || '',
           subject: composeSubject,
           content: composeContent,
           lastSaved: new Date().toISOString(),
@@ -512,9 +512,9 @@ export default function GmailStyleInbox() {
 
   // Helper functions
   const resetCompose = () => {
-    setComposeRecipient("");
-    setComposeSubject("");
-    setComposeContent("");
+    setComposeRecipient('');
+    setComposeSubject('');
+    setComposeContent('');
     setCurrentDraft(null);
   };
 
@@ -548,8 +548,8 @@ export default function GmailStyleInbox() {
   const handleSendMessage = () => {
     if (!composeRecipient || !composeContent) {
       toast({
-        description: "Please select a recipient and enter a message",
-        variant: "destructive",
+        description: 'Please select a recipient and enter a message',
+        variant: 'destructive',
       });
       return;
     }
@@ -561,9 +561,9 @@ export default function GmailStyleInbox() {
       recipientId: composeRecipient,
       recipientName: recipient
         ? `${recipient.firstName} ${recipient.lastName}`.trim()
-        : "",
-      recipientEmail: recipient?.email || "",
-      subject: composeSubject || "Project Discussion",
+        : '',
+      recipientEmail: recipient?.email || '',
+      subject: composeSubject || 'Project Discussion',
       content: composeContent,
       isDraft: false,
     });
@@ -572,13 +572,13 @@ export default function GmailStyleInbox() {
   const handleReply = () => {
     if (!selectedMessage || !replyContent.trim()) {
       toast({
-        description: "Please enter a reply message",
-        variant: "destructive",
+        description: 'Please enter a reply message',
+        variant: 'destructive',
       });
       return;
     }
 
-    console.log("Sending reply with data:", {
+    console.log('Sending reply with data:', {
       content: replyContent,
       sender: null, // Let backend use authenticated user info
       recipientId: selectedMessage.userId,
@@ -597,7 +597,7 @@ export default function GmailStyleInbox() {
     replyMutation.mutate(replyData);
 
     // Clear the reply content after sending
-    setReplyContent("");
+    setReplyContent('');
   };
 
   // Filter messages based on search
@@ -614,15 +614,15 @@ export default function GmailStyleInbox() {
   const getUnreadCount = (folder: string) => {
     return messages.filter((m) => {
       switch (folder) {
-        case "inbox":
+        case 'inbox':
           return !m.isRead; // Count unread messages in inbox
-        case "starred":
+        case 'starred':
           return false; // No starred functionality yet
-        case "archived":
+        case 'archived':
           return false; // No archived functionality yet
-        case "trash":
+        case 'trash':
           return false; // No trash functionality yet
-        case "kudos":
+        case 'kudos':
           return false; // Kudos uses separate count system
         default:
           return false;
@@ -636,36 +636,36 @@ export default function GmailStyleInbox() {
 
   const folders = [
     {
-      id: "inbox",
-      label: "Inbox",
+      id: 'inbox',
+      label: 'Inbox',
       icon: InboxIcon,
-      count: getUnreadCount("inbox"),
+      count: getUnreadCount('inbox'),
     },
     {
-      id: "starred",
-      label: "Starred",
+      id: 'starred',
+      label: 'Starred',
       icon: Star,
-      count: getUnreadCount("starred"),
+      count: getUnreadCount('starred'),
     },
-    { id: "sent", label: "Sent", icon: Send, count: 0 },
-    { id: "drafts", label: "Drafts", icon: Edit3, count: drafts.length },
-    { id: "kudos", label: "Kudos", icon: Heart, count: getKudosUnreadCount() },
+    { id: 'sent', label: 'Sent', icon: Send, count: 0 },
+    { id: 'drafts', label: 'Drafts', icon: Edit3, count: drafts.length },
+    { id: 'kudos', label: 'Kudos', icon: Heart, count: getKudosUnreadCount() },
     {
-      id: "archived",
-      label: "Archived",
+      id: 'archived',
+      label: 'Archived',
       icon: Archive,
-      count: getUnreadCount("archived"),
+      count: getUnreadCount('archived'),
     },
     {
-      id: "trash",
-      label: "Trash",
+      id: 'trash',
+      label: 'Trash',
       icon: Trash2,
-      count: getUnreadCount("trash"),
+      count: getUnreadCount('trash'),
     },
   ];
 
-  console.log("🎨 About to render GmailStyleInbox main UI");
-  console.log("📊 Component state:", {
+  console.log('🎨 About to render GmailStyleInbox main UI');
+  console.log('📊 Component state:', {
     activeFolder,
     selectedMessage: !!selectedMessage,
     messageCount: messages.length,
@@ -675,7 +675,7 @@ export default function GmailStyleInbox() {
     <div className="flex h-full bg-white relative min-w-0 max-w-full overflow-hidden">
       {/* Mobile/Tablet Overlay for Sidebar - when sidebar is open as overlay */}
       {!isSidebarCollapsed &&
-        (screenSize === "mobile" || screenSize === "small-tablet") && (
+        (screenSize === 'mobile' || screenSize === 'small-tablet') && (
           <div
             className="fixed inset-0 bg-black bg-opacity-50 z-40"
             onClick={() => setIsSidebarCollapsed(true)}
@@ -687,31 +687,31 @@ export default function GmailStyleInbox() {
         className={`
         ${
           isSidebarCollapsed &&
-          (screenSize === "mobile" || screenSize === "small-tablet")
-            ? "hidden"
-            : "flex"
+          (screenSize === 'mobile' || screenSize === 'small-tablet')
+            ? 'hidden'
+            : 'flex'
         } 
         ${
-          screenSize === "large-tablet"
-            ? "w-48"
-            : screenSize === "desktop"
-            ? "w-56"
-            : "w-64"
+          screenSize === 'large-tablet'
+            ? 'w-48'
+            : screenSize === 'desktop'
+              ? 'w-56'
+              : 'w-64'
         } 
         border-r bg-white flex-col flex-shrink-0
         transition-all duration-300 ease-in-out
         ${
-          (screenSize === "mobile" || screenSize === "small-tablet") &&
+          (screenSize === 'mobile' || screenSize === 'small-tablet') &&
           !isSidebarCollapsed
-            ? "fixed left-0 top-0 h-full w-64 z-50"
-            : "relative"
+            ? 'fixed left-0 top-0 h-full w-64 z-50'
+            : 'relative'
         }
       `}
       >
         <div className="p-4">
           <div
             className={`flex items-center justify-between mb-4 ${
-              screenSize === "desktop" ? "hidden" : "flex"
+              screenSize === 'desktop' ? 'hidden' : 'flex'
             }`}
           >
             <span className="text-sm font-medium text-gray-700">
@@ -745,7 +745,7 @@ export default function GmailStyleInbox() {
                 onClick={() => {
                   setActiveFolder(folder.id);
                   // On mobile, collapse sidebar when selecting a folder to show content
-                  if (screenSize === "mobile") {
+                  if (screenSize === 'mobile') {
                     setIsSidebarCollapsed(true);
                   }
                 }}
@@ -753,8 +753,8 @@ export default function GmailStyleInbox() {
                   w-full flex items-center justify-between px-3 py-2 mb-1 rounded-lg text-left transition-colors font-['Roboto']
                   ${
                     activeFolder === folder.id
-                      ? "bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-md"
-                      : "hover:bg-amber-50 hover:border-amber-200 text-gray-700"
+                      ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-md'
+                      : 'hover:bg-amber-50 hover:border-amber-200 text-gray-700'
                   }
                 `}
               >
@@ -769,8 +769,8 @@ export default function GmailStyleInbox() {
                       h-5 px-2 text-xs
                       ${
                         activeFolder === folder.id
-                          ? "bg-white/20 text-white"
-                          : "bg-gray-200 text-gray-800"
+                          ? 'bg-white/20 text-white'
+                          : 'bg-gray-200 text-gray-800'
                       }
                     `}
                   >
@@ -788,7 +788,7 @@ export default function GmailStyleInbox() {
         {/* Message List Panel - Simplified for mobile */}
         <div
           className="flex-1 flex-col bg-white min-w-0 overflow-hidden border-r"
-          style={{ display: "flex" }}
+          style={{ display: 'flex' }}
         >
           {/* Toolbar */}
           <div className="border-b p-4 space-y-3 bg-white">
@@ -806,7 +806,7 @@ export default function GmailStyleInbox() {
                   </Button>
                 )}
                 {/* Close message list button - only on mobile when message is selected */}
-                {screenSize === "mobile" && selectedMessage && (
+                {screenSize === 'mobile' && selectedMessage && (
                   <Button
                     variant="ghost"
                     size="sm"
@@ -850,15 +850,15 @@ export default function GmailStyleInbox() {
                   className="text-xs lg:text-sm px-2 lg:px-3"
                 >
                   {selectedMessages.size === messages.length
-                    ? "Deselect"
-                    : "Select All"}
+                    ? 'Deselect'
+                    : 'Select All'}
                 </Button>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() =>
                     console.log(
-                      "Mark Read not implemented for conversation messages"
+                      'Mark Read not implemented for conversation messages'
                     )
                   }
                   className="text-xs lg:text-sm px-2 lg:px-3"
@@ -900,7 +900,7 @@ export default function GmailStyleInbox() {
           </div>
 
           {/* Kudos Section - Only show in inbox when user has permission */}
-          {activeFolder === "inbox" &&
+          {activeFolder === 'inbox' &&
             hasPermission(user, PERMISSIONS.VIEW_KUDOS) && (
               <>
                 {/* Unread Kudos Section - Improved Responsiveness */}
@@ -932,14 +932,14 @@ export default function GmailStyleInbox() {
                                 userId:
                                   kudo?.userId ||
                                   (user as any)?.id ||
-                                  "unknown",
+                                  'unknown',
                                 sender: kudo.sender,
                                 senderName: kudo.senderName,
                                 conversationId: kudo.conversationId || kudo.id,
                                 subject: `Kudos ${
                                   kudo.projectTitle
                                     ? `for ${kudo.projectTitle}`
-                                    : ""
+                                    : ''
                                 }`,
                                 content: kudo.message || kudo.content,
                                 createdAt: kudo.createdAt,
@@ -951,7 +951,7 @@ export default function GmailStyleInbox() {
                                 entityName: kudo.entityName,
                               };
                               setSelectedMessage(kudosMessage);
-                              setActiveFolder("inbox");
+                              setActiveFolder('inbox');
                             }}
                             className="flex items-center gap-3 p-3 bg-white rounded-lg shadow-sm border-2 border-yellow-300 cursor-pointer hover:bg-yellow-50 hover:border-yellow-400 transition-colors animate-pulse"
                           >
@@ -963,11 +963,11 @@ export default function GmailStyleInbox() {
                               <p className="text-xs lg:text-sm font-bold text-gray-900">
                                 <span className="text-yellow-700 font-bold">
                                   {kudo.senderName}
-                                </span>{" "}
+                                </span>{' '}
                                 sent you kudos
                                 {kudo.projectTitle && (
                                   <span className="text-gray-600">
-                                    {" "}
+                                    {' '}
                                     for "{kudo.projectTitle}"
                                   </span>
                                 )}
@@ -1012,7 +1012,7 @@ export default function GmailStyleInbox() {
                       </Badge>
                       <ChevronRight
                         className={`h-4 w-4 text-gray-500 ml-auto transition-transform ${
-                          showOldKudos ? "rotate-90" : ""
+                          showOldKudos ? 'rotate-90' : ''
                         }`}
                       />
                     </button>
@@ -1031,7 +1031,7 @@ export default function GmailStyleInbox() {
                                   userId:
                                     kudo?.userId ||
                                     (user as any)?.id ||
-                                    "unknown",
+                                    'unknown',
                                   sender: kudo.sender,
                                   senderName: kudo.senderName,
                                   conversationId:
@@ -1039,7 +1039,7 @@ export default function GmailStyleInbox() {
                                   subject: `Kudos ${
                                     kudo.projectTitle
                                       ? `for ${kudo.projectTitle}`
-                                      : ""
+                                      : ''
                                   }`,
                                   content: kudo.message || kudo.content,
                                   createdAt: kudo.createdAt,
@@ -1051,7 +1051,7 @@ export default function GmailStyleInbox() {
                                   entityName: kudo.entityName,
                                 };
                                 setSelectedMessage(kudosMessage);
-                                setActiveFolder("inbox");
+                                setActiveFolder('inbox');
                               }}
                               className="flex items-center gap-2 p-2 bg-white rounded border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors"
                             >
@@ -1063,7 +1063,7 @@ export default function GmailStyleInbox() {
                                   </span>
                                   {kudo.projectTitle && (
                                     <span className="text-gray-500">
-                                      {" "}
+                                      {' '}
                                       • {kudo.projectTitle}
                                     </span>
                                   )}
@@ -1078,7 +1078,7 @@ export default function GmailStyleInbox() {
                           ))}
                         {kudos.filter((k: any) => k.isRead).length > 5 && (
                           <p className="text-xs text-gray-500 mt-2 text-center">
-                            + {kudos.filter((k: any) => k.isRead).length - 5}{" "}
+                            + {kudos.filter((k: any) => k.isRead).length - 5}{' '}
                             more
                           </p>
                         )}
@@ -1090,7 +1090,7 @@ export default function GmailStyleInbox() {
             )}
 
           {/* Message List - Show KudosInbox for kudos folder */}
-          {activeFolder === "kudos" ? (
+          {activeFolder === 'kudos' ? (
             <div className="flex-1 p-4">
               <KudosInbox />
             </div>
@@ -1105,13 +1105,13 @@ export default function GmailStyleInbox() {
                     p-3 lg:p-5 cursor-pointer transition-colors hover:bg-amber-50 font-['Roboto'] border-b border-gray-100
                     ${
                       selectedMessage?.id === message.id
-                        ? "bg-amber-100 border-r-4 border-amber-500 shadow-sm"
-                        : ""
+                        ? 'bg-amber-100 border-r-4 border-amber-500 shadow-sm'
+                        : ''
                     }
                     ${
                       !message.isRead
-                        ? "bg-blue-50 font-bold border-l-4 border-blue-500"
-                        : "bg-white font-normal"
+                        ? 'bg-blue-50 font-bold border-l-4 border-blue-500'
+                        : 'bg-white font-normal'
                     }
                   `}
                   >
@@ -1128,7 +1128,7 @@ export default function GmailStyleInbox() {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          console.log("Star clicked for message", message.id);
+                          console.log('Star clicked for message', message.id);
                         }}
                         className="mt-1"
                       >
@@ -1136,17 +1136,17 @@ export default function GmailStyleInbox() {
                       </button>
                       <Avatar className="h-7 w-7 lg:h-8 lg:w-8 flex-shrink-0">
                         <AvatarFallback className="text-xs bg-gray-200 text-gray-800">
-                          {activeFolder === "sent"
-                            ? (message.recipientName || "U")
-                                ?.split(" ")
+                          {activeFolder === 'sent'
+                            ? (message.recipientName || 'U')
+                                ?.split(' ')
                                 .map((n: string) => n[0])
-                                .join("")
-                                .toUpperCase() || "U"
-                            : (message.senderName || "U")
-                                ?.split(" ")
+                                .join('')
+                                .toUpperCase() || 'U'
+                            : (message.senderName || 'U')
+                                ?.split(' ')
                                 .map((n: string) => n[0])
-                                .join("")
-                                .toUpperCase() || "U"}
+                                .join('')
+                                .toUpperCase() || 'U'}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0 overflow-hidden">
@@ -1154,13 +1154,13 @@ export default function GmailStyleInbox() {
                           <p
                             className={`text-sm flex-1 break-words ${
                               !message.isRead
-                                ? "font-bold text-gray-900"
-                                : "font-medium text-gray-700"
+                                ? 'font-bold text-gray-900'
+                                : 'font-medium text-gray-700'
                             }`}
                           >
-                            {activeFolder === "sent"
-                              ? message.recipientName || "Unknown"
-                              : message.senderName || "Unknown"}
+                            {activeFolder === 'sent'
+                              ? message.recipientName || 'Unknown'
+                              : message.senderName || 'Unknown'}
                           </p>
                           <span className="text-xs text-gray-500 whitespace-nowrap">
                             {(() => {
@@ -1170,9 +1170,9 @@ export default function GmailStyleInbox() {
                                       new Date(message.createdAt),
                                       { addSuffix: true }
                                     )
-                                  : "No date";
+                                  : 'No date';
                               } catch (error) {
-                                return "Invalid date";
+                                return 'Invalid date';
                               }
                             })()}
                           </span>
@@ -1180,12 +1180,12 @@ export default function GmailStyleInbox() {
                         <p
                           className={`text-sm leading-relaxed ${
                             !message.isRead
-                              ? "font-bold text-gray-900"
-                              : "font-normal text-gray-600"
+                              ? 'font-bold text-gray-900'
+                              : 'font-normal text-gray-600'
                           }`}
                           style={{
-                            wordBreak: "break-word",
-                            whiteSpace: "pre-wrap",
+                            wordBreak: 'break-word',
+                            whiteSpace: 'pre-wrap',
                           }}
                         >
                           {message.content}
@@ -1198,7 +1198,7 @@ export default function GmailStyleInbox() {
                 {filteredMessages.length === 0 && (
                   <div className="p-8 text-center text-gray-500">
                     {searchQuery
-                      ? "No messages found matching your search"
+                      ? 'No messages found matching your search'
                       : `No ${activeFolder} messages`}
                   </div>
                 )}
@@ -1210,10 +1210,10 @@ export default function GmailStyleInbox() {
         {/* Message Detail Panel */}
         <div
           className={`
-          ${selectedMessage ? "flex-1 min-w-0 max-w-none" : ""} 
-          ${!selectedMessage && screenSize === "desktop" ? "flex flex-1" : ""}
-          ${!selectedMessage && screenSize !== "desktop" ? "hidden" : ""}
-          ${selectedMessage ? "flex" : ""}
+          ${selectedMessage ? 'flex-1 min-w-0 max-w-none' : ''} 
+          ${!selectedMessage && screenSize === 'desktop' ? 'flex flex-1' : ''}
+          ${!selectedMessage && screenSize !== 'desktop' ? 'hidden' : ''}
+          ${selectedMessage ? 'flex' : ''}
           flex-col bg-white overflow-hidden
         `}
         >
@@ -1246,7 +1246,7 @@ export default function GmailStyleInbox() {
                       {(selectedMessage as any).isKudos ? (
                         <span className="flex items-center gap-2">
                           <Trophy className="h-5 w-5 text-yellow-600" />
-                          {selectedMessage.subject || "Kudos Message"}
+                          {selectedMessage.subject || 'Kudos Message'}
                         </span>
                       ) : selectedMessage.content.length > 40 ? (
                         `${selectedMessage.content.substring(0, 40)}...`
@@ -1262,14 +1262,13 @@ export default function GmailStyleInbox() {
                         variant="outline"
                         size="sm"
                         onClick={() => {
-                          const replySection = document.querySelector(
-                            ".reply-section"
-                          );
-                          replySection?.scrollIntoView({ behavior: "smooth" });
+                          const replySection =
+                            document.querySelector('.reply-section');
+                          replySection?.scrollIntoView({ behavior: 'smooth' });
                           // Focus the textarea after a short delay to allow for scrolling
                           setTimeout(() => {
                             const textarea = document.querySelector(
-                              ".reply-section textarea"
+                              '.reply-section textarea'
                             ) as HTMLTextAreaElement;
                             textarea?.focus();
                           }, 300);
@@ -1285,7 +1284,7 @@ export default function GmailStyleInbox() {
                       size="sm"
                       onClick={() =>
                         console.log(
-                          "Star clicked for message",
+                          'Star clicked for message',
                           selectedMessage.id
                         )
                       }
@@ -1325,10 +1324,10 @@ export default function GmailStyleInbox() {
                   <Avatar className="h-10 w-10">
                     <AvatarFallback className="bg-gray-200 text-gray-800">
                       {selectedMessage.senderName
-                        ?.split(" ")
+                        ?.split(' ')
                         .map((n) => n[0])
-                        .join("")
-                        .toUpperCase() || "U"}
+                        .join('')
+                        .toUpperCase() || 'U'}
                     </AvatarFallback>
                   </Avatar>
                   <div>
@@ -1344,9 +1343,9 @@ export default function GmailStyleInbox() {
                       try {
                         return selectedMessage.createdAt
                           ? new Date(selectedMessage.createdAt).toLocaleString()
-                          : "No date";
+                          : 'No date';
                       } catch (error) {
-                        return "Invalid date";
+                        return 'Invalid date';
                       }
                     })()}
                   </div>
@@ -1357,8 +1356,8 @@ export default function GmailStyleInbox() {
               <div
                 className={`p-4 ${
                   selectedMessage.content.length > 500
-                    ? "flex-1 overflow-y-auto"
-                    : "flex-shrink-0"
+                    ? 'flex-1 overflow-y-auto'
+                    : 'flex-shrink-0'
                 }`}
               >
                 <div className="prose max-w-none">
@@ -1390,11 +1389,11 @@ export default function GmailStyleInbox() {
                       </div>
                       {(selectedMessage as any).contextType && (
                         <div className="mt-4 text-xs text-yellow-600">
-                          <span className="font-medium">Context:</span>{" "}
-                          {(selectedMessage as any).contextType === "project"
-                            ? "Project"
-                            : "Task"}{" "}
-                          -{" "}
+                          <span className="font-medium">Context:</span>{' '}
+                          {(selectedMessage as any).contextType === 'project'
+                            ? 'Project'
+                            : 'Task'}{' '}
+                          -{' '}
                           {(selectedMessage as any).entityName ||
                             (selectedMessage as any).projectTitle}
                         </div>
@@ -1426,7 +1425,7 @@ export default function GmailStyleInbox() {
                       value={replyContent}
                       onChange={(e) => setReplyContent(e.target.value)}
                       onKeyDown={(e) => {
-                        if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+                        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
                           e.preventDefault();
                           if (replyContent.trim()) {
                             handleReply();
@@ -1436,9 +1435,9 @@ export default function GmailStyleInbox() {
                       rows={6}
                       className="w-full bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 resize-none"
                       style={{
-                        minHeight: "150px",
-                        fontSize: "14px",
-                        lineHeight: "1.5",
+                        minHeight: '150px',
+                        fontSize: '14px',
+                        lineHeight: '1.5',
                       }}
                     />
                     <div className="flex justify-between items-center">
@@ -1449,7 +1448,7 @@ export default function GmailStyleInbox() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => setReplyContent("")}
+                          onClick={() => setReplyContent('')}
                           disabled={!replyContent.trim()}
                         >
                           Clear
@@ -1566,20 +1565,20 @@ export default function GmailStyleInbox() {
                         value={teamUser.id}
                         className="py-2 px-3 hover:bg-amber-50 focus:bg-amber-50 data-[highlighted]:bg-amber-50"
                         style={{
-                          color: "#1f2937",
-                          fontWeight: "500",
-                          fontSize: "14px",
+                          color: '#1f2937',
+                          fontWeight: '500',
+                          fontSize: '14px',
                         }}
                       >
                         <div
                           className="flex items-center gap-2"
-                          style={{ color: "#1f2937" }}
+                          style={{ color: '#1f2937' }}
                         >
                           <div className="w-2 h-2 bg-teal-500 rounded-full"></div>
-                          <span style={{ color: "#1f2937", fontWeight: "600" }}>
+                          <span style={{ color: '#1f2937', fontWeight: '600' }}>
                             {teamUser.firstName} {teamUser.lastName}
                           </span>
-                          <span style={{ color: "#6b7280", fontSize: "12px" }}>
+                          <span style={{ color: '#6b7280', fontSize: '12px' }}>
                             ({teamUser.email})
                           </span>
                         </div>
@@ -1603,7 +1602,7 @@ export default function GmailStyleInbox() {
                 onChange={(e) => setComposeSubject(e.target.value)}
                 placeholder="Budget Review, Website Updates, Event Planning..."
                 className="rounded-lg border border-gray-300 bg-white focus:border-amber-400 focus:ring-2 focus:ring-amber-200 h-11 font-['Roboto'] placeholder:text-gray-500 transition-colors text-gray-900"
-                style={{ color: "#1f2937" }}
+                style={{ color: '#1f2937' }}
               />
               <p className="text-xs text-gray-500 font-['Roboto'] italic">
                 Leave blank for general conversation
@@ -1624,7 +1623,7 @@ export default function GmailStyleInbox() {
                 placeholder="Type your message here..."
                 rows={6}
                 className="rounded-lg border border-gray-300 bg-white focus:border-amber-400 focus:ring-2 focus:ring-amber-200 font-['Roboto'] placeholder:text-gray-500 resize-none transition-colors text-gray-900"
-                style={{ color: "#1f2937" }}
+                style={{ color: '#1f2937' }}
               />
             </div>
 
@@ -1656,7 +1655,7 @@ export default function GmailStyleInbox() {
                     Sending...
                   </div>
                 ) : (
-                  "Send Message"
+                  'Send Message'
                 )}
               </Button>
             </ButtonTooltip>

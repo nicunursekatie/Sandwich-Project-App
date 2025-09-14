@@ -1,10 +1,18 @@
-import { Clock, Users, AlertCircle, CheckCircle, Calendar, Edit, Trash2 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { useAuth } from "@/hooks/useAuth";
-import SendKudosButton from "@/components/send-kudos-button";
-import type { Project } from "@shared/schema";
+import {
+  Clock,
+  Users,
+  AlertCircle,
+  CheckCircle,
+  Calendar,
+  Edit,
+  Trash2,
+} from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/hooks/useAuth';
+import SendKudosButton from '@/components/send-kudos-button';
+import type { Project } from '@shared/schema';
 
 interface ProjectCardProps {
   project: Project;
@@ -16,11 +24,11 @@ export function ProjectCard({ project, onEdit, onDelete }: ProjectCardProps) {
   const { user } = useAuth();
   const getStatusIcon = () => {
     switch (project.status) {
-      case "completed":
+      case 'completed':
         return <CheckCircle className="h-4 w-4 text-green-600" />;
-      case "in-progress":
+      case 'in-progress':
         return <Clock className="h-4 w-4 text-blue-600" />;
-      case "on-hold":
+      case 'on-hold':
         return <AlertCircle className="h-4 w-4 text-yellow-600" />;
       default:
         return <AlertCircle className="h-4 w-4 text-gray-400" />;
@@ -29,14 +37,14 @@ export function ProjectCard({ project, onEdit, onDelete }: ProjectCardProps) {
 
   const getStatusColor = () => {
     switch (project.status) {
-      case "completed":
-        return "bg-green-100 text-green-800";
-      case "in-progress":
-        return "bg-blue-100 text-blue-800";
-      case "on-hold":
-        return "bg-yellow-100 text-yellow-800";
+      case 'completed':
+        return 'bg-green-100 text-green-800';
+      case 'in-progress':
+        return 'bg-blue-100 text-blue-800';
+      case 'on-hold':
+        return 'bg-yellow-100 text-yellow-800';
       default:
-        return "bg-gray-100 text-gray-800";
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -69,21 +77,21 @@ export function ProjectCard({ project, onEdit, onDelete }: ProjectCardProps) {
         <div className="flex items-center gap-2">
           {getStatusIcon()}
           <Badge className={getStatusColor()}>
-            {project.status.replace("-", " ")}
+            {project.status.replace('-', ' ')}
           </Badge>
           <Badge variant="outline" className="text-xs">
             {project.priority}
           </Badge>
         </div>
       </CardHeader>
-      
+
       <CardContent className="pt-0">
         {project.description && (
           <p className="text-sm text-gray-600 mb-4 line-clamp-3">
             {project.description}
           </p>
         )}
-        
+
         <div className="space-y-2 text-sm">
           {project.category && project.category !== project.milestone && (
             <div className="flex items-center gap-2">
@@ -91,43 +99,51 @@ export function ProjectCard({ project, onEdit, onDelete }: ProjectCardProps) {
               <Badge variant="secondary">{project.category}</Badge>
             </div>
           )}
-          
 
-          
           {project.assigneeName && (
             <div className="flex items-center gap-2 text-gray-600">
               <Users className="h-4 w-4" />
-              <span><strong>Owner:</strong> {project.assigneeName}</span>
+              <span>
+                <strong>Owner:</strong> {project.assigneeName}
+              </span>
             </div>
           )}
-          
+
           {project.supportPeople && (
             <div className="flex items-center gap-2 text-gray-600">
               <Users className="h-4 w-4" />
-              <span><strong>Support:</strong> {project.supportPeople}</span>
+              <span>
+                <strong>Support:</strong> {project.supportPeople}
+              </span>
             </div>
           )}
-          
+
           {project.dueDate && (
             <div className="flex items-center gap-2 text-gray-600">
               <Calendar className="h-4 w-4" />
-              <span>{(() => {
-                // Timezone-safe date parsing
-                const dateStr = project.dueDate;
-                let date: Date;
-                if (dateStr.match(/^\d{4}-\d{2}-\d{2}T00:00:00(\.\d{3})?Z?$/)) {
-                  const dateOnly = dateStr.split('T')[0];
-                  date = new Date(dateOnly + 'T12:00:00');
-                } else if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
-                  date = new Date(dateStr + 'T12:00:00');
-                } else {
-                  date = new Date(dateStr);
-                }
-                return isNaN(date.getTime()) ? 'Invalid date' : date.toLocaleDateString();
-              })()}</span>
+              <span>
+                {(() => {
+                  // Timezone-safe date parsing
+                  const dateStr = project.dueDate;
+                  let date: Date;
+                  if (
+                    dateStr.match(/^\d{4}-\d{2}-\d{2}T00:00:00(\.\d{3})?Z?$/)
+                  ) {
+                    const dateOnly = dateStr.split('T')[0];
+                    date = new Date(dateOnly + 'T12:00:00');
+                  } else if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                    date = new Date(dateStr + 'T12:00:00');
+                  } else {
+                    date = new Date(dateStr);
+                  }
+                  return isNaN(date.getTime())
+                    ? 'Invalid date'
+                    : date.toLocaleDateString();
+                })()}
+              </span>
             </div>
           )}
-          
+
           {project.estimatedHours && (
             <div className="flex items-center gap-2 text-gray-600">
               <Clock className="h-4 w-4" />
@@ -138,31 +154,37 @@ export function ProjectCard({ project, onEdit, onDelete }: ProjectCardProps) {
             </div>
           )}
         </div>
-        
+
         {/* Show kudos button for completed projects if assignee is not current user and has valid ID */}
-        {project.status === "completed" && project.assigneeName && project.assigneeId && user && (
-          <div className="mt-4 pt-3 border-t border-gray-200">
-            <SendKudosButton
-              recipientId={project.assigneeId.toString()}
-              recipientName={project.assigneeName}
-              contextType="project"
-              contextId={project.id.toString()}
-              contextTitle={project.title}
-              size="sm"
-              variant="outline"
-              className="text-purple-600 hover:text-purple-700 border-purple-200 hover:bg-purple-50"
-            />
-          </div>
-        )}
-        
-        {/* Show warning for legacy projects without proper assignee IDs */}
-        {project.status === "completed" && project.assigneeName && !project.assigneeId && (
-          <div className="mt-4 pt-3 border-t border-gray-200"
-            <div className="text-xs text-orange-600 bg-orange-50 px-2 py-1 rounded border border-orange-200">
-              ⚠️ Legacy project: Cannot send kudos to {project.assigneeName} (no user ID)
+        {project.status === 'completed' &&
+          project.assigneeName &&
+          project.assigneeId &&
+          user && (
+            <div className="mt-4 pt-3 border-t border-gray-200">
+              <SendKudosButton
+                recipientId={project.assigneeId.toString()}
+                recipientName={project.assigneeName}
+                contextType="project"
+                contextId={project.id.toString()}
+                contextTitle={project.title}
+                size="sm"
+                variant="outline"
+                className="text-purple-600 hover:text-purple-700 border-purple-200 hover:bg-purple-50"
+              />
             </div>
-          </div>
-        )}
+          )}
+
+        {/* Show warning for legacy projects without proper assignee IDs */}
+        {project.status === 'completed' &&
+          project.assigneeName &&
+          !project.assigneeId && (
+            <div className="mt-4 pt-3 border-t border-gray-200">
+              <div className="text-xs text-orange-600 bg-orange-50 px-2 py-1 rounded border border-orange-200">
+                ⚠️ Legacy project: Cannot send kudos to {project.assigneeName}{' '}
+                (no user ID)
+              </div>
+            </div>
+          )}
       </CardContent>
     </Card>
   );

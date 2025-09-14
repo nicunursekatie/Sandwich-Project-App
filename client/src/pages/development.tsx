@@ -1,5 +1,5 @@
-import { Building2 } from "lucide-react";
-import { DevelopmentDocuments } from "@/components/development-documents";
+import { Building2 } from 'lucide-react';
+import { DevelopmentDocuments } from '@/components/development-documents';
 
 export default function Development() {
   return (

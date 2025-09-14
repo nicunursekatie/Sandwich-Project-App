@@ -189,7 +189,7 @@ export default function Dashboard({ initialSection = "dashboard" }: { initialSec
           <div className="space-y-6">
             <div className="flex items-center gap-4 mb-6">
               <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-xl">
-                <FileText className="w-6 h-6 text-blue-600 />"
+                <FileText className="w-6 h-6 text-blue-600"/"
               </div>
               <div>
                 <h1 className="text-2xl font-main-heading text-primary Toolkit</h1>"

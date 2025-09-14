@@ -1,25 +1,25 @@
-import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+} from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+} from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Mail,
   Send,
@@ -29,16 +29,16 @@ import {
   AlertCircle,
   Megaphone,
   Heart,
-} from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+} from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '@/lib/queryClient';
 
 interface ShoutoutTemplate {
   id: string;
   name: string;
   subject: string;
   message: string;
-  type: "reminder" | "encouragement" | "announcement" | "celebration";
+  type: 'reminder' | 'encouragement' | 'announcement' | 'celebration';
 }
 
 interface ShoutoutLog {
@@ -47,15 +47,15 @@ interface ShoutoutLog {
   subject: string;
   recipientCount: number;
   sentAt: string;
-  status: "sent" | "failed";
+  status: 'sent' | 'failed';
   sentBy: string;
 }
 
 const predefinedTemplates: ShoutoutTemplate[] = [
   {
-    id: "check-in-reminder",
-    name: "Check-In Reminder",
-    subject: "Quick check-in - How are things going? 👋",
+    id: 'check-in-reminder',
+    name: 'Check-In Reminder',
+    subject: 'Quick check-in - How are things going? 👋',
     message: `Hi there!
 
 Just wanted to reach out and see how you're doing! 
@@ -66,12 +66,12 @@ No pressure - just checking in and letting you know we're thinking of you!
 
 Best regards,
 The Sandwich Project Team`,
-    type: "reminder",
+    type: 'reminder',
   },
   {
-    id: "test-invitation",
-    name: "Platform Testing Invitation",
-    subject: "Help us test some cool new features! 🚀",
+    id: 'test-invitation',
+    name: 'Platform Testing Invitation',
+    subject: 'Help us test some cool new features! 🚀',
     message: `Hello!
 
 We've been working on some exciting improvements to the platform, and we'd love your help testing them out!
@@ -86,12 +86,12 @@ When you have 5-10 minutes, could you log in and let us know what you think? You
 Thanks for being an amazing part of our community!
 
 The Sandwich Project Team`,
-    type: "encouragement",
+    type: 'encouragement',
   },
   {
-    id: "appreciation",
-    name: "Team Appreciation",
-    subject: "Thank you for everything you do! ❤️",
+    id: 'appreciation',
+    name: 'Team Appreciation',
+    subject: 'Thank you for everything you do! ❤️',
     message: `Dear Team Member,
 
 We wanted to take a moment to say THANK YOU for all the incredible work you do for The Sandwich Project.
@@ -102,12 +102,12 @@ The platform is here to support your amazing work, so please don't hesitate to r
 
 With gratitude,
 The Sandwich Project Team`,
-    type: "celebration",
+    type: 'celebration',
   },
   {
-    id: "system-update",
-    name: "System Update Notification",
-    subject: "Platform updates - New features available!",
+    id: 'system-update',
+    name: 'System Update Notification',
+    subject: 'Platform updates - New features available!',
     message: `Hi there!
 
 We've just rolled out some exciting updates to The Sandwich Project platform:
@@ -124,32 +124,30 @@ Log in whenever you're ready to explore the improvements!
 
 Best,
 The Sandwich Project Development Team`,
-    type: "announcement",
+    type: 'announcement',
   },
 ];
 
 export default function ShoutoutSystem() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [
-    selectedTemplate,
-    setSelectedTemplate,
-  ] = useState<ShoutoutTemplate | null>(null);
-  const [customSubject, setCustomSubject] = useState("");
-  const [customMessage, setCustomMessage] = useState("");
-  const [recipientGroup, setRecipientGroup] = useState<string>("all");
+  const [selectedTemplate, setSelectedTemplate] =
+    useState<ShoutoutTemplate | null>(null);
+  const [customSubject, setCustomSubject] = useState('');
+  const [customMessage, setCustomMessage] = useState('');
+  const [recipientGroup, setRecipientGroup] = useState<string>('all');
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [showUserSelection, setShowUserSelection] = useState(false);
 
   // Fetch users for recipient selection
   const { data: users } = useQuery({
-    queryKey: ["/api/users"],
+    queryKey: ['/api/users'],
     staleTime: 300000, // 5 minutes
   });
 
   // Fetch shoutout history
   const { data: shoutoutHistory } = useQuery({
-    queryKey: ["/api/shoutouts/history"],
+    queryKey: ['/api/shoutouts/history'],
     staleTime: 60000, // 1 minute
   });
 
@@ -162,28 +160,28 @@ export default function ShoutoutSystem() {
       templateName?: string;
       customRecipients?: string[];
     }) => {
-      return apiRequest("POST", "/api/shoutouts/send", data);
+      return apiRequest('POST', '/api/shoutouts/send', data);
     },
     onSuccess: () => {
       toast({
-        title: "Shoutout sent successfully!",
+        title: 'Shoutout sent successfully!',
         description:
-          "Your message has been delivered to the selected recipients.",
+          'Your message has been delivered to the selected recipients.',
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/shoutouts/history"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/shoutouts/history'] });
       // Reset form
       setSelectedTemplate(null);
-      setCustomSubject("");
-      setCustomMessage("");
-      setRecipientGroup("all");
+      setCustomSubject('');
+      setCustomMessage('');
+      setRecipientGroup('all');
       setSelectedUsers([]);
       setShowUserSelection(false);
     },
     onError: (error: any) => {
       toast({
-        variant: "destructive",
-        title: "Failed to send shoutout",
-        description: error.message || "Please try again later.",
+        variant: 'destructive',
+        title: 'Failed to send shoutout',
+        description: error.message || 'Please try again later.',
       });
     },
   });
@@ -191,32 +189,32 @@ export default function ShoutoutSystem() {
   // Test SendGrid configuration mutation
   const testSendGridMutation = useMutation({
     mutationFn: async () => {
-      return apiRequest("POST", "/api/shoutouts/test", {});
+      return apiRequest('POST', '/api/shoutouts/test', {});
     },
     onSuccess: (data: any) => {
       const successfulSenders =
-        data.results?.filter((r: any) => r.status === "success") || [];
+        data.results?.filter((r: any) => r.status === 'success') || [];
       if (successfulSenders.length > 0) {
         toast({
-          title: "SendGrid test successful!",
+          title: 'SendGrid test successful!',
           description: `Working sender addresses found: ${successfulSenders
             .map((s: any) => s.from)
-            .join(", ")}`,
+            .join(', ')}`,
         });
       } else {
         toast({
-          variant: "destructive",
-          title: "SendGrid test failed",
+          variant: 'destructive',
+          title: 'SendGrid test failed',
           description:
-            "No working sender addresses found. Check SendGrid configuration.",
+            'No working sender addresses found. Check SendGrid configuration.',
         });
       }
     },
     onError: (error: any) => {
       toast({
-        variant: "destructive",
-        title: "SendGrid test failed",
-        description: error.message || "Unable to test SendGrid configuration.",
+        variant: 'destructive',
+        title: 'SendGrid test failed',
+        description: error.message || 'Unable to test SendGrid configuration.',
       });
     },
   });
@@ -230,19 +228,19 @@ export default function ShoutoutSystem() {
   const handleSendShoutout = () => {
     if (!customSubject.trim() || !customMessage.trim()) {
       toast({
-        variant: "destructive",
-        title: "Missing information",
-        description: "Please provide both subject and message.",
+        variant: 'destructive',
+        title: 'Missing information',
+        description: 'Please provide both subject and message.',
       });
       return;
     }
 
     // Validate custom recipients if needed
-    if (recipientGroup === "custom" && selectedUsers.length === 0) {
+    if (recipientGroup === 'custom' && selectedUsers.length === 0) {
       toast({
-        variant: "destructive",
-        title: "No users selected",
-        description: "Please select at least one user for custom email.",
+        variant: 'destructive',
+        title: 'No users selected',
+        description: 'Please select at least one user for custom email.',
       });
       return;
     }
@@ -252,7 +250,7 @@ export default function ShoutoutSystem() {
       message: customMessage,
       recipientGroup,
       templateName: selectedTemplate?.name,
-      customRecipients: recipientGroup === "custom" ? selectedUsers : undefined,
+      customRecipients: recipientGroup === 'custom' ? selectedUsers : undefined,
     });
   };
 
@@ -263,19 +261,19 @@ export default function ShoutoutSystem() {
   const getRecipientCount = () => {
     if (!users) return 0;
     switch (recipientGroup) {
-      case "all":
+      case 'all':
         return users.length;
-      case "admins":
-        return users.filter((u: any) => u.role === "admin").length;
-      case "super_admins":
-        return users.filter((u: any) => u.role === "super_admin").length;
-      case "hosts":
-        return users.filter((u: any) => u.role === "host").length;
-      case "volunteers":
-        return users.filter((u: any) => u.role === "volunteer").length;
-      case "committee":
-        return users.filter((u: any) => u.role === "committee_member").length;
-      case "custom":
+      case 'admins':
+        return users.filter((u: any) => u.role === 'admin').length;
+      case 'super_admins':
+        return users.filter((u: any) => u.role === 'super_admin').length;
+      case 'hosts':
+        return users.filter((u: any) => u.role === 'host').length;
+      case 'volunteers':
+        return users.filter((u: any) => u.role === 'volunteer').length;
+      case 'committee':
+        return users.filter((u: any) => u.role === 'committee_member').length;
+      case 'custom':
         return selectedUsers.length;
       default:
         return 0;
@@ -284,7 +282,7 @@ export default function ShoutoutSystem() {
 
   const handleRecipientGroupChange = (value: string) => {
     setRecipientGroup(value);
-    if (value === "custom") {
+    if (value === 'custom') {
       setShowUserSelection(true);
     } else {
       setShowUserSelection(false);
@@ -314,13 +312,13 @@ export default function ShoutoutSystem() {
 
   const getTypeIcon = (type: string) => {
     switch (type) {
-      case "reminder":
+      case 'reminder':
         return <Clock className="h-4 w-4" />;
-      case "encouragement":
+      case 'encouragement':
         return <Heart className="h-4 w-4" />;
-      case "announcement":
+      case 'announcement':
         return <Megaphone className="h-4 w-4" />;
-      case "celebration":
+      case 'celebration':
         return <CheckCircle className="h-4 w-4" />;
       default:
         return <Mail className="h-4 w-4" />;
@@ -329,16 +327,16 @@ export default function ShoutoutSystem() {
 
   const getTypeColor = (type: string) => {
     switch (type) {
-      case "reminder":
-        return "bg-blue-100 text-blue-800 border-blue-200";
-      case "encouragement":
-        return "bg-green-100 text-green-800 border-green-200";
-      case "announcement":
-        return "bg-purple-100 text-purple-800 border-purple-200";
-      case "celebration":
-        return "bg-pink-100 text-pink-800 border-pink-200";
+      case 'reminder':
+        return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'encouragement':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'announcement':
+        return 'bg-purple-100 text-purple-800 border-purple-200';
+      case 'celebration':
+        return 'bg-pink-100 text-pink-800 border-pink-200';
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
+        return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
 
@@ -381,8 +379,8 @@ export default function ShoutoutSystem() {
                 key={template.id}
                 className={`p-4 rounded-xl border cursor-pointer transition-all duration-200 hover:shadow-md ${
                   selectedTemplate?.id === template.id
-                    ? "border-[#FBAD3F] bg-[#FBAD3F]/5"
-                    : "border-slate-200 hover:border-slate-300"
+                    ? 'border-[#FBAD3F] bg-[#FBAD3F]/5'
+                    : 'border-slate-200 hover:border-slate-300'
                 }`}
                 onClick={() => handleTemplateSelect(template)}
               >
@@ -437,27 +435,27 @@ export default function ShoutoutSystem() {
                   </SelectItem>
                   <SelectItem value="super_admins">
                     Super Administrators (
-                    {users?.filter((u: any) => u.role === "super_admin")
+                    {users?.filter((u: any) => u.role === 'super_admin')
                       .length || 0}
                     )
                   </SelectItem>
                   <SelectItem value="admins">
                     Administrators (
-                    {users?.filter((u: any) => u.role === "admin").length || 0})
+                    {users?.filter((u: any) => u.role === 'admin').length || 0})
                   </SelectItem>
                   <SelectItem value="hosts">
                     Hosts (
-                    {users?.filter((u: any) => u.role === "host").length || 0})
+                    {users?.filter((u: any) => u.role === 'host').length || 0})
                   </SelectItem>
                   <SelectItem value="volunteers">
                     Volunteers (
-                    {users?.filter((u: any) => u.role === "volunteer").length ||
+                    {users?.filter((u: any) => u.role === 'volunteer').length ||
                       0}
                     )
                   </SelectItem>
                   <SelectItem value="committee">
                     Committee Members (
-                    {users?.filter((u: any) => u.role === "committee_member")
+                    {users?.filter((u: any) => u.role === 'committee_member')
                       .length || 0}
                     )
                   </SelectItem>
@@ -503,8 +501,8 @@ export default function ShoutoutSystem() {
                       key={user.id}
                       className={`flex items-center space-x-3 p-2 rounded-md cursor-pointer transition-colors ${
                         selectedUsers.includes(user.id)
-                          ? "bg-[#FBAD3F]/10 border border-[#FBAD3F]/30"
-                          : "hover:bg-slate-50 border border-transparent"
+                          ? 'bg-[#FBAD3F]/10 border border-[#FBAD3F]/30'
+                          : 'hover:bg-slate-50 border border-transparent'
                       }`}
                       onClick={() => handleUserToggle(user.id)}
                     >
@@ -520,7 +518,7 @@ export default function ShoutoutSystem() {
                             {user.displayName || user.firstName || user.email}
                           </span>
                           <Badge variant="outline" className="text-xs">
-                            {user.role?.replace("_", " ") || "user"}
+                            {user.role?.replace('_', ' ') || 'user'}
                           </Badge>
                         </div>
                         <p className="text-sm text-slate-500 truncate">
@@ -533,7 +531,7 @@ export default function ShoutoutSystem() {
 
                 <div className="text-sm text-slate-600">
                   {selectedUsers.length} user
-                  {selectedUsers.length !== 1 ? "s" : ""} selected
+                  {selectedUsers.length !== 1 ? 's' : ''} selected
                 </div>
               </div>
             )}
@@ -572,7 +570,7 @@ export default function ShoutoutSystem() {
               <Alert className="mb-4 border-[#FBAD3F]/30 bg-[#FBAD3F]/5">
                 <Users className="h-4 w-4 text-[#FBAD3F]" />
                 <AlertDescription className="text-slate-700">
-                  This message will be sent to{" "}
+                  This message will be sent to{' '}
                   <strong>{getRecipientCount()} recipients</strong> via email.
                 </AlertDescription>
               </Alert>
@@ -646,13 +644,13 @@ export default function ShoutoutSystem() {
                       {shoutout.subject}
                     </h4>
                     <p className="text-sm text-slate-600">
-                      {shoutout.templateName} • {shoutout.recipientCount}{" "}
-                      recipients •{" "}
+                      {shoutout.templateName} • {shoutout.recipientCount}{' '}
+                      recipients •{' '}
                       {new Date(shoutout.sentAt).toLocaleDateString()}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    {shoutout.status === "sent" ? (
+                    {shoutout.status === 'sent' ? (
                       <Badge className="bg-green-100 text-green-800 border-green-200">
                         <CheckCircle className="h-3 w-3 mr-1" />
                         Sent
