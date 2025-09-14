@@ -10,7 +10,7 @@ describe('Meeting Management Integration Tests', () => {
     // Login test users using the real users from the system
     const adminLogin = await request(API_BASE)
       .post('/api/auth/login')
-      .send({ email: 'admin@sandwich.project', password: 'password123' });
+      .send({ email: 'admin@sandwich.project', password: 'admin123' });
     expect(adminLogin.status).toBe(200);
     adminCookie = adminLogin.headers['set-cookie'][0];
 
