@@ -19,9 +19,12 @@ import {
   ImageIcon,
   Share2,
   Copy,
+  Lock,
 } from 'lucide-react';
 import { DocumentPreview } from '@/components/document-preview';
+import { ConfidentialDocuments } from '@/components/confidential-documents';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 import {
   Dialog,
   DialogContent,
@@ -158,9 +161,13 @@ const logoFiles = [
 export default function ImportantDocuments() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const { toast } = useToast();
+  const { user, isLoading: isAuthLoading } = useAuth();
   const [previewDocument, setPreviewDocument] = useState<AdminDocument | null>(
     null
   );
+
+  // Show confidential tab to all authenticated users - server handles access control
+  const hasConfidentialAccess = !!user && !isAuthLoading;
 
   const filteredDocuments = adminDocuments.filter(
     (doc) => selectedCategory === 'All' || doc.category === selectedCategory
@@ -320,7 +327,7 @@ export default function ImportantDocuments() {
         </div>
 
         <Tabs defaultValue="documents" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 h-auto p-1 mb-8 border-0 shadow-[0_2px_8px_rgba(0,0,0,0.08)] rounded-lg bg-white">
+          <TabsList className={`grid w-full ${hasConfidentialAccess ? 'grid-cols-3' : 'grid-cols-2'} h-auto p-1 mb-8 border-0 shadow-[0_2px_8px_rgba(0,0,0,0.08)] rounded-lg bg-white`}>
             <TabsTrigger
               value="documents"
               className="flex items-center gap-2 py-4 px-6 rounded-lg font-medium text-[#236383] hover:bg-[#236383]/5 transition-all duration-200 ease-in-out data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#236383] data-[state=active]:to-[#1a4e66] data-[state=active]:text-white data-[state=active]:shadow-[0_2px_8px_rgba(35,99,131,0.25)]"
@@ -335,6 +342,16 @@ export default function ImportantDocuments() {
               <FileImage className="h-4 w-4" />
               Logos & Branding
             </TabsTrigger>
+            {hasConfidentialAccess && (
+              <TabsTrigger
+                value="confidential"
+                className="flex items-center gap-2 py-4 px-6 rounded-lg font-medium text-[#236383] hover:bg-[#236383]/5 transition-all duration-200 ease-in-out data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#236383] data-[state=active]:to-[#1a4e66] data-[state=active]:text-white data-[state=active]:shadow-[0_2px_8px_rgba(35,99,131,0.25)]"
+                data-testid="tab-confidential"
+              >
+                <Lock className="h-4 w-4" />
+                Confidential
+              </TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="documents" className="space-y-6">
@@ -573,6 +590,12 @@ export default function ImportantDocuments() {
               ))}
             </div>
           </TabsContent>
+
+          {hasConfidentialAccess && (
+            <TabsContent value="confidential" className="space-y-8">
+              <ConfidentialDocuments />
+            </TabsContent>
+          )}
         </Tabs>
 
         {/* Document Preview Modal */}

@@ -33,7 +33,7 @@ interface AuthenticatedRequest extends Request {
 const confidentialDocumentsUpload = multer({
   storage: multer.diskStorage({
     destination: (req, file, cb) => {
-      const uploadDir = 'attached_assets/CONFIDENTIAL';
+      const uploadDir = 'server/uploads/confidential';
       // Ensure the directory exists
       if (!fs.existsSync(uploadDir)) {
         fs.mkdirSync(uploadDir, { recursive: true });
@@ -100,7 +100,8 @@ storageRouter.get('/confidential', async (req: AuthenticatedRequest, res: Respon
       return res.status(401).json({ error: 'Authentication required' });
     }
 
-    logger.info(`Fetching confidential documents for user: ${user.email}`);
+    // AUDIT LOG: List access
+    logger.info(`CONFIDENTIAL LIST ACCESS: User ${user.email} accessing confidential documents list`);
 
     const documents = await storage.getConfidentialDocumentsForUser(user.email);
     
@@ -122,11 +123,30 @@ storageRouter.post('/confidential',
         return res.status(401).json({ error: 'Authentication required' });
       }
 
+      // CRITICAL SECURITY: Only specific users can upload confidential documents
+      const authorizedUploaders = ['admin@sandwich.project', 'katielong2316@gmail.com'];
+      if (!authorizedUploaders.includes(user.email)) {
+        logger.warn(`Unauthorized confidential document upload attempt by: ${user.email}`);
+        return res.status(403).json({ 
+          error: 'Access denied. Only authorized administrators can upload confidential documents.' 
+        });
+      }
+
       if (!req.file) {
         return res.status(400).json({ error: 'No file uploaded' });
       }
 
-      const { allowedEmails } = req.body;
+      let { allowedEmails } = req.body;
+      
+      // Handle JSON string from FormData (client sends JSON.stringify(emails))
+      if (typeof allowedEmails === 'string') {
+        try {
+          allowedEmails = JSON.parse(allowedEmails);
+        } catch (parseError) {
+          logger.error('Failed to parse allowedEmails JSON:', parseError);
+          return res.status(400).json({ error: 'Invalid allowedEmails format - must be valid JSON array' });
+        }
+      }
       
       if (!allowedEmails || !Array.isArray(allowedEmails)) {
         return res.status(400).json({ error: 'allowedEmails must be provided as an array' });
@@ -140,7 +160,8 @@ storageRouter.post('/confidential',
         }
       }
 
-      logger.info(`Creating confidential document: ${req.file.originalname} for user: ${user.email}`);
+      // AUDIT LOG: Record confidential document upload attempt
+      logger.info(`CONFIDENTIAL UPLOAD: User ${user.email} uploading "${req.file.originalname}" with access for: [${allowedEmails.join(', ')}]`);
 
       const documentData = {
         fileName: req.file.filename,
@@ -155,7 +176,8 @@ storageRouter.post('/confidential',
       
       const document = await storage.createConfidentialDocument(validatedData);
       
-      logger.info(`Confidential document created successfully with ID: ${document.id}`);
+      // AUDIT LOG: Successful upload
+      logger.info(`CONFIDENTIAL UPLOAD SUCCESS: Document ID ${document.id} created by ${user.email} - "${document.originalName}"`);
       
       res.status(201).json({ document });
     } catch (error: any) {
@@ -195,12 +217,20 @@ storageRouter.get('/confidential/:id/download', async (req: AuthenticatedRequest
       return res.status(400).json({ error: 'Invalid document ID' });
     }
 
-    logger.info(`Downloading confidential document ${documentId} for user: ${user.email}`);
+    // AUDIT LOG: Download attempt
+    logger.info(`CONFIDENTIAL DOWNLOAD ATTEMPT: User ${user.email} requesting document ID ${documentId}`);
 
     const document = await storage.getConfidentialDocumentById(documentId, user.email);
     
     if (!document) {
+      logger.warn(`CONFIDENTIAL ACCESS DENIED: User ${user.email} attempted to access document ID ${documentId} - not found or no permission`);
       return res.status(404).json({ error: 'Document not found or access denied' });
+    }
+
+    // Additional security verification: ensure user email is in allowed list
+    if (!document.allowedEmails.includes(user.email)) {
+      logger.warn(`CONFIDENTIAL ACCESS VIOLATION: User ${user.email} not in allowed list for document ID ${documentId} ("${document.originalName}")`);
+      return res.status(403).json({ error: 'Access denied - you do not have permission to access this document' });
     }
 
     // Check if file exists on disk
@@ -217,7 +247,8 @@ storageRouter.get('/confidential/:id/download', async (req: AuthenticatedRequest
     const fileStream = fs.createReadStream(document.filePath);
     fileStream.pipe(res);
     
-    logger.info(`Confidential document ${documentId} downloaded successfully by user: ${user.email}`);
+    // AUDIT LOG: Successful download
+    logger.info(`CONFIDENTIAL DOWNLOAD SUCCESS: User ${user.email} downloaded document ID ${documentId} - "${document.originalName}"`);
   } catch (error: any) {
     logger.error('Error downloading confidential document:', error);
     res.status(500).json({ error: 'Failed to download document' });
@@ -239,18 +270,25 @@ storageRouter.delete('/confidential/:id', async (req: AuthenticatedRequest, res:
       return res.status(400).json({ error: 'Invalid document ID' });
     }
 
-    logger.info(`Deleting confidential document ${documentId} for user: ${user.email}`);
+    // AUDIT LOG: Delete attempt
+    logger.info(`CONFIDENTIAL DELETE ATTEMPT: User ${user.email} requesting to delete document ID ${documentId}`);
 
     // Get document first to get file path for cleanup
     const document = await storage.getConfidentialDocumentById(documentId, user.email);
     
     if (!document) {
+      logger.warn(`CONFIDENTIAL DELETE DENIED: User ${user.email} attempted to delete document ID ${documentId} - not found or no access`);
       return res.status(404).json({ error: 'Document not found or access denied' });
     }
 
-    // Only allow deletion if user is the uploader or has admin privileges
-    if (document.uploadedBy !== user.id && user.role !== 'admin') {
-      return res.status(403).json({ error: 'Only the uploader or admin can delete this document' });
+    // Enhanced authorization: uploader, admin, or user in allowed emails can delete
+    const canDelete = document.uploadedBy === user.id || 
+                     user.role === 'admin' || 
+                     document.allowedEmails.includes(user.email);
+    
+    if (!canDelete) {
+      logger.warn(`CONFIDENTIAL DELETE VIOLATION: User ${user.email} denied deletion of document ID ${documentId} ("${document.originalName}") - insufficient permissions`);
+      return res.status(403).json({ error: 'Access denied - only the uploader, admin, or authorized users can delete this document' });
     }
 
     const deleted = await storage.deleteConfidentialDocument(documentId, user.email);
@@ -270,7 +308,8 @@ storageRouter.delete('/confidential/:id', async (req: AuthenticatedRequest, res:
       }
     }
 
-    logger.info(`Confidential document ${documentId} deleted successfully by user: ${user.email}`);
+    // AUDIT LOG: Successful deletion
+    logger.info(`CONFIDENTIAL DELETE SUCCESS: User ${user.email} deleted document ID ${documentId} - "${document.originalName}"`);
     
     res.json({ success: true, message: 'Document deleted successfully' });
   } catch (error: any) {
