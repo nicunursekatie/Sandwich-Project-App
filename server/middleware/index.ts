@@ -39,6 +39,9 @@ export type { VersionedRecord, ChangesetRequest } from './version-control';
 // Activity logging middleware factory
 export { createActivityLogger } from './activity-logger';
 
+// Import logger for error handling
+import { logger } from './logger';
+
 /**
  * Standard middleware stack for API routes
  *
@@ -150,8 +153,7 @@ export function validateRequest(
  */
 export function createErrorHandler(moduleId: string) {
   return (error: any, req: any, res: any, next: any) => {
-    // Import logger locally to avoid re-export issues
-    const { logger } = require('./logger');
+    // Use imported logger
 
     logger.error(`${moduleId} error: ${error.message}`, error, {
       method: req.method,
