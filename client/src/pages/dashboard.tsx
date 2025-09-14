@@ -68,6 +68,7 @@ import { queryClient } from '@/lib/queryClient';
 import SimpleNav from '@/components/simple-nav';
 import AnnouncementBanner from '@/components/announcement-banner';
 import MessageNotifications from '@/components/message-notifications';
+import EnhancedNotifications from '@/components/enhanced-notifications';
 import WorkLogPage from '@/pages/work-log';
 import SuggestionsPortal from '@/pages/suggestions';
 import GoogleSheetsPage from '@/pages/google-sheets';
@@ -618,6 +619,11 @@ export default function Dashboard({
               {/* MessageNotifications component */}
               {typeof window !== 'undefined' && (
                 <MessageNotifications user={user} />
+              )}
+
+              {/* Enhanced In-App Notifications */}
+              {typeof window !== 'undefined' && (
+                <EnhancedNotifications user={user} />
               )}
 
               <button

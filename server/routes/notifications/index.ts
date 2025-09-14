@@ -9,7 +9,7 @@ import { z } from 'zod';
 const notificationsRouter = Router();
 
 // Apply standard middleware (authentication, logging, etc.)
-notificationsRouter.use(createStandardMiddleware('notifications'));
+notificationsRouter.use(createStandardMiddleware());
 
 // Get notifications for current user
 notificationsRouter.get('/', async (req, res) => {
