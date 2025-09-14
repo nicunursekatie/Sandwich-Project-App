@@ -152,14 +152,33 @@ export default function ImportantLinks() {
                 </div>
 
                 {/* Embedded Calculator */}
-                <div className="border rounded-lg overflow-hidden flex-1 min-h-[800px]">
+                <div className="border rounded-lg overflow-hidden flex-1 min-h-[800px] bg-gray-50 relative">
                   <iframe
                     src={inventoryCalculatorUrl}
-                    className="w-full h-full border-0"
+                    className="w-full h-full border-0 relative z-10"
                     title="Inventory Calculator"
                     loading="lazy"
-                    sandbox="allow-scripts allow-same-origin allow-forms"
+                    sandbox="allow-scripts allow-same-origin allow-forms allow-top-navigation"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    onLoad={() => {
+                      // Hide loading indicator when iframe loads
+                      const loader = document.getElementById('calculator-loader');
+                      if (loader) loader.style.display = 'none';
+                    }}
+                    onError={() => {
+                      console.log('Calculator iframe failed to load');
+                    }}
                   />
+                  <div 
+                    id="calculator-loader"
+                    className="absolute inset-0 flex items-center justify-center text-gray-500 pointer-events-none z-0"
+                  >
+                    <div className="text-center p-8">
+                      <Calculator className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                      <p className="text-lg font-medium mb-2">Calculator Loading...</p>
+                      <p className="text-sm">If the calculator doesn't load, use the "Open Calculator" button above.</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </CardContent>
