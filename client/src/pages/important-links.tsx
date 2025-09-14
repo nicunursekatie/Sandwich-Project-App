@@ -151,24 +151,15 @@ export default function ImportantLinks() {
                   </Button>
                 </div>
 
-                {/* Calculator Notice */}
-                <div className="border rounded-lg overflow-hidden flex-1 min-h-[400px] bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
-                  <div className="text-center p-8 max-w-md mx-auto">
-                    <Calculator className="w-16 h-16 mx-auto mb-6 text-[#236383]" />
-                    <h3 className="text-xl font-bold text-gray-900 mb-4">Inventory Calculator</h3>
-                    <p className="text-gray-600 mb-6 leading-relaxed">
-                      The interactive calculator is optimized for direct access. Click the button above to open the full-featured calculator in a new window for the best experience.
-                    </p>
-                    <div className="flex gap-3 justify-center">
-                      <Button
-                        onClick={() => window.open(inventoryCalculatorUrl, '_blank')}
-                        className="bg-[#236383] hover:bg-[#007E8C] text-white"
-                      >
-                        <Calculator className="w-4 h-4 mr-2" />
-                        Open Calculator
-                      </Button>
-                    </div>
-                  </div>
+                {/* Embedded Calculator */}
+                <div className="border rounded-lg overflow-hidden flex-1" style={{ height: 'calc(100vh - 240px)', minHeight: '800px' }}>
+                  <iframe
+                    src={inventoryCalculatorUrl}
+                    className="w-full h-full block border-0 rounded-lg"
+                    title="Inventory Calculator"
+                    loading="eager"
+                    referrerPolicy="no-referrer"
+                  />
                 </div>
               </div>
             </CardContent>
@@ -256,7 +247,7 @@ export default function ImportantLinks() {
             </CardHeader>
             
             <CardContent className="p-0 flex-1">
-              <div className="w-full h-full relative overflow-hidden">
+              <div className="w-full relative overflow-hidden" style={{ height: 'calc(100vh - 320px)', minHeight: '700px' }}>
                 {isLoading && (
                   <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
                     <div className="flex items-center gap-2 text-gray-600">
@@ -269,12 +260,14 @@ export default function ImportantLinks() {
                 <iframe
                   id="events-spreadsheet"
                   src={eventsEmbedUrl}
-                  className="border-0 rounded-b-lg w-full h-full"
+                  className="border-0 rounded-b-lg"
                   style={{ 
                     transform: `scale(${eventsZoomLevel / 100})`,
                     transformOrigin: 'top left',
                     width: `${100 / (eventsZoomLevel / 100)}%`,
-                    height: `${100 / (eventsZoomLevel / 100)}%`
+                    height: `${100 / (eventsZoomLevel / 100)}%`,
+                    minWidth: '1200px',
+                    minHeight: '800px'
                   }}
                   title="Events Calendar"
                   loading="lazy"
@@ -390,7 +383,7 @@ export default function ImportantLinks() {
             </CardHeader>
             
             <CardContent className="p-0 flex-1">
-              <div className="w-full h-full relative overflow-hidden">
+              <div className="w-full relative overflow-hidden" style={{ height: 'calc(100vh - 320px)', minHeight: '700px' }}>
                 {isLoading && (
                   <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
                     <div className="flex items-center gap-2 text-gray-600">
@@ -403,12 +396,14 @@ export default function ImportantLinks() {
                 <iframe
                   id="user-spreadsheet"
                   src={userSheetEmbedUrl}
-                  className="border-0 rounded-b-lg w-full h-full"
+                  className="border-0 rounded-b-lg"
                   style={{ 
                     transform: `scale(${userSheetZoomLevel / 100})`,
                     transformOrigin: 'top left',
                     width: `${100 / (userSheetZoomLevel / 100)}%`,
-                    height: `${100 / (userSheetZoomLevel / 100)}%`
+                    height: `${100 / (userSheetZoomLevel / 100)}%`,
+                    minWidth: '1200px',
+                    minHeight: '800px'
                   }}
                   title="Historical Collections Record"
                   loading="lazy"
