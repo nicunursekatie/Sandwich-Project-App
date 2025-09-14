@@ -1518,6 +1518,21 @@ export default function DriversManagement() {
                 />
               </div>
 
+              <div>
+                <Label htmlFor="edit-licenseNumber">Driver's License Number</Label>
+                <Input
+                  id="edit-licenseNumber"
+                  value={editingDriver.licenseNumber ?? ""}
+                  onChange={(e) =>
+                    setEditingDriver({
+                      ...editingDriver,
+                      licenseNumber: e.target.value,
+                    })
+                  }
+                  placeholder="License number (optional)"
+                />
+              </div>
+
               {/* Zone and Area */}
               <div className="grid grid-cols-2 gap-4">
                 <div>

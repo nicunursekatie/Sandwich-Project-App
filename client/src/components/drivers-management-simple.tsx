@@ -58,6 +58,7 @@ export default function DriversManagement() {
     name: "",
     phone: "",
     email: "",
+    licenseNumber: "",
     hostLocation: "",
     availability: "",
     emailAgreementSent: false,
@@ -171,6 +172,7 @@ export default function DriversManagement() {
       name: "",
       phone: "",
       email: "",
+      licenseNumber: "",
       hostLocation: "",
       availability: "",
       emailAgreementSent: false,
@@ -301,6 +303,17 @@ export default function DriversManagement() {
                           setNewDriver({ ...newDriver, email: e.target.value })
                         }
                         placeholder="Enter email address"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="licenseNumber">Driver's License Number</Label>
+                      <Input
+                        id="licenseNumber"
+                        value={newDriver.licenseNumber}
+                        onChange={(e) =>
+                          setNewDriver({ ...newDriver, licenseNumber: e.target.value })
+                        }
+                        placeholder="Enter license number (optional)"
                       />
                     </div>
                     <div>
@@ -534,6 +547,17 @@ export default function DriversManagement() {
                     setEditingDriver({ ...editingDriver, email: e.target.value })
                   }
                   placeholder="Enter email address"
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-licenseNumber">Driver's License Number</Label>
+                <Input
+                  id="edit-licenseNumber"
+                  value={editingDriver.licenseNumber || ""}
+                  onChange={(e) =>
+                    setEditingDriver({ ...editingDriver, licenseNumber: e.target.value })
+                  }
+                  placeholder="Enter license number (optional)"
                 />
               </div>
               <div>
