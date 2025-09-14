@@ -1707,6 +1707,35 @@ class StorageWrapper implements IStorage {
       () => this.fallbackStorage.updateDocumentPermission(id, updates)
     );
   }
+
+  // Confidential Document Management Methods
+  async createConfidentialDocument(data: any) {
+    return this.executeWithFallback(
+      () => this.primaryStorage.createConfidentialDocument(data),
+      () => this.fallbackStorage.createConfidentialDocument(data)
+    );
+  }
+
+  async getConfidentialDocumentsForUser(userEmail: string) {
+    return this.executeWithFallback(
+      () => this.primaryStorage.getConfidentialDocumentsForUser(userEmail),
+      () => this.fallbackStorage.getConfidentialDocumentsForUser(userEmail)
+    );
+  }
+
+  async getConfidentialDocumentById(id: number, userEmail: string) {
+    return this.executeWithFallback(
+      () => this.primaryStorage.getConfidentialDocumentById(id, userEmail),
+      () => this.fallbackStorage.getConfidentialDocumentById(id, userEmail)
+    );
+  }
+
+  async deleteConfidentialDocument(id: number, userEmail: string) {
+    return this.executeWithFallback(
+      () => this.primaryStorage.deleteConfidentialDocument(id, userEmail),
+      () => this.fallbackStorage.deleteConfidentialDocument(id, userEmail)
+    );
+  }
 }
 
 export const storage = new StorageWrapper();
