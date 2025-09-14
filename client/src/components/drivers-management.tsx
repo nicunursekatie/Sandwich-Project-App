@@ -398,7 +398,7 @@ export default function DriversManagement() {
       }
 
       // Missing agreements filter
-      if (filters.missingAgreementsOnly && hasSignedAgreement(driver.notes || "")) {
+      if (filters.missingAgreementsOnly && hasSignedAgreement(driver)) {
         return false;
       }
 
@@ -972,6 +972,9 @@ export default function DriversManagement() {
                 </div>
               </DialogContent>
             </Dialog>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Filters */}
@@ -1263,12 +1266,12 @@ export default function DriversManagement() {
                       </div>
                     </div>
                   )}
-                  {getCleanNotesForDisplay(driver.notes, driver.zone) && (
+                  {getCleanNotesForDisplay(driver.notes ?? '', driver.zone ?? '') && (
                     <div className="mt-3 pt-3 border-t border-slate-200">
                       <div className="flex items-start gap-2 text-sm text-slate-600">
                         <FileCheck className="w-4 h-4 mt-0.5 flex-shrink-0" />
                         <span>
-                          <strong>Notes:</strong> {getCleanNotesForDisplay(driver.notes, driver.zone)}
+                          <strong>Notes:</strong> {getCleanNotesForDisplay(driver.notes ?? '', driver.zone ?? '')}
                         </span>
                       </div>
                     </div>
@@ -1466,12 +1469,12 @@ export default function DriversManagement() {
                       </div>
                     </div>
                   )}
-                  {getCleanNotesForDisplay(driver.notes, driver.zone) && (
+                  {getCleanNotesForDisplay(driver.notes ?? '', driver.zone ?? '') && (
                     <div className="mt-3 pt-3 border-t border-slate-200">
                       <div className="flex items-start gap-2 text-sm text-slate-600">
                         <FileCheck className="w-4 h-4 mt-0.5 flex-shrink-0" />
                         <span>
-                          <strong>Notes:</strong> {getCleanNotesForDisplay(driver.notes, driver.zone)}
+                          <strong>Notes:</strong> {getCleanNotesForDisplay(driver.notes ?? '', driver.zone ?? '')}
                         </span>
                       </div>
                     </div>
