@@ -152,7 +152,7 @@ export default function ImportantLinks() {
                 </div>
 
                 {/* Embedded Calculator */}
-                <div className="border rounded-lg overflow-hidden flex-1">
+                <div className="border rounded-lg overflow-hidden flex-1 min-h-[800px]">
                   <iframe
                     src={inventoryCalculatorUrl}
                     className="w-full h-full border-0"
