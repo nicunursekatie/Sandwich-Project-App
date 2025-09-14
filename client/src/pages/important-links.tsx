@@ -13,10 +13,9 @@ export default function ImportantLinks() {
   // URLs for all the important links
   const inventoryCalculatorUrl = "https://nicunursekatie.github.io/sandwichinventory/inventorycalculator.html";
   
-  // Events Google Sheet (from events-viewer.tsx)
-  const eventsSpreadsheetId = "1WYHS8Yj9Ef8SFDkVnf4bqWn-gjo94KqU-btEcyju4Q0";
-  const eventsEmbedUrl = `https://docs.google.com/spreadsheets/d/${eventsSpreadsheetId}/edit?usp=sharing&rm=minimal`;
-  const eventsFullViewUrl = `https://docs.google.com/spreadsheets/d/${eventsSpreadsheetId}/edit?usp=sharing`;
+  // Events Google Sheet (published version)
+  const eventsEmbedUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT2r5KMRKuKSrqn1yQxtw8T0e5Ooi_iBfd0HlgGVcIHtFat3o54FrqyTLB_uq-RxojjSFg1GTvpIZLZ/pubhtml?widget=true&headers=false";
+  const eventsFullViewUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT2r5KMRKuKSrqn1yQxtw8T0e5Ooi_iBfd0HlgGVcIHtFat3o54FrqyTLB_uq-RxojjSFg1GTvpIZLZ/pubhtml";
   
   // User's specific Google Sheet
   const userSheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRAgug7UWU-j96KzlWYnff0oS61ezmshAvgDFugYvC-EHSeHcl5TlIKuE2dbyAJ9hz2DexSCJbf6Cpr/pubhtml";
