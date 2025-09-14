@@ -1117,6 +1117,18 @@ export default function DriversManagement() {
                           </Badge>
                         )}
 
+                        {/* Driver License on File */}
+                        {driver.licenseNumber && driver.licenseNumber.trim().length > 0 && (
+                          <Badge
+                            variant="secondary"
+                            className="bg-slate-50 text-slate-700 border-slate-200 flex items-center gap-1"
+                            data-testid={`badge-dl-on-file-${driver.id}`}
+                          >
+                            <FileCheck className="w-3 h-3" />
+                            DL# on file
+                          </Badge>
+                        )}
+
                         {/* Agreement Status - Clickable */}
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -1295,6 +1307,18 @@ export default function DriversManagement() {
                           >
                             <Truck className="w-3 h-3" />
                             Van Driver
+                          </Badge>
+                        )}
+
+                        {/* Driver License on File (for inactive drivers) */}
+                        {driver.licenseNumber && driver.licenseNumber.trim().length > 0 && (
+                          <Badge
+                            variant="secondary"
+                            className="bg-slate-50 text-slate-700 border-slate-200 flex items-center gap-1"
+                            data-testid={`badge-dl-on-file-${driver.id}`}
+                          >
+                            <FileCheck className="w-3 h-3" />
+                            DL# on file
                           </Badge>
                         )}
 

@@ -702,6 +702,12 @@ export default function DriversManagement() {
                                 Missing Agreement
                               </Badge>
                             )}
+                            {driver.licenseNumber && driver.licenseNumber.trim().length > 0 && (
+                              <Badge variant="secondary" className="bg-slate-50 text-slate-700 border-slate-200" data-testid={`badge-dl-on-file-${driver.id}`}>
+                                <FileCheck className="w-3 h-3 mr-1" />
+                                DL# on file
+                              </Badge>
+                            )}
                           </div>
                           <div className="flex items-center gap-4 mt-1">
                             {driver.phone && (
@@ -803,6 +809,12 @@ export default function DriversManagement() {
                               <Badge variant="outline" className="border-orange-200 text-orange-600 bg-orange-50">
                                 <AlertTriangle className="w-3 h-3 mr-1" />
                                 Missing Agreement
+                              </Badge>
+                            )}
+                            {driver.licenseNumber && driver.licenseNumber.trim().length > 0 && (
+                              <Badge variant="outline" className="border-slate-200 text-slate-600 bg-slate-50" data-testid={`badge-dl-on-file-${driver.id}`}>
+                                <FileCheck className="w-3 h-3 mr-1" />
+                                DL# on file
                               </Badge>
                             )}
                           </div>
