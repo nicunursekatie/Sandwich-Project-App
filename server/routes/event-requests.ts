@@ -1107,7 +1107,12 @@ router.put(
           } catch (error) {
             console.warn("⚠️ Failed to parse sandwich types, keeping as string:", error);
           }
+        } else {
+          console.warn("⚠️ No sandwich types provided in scheduling request");
         }
+        
+        // Log sandwich count for debugging
+        console.log("📋 Estimated sandwich count:", processedUpdates.estimatedSandwichCount);
 
         // Ensure numeric fields are properly typed
         const numericFields = ['driversNeeded', 'speakersNeeded', 'estimatedSandwichCount'];
