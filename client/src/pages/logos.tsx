@@ -64,7 +64,7 @@ export default function LogosPage() {
 
   const handleDownload = async (filename: string, displayName: string) => {
     try {
-      const response = await fetch(`/public-objects/LOGOS/${filename}`);
+      const response = await fetch(`/attached_assets/LOGOS/${filename}`);
       if (!response.ok) throw new Error('Logo not found');
       
       const blob = await response.blob();
@@ -141,7 +141,7 @@ export default function LogosPage() {
                 style={{ backgroundColor: logo.bgColor }}
               >
                 <img 
-                  src={`/public-objects/LOGOS/${logo.filename}`}
+                  src={`/attached_assets/LOGOS/${logo.filename}`}
                   alt={logo.name}
                   className="max-w-full max-h-full object-contain p-2"
                   onError={(e) => {
@@ -182,7 +182,7 @@ export default function LogosPage() {
                         style={{ backgroundColor: logo.bgColor }}
                       >
                         <img 
-                          src={`/public-objects/LOGOS/${logo.filename}`}
+                          src={`/attached_assets/LOGOS/${logo.filename}`}
                           alt={logo.name}
                           className="max-w-full max-h-full object-contain p-4"
                         />

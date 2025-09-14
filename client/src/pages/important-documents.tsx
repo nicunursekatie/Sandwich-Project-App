@@ -157,7 +157,7 @@ export default function ImportantDocuments() {
 
   const handleLogoDownload = async (filename: string, displayName: string) => {
     try {
-      const response = await fetch(`/public-objects/LOGOS/${filename}`);
+      const response = await fetch(`/attached_assets/LOGOS/${filename}`);
       if (!response.ok) throw new Error('Logo not found');
       
       const blob = await response.blob();
@@ -186,7 +186,7 @@ export default function ImportantDocuments() {
   };
 
   const handleLogoShare = async (filename: string, displayName: string) => {
-    const logoUrl = `${window.location.origin}/public-objects/LOGOS/${filename}`;
+    const logoUrl = `${window.location.origin}/attached_assets/LOGOS/${filename}`;
     
     if (navigator.share) {
       try {
@@ -221,7 +221,7 @@ export default function ImportantDocuments() {
 
   const handleLogoCopy = async (filename: string, displayName: string) => {
     try {
-      const response = await fetch(`/public-objects/LOGOS/${filename}`);
+      const response = await fetch(`/attached_assets/LOGOS/${filename}`);
       if (!response.ok) throw new Error('Logo not found');
       
       const blob = await response.blob();
@@ -235,7 +235,7 @@ export default function ImportantDocuments() {
     } catch (error) {
       console.error('Copy failed:', error);
       // Fallback to copying the URL
-      const logoUrl = `${window.location.origin}/public-objects/LOGOS/${filename}`;
+      const logoUrl = `${window.location.origin}/attached_assets/LOGOS/${filename}`;
       await navigator.clipboard.writeText(logoUrl);
       toast({
         title: "Link Copied",
@@ -398,7 +398,7 @@ export default function ImportantDocuments() {
                       style={{ backgroundColor: logo.bgColor }}
                     >
                       <img 
-                        src={`/public-objects/LOGOS/${logo.filename}`}
+                        src={`/attached_assets/LOGOS/${logo.filename}`}
                         alt={logo.name}
                         className="max-w-full max-h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300 ease-in-out"
                         onError={(e) => {
@@ -439,7 +439,7 @@ export default function ImportantDocuments() {
                               style={{ backgroundColor: logo.bgColor }}
                             >
                               <img 
-                                src={`/public-objects/LOGOS/${logo.filename}`}
+                                src={`/attached_assets/LOGOS/${logo.filename}`}
                                 alt={logo.name}
                                 className="max-w-full max-h-full object-contain p-4"
                               />
