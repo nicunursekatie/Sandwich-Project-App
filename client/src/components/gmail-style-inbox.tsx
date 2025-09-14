@@ -62,6 +62,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ButtonTooltip } from "@/components/ui/button-tooltip";
+import { KudosInbox } from "@/components/kudos-inbox";
 
 interface User {
   id: string;
@@ -579,9 +580,14 @@ export default function GmailStyleInbox() {
         case "starred": return false; // No starred functionality yet
         case "archived": return false; // No archived functionality yet  
         case "trash": return false; // No trash functionality yet
+        case "kudos": return false; // Kudos uses separate count system
         default: return false;
       }
     }).length;
+  };
+
+  const getKudosUnreadCount = () => {
+    return kudos.filter((k: any) => !k.read).length;
   };
 
   const folders = [
@@ -589,6 +595,7 @@ export default function GmailStyleInbox() {
     { id: "starred", label: "Starred", icon: Star, count: getUnreadCount("starred") },
     { id: "sent", label: "Sent", icon: Send, count: 0 },
     { id: "drafts", label: "Drafts", icon: Edit3, count: drafts.length },
+    { id: "kudos", label: "Kudos", icon: Heart, count: getKudosUnreadCount() },
     { id: "archived", label: "Archived", icon: Archive, count: getUnreadCount("archived") },
     { id: "trash", label: "Trash", icon: Trash2, count: getUnreadCount("trash") },
   ];
@@ -912,10 +919,15 @@ export default function GmailStyleInbox() {
             </>
           )}
 
-          {/* Message List */}
-          <ScrollArea className="flex-1">
-            <div className="divide-y">
-              {filteredMessages.map((message) => (
+          {/* Message List - Show KudosInbox for kudos folder */}
+          {activeFolder === "kudos" ? (
+            <div className="flex-1 p-4">
+              <KudosInbox />
+            </div>
+          ) : (
+            <ScrollArea className="flex-1">
+              <div className="divide-y">
+                {filteredMessages.map((message) => (
                 <div
                   key={message.id}
                   onClick={() => handleSelectMessage(message)}
@@ -980,13 +992,14 @@ export default function GmailStyleInbox() {
                 </div>
               ))}
               
-              {filteredMessages.length === 0 && (
-                <div className="p-8 text-center text-gray-500">
-                  {searchQuery ? "No messages found matching your search" : `No ${activeFolder} messages`}
-                </div>
-              )}
-            </div>
-          </ScrollArea>
+                {filteredMessages.length === 0 && (
+                  <div className="p-8 text-center text-gray-500">
+                    {searchQuery ? "No messages found matching your search" : `No ${activeFolder} messages`}
+                  </div>
+                )}
+              </div>
+            </ScrollArea>
+          )}
         </div>
 
         {/* Message Detail Panel */}
