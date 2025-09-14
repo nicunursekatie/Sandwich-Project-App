@@ -39,6 +39,7 @@ import {
   documents,
   documentPermissions,
   documentAccessLogs,
+  confidentialDocuments,
   eventRequests,
   organizations,
   eventVolunteers,
@@ -109,6 +110,8 @@ import {
   type InsertDocumentPermission,
   type DocumentAccessLog,
   type InsertDocumentAccessLog,
+  type ConfidentialDocument,
+  type InsertConfidentialDocument,
   type EventRequest,
   type InsertEventRequest,
   type Organization,
@@ -3444,6 +3447,51 @@ export class DatabaseStorage implements IStorage {
       .from(documentAccessLogs)
       .where(eq(documentAccessLogs.documentId, documentId))
       .orderBy(desc(documentAccessLogs.accessedAt));
+  }
+
+  // Confidential Document Management Methods
+  async createConfidentialDocument(data: InsertConfidentialDocument): Promise<ConfidentialDocument> {
+    const [result] = await db
+      .insert(confidentialDocuments)
+      .values(data)
+      .returning();
+    return result;
+  }
+
+  async getConfidentialDocumentsForUser(userEmail: string): Promise<ConfidentialDocument[]> {
+    return await db
+      .select()
+      .from(confidentialDocuments)
+      .where(
+        sql`JSON_ARRAY_CONTAINS(${confidentialDocuments.allowedEmails}, ${userEmail})`
+      )
+      .orderBy(desc(confidentialDocuments.uploadedAt));
+  }
+
+  async getConfidentialDocumentById(id: number, userEmail: string): Promise<ConfidentialDocument | null> {
+    const [result] = await db
+      .select()
+      .from(confidentialDocuments)
+      .where(
+        and(
+          eq(confidentialDocuments.id, id),
+          sql`JSON_ARRAY_CONTAINS(${confidentialDocuments.allowedEmails}, ${userEmail})`
+        )
+      );
+    return result || null;
+  }
+
+  async deleteConfidentialDocument(id: number, userEmail: string): Promise<boolean> {
+    // First check if user has access to this document
+    const document = await this.getConfidentialDocumentById(id, userEmail);
+    if (!document) {
+      return false; // User doesn't have access or document doesn't exist
+    }
+
+    const result = await db
+      .delete(confidentialDocuments)
+      .where(eq(confidentialDocuments.id, id));
+    return (result.rowCount ?? 0) > 0;
   }
 
   // Event Request Management Methods

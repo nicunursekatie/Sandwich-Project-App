@@ -29,6 +29,7 @@ import {
   documents,
   documentPermissions,
   documentAccessLogs,
+  confidentialDocuments,
   eventRequests,
   organizations,
   eventVolunteers,
@@ -93,6 +94,8 @@ import {
   type InsertDocumentPermission,
   type DocumentAccessLog,
   type InsertDocumentAccessLog,
+  type ConfidentialDocument,
+  type InsertConfidentialDocument,
   type EventRequest,
   type InsertEventRequest,
   type Organization,
@@ -492,6 +495,12 @@ export interface IStorage {
     access: InsertDocumentAccessLog
   ): Promise<DocumentAccessLog>;
   getDocumentAccessLogs(documentId: number): Promise<DocumentAccessLog[]>;
+
+  // Confidential Document Management
+  createConfidentialDocument(data: InsertConfidentialDocument): Promise<ConfidentialDocument>;
+  getConfidentialDocumentsForUser(userEmail: string): Promise<ConfidentialDocument[]>;
+  getConfidentialDocumentById(id: number, userEmail: string): Promise<ConfidentialDocument | null>;
+  deleteConfidentialDocument(id: number, userEmail: string): Promise<boolean>;
 
   // Shoutout methods
   createShoutoutLog(log: {
