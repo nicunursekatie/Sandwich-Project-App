@@ -115,17 +115,50 @@ tasksRouter.post(
         return res.status(401).json({ error: 'Authentication required' });
       }
 
-      // Check if user is assigned to this task
+      // Check if user is assigned to this task or has admin privileges
       const task = await storage.getTaskById(taskId);
       if (!task) {
         return res.status(404).json({ error: 'Task not found' });
       }
 
       const assigneeIds = task.assigneeIds || [];
-      if (!assigneeIds.includes(user.id)) {
+      const isAssignee = assigneeIds.includes(user.id);
+      
+      // Check admin/permission capabilities
+      const has = (p: string) => user.permissions?.includes(p) === true;
+      const isAdmin = user.role === 'admin' || has('admin');
+      const canCompleteAny = isAdmin || has('tasks:complete:any');
+      
+      if (!isAssignee && !canCompleteAny) {
         return res
           .status(403)
           .json({ error: 'You are not assigned to this task' });
+      }
+
+      // Admin override path - directly complete the task
+      if (!isAssignee && canCompleteAny) {
+        await storage.updateTaskStatus(taskId, 'completed');
+        
+        // Audit log the override
+        logger.info('Admin override task completion', {
+          taskId,
+          taskTitle: task.title,
+          adminUser: user.id,
+          adminEmail: user.email,
+          role: user.role,
+          notes: notes || 'Completed during agenda planning',
+          action: 'task.complete.override'
+        });
+
+        const completions = await storage.getTaskCompletions(taskId);
+        return res.json({
+          completion: null,
+          isFullyCompleted: true,
+          totalCompletions: completions.length,
+          totalAssignees: assigneeIds.length,
+          overridden: true,
+          message: 'Task completed by admin override'
+        });
       }
 
       // Add completion record
