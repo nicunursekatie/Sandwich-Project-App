@@ -194,12 +194,116 @@ export default function SandwichCollectionForm({
     setGroups(groups.filter((g) => g.id !== id));
   };
 
+  // Secure math parser to replace eval()
+  const safeMathEvaluator = (expression: string): number => {
+    // Remove spaces and validate characters
+    const cleaned = expression.replace(/\s/g, '');
+    
+    // Only allow numbers, operators, and decimal points
+    if (!/^[0-9+\-*/.()]*$/.test(cleaned)) {
+      throw new Error('Invalid characters');
+    }
+    
+    // Simple tokenizer
+    const tokens: (number | string)[] = [];
+    let current = '';
+    
+    for (let i = 0; i < cleaned.length; i++) {
+      const char = cleaned[i];
+      
+      if ('+-*/()'.includes(char)) {
+        if (current) {
+          const num = parseFloat(current);
+          if (isNaN(num)) throw new Error('Invalid number');
+          tokens.push(num);
+          current = '';
+        }
+        tokens.push(char);
+      } else {
+        current += char;
+      }
+    }
+    
+    if (current) {
+      const num = parseFloat(current);
+      if (isNaN(num)) throw new Error('Invalid number');
+      tokens.push(num);
+    }
+    
+    if (tokens.length === 0) return 0;
+    
+    // Evaluate expression with proper order of operations
+    const evaluateTokens = (tokens: (number | string)[]): number => {
+      // Handle parentheses first
+      while (tokens.includes('(')) {
+        let openIndex = -1;
+        let closeIndex = -1;
+        
+        for (let i = 0; i < tokens.length; i++) {
+          if (tokens[i] === '(') openIndex = i;
+          if (tokens[i] === ')') {
+            closeIndex = i;
+            break;
+          }
+        }
+        
+        if (openIndex === -1 || closeIndex === -1) {
+          throw new Error('Mismatched parentheses');
+        }
+        
+        const subTokens = tokens.slice(openIndex + 1, closeIndex);
+        const result = evaluateTokens(subTokens);
+        tokens.splice(openIndex, closeIndex - openIndex + 1, result);
+      }
+      
+      // Handle multiplication and division
+      for (let i = 1; i < tokens.length; i += 2) {
+        if (tokens[i] === '*' || tokens[i] === '/') {
+          const left = tokens[i - 1] as number;
+          const right = tokens[i + 1] as number;
+          const operator = tokens[i] as string;
+          
+          if (operator === '/' && right === 0) {
+            throw new Error('Division by zero');
+          }
+          
+          const result = operator === '*' ? left * right : left / right;
+          tokens.splice(i - 1, 3, result);
+          i -= 2;
+        }
+      }
+      
+      // Handle addition and subtraction
+      for (let i = 1; i < tokens.length; i += 2) {
+        if (tokens[i] === '+' || tokens[i] === '-') {
+          const left = tokens[i - 1] as number;
+          const right = tokens[i + 1] as number;
+          const operator = tokens[i] as string;
+          
+          const result = operator === '+' ? left + right : left - right;
+          tokens.splice(i - 1, 3, result);
+          i -= 2;
+        }
+      }
+      
+      if (tokens.length !== 1 || typeof tokens[0] !== 'number') {
+        throw new Error('Invalid expression');
+      }
+      
+      return tokens[0];
+    };
+    
+    return evaluateTokens([...tokens]);
+  };
+
   // Calculator functions
   const handleCalcInput = (value: string) => {
     if (value === "=") {
       try {
-        const result = eval(calcDisplay);
-        setCalcDisplay(result.toString());
+        const result = safeMathEvaluator(calcDisplay);
+        // Round to 2 decimal places to avoid floating point issues
+        const rounded = Math.round(result * 100) / 100;
+        setCalcDisplay(rounded.toString());
       } catch {
         setCalcDisplay("Error");
       }
@@ -602,13 +706,18 @@ export default function SandwichCollectionForm({
   };
 
   const calcButtonStyle = {
-    height: "36px",
+    height: "44px", // Increased for better mobile touch targets
     border: "1px solid #E9E6E6",
-    borderRadius: "4px",
+    borderRadius: "6px", // Slightly larger radius for better visual appeal
     background: "white",
-    fontSize: "14px",
+    fontSize: "16px", // Slightly larger text for better readability
     cursor: "pointer",
     fontFamily: "Roboto, sans-serif",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontWeight: "500", // Slightly bolder for better contrast
+    transition: "all 0.2s ease", // Smooth interaction feedback
   };
 
   const calcActionButtonStyle = {
@@ -616,6 +725,7 @@ export default function SandwichCollectionForm({
     background: "#236383",
     color: "white",
     border: "1px solid #236383",
+    fontWeight: "600", // Bolder for action buttons
   };
 
   // Group collections collapsed section style
@@ -1119,31 +1229,54 @@ export default function SandwichCollectionForm({
               <button
                 style={{
                   flex: 1,
-                  padding: "8px",
+                  padding: "12px 16px", // Increased padding for better touch targets
                   background: "#FBAD3F",
                   color: "white",
                   border: "none",
-                  borderRadius: "4px",
+                  borderRadius: "6px", // Consistent with calculator buttons
                   fontSize: "16px",
                   fontWeight: "600",
                   cursor: "pointer",
+                  minHeight: "44px", // Ensure minimum touch target size
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  transition: "all 0.2s ease", // Smooth feedback
                 }}
                 onClick={useCalcResult}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "#e89b2e";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "#FBAD3F";
+                }}
               >
                 Use Result
               </button>
               <button
                 style={{
                   flex: 1,
-                  padding: "8px",
+                  padding: "12px 16px", // Increased padding for better touch targets
                   background: "#f8f9fa",
                   color: "#6c757d",
                   border: "1px solid #dee2e6",
-                  borderRadius: "4px",
-                  fontSize: "14px",
+                  borderRadius: "6px", // Consistent with calculator buttons
+                  fontSize: "16px", // Consistent font size
                   cursor: "pointer",
+                  minHeight: "44px", // Ensure minimum touch target size
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  transition: "all 0.2s ease", // Smooth feedback
+                  fontWeight: "500",
                 }}
                 onClick={() => setShowCalculator(false)}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "#e9ecef";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "#f8f9fa";
+                }}
               >
                 Cancel
               </button>
