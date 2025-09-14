@@ -105,7 +105,7 @@ export function DriverCard({ driver, onEdit, onDelete }: DriverCardProps) {
         
         {driver.licenseNumber && (
           <div className="text-xs text-gray-500">
-            License: {driver.licenseNumber}
+            DL# on file
           </div>
         )}
       </CardContent>
