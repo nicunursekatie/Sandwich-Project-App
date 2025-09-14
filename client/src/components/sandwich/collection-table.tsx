@@ -191,7 +191,7 @@ export function CollectionTable({ collections, onEdit, onDelete, isUpdating, isD
               const total = calculateTotal(collection);
               
               return (
-                <tr key={collection.id} className="border-b hover:bg-gray-50"
+                <tr key={collection.id} className="border-b hover:bg-gray-50">
                   <td className="p-3">
                     <div className="flex items-center gap-2">
                       <Calendar className="h-4 w-4 text-gray-400" />
@@ -200,7 +200,6 @@ export function CollectionTable({ collections, onEdit, onDelete, isUpdating, isD
                           // Timezone-safe date parsing to prevent day shifting
                           const dateStr = collection.collectionDate;
                           if (!dateStr) return 'No date';
-                          
                           let date: Date;
                           if (dateStr.match(/^\d{4}-\d{2}-\d{2}T00:00:00(\.\d{3})?Z?$/)) {
                             // ISO midnight format - extract date part to avoid timezone shift
@@ -212,26 +211,22 @@ export function CollectionTable({ collections, onEdit, onDelete, isUpdating, isD
                           } else {
                             date = new Date(dateStr);
                           }
-                          
                           return isNaN(date.getTime()) ? 'Invalid date' : date.toLocaleDateString();
                         })()}
                       </span>
                     </div>
                   </td>
-                  
                   <td className="p-3">
                     <div className="flex items-center gap-2">
                       <User className="h-4 w-4 text-gray-400" />
                       <span>{collection.hostName}</span>
                     </div>
                   </td>
-                  
                   <td className="p-3">
                     <Badge variant="secondary">
                       {collection.individualSandwiches}
                     </Badge>
                   </td>
-                  
                   <td className="p-3">
                     {groupCollections.length > 0 ? (
                       <div className="space-y-1">
@@ -245,42 +240,37 @@ export function CollectionTable({ collections, onEdit, onDelete, isUpdating, isD
                       <span className="text-gray-400">No groups</span>
                     )}
                   </td>
-                  
                   <td className="p-3">
-                    <Badge className="bg-blue-100 text-blue-800"
+                    <Badge className="bg-blue-100 text-blue-800">
                       {total}
                     </Badge>
                   </td>
-                  
-                  <td className="p-3 text-sm text-gray-600"
+                  <td className="p-3 text-sm text-gray-600">
                     <div className="flex items-center gap-2">
                       <User className="h-3 w-3 text-gray-400" />
                       <span>{(collection as any).createdByName || 'Unknown User'}</span>
                     </div>
                   </td>
-                  
-                  <td className="p-3 text-sm text-gray-600"
+                  <td className="p-3 text-sm text-gray-600">
                     {(() => {
                       // Timezone-safe date parsing to prevent day shifting
                       const dateStr = collection.submittedAt;
                       if (!dateStr) return 'No date';
-                      
                       let date: Date;
-                      if (dateStr.match(/^\d{4}-\d{2}-\d{2}T00:00:00(\.\d{3})?Z?$/)) {
+                      const dateStrString = typeof dateStr === 'string' ? dateStr : dateStr?.toISOString?.() ?? '';
+                      if (dateStrString.match(/^\d{4}-\d{2}-\d{2}T00:00:00(\.\d{3})?Z?$/)) {
                         // ISO midnight format - extract date part to avoid timezone shift
-                        const dateOnly = dateStr.split('T')[0];
+                        const dateOnly = dateStrString.split('T')[0];
                         date = new Date(dateOnly + 'T12:00:00');
-                      } else if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                      } else if (dateStrString.match(/^\d{4}-\d{2}-\d{2}$/)) {
                         // Date-only format
                         date = new Date(dateStr + 'T12:00:00');
                       } else {
                         date = new Date(dateStr);
                       }
-                      
                       return isNaN(date.getTime()) ? 'Invalid date' : date.toLocaleDateString();
                     })()}
                   </td>
-                  
                   <td className="p-3">
                     <div className="flex justify-end gap-1">
                       <Button
