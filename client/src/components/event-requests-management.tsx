@@ -10336,7 +10336,6 @@ export default function EventRequestsManagement() {
                     name="scheduledDate"
                     type="date"
                     required
-                    min={new Date().toISOString().split('T')[0]}
                     className="mt-1"
                     data-testid="input-scheduled-date"
                   />
