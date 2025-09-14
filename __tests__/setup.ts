@@ -9,6 +9,7 @@
 import request from 'supertest';
 import { db } from '../server/db';
 import { users } from '../shared/schema';
+import { eq } from 'drizzle-orm';
 
 // Test environment configuration
 process.env.NODE_ENV = 'test';
@@ -73,7 +74,7 @@ export async function cleanupTestData(): Promise<void> {
 export async function seedTestData(): Promise<void> {
   // Insert admin user if not present
   const adminEmail = 'admin@sandwich.project';
-  const existing = await db.select().from(users).where(users.email.eq(adminEmail));
+  const existing = await db.select().from(users).where(eq(users.email, adminEmail));
   if (existing.length === 0) {
     await db.insert(users).values({
       id: 'admin_test',
