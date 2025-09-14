@@ -221,10 +221,10 @@ function ProjectTasksView({ projectId }: { projectId: number }) {
         description: 'Task has been marked as complete',
       });
     },
-    onError: (error: Error) => {
+    onError: (error: any) => {
       toast({
         title: 'Failed to Complete Task',
-        description: error.message || 'Failed to mark task as complete',
+        description: error?.message || 'Failed to mark task as complete',
         variant: 'destructive',
       });
     },
@@ -2278,11 +2278,11 @@ export default function EnhancedMeetingDashboard() {
                     queryClient.invalidateQueries({
                       queryKey: ['/api/projects'],
                     });
-                  } catch (error) {
+                  } catch (error: any) {
                     toast({
                       title: 'Sync Failed',
                       description:
-                        error.message || 'Failed to sync from Google Sheets',
+                        error?.message || 'Failed to sync from Google Sheets',
                       variant: 'destructive',
                     });
                   } finally {
