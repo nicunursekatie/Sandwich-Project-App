@@ -49,7 +49,7 @@ const confidentialDocumentsUpload = multer({
       cb(null, uniqueFilename);
     }
   }),
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+  limits: { fileSize: 100 * 1024 * 1024 }, // 100MB limit
   fileFilter: (req, file, cb) => {
     // Allow common document types for confidential documents
     const allowedTypes = [

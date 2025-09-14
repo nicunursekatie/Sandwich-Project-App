@@ -72,6 +72,7 @@ Typography uses Roboto font family. UI elements prioritize clarity, responsivene
 - **Meeting Management**: Full-featured system with automated agenda compilation, project integration, Google Sheets export, task status controls, enhanced discussion interface, and PDF export for agendas. Includes task creation from meeting notes.
 - **Event Requests Management System**: Complete tracking system with database schema, duplicate detection, status tracking, permissions, CRUD API, responsive UI, and full Google Sheets integration. Includes workflow for unresponsive contacts.
 - **Google Sheets Integration**: Complete bidirectional automatic synchronization with Google Sheets for project tracker and event requests.
+- **Confidential Document Storage**: Secure file storage system with email-based access control restricted to admin@sandwich.project and katielong2316@gmail.com only. Features audit logging, file type validation, comprehensive security measures, and 100MB file upload limit (increased from 10MB in September 2025).
 
 ## External Dependencies
 - **Database**: `@neondatabase/serverless`, `drizzle-orm`

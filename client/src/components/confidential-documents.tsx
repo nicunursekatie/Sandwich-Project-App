@@ -136,11 +136,11 @@ export function ConfidentialDocuments() {
   });
 
   const handleFileSelect = (file: File) => {
-    if (file.size > 10 * 1024 * 1024) {
-      // 10MB limit
+    if (file.size > 100 * 1024 * 1024) {
+      // 100MB limit
       toast({
         title: 'File Too Large',
-        description: 'Please select a file smaller than 10MB.',
+        description: 'Please select a file smaller than 100MB.',
         variant: 'destructive',
       });
       return;
