@@ -80,6 +80,8 @@ import {
   type InsertVolunteer,
   type Host,
   type InsertHost,
+  type Notification,
+  type InsertNotification,
   type HostContact,
   type InsertHostContact,
   type Recipient,
@@ -2032,17 +2034,204 @@ export class DatabaseStorage implements IStorage {
     return this.createNotification({
       userId,
       type: 'celebration',
+      priority: 'medium',
       title: `${randomEmoji} Task Completed!`,
       message: `Thanks for completing your task! ${message}`,
       isRead: false,
+      category: 'social',
       relatedType: 'task',
       relatedId: taskId,
-      celebrationData: {
+      metadata: {
         emoji: randomEmoji,
         achievementType: 'task_completion',
         taskId,
         completedAt: new Date().toISOString(),
       },
+    });
+  }
+
+  // Enhanced notification methods for the new system
+  async getUserNotificationsPaginated(
+    userId: string,
+    options: {
+      limit?: number;
+      offset?: number;
+      category?: string;
+      unreadOnly?: boolean;
+      includeArchived?: boolean;
+    } = {}
+  ): Promise<{
+    notifications: Notification[];
+    totalCount: number;
+    unreadCount: number;
+  }> {
+    const {
+      limit = 50,
+      offset = 0,
+      category,
+      unreadOnly = false,
+      includeArchived = false,
+    } = options;
+
+    try {
+      // Build conditions
+      const conditions = [
+        eq(notifications.userId, userId),
+        !includeArchived ? eq(notifications.isArchived, false) : undefined,
+        unreadOnly ? eq(notifications.isRead, false) : undefined,
+        category ? eq(notifications.category, category) : undefined,
+      ].filter(Boolean) as any[];
+
+      // Get paginated notifications
+      const userNotifications = await db
+        .select()
+        .from(notifications)
+        .where(and(...conditions))
+        .orderBy(desc(notifications.createdAt))
+        .limit(limit)
+        .offset(offset);
+
+      // Get total count
+      const [totalResult] = await db
+        .select({ count: sql`count(*)` })
+        .from(notifications)
+        .where(and(...conditions));
+
+      // Get unread count
+      const [unreadResult] = await db
+        .select({ count: sql`count(*)` })
+        .from(notifications)
+        .where(
+          and(
+            eq(notifications.userId, userId),
+            eq(notifications.isRead, false),
+            eq(notifications.isArchived, false)
+          )
+        );
+
+      return {
+        notifications: userNotifications,
+        totalCount: parseInt(totalResult?.count as string) || 0,
+        unreadCount: parseInt(unreadResult?.count as string) || 0,
+      };
+    } catch (error) {
+      console.error('Failed to get paginated user notifications:', error);
+      return { notifications: [], totalCount: 0, unreadCount: 0 };
+    }
+  }
+
+  async archiveNotification(notificationId: number, userId?: string): Promise<boolean> {
+    try {
+      const conditions = [eq(notifications.id, notificationId)];
+      if (userId) {
+        conditions.push(eq(notifications.userId, userId));
+      }
+
+      const result = await db
+        .update(notifications)
+        .set({ isArchived: true, isRead: true })
+        .where(and(...conditions));
+      
+      return (result.rowCount ?? 0) > 0;
+    } catch (error) {
+      console.error('Failed to archive notification:', error);
+      return false;
+    }
+  }
+
+  async bulkMarkNotificationsRead(
+    notificationIds: number[],
+    userId?: string
+  ): Promise<number> {
+    try {
+      const conditions = [
+        sql`${notifications.id} = ANY(${notificationIds})`,
+        userId ? eq(notifications.userId, userId) : undefined,
+      ].filter(Boolean) as any[];
+
+      const result = await db
+        .update(notifications)
+        .set({ isRead: true })
+        .where(and(...conditions));
+
+      return result.rowCount ?? 0;
+    } catch (error) {
+      console.error('Failed to bulk mark notifications as read:', error);
+      return 0;
+    }
+  }
+
+  async getNotificationCounts(userId: string): Promise<{
+    total: number;
+    byCategory: Record<string, number>;
+    byPriority: Record<string, number>;
+  }> {
+    try {
+      const counts = await db
+        .select({
+          category: notifications.category,
+          priority: notifications.priority,
+          count: sql`count(*)`
+        })
+        .from(notifications)
+        .where(
+          and(
+            eq(notifications.userId, userId),
+            eq(notifications.isRead, false),
+            eq(notifications.isArchived, false)
+          )
+        )
+        .groupBy(notifications.category, notifications.priority);
+
+      const total = counts.reduce((sum, item) => sum + parseInt(item.count as string), 0);
+
+      const byCategory = counts.reduce((acc, item) => {
+        const category = item.category || 'general';
+        if (!acc[category]) acc[category] = 0;
+        acc[category] += parseInt(item.count as string);
+        return acc;
+      }, {} as Record<string, number>);
+
+      const byPriority = counts.reduce((acc, item) => {
+        const priority = item.priority || 'medium';
+        if (!acc[priority]) acc[priority] = 0;
+        acc[priority] += parseInt(item.count as string);
+        return acc;
+      }, {} as Record<string, number>);
+
+      return { total, byCategory, byPriority };
+    } catch (error) {
+      console.error('Failed to get notification counts:', error);
+      return { total: 0, byCategory: {}, byPriority: {} };
+    }
+  }
+
+  async createSystemNotification(
+    userId: string,
+    title: string,
+    message: string,
+    options: {
+      type?: string;
+      priority?: 'low' | 'medium' | 'high' | 'urgent';
+      category?: string;
+      actionUrl?: string;
+      actionText?: string;
+      expiresAt?: Date;
+      metadata?: any;
+    } = {}
+  ): Promise<Notification> {
+    return this.createNotification({
+      userId,
+      type: options.type || 'system_update',
+      priority: options.priority || 'medium',
+      title,
+      message,
+      category: options.category || 'system',
+      actionUrl: options.actionUrl,
+      actionText: options.actionText,
+      expiresAt: options.expiresAt,
+      metadata: options.metadata || {},
+      isRead: false,
     });
   }
 
