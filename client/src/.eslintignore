@@ -1,0 +1,9 @@
+node_modules/
+dist/
+build/
+public/
+coverage/
+old_files_backup/
+**/*.min.js
+**/assets/**
+**/temp_*.ts
