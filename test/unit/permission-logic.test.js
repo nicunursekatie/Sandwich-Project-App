@@ -8,7 +8,7 @@ describe('Permission Logic Unit Tests', () => {
   beforeAll(async () => {
     adminCookie = await global.loginUser(
       'admin@sandwich.project',
-      'password123'
+      'admin123'
     );
     christineCookie = await global.loginUser(
       'christine@thesandwichproject.org',

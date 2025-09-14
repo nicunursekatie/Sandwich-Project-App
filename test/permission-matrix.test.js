@@ -7,7 +7,7 @@ const API_BASE = 'http://localhost:5000';
 const TEST_USERS = [
   {
     email: 'admin@sandwich.project',
-    password: 'password123',
+    password: 'admin123',
     role: 'super_admin',
     expected_permissions: ['all'], // Super admin should access everything
   },

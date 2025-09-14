@@ -9,7 +9,7 @@ describe('Route Health Regression Tests', () => {
     // Get admin session for authenticated routes
     const loginResponse = await request(API_BASE)
       .post('/api/auth/login')
-      .send({ email: 'admin@sandwich.project', password: 'password123' });
+      .send({ email: 'admin@sandwich.project', password: 'admin123' });
 
     adminCookie = loginResponse.headers['set-cookie'][0];
   });

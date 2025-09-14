@@ -7,6 +7,8 @@
  */
 
 import request from 'supertest';
+import { db } from '../server/db';
+import { users } from '../shared/schema';
 
 // Test environment configuration
 process.env.NODE_ENV = 'test';
@@ -69,9 +71,25 @@ export async function cleanupTestData(): Promise<void> {
  * for use across multiple test scenarios.
  */
 export async function seedTestData(): Promise<void> {
-  // TODO: Implement test data seeding
-  // This should create consistent test data for testing
-  console.log('Seeding test data...');
+  // Insert admin user if not present
+  const adminEmail = 'admin@sandwich.project';
+  const existing = await db.select().from(users).where(users.email.eq(adminEmail));
+  if (existing.length === 0) {
+    await db.insert(users).values({
+      id: 'admin_test',
+      email: adminEmail,
+      firstName: 'Admin',
+      lastName: 'User',
+      role: 'admin',
+      permissions: [], // You can set default permissions if needed
+      isActive: true,
+      profileImageUrl: null,
+      metadata: { password: 'admin123' },
+    });
+    console.log('Seeded admin user for tests');
+  } else {
+    console.log('Admin user already exists in test DB');
+  }
 }
 
 /**
