@@ -5,6 +5,18 @@ interface GroupsCatalogDependencies {
   isAuthenticated: any;
 }
 
+// Canonicalize organization names for robust matching
+function canonicalizeOrgName(orgName: string): string {
+  if (!orgName || typeof orgName !== 'string') return '';
+  
+  return orgName
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, ' ')  // Collapse multiple whitespace to single space
+    .replace(/[&\.,;:!?"'\-_]/g, '')  // Remove common punctuation
+    .replace(/\s/g, '');  // Remove all remaining spaces
+}
+
 export function createGroupsCatalogRoutes(deps: GroupsCatalogDependencies) {
   const router = Router();
 
@@ -32,13 +44,15 @@ export function createGroupsCatalogRoutes(deps: GroupsCatalogDependencies) {
         
         if (!orgName || !contactName) return;
         
-        // Create a unique key for organization + department combination
-        const departmentKey = `${orgName}|${department}`;
+        // Create a unique key using canonical name for matching
+        const canonicalOrgName = canonicalizeOrgName(orgName);
+        const departmentKey = `${canonicalOrgName}|${department}`;
         
         // Track department-level aggregation
         if (!departmentsMap.has(departmentKey)) {
           departmentsMap.set(departmentKey, {
-            organizationName: orgName,
+            organizationName: orgName, // Preserve original display name
+            canonicalName: canonicalOrgName, // Store canonical for matching
             department: department,
             contacts: [],
             totalRequests: 0,
@@ -124,67 +138,169 @@ export function createGroupsCatalogRoutes(deps: GroupsCatalogDependencies) {
         }
       });
       
-      // Add historical host organizations from sandwich collections
-      const historicalGroups = new Set();
+      // Calculate actual sandwich totals and event counts from collections
+      const organizationSandwichData = new Map();
+      
       allCollections.forEach(collection => {
-        // Add group1_name if it exists and looks like an organization
-        if (collection.group1Name && 
-            collection.group1Name !== 'Group' && 
-            collection.group1Name !== 'Groups' && 
-            collection.group1Name !== 'Unnamed Groups' &&
-            collection.group1Name.trim()) {
-          historicalGroups.add(collection.group1Name.trim());
+        const collectionDate = collection.collectionDate;
+        
+        // Helper function to process organization data from collections
+        const processOrganization = (orgName: string, sandwichCount: number) => {
+          if (!orgName || 
+              orgName === 'Group' || 
+              orgName === 'Groups' || 
+              orgName === 'Unnamed Groups' ||
+              !orgName.trim()) {
+            return;
+          }
+          
+          const cleanOrgName = orgName.trim();
+          const canonicalOrgName = canonicalizeOrgName(cleanOrgName);
+          
+          // Track sandwich totals using canonical name for matching
+          if (!organizationSandwichData.has(canonicalOrgName)) {
+            organizationSandwichData.set(canonicalOrgName, {
+              originalName: cleanOrgName, // Preserve original display name
+              totalSandwiches: 0,
+              eventCount: 0,
+              eventDates: new Set()
+            });
+          }
+          
+          const orgData = organizationSandwichData.get(canonicalOrgName);
+          orgData.totalSandwiches += sandwichCount || 0;
+          
+          // Track unique event dates to calculate frequency
+          if (collectionDate) {
+            orgData.eventDates.add(collectionDate);
+            orgData.eventCount = orgData.eventDates.size;
+          }
+        };
+        
+        // Process legacy group data
+        if (collection.group1Name && collection.group1Count) {
+          processOrganization(collection.group1Name, collection.group1Count);
+        }
+        if (collection.group2Name && collection.group2Count) {
+          processOrganization(collection.group2Name, collection.group2Count);
         }
         
-        // Add group2_name if it exists and looks like an organization
-        if (collection.group2Name && 
-            collection.group2Name !== 'Group' && 
-            collection.group2Name !== 'Groups' && 
-            collection.group2Name !== 'Unnamed Groups' &&
-            collection.group2Name.trim()) {
-          historicalGroups.add(collection.group2Name.trim());
+        // Process new JSON group collections data
+        if (collection.groupCollections && Array.isArray(collection.groupCollections)) {
+          collection.groupCollections.forEach((group: any) => {
+            if (group.name && group.count) {
+              processOrganization(group.name, group.count);
+            }
+          });
         }
       });
       
-      // Add historical groups to departments map if not already present
-      historicalGroups.forEach(groupName => {
-        const departmentKey = `${groupName}|`; // Empty department for historical entries
+      // Helper function to calculate event frequency
+      const calculateEventFrequency = (eventDates: Set<string>) => {
+        if (eventDates.size === 1) return "1 event";
+        if (eventDates.size === 0) return null;
         
-        if (!departmentsMap.has(departmentKey)) {
+        const dates = Array.from(eventDates).map(d => new Date(d)).sort((a, b) => a.getTime() - b.getTime());
+        const firstEvent = dates[0];
+        const lastEvent = dates[dates.length - 1];
+        const daysDiff = (lastEvent.getTime() - firstEvent.getTime()) / (1000 * 60 * 60 * 24);
+        const yearsDiff = daysDiff / 365.25;
+        
+        if (yearsDiff < 1) {
+          return `${eventDates.size} events in ${Math.round(daysDiff / 30)} months`;
+        } else {
+          const eventsPerYear = eventDates.size / yearsDiff;
+          if (eventsPerYear >= 1) {
+            return `${Math.round(eventsPerYear * 10) / 10} events per year`;
+          } else {
+            return `${eventDates.size} events in ${Math.round(yearsDiff)} years`;
+          }
+        }
+      };
+      
+      // Update departments with actual collection data
+      organizationSandwichData.forEach((orgData, canonicalOrgName) => {
+        // Find existing department entries for this organization using canonical matching
+        let foundExisting = false;
+        
+        departmentsMap.forEach((dept, key) => {
+          if (dept.canonicalName === canonicalOrgName) {
+            foundExisting = true;
+            dept.actualSandwichTotal = orgData.totalSandwiches;
+            dept.actualEventCount = orgData.eventCount;
+            dept.eventFrequency = calculateEventFrequency(orgData.eventDates);
+            dept.hasHostedEvent = true;
+            
+            // Update latest collection date and calculate latest activity date
+            const latestCollectionDate = Math.max(...Array.from(orgData.eventDates).map(d => new Date(d).getTime()));
+            dept.latestCollectionDate = new Date(latestCollectionDate).toISOString().split('T')[0];
+            
+            // Calculate latest activity date for proper sorting
+            const requestTime = new Date(dept.latestRequestDate).getTime();
+            const collectionTime = latestCollectionDate;
+            dept.latestActivityDate = new Date(Math.max(requestTime, collectionTime));
+          }
+        });
+        
+        // Add as historical organization if not found in event requests
+        if (!foundExisting) {
+          const departmentKey = `${canonicalOrgName}|`; // Empty department for historical entries
+          const latestCollectionDate = Math.max(...Array.from(orgData.eventDates).map(d => new Date(d).getTime()));
+          
           departmentsMap.set(departmentKey, {
-            organizationName: groupName,
+            organizationName: orgData.originalName,
+            canonicalName: canonicalOrgName,
             department: '',
             contacts: [],
             totalRequests: 0,
             latestStatus: 'past',
-            latestRequestDate: new Date('2020-01-01'), // Historical placeholder
+            latestRequestDate: new Date(latestCollectionDate),
+            latestActivityDate: new Date(latestCollectionDate),
             hasHostedEvent: true,
             totalSandwiches: 0,
-            eventDate: null
+            actualSandwichTotal: orgData.totalSandwiches,
+            actualEventCount: orgData.eventCount,
+            eventFrequency: calculateEventFrequency(orgData.eventDates),
+            eventDate: null,
+            latestCollectionDate: new Date(latestCollectionDate).toISOString().split('T')[0]
           });
-        } else {
-          // Update existing entry to show it has hosted events
-          const dept = departmentsMap.get(departmentKey);
-          dept.hasHostedEvent = true;
         }
       });
       
-      // Convert Map to array and group by organization
+      // Initialize latestActivityDate for departments that don't have collection data
+      departmentsMap.forEach((dept, key) => {
+        if (!dept.latestActivityDate) {
+          dept.latestActivityDate = dept.latestRequestDate;
+        }
+      });
+      
+      // Convert Map to array and group by canonical organization name
       const organizationsMap = new Map();
       
       departmentsMap.forEach((dept) => {
-        const orgName = dept.organizationName;
+        const canonicalKey = dept.canonicalName;
         
-        if (!organizationsMap.has(orgName)) {
-          organizationsMap.set(orgName, {
-            name: orgName,
+        if (!organizationsMap.has(canonicalKey)) {
+          organizationsMap.set(canonicalKey, {
+            canonicalName: canonicalKey,
+            displayName: dept.organizationName, // Use first occurrence as display name
+            nameVariations: new Set([dept.organizationName]),
             departments: []
           });
         }
         
-        const org = organizationsMap.get(orgName);
+        const org = organizationsMap.get(canonicalKey);
+        
+        // Track all name variations for this organization
+        org.nameVariations.add(dept.organizationName);
+        
+        // Choose the most "complete" name as display name (longest non-empty name)
+        if (dept.organizationName.length > org.displayName.length) {
+          org.displayName = dept.organizationName;
+        }
+        
         org.departments.push({
-          organizationName: orgName,
+          organizationName: org.displayName, // Use unified display name
           department: dept.department,
           contactName: dept.contacts[0]?.name || 'Historical Organization',
           email: dept.contacts[0]?.email || '',
@@ -194,23 +310,30 @@ export function createGroupsCatalogRoutes(deps: GroupsCatalogDependencies) {
           totalRequests: dept.totalRequests,
           hasHostedEvent: dept.hasHostedEvent,
           totalSandwiches: dept.totalSandwiches,
+          actualSandwichTotal: dept.actualSandwichTotal || 0,
+          actualEventCount: dept.actualEventCount || 0,
+          eventFrequency: dept.eventFrequency || null,
           eventDate: dept.eventDate,
-          latestRequestDate: dept.latestRequestDate
+          latestRequestDate: dept.latestRequestDate,
+          latestCollectionDate: dept.latestCollectionDate || null,
+          latestActivityDate: dept.latestActivityDate
         });
       });
       
       // Convert to final format and sort
       const organizations = Array.from(organizationsMap.entries()).map(([_, org]) => ({
-        name: org.name,
+        name: org.displayName,
+        canonicalName: org.canonicalName,
+        nameVariations: Array.from(org.nameVariations),
         departments: org.departments.sort((a, b) => 
-          new Date(b.latestRequestDate).getTime() - new Date(a.latestRequestDate).getTime()
+          new Date(b.latestActivityDate).getTime() - new Date(a.latestActivityDate).getTime()
         )
       }));
       
       // Sort organizations by most recent activity across all departments
       organizations.sort((a, b) => {
-        const aLatest = Math.max(...a.departments.map(d => new Date(d.latestRequestDate).getTime()));
-        const bLatest = Math.max(...b.departments.map(d => new Date(d.latestRequestDate).getTime()));
+        const aLatest = Math.max(...a.departments.map(d => new Date(d.latestActivityDate).getTime()));
+        const bLatest = Math.max(...b.departments.map(d => new Date(d.latestActivityDate).getTime()));
         return bLatest - aLatest;
       });
       
@@ -219,6 +342,174 @@ export function createGroupsCatalogRoutes(deps: GroupsCatalogDependencies) {
     } catch (error) {
       console.error("Error fetching organizations catalog:", error);
       res.status(500).json({ message: "Failed to fetch organizations catalog" });
+    }
+  });
+
+  // Get detailed event history for a specific organization
+  router.get("/details/:organizationName", deps.isAuthenticated, async (req, res) => {
+    try {
+      const { organizationName } = req.params;
+      const decodedOrgName = decodeURIComponent(organizationName);
+      const canonicalSearchName = canonicalizeOrgName(decodedOrgName);
+      
+      // Get all event requests for this organization using canonical matching
+      const eventRequests = await storage.getAllEventRequests();
+      const orgEventRequests = eventRequests.filter(request => 
+        canonicalizeOrgName(request.organizationName) === canonicalSearchName
+      );
+      
+      // Get all sandwich collections for this organization using canonical matching
+      const allCollections = await storage.getAllSandwichCollections();
+      const orgCollections = allCollections.filter(collection => {
+        // Check if organization name matches in any of the group fields using canonical names
+        const matchesGroup1 = collection.group1Name && 
+          canonicalizeOrgName(collection.group1Name) === canonicalSearchName;
+        const matchesGroup2 = collection.group2Name && 
+          canonicalizeOrgName(collection.group2Name) === canonicalSearchName;
+        
+        // Check JSON group collections using canonical names
+        let matchesGroupCollections = false;
+        if (collection.groupCollections && Array.isArray(collection.groupCollections)) {
+          matchesGroupCollections = collection.groupCollections.some((group: any) => 
+            group.name && canonicalizeOrgName(group.name) === canonicalSearchName
+          );
+        }
+        
+        return matchesGroup1 || matchesGroup2 || matchesGroupCollections;
+      });
+      
+      // Process event requests into unified format
+      const eventRequestHistory = orgEventRequests.map(request => ({
+        type: 'event_request',
+        id: request.id,
+        date: request.desiredEventDate || request.createdAt,
+        status: request.status,
+        department: request.department || '',
+        contactName: request.firstName && request.lastName 
+          ? `${request.firstName} ${request.lastName}`.trim()
+          : request.firstName || request.lastName || '',
+        email: request.email,
+        phone: request.phone,
+        estimatedSandwiches: request.estimatedSandwichCount || 0,
+        actualSandwiches: 0,
+        notes: request.description || '',
+        createdAt: request.createdAt,
+        lastUpdated: request.updatedAt || request.createdAt
+      }));
+      
+      // Process sandwich collections into unified format
+      const collectionHistory = orgCollections.map(collection => {
+        // Calculate sandwiches for this organization from this collection using canonical matching
+        let sandwichCount = 0;
+        
+        // Check legacy fields using canonical names
+        if (collection.group1Name && canonicalizeOrgName(collection.group1Name) === canonicalSearchName) {
+          sandwichCount += collection.group1Count || 0;
+        }
+        if (collection.group2Name && canonicalizeOrgName(collection.group2Name) === canonicalSearchName) {
+          sandwichCount += collection.group2Count || 0;
+        }
+        
+        // Check JSON group collections using canonical names
+        if (collection.groupCollections && Array.isArray(collection.groupCollections)) {
+          collection.groupCollections.forEach((group: any) => {
+            if (group.name && canonicalizeOrgName(group.name) === canonicalSearchName) {
+              sandwichCount += group.count || 0;
+            }
+          });
+        }
+        
+        return {
+          type: 'sandwich_collection',
+          id: collection.id,
+          date: collection.collectionDate,
+          status: 'completed',
+          hostName: collection.hostName,
+          department: '',
+          contactName: collection.createdByName || 'Unknown',
+          email: '',
+          phone: '',
+          estimatedSandwiches: 0,
+          actualSandwiches: sandwichCount,
+          notes: `Collection hosted by ${collection.hostName}`,
+          createdAt: collection.submittedAt,
+          lastUpdated: collection.submittedAt
+        };
+      });
+      
+      // Combine and sort all events by date
+      const allEvents = [...eventRequestHistory, ...collectionHistory]
+        .sort((a, b) => {
+          const dateA = new Date(a.date || a.createdAt).getTime();
+          const dateB = new Date(b.date || b.createdAt).getTime();
+          return dateB - dateA; // Most recent first
+        });
+      
+      // Calculate summary statistics
+      const totalEvents = allEvents.length;
+      const completedEvents = allEvents.filter(event => 
+        event.status === 'completed' || event.status === 'contact_completed' || event.type === 'sandwich_collection'
+      ).length;
+      const totalActualSandwiches = allEvents.reduce((sum, event) => 
+        sum + event.actualSandwiches, 0
+      );
+      const totalEstimatedSandwiches = allEvents.reduce((sum, event) => 
+        sum + event.estimatedSandwiches, 0
+      );
+      
+      // Get unique contacts
+      const uniqueContacts = Array.from(new Map(
+        allEvents
+          .filter(event => event.email)
+          .map(event => [event.email, {
+            name: event.contactName,
+            email: event.email,
+            phone: event.phone,
+            department: event.department
+          }])
+      ).values());
+      
+      // Calculate event frequency
+      let eventFrequency = null;
+      if (allEvents.length === 1) {
+        eventFrequency = "1 event";
+      } else if (allEvents.length > 1) {
+        const dates = allEvents
+          .map(event => new Date(event.date || event.createdAt))
+          .sort((a, b) => a.getTime() - b.getTime());
+        const firstEvent = dates[0];
+        const lastEvent = dates[dates.length - 1];
+        const daysDiff = (lastEvent.getTime() - firstEvent.getTime()) / (1000 * 60 * 60 * 24);
+        const yearsDiff = daysDiff / 365.25;
+        
+        if (yearsDiff < 1) {
+          eventFrequency = `${allEvents.length} events in ${Math.round(daysDiff / 30)} months`;
+        } else {
+          const eventsPerYear = allEvents.length / yearsDiff;
+          if (eventsPerYear >= 1) {
+            eventFrequency = `${Math.round(eventsPerYear * 10) / 10} events per year`;
+          } else {
+            eventFrequency = `${allEvents.length} events in ${Math.round(yearsDiff)} years`;
+          }
+        }
+      }
+      
+      res.json({
+        organizationName: decodedOrgName,
+        summary: {
+          totalEvents,
+          completedEvents,
+          totalActualSandwiches,
+          totalEstimatedSandwiches,
+          eventFrequency
+        },
+        contacts: uniqueContacts,
+        events: allEvents
+      });
+      
+    } catch (error) {
+      console.error(`Error fetching details for organization ${req.params.organizationName}:`, error);
+      res.status(500).json({ message: "Failed to fetch organization details" });
     }
   });
 

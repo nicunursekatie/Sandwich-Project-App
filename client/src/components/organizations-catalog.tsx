@@ -31,11 +31,16 @@ interface OrganizationContact {
   email?: string;
   department?: string;
   latestRequestDate: string;
+  latestActivityDate: string;
   totalRequests: number;
   status: 'new' | 'contacted' | 'completed' | 'scheduled' | 'past' | 'declined' | 'contact_completed' | 'in_process';
   hasHostedEvent: boolean;
   eventDate?: string | null;
   totalSandwiches?: number;
+  actualSandwichTotal?: number;
+  actualEventCount?: number;
+  eventFrequency?: string | null;
+  latestCollectionDate?: string | null;
 }
 
 interface GroupCatalogProps {
@@ -53,6 +58,8 @@ export default function GroupCatalog({ onNavigateToEventPlanning }: GroupCatalog
   const [showEventDetailsDialog, setShowEventDetailsDialog] = useState(false);
   const [eventDetails, setEventDetails] = useState<any>(null);
   const [loadingEventDetails, setLoadingEventDetails] = useState(false);
+  const [organizationDetails, setOrganizationDetails] = useState<any>(null);
+  const [loadingOrganizationDetails, setLoadingOrganizationDetails] = useState(false);
 
   // Fetch groups data
   const { data: groupsResponse, isLoading, error } = useQuery({
@@ -87,6 +94,25 @@ export default function GroupCatalog({ onNavigateToEventPlanning }: GroupCatalog
     }
   };
 
+  // Function to fetch complete organization details
+  const fetchOrganizationDetails = async (organizationName: string) => {
+    setLoadingOrganizationDetails(true);
+    try {
+      const response = await fetch(`/api/groups-catalog/details/${encodeURIComponent(organizationName)}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch organization details');
+      }
+      const details = await response.json();
+      setOrganizationDetails(details);
+      setShowEventDetailsDialog(true);
+    } catch (error) {
+      console.error('Error fetching organization details:', error);
+      setOrganizationDetails(null);
+    } finally {
+      setLoadingOrganizationDetails(false);
+    }
+  };
+
   // Helper function to get status badge color
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
@@ -113,11 +139,16 @@ export default function GroupCatalog({ onNavigateToEventPlanning }: GroupCatalog
       email: contact.email,
       department: contact.department,
       latestRequestDate: contact.latestRequestDate || org.lastRequestDate,
+      latestActivityDate: contact.latestActivityDate || contact.latestRequestDate || org.lastRequestDate,
       totalRequests: contact.totalRequests || 1,
       status: contact.status || 'new',
       hasHostedEvent: contact.hasHostedEvent || org.hasHostedEvent,
       eventDate: contact.eventDate || null,
-      totalSandwiches: contact.totalSandwiches || 0
+      totalSandwiches: contact.totalSandwiches || 0,
+      actualSandwichTotal: contact.actualSandwichTotal || 0,
+      actualEventCount: contact.actualEventCount || 0,
+      eventFrequency: contact.eventFrequency || null,
+      latestCollectionDate: contact.latestCollectionDate || null
     }))
   );
 
@@ -159,6 +190,7 @@ export default function GroupCatalog({ onNavigateToEventPlanning }: GroupCatalog
     totalDepartments: number;
     hasHostedEvent: boolean;
     latestRequestDate: string;
+    latestActivityDate: string;
   }
 
   // Process active organizations into groups
@@ -173,7 +205,8 @@ export default function GroupCatalog({ onNavigateToEventPlanning }: GroupCatalog
           totalRequests: 0,
           totalDepartments: 0,
           hasHostedEvent: false,
-          latestRequestDate: org.latestRequestDate
+          latestRequestDate: org.latestRequestDate,
+          latestActivityDate: org.latestActivityDate
         });
       }
       
@@ -185,6 +218,11 @@ export default function GroupCatalog({ onNavigateToEventPlanning }: GroupCatalog
       // Update latest request date
       if (new Date(org.latestRequestDate) > new Date(group.latestRequestDate)) {
         group.latestRequestDate = org.latestRequestDate;
+      }
+      
+      // Update latest activity date
+      if (new Date(org.latestActivityDate) > new Date(group.latestActivityDate)) {
+        group.latestActivityDate = org.latestActivityDate;
       }
       
       return groups;
@@ -203,7 +241,8 @@ export default function GroupCatalog({ onNavigateToEventPlanning }: GroupCatalog
           totalRequests: 0,
           totalDepartments: 0,
           hasHostedEvent: org.hasHostedEvent,
-          latestRequestDate: org.latestRequestDate
+          latestRequestDate: org.latestRequestDate,
+          latestActivityDate: org.latestActivityDate
         });
       }
       
@@ -215,7 +254,7 @@ export default function GroupCatalog({ onNavigateToEventPlanning }: GroupCatalog
     }, new Map())
     .values());
 
-  // Sort active groups by organization name or latest request date
+  // Sort active groups by organization name or latest activity date
   const sortedActiveGroups = activeGroupInfo.sort((a, b) => {
     if (sortBy === 'groupName') {
       return sortOrder === "desc" 
@@ -223,9 +262,9 @@ export default function GroupCatalog({ onNavigateToEventPlanning }: GroupCatalog
         : a.groupName.localeCompare(b.groupName);
     }
     
-    // Default sort by latest request date
-    const aDate = new Date(a.latestRequestDate).getTime();
-    const bDate = new Date(b.latestRequestDate).getTime();
+    // Default sort by latest activity date (includes both requests and collections)
+    const aDate = new Date(a.latestActivityDate).getTime();
+    const bDate = new Date(b.latestActivityDate).getTime();
     return sortOrder === "desc" ? bDate - aDate : aDate - bDate;
   });
 
@@ -538,7 +577,7 @@ export default function GroupCatalog({ onNavigateToEventPlanning }: GroupCatalog
                           )}
                         </div>
                         
-                        {/* Enhanced Key Metrics Bar */}
+                        {/* Enhanced Key Metrics Bar with Analytics */}
                         <div className="bg-gradient-to-r from-orange-50 to-yellow-50 p-3 border border-orange-200 rounded-md">
                           <div className="space-y-2">
                             <div className="flex items-center justify-between">
@@ -552,20 +591,38 @@ export default function GroupCatalog({ onNavigateToEventPlanning }: GroupCatalog
                                 {org.totalRequests} request{org.totalRequests !== 1 ? 's' : ''}
                               </div>
                             </div>
-                            <div className="flex items-center justify-between text-sm">
-                              <span className="flex items-center space-x-1">
+                            
+                            {/* Enhanced Analytics Display */}
+                            <div className="grid grid-cols-2 gap-2 text-sm">
+                              <div className="flex items-center space-x-1">
                                 <span>🥪</span>
                                 <span className="font-semibold text-orange-700">
-                                  {org.totalSandwiches || 0} sandwiches
+                                  {org.actualSandwichTotal || org.totalSandwiches || 0} sandwiches
                                 </span>
-                              </span>
-                              {org.hasHostedEvent && (
-                                <span className="flex items-center space-x-1 text-green-600">
-                                  <CheckCircle className="w-3 h-3" />
-                                  <span className="text-xs">Event Hosted</span>
+                              </div>
+                              <div className="flex items-center space-x-1">
+                                <span>📅</span>
+                                <span className="font-semibold text-blue-700">
+                                  {org.actualEventCount || 0} events
                                 </span>
-                              )}
+                              </div>
                             </div>
+                            
+                            {/* Event Frequency Display */}
+                            {org.eventFrequency && (
+                              <div className="text-center text-xs text-purple-600 font-medium bg-purple-50 px-2 py-1 rounded">
+                                {org.eventFrequency}
+                              </div>
+                            )}
+                            
+                            {org.hasHostedEvent && (
+                              <div className="flex items-center justify-center space-x-1 text-green-600">
+                                <CheckCircle className="w-3 h-3" />
+                                <span className="text-xs">
+                                  Hosted {org.actualEventCount || 1} event{(org.actualEventCount || 1) > 1 ? 's' : ''}
+                                </span>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -588,20 +645,19 @@ export default function GroupCatalog({ onNavigateToEventPlanning }: GroupCatalog
                   </div>
                     
                     
-                    {/* View Event Details Button */}
+                    {/* View Complete Organization History Button */}
                     <Button 
                       onClick={() => {
                         setSelectedOrganization(org);
-                        setEventDetails(null); // Reset previous details
-                        setShowEventDetailsDialog(true);
-                        fetchEventDetails(org); // Fetch complete details
+                        setOrganizationDetails(null); // Reset previous details
+                        fetchOrganizationDetails(org.organizationName); // Fetch complete organization history
                       }}
                       variant="outline" 
                       size="sm" 
                       className="w-full text-sm bg-[#FBAD3F] hover:bg-[#FBAD3F]/90 text-white border-[#FBAD3F] hover:border-[#FBAD3F]/90"
                     >
                       <ExternalLink className="w-4 h-4 mr-2" />
-                      View Event Details
+                      View Complete History
                     </Button>
                   </div>
                 </CardContent>
@@ -718,298 +774,188 @@ export default function GroupCatalog({ onNavigateToEventPlanning }: GroupCatalog
         </div>
       )}
 
-      {/* Event Details Dialog */}
-      {showEventDetailsDialog && selectedOrganization && (
-        <Dialog open={showEventDetailsDialog} onOpenChange={setShowEventDetailsDialog}>
-          <DialogContent className="max-w-4xl">
-            <DialogHeader>
-              <DialogTitle className="flex items-center space-x-3">
-                <Building className="w-6 h-6" style={{ color: '#236383' }} />
-                <span>{selectedOrganization.organizationName}</span>
-                {selectedOrganization.department && (
-                  <span className="text-gray-600">- {selectedOrganization.department}</span>
-                )}
-              </DialogTitle>
-              <DialogDescription>
-                Comprehensive event and contact information
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="space-y-6">
-              {loadingEventDetails ? (
-                <div className="flex items-center justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#236383]"></div>
-                  <span className="ml-3 text-gray-600">Loading event details...</span>
+      {/* Organization History Dialog */}
+      <Dialog open={showEventDetailsDialog} onOpenChange={setShowEventDetailsDialog}>
+        <DialogContent className="max-w-6xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-gray-900 dark:text-gray-100">
+              Organization History: {organizationDetails?.organizationName || selectedOrganization?.organizationName}
+            </DialogTitle>
+            <DialogDescription className="text-gray-600 dark:text-gray-400">
+              Complete event history and analytics
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-6">
+            {loadingOrganizationDetails ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <span className="ml-2 text-gray-600 dark:text-gray-400">Loading organization details...</span>
+              </div>
+            ) : organizationDetails ? (
+              <div className="space-y-6">
+                {/* Summary Statistics */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <Card>
+                    <CardContent className="p-4 text-center">
+                      <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                        {organizationDetails.summary.totalEvents}
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Total Events</div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-4 text-center">
+                      <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                        {organizationDetails.summary.completedEvents}
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Completed</div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-4 text-center">
+                      <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+                        {organizationDetails.summary.totalActualSandwiches.toLocaleString()}
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Sandwiches Made</div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-4 text-center">
+                      <div className="text-lg font-bold text-purple-600 dark:text-purple-400">
+                        {organizationDetails.summary.eventFrequency || 'First Time'}
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Frequency</div>
+                    </CardContent>
+                  </Card>
                 </div>
-              ) : eventDetails ? (
-                <>
-                  {/* Contact Information */}
-                  <div className="bg-gray-50 p-4 rounded-lg border">
-                    <h3 className="font-semibold text-gray-800 mb-3 flex items-center">
-                      <User className="w-5 h-5 mr-2" style={{ color: '#236383' }} />
-                      Contact Information
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Contact Name</label>
-                        <p className="text-lg font-semibold" style={{ color: '#236383' }}>
-                          {eventDetails.firstName} {eventDetails.lastName}
-                        </p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Email Address</label>
-                        <p className="text-base font-medium" style={{ color: '#236383' }}>
-                          {eventDetails.email}
-                        </p>
-                      </div>
-                      {eventDetails.phone && (
-                        <div>
-                          <label className="text-sm font-medium text-gray-600">Phone Number</label>
-                          <p className="text-base font-medium text-gray-700">
-                            {eventDetails.phone}
-                          </p>
-                        </div>
-                      )}
-                      {eventDetails.department && (
-                        <div>
-                          <label className="text-sm font-medium text-gray-600">Department</label>
-                          <p className="text-base font-medium text-gray-700">
-                            {eventDetails.department}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
 
-                  {/* Event Planning Details */}
-                  <div className="bg-white p-4 rounded-lg border">
-                    <h3 className="font-semibold text-gray-800 mb-3 flex items-center">
-                      <Calendar className="w-5 h-5 mr-2" style={{ color: '#236383' }} />
-                      Event Planning Information
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Current Status</label>
-                        <div className="mt-1">
-                          {(() => {
-                            const statusConfig = {
-                              'new': { color: 'bg-teal-100 text-teal-800 border-teal-200', label: 'New Request' },
-                              'contacted': { color: 'bg-yellow-100 text-yellow-800 border-yellow-200', label: 'Contact Made' },
-                              'in_process': { color: 'bg-blue-100 text-blue-800 border-blue-200', label: 'In Process' },
-                              'scheduled': { color: 'bg-purple-100 text-purple-800 border-purple-200', label: 'Event Scheduled' },
-                              'completed': { color: 'bg-orange-100 text-orange-800 border-orange-200', label: 'Event Completed' },
-                              'past': { color: 'bg-gray-100 text-gray-800 border-gray-200', label: 'Past Event' }
-                            };
-                            const config = statusConfig[eventDetails.status as keyof typeof statusConfig] || statusConfig.new;
-                            return (
-                              <Badge className={`${config.color} border`}>
-                                {config.label}
-                              </Badge>
-                            );
-                          })()}
-                        </div>
+                {/* Contacts */}
+                {organizationDetails.contacts && organizationDetails.contacts.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Users className="w-5 h-5" />
+                        Organization Contacts
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {organizationDetails.contacts.map((contact: any, index: number) => (
+                          <div key={index} className="p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
+                            <div className="font-semibold">{contact.name}</div>
+                            <div className="text-sm text-gray-600 dark:text-gray-400">
+                              {contact.email && (
+                                <div className="flex items-center gap-1 mt-1">
+                                  <Mail className="w-3 h-3" />
+                                  {contact.email}
+                                </div>
+                              )}
+                              {contact.phone && (
+                                <div className="flex items-center gap-1 mt-1">
+                                  <Phone className="w-3 h-3" />
+                                  {contact.phone}
+                                </div>
+                              )}
+                              {contact.department && (
+                                <div className="text-xs mt-1 text-blue-600 dark:text-blue-400">
+                                  {contact.department}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
                       </div>
+                    </CardContent>
+                  </Card>
+                )}
 
-                      {eventDetails.desiredEventDate && (
-                        <div>
-                          <label className="text-sm font-medium text-gray-600">Event Date</label>
-                          <p className="text-base font-semibold" style={{ color: '#FBAD3F' }}>
-                            {(() => {
-                              try {
-                                // Timezone-safe date parsing and display
-                              let date: Date;
-                              const dateStr = eventDetails.desiredEventDate;
+                {/* Event History */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Calendar className="w-5 h-5" />
+                      Event History ({organizationDetails.events.length} events)
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3 max-h-96 overflow-y-auto">
+                      {organizationDetails.events.map((event: any, index: number) => (
+                        <div key={index} className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-300 dark:hover:border-blue-600 transition-colors">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <div className="font-semibold text-gray-900 dark:text-gray-100">
+                                  {formatDateForDisplay(event.date)}
+                                </div>
+                                <Badge 
+                                  className={event.type === 'sandwich_collection' 
+                                    ? 'bg-green-100 text-green-800 border-green-200'
+                                    : 'bg-blue-100 text-blue-800 border-blue-200'
+                                  }
+                                >
+                                  {event.type === 'sandwich_collection' ? 'Collection' : 'Request'}
+                                </Badge>
+                                {getStatusBadge(event.status)}
+                              </div>
                               
-                              if (dateStr.match(/^\d{4}-\d{2}-\d{2}T00:00:00(\.\d{3})?Z?$/)) {
-                                // Handle ISO midnight format that causes timezone shifting
-                                const datePart = dateStr.split('T')[0];
-                                date = new Date(datePart + 'T12:00:00');
-                              } else {
-                                date = new Date(dateStr + 'T12:00:00');
-                              }
-                              
-                              return date.toLocaleDateString('en-US', {
-                                weekday: 'long',
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric'
-                              });
-                              } catch {
-                                return eventDetails.desiredEventDate;
-                              }
-                            })()}
-                          </p>
-                        </div>
-                      )}
-
-                      {eventDetails.estimatedSandwichCount && (
-                        <div>
-                          <label className="text-sm font-medium text-gray-600">Estimated Sandwiches</label>
-                          <p className="text-lg font-semibold text-orange-600">
-                            {eventDetails.estimatedSandwichCount} sandwiches
-                          </p>
-                        </div>
-                      )}
-
-                      {eventDetails.sandwichesMade && (
-                        <div>
-                          <label className="text-sm font-medium text-gray-600">Sandwiches Made</label>
-                          <p className="text-lg font-semibold text-orange-600">
-                            {eventDetails.sandwichesMade} sandwiches
-                          </p>
-                        </div>
-                      )}
-
-                      {eventDetails.eventStartTime && (
-                        <div>
-                          <label className="text-sm font-medium text-gray-600">Event Start Time</label>
-                          <p className="text-base font-medium text-gray-700">
-                            {eventDetails.eventStartTime}
-                          </p>
-                        </div>
-                      )}
-
-                      {eventDetails.eventEndTime && (
-                        <div>
-                          <label className="text-sm font-medium text-gray-600">Event End Time</label>
-                          <p className="text-base font-medium text-gray-700">
-                            {eventDetails.eventEndTime}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-
-                    {eventDetails.eventAddress && (
-                      <div className="mt-4 pt-4 border-t">
-                        <label className="text-sm font-medium text-gray-600">Event Address</label>
-                        <p className="text-base font-medium text-gray-700">
-                          {eventDetails.eventAddress}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Additional Details */}
-                  {(eventDetails.message || eventDetails.planningNotes || eventDetails.contactCompletionNotes) && (
-                    <div className="bg-teal-50 p-4 rounded-lg border border-teal-200">
-                      <h3 className="font-semibold text-teal-800 mb-3">Additional Information</h3>
-                      {eventDetails.message && (
-                        <div className="mb-3">
-                          <label className="text-sm font-medium text-teal-700">Original Message</label>
-                          <p className="text-sm text-teal-800 bg-white p-2 rounded border">
-                            {eventDetails.message}
-                          </p>
-                        </div>
-                      )}
-                      {eventDetails.planningNotes && (
-                        <div className="mb-3">
-                          <label className="text-sm font-medium text-teal-700">Planning Notes</label>
-                          <p className="text-sm text-teal-800 bg-white p-2 rounded border">
-                            {eventDetails.planningNotes}
-                          </p>
-                        </div>
-                      )}
-                      {eventDetails.contactCompletionNotes && (
-                        <div>
-                          <label className="text-sm font-medium text-teal-700">Contact Notes</label>
-                          <p className="text-sm text-teal-800 bg-white p-2 rounded border">
-                            {eventDetails.contactCompletionNotes}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Event History */}
-                  <div className="bg-teal-50 p-4 rounded-lg border border-teal-200">
-                    <h3 className="font-semibold text-teal-800 mb-3 flex items-center">
-                      <Clock className="w-5 h-5 mr-2" />
-                      Event History
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {/* Only show Request Submitted for actual form submissions, not imported events */}
-                      {eventDetails.createdBy !== 'admin_1751065261945' && (
-                        <div>
-                          <label className="text-sm font-medium text-teal-700">Request Submitted</label>
-                          <p className="text-base font-medium text-teal-800">
-                            {(() => {
-                              try {
-                                // Timezone-safe date parsing for submission date
-                                let date: Date;
-                                if (eventDetails.createdAt.match(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/)) {
-                                  // Database timestamp format: "2025-08-27 06:26:14"
-                                  const [datePart, timePart] = eventDetails.createdAt.split(' ');
-                                  date = new Date(datePart + 'T' + timePart);
-                                } else {
-                                  date = new Date(eventDetails.createdAt);
-                                }
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                                <div>
+                                  <div className="font-medium text-gray-700 dark:text-gray-300">Contact</div>
+                                  <div className="text-gray-600 dark:text-gray-400">{event.contactName}</div>
+                                  {event.email && (
+                                    <div className="text-xs text-gray-500 dark:text-gray-500">{event.email}</div>
+                                  )}
+                                </div>
                                 
-                                return date.toLocaleDateString('en-US', { 
-                                  year: 'numeric', 
-                                  month: 'short', 
-                                  day: 'numeric',
-                                  hour: 'numeric',
-                                  minute: '2-digit'
-                                });
-                              } catch (error) {
-                                return 'Unknown';
-                              }
-                            })()}
-                          </p>
-                        </div>
-                      )}
-                      
-                      {eventDetails.hasHostedEvent !== undefined && (
-                        <div>
-                          <label className="text-sm font-medium text-teal-700">Previously Hosted Events</label>
-                          <div className="flex items-center space-x-2 mt-1">
-                            {eventDetails.hasHostedEvent ? (
-                              <>
-                                <CheckCircle className="w-5 h-5 text-orange-600" />
-                                <span className="text-orange-600 font-semibold">Yes</span>
-                              </>
-                            ) : (
-                              <>
-                                <Clock className="w-5 h-5 text-gray-400" />
-                                <span className="text-gray-500">First time</span>
-                              </>
-                            )}
+                                <div>
+                                  <div className="font-medium text-gray-700 dark:text-gray-300">Sandwiches</div>
+                                  <div className="text-gray-600 dark:text-gray-400">
+                                    {event.actualSandwiches > 0 
+                                      ? `${event.actualSandwiches.toLocaleString()} made`
+                                      : event.estimatedSandwiches > 0 
+                                      ? `${event.estimatedSandwiches.toLocaleString()} estimated`
+                                      : 'Not specified'
+                                    }
+                                  </div>
+                                </div>
+                                
+                                <div>
+                                  <div className="font-medium text-gray-700 dark:text-gray-300">Details</div>
+                                  <div className="text-gray-600 dark:text-gray-400">
+                                    {event.department && <div>Dept: {event.department}</div>}
+                                    {event.hostName && <div>Host: {event.hostName}</div>}
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              {event.notes && (
+                                <div className="mt-2 text-sm text-gray-600 dark:text-gray-400 italic">
+                                  {event.notes}
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </div>
+                      ))}
+                      
+                      {organizationDetails.events.length === 0 && (
+                        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                          No events found for this organization
+                        </div>
                       )}
                     </div>
-                  </div>
-                </>
-              ) : (
-                <div className="text-center py-8">
-                  <p className="text-gray-600">No detailed event information available</p>
-                </div>
-              )}
-
-              {/* Action Buttons */}
-              <div className="flex justify-between items-center pt-4 border-t">
-                <Button 
-                  variant="outline" 
-                  onClick={() => setShowEventDetailsDialog(false)}
-                >
-                  Close
-                </Button>
-                {eventDetails && (eventDetails.status === 'new' || eventDetails.status === 'scheduled') && (
-                  <Button 
-                    onClick={() => {
-                      setShowEventDetailsDialog(false);
-                      onNavigateToEventPlanning?.();
-                    }}
-                    className="bg-[#236383] hover:bg-[#236383]/90 text-white"
-                  >
-                    Go to Event Planning
-                  </Button>
-                )}
+                  </CardContent>
+                </Card>
               </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
+            ) : (
+              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                No organization details available
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
