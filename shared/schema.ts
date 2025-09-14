@@ -906,6 +906,17 @@ export const documentAccessLogs = pgTable(
   })
 );
 
+// Confidential documents table for sensitive documents with email-based access control
+export const confidentialDocuments = pgTable('confidential_documents', {
+  id: serial('id').primaryKey(),
+  fileName: varchar('file_name').notNull(),
+  originalName: varchar('original_name').notNull(),
+  filePath: varchar('file_path').notNull(),
+  allowedEmails: jsonb('allowed_emails').notNull().default('[]'), // Array of email addresses with access
+  uploadedBy: varchar('uploaded_by').notNull(), // User ID who uploaded
+  uploadedAt: timestamp('uploaded_at').notNull().defaultNow(),
+});
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -1037,6 +1048,13 @@ export const insertDocumentSchema = createInsertSchema(documents).omit({
 export const insertDocumentPermissionSchema = createInsertSchema(
   documentPermissions
 ).omit({ id: true, grantedAt: true });
+export const insertConfidentialDocumentSchema = createInsertSchema(
+  confidentialDocuments
+).omit({
+  id: true,
+  uploadedAt: true,
+});
+
 export const insertDocumentAccessLogSchema = createInsertSchema(
   documentAccessLogs
 ).omit({ id: true, accessedAt: true });
@@ -1122,6 +1140,10 @@ export type InsertDocumentPermission = z.infer<
 export type DocumentAccessLog = typeof documentAccessLogs.$inferSelect;
 export type InsertDocumentAccessLog = z.infer<
   typeof insertDocumentAccessLogSchema
+>;
+export type ConfidentialDocument = typeof confidentialDocuments.$inferSelect;
+export type InsertConfidentialDocument = z.infer<
+  typeof insertConfidentialDocumentSchema
 >;
 export type ProjectTask = typeof projectTasks.$inferSelect;
 export type InsertProjectTask = z.infer<typeof insertProjectTaskSchema>;
