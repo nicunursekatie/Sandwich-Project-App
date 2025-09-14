@@ -3463,7 +3463,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(confidentialDocuments)
       .where(
-        sql`JSON_ARRAY_CONTAINS(${confidentialDocuments.allowedEmails}, ${userEmail})`
+        sql`${confidentialDocuments.allowedEmails} @> ${JSON.stringify([userEmail])}`
       )
       .orderBy(desc(confidentialDocuments.uploadedAt));
   }
@@ -3475,7 +3475,7 @@ export class DatabaseStorage implements IStorage {
       .where(
         and(
           eq(confidentialDocuments.id, id),
-          sql`JSON_ARRAY_CONTAINS(${confidentialDocuments.allowedEmails}, ${userEmail})`
+          sql`${confidentialDocuments.allowedEmails} @> ${JSON.stringify([userEmail])}`
         )
       );
     return result || null;
