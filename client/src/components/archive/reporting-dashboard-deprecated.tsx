@@ -2,23 +2,45 @@
 // The reports tab has been removed from the main navigation
 // Reporting functionality has been consolidated into Analytics tab
 // This file is kept for reference only - DO NOT USE
-// 
+//
 // Migration date: August 2025
 // Reason: Reports tab removed, analytics provides better insights
 // Alternative: Use Analytics tab for data visualization and insights
 
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Calendar, FileText, Mail, Download, Settings, BarChart3, LineChart, PieChart, LogOut } from "lucide-react";
+import {
+  Calendar,
+  FileText,
+  Mail,
+  Download,
+  Settings,
+  BarChart3,
+  LineChart,
+  PieChart,
+  LogOut,
+} from "lucide-react";
 import { format, subDays, subWeeks, subMonths } from "date-fns";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -26,14 +48,14 @@ import SimpleNav from "@/components/simple-nav";
 import WeeklyImpactReport from "@/components/weekly-impact-report";
 
 interface ReportConfig {
-  type: 'collections' | 'hosts' | 'impact' | 'comprehensive';
+  type: "collections" | "hosts" | "impact" | "comprehensive";
   dateRange: {
     start: string;
     end: string;
   };
-  format: 'pdf' | 'csv' | 'json';
+  format: "pdf" | "csv" | "json";
   includeCharts: boolean;
-  groupBy?: 'week' | 'month' | 'host' | 'project';
+  groupBy?: "week" | "month" | "host" | "project";
   filters?: {
     hostIds?: number[];
     projectIds?: number[];
@@ -45,71 +67,81 @@ interface ScheduledReport {
   id: number;
   config: ReportConfig;
   schedule: {
-    frequency: 'daily' | 'weekly' | 'monthly';
+    frequency: "daily" | "weekly" | "monthly";
     time: string;
     recipients: string[];
   };
   nextRun: string;
-  status: 'active' | 'paused';
+  status: "active" | "paused";
 }
 
-export default function ReportingDashboard({ isEmbedded = false }: { isEmbedded?: boolean }) {
+export default function ReportingDashboard({
+  isEmbedded = false,
+}: {
+  isEmbedded?: boolean;
+}) {
   const { toast } = useToast();
   const [reportConfig, setReportConfig] = useState<ReportConfig>({
-    type: 'collections',
+    type: "collections",
     dateRange: {
-      start: format(subMonths(new Date(), 1), 'yyyy-MM-dd'),
-      end: format(new Date(), 'yyyy-MM-dd')
+      start: format(subMonths(new Date(), 1), "yyyy-MM-dd"),
+      end: format(new Date(), "yyyy-MM-dd"),
     },
-    format: 'pdf',
+    format: "pdf",
     includeCharts: true,
-    groupBy: 'month'
+    groupBy: "month",
   });
 
   const [scheduleConfig, setScheduleConfig] = useState({
-    frequency: 'weekly' as const,
-    time: '09:00',
-    recipients: ['']
+    frequency: "weekly" as const,
+    time: "09:00",
+    recipients: [""],
   });
 
   // Query for scheduled reports
-  const { data: scheduledReports = [], refetch: refetchScheduled } = useQuery<ScheduledReport[]>({
-    queryKey: ['/api/reports/scheduled'],
-    retry: false
+  const { data: scheduledReports = [], refetch: refetchScheduled } = useQuery<
+    ScheduledReport[]
+  >({
+    queryKey: ["/api/reports/scheduled"],
+    retry: false,
   });
 
   // Query for recent reports
   const { data: recentReports = [] } = useQuery<any[]>({
-    queryKey: ['/api/reports/recent'],
-    retry: false
+    queryKey: ["/api/reports/recent"],
+    retry: false,
   });
 
   // Generate report mutation
   const generateReport = useMutation({
     mutationFn: async (config: ReportConfig) => {
-      return await apiRequest('POST', '/api/reports/generate', config);
+      return await apiRequest("POST", "/api/reports/generate", config);
     },
     onSuccess: (data) => {
       toast({
         title: "Report Generated",
         description: "Your report has been generated successfully.",
       });
-      
+
       // Trigger download if data is valid
       if (data && data.id && data.metadata) {
         try {
           const downloadUrl = `/api/reports/download/${data.id}`;
-          const link = document.createElement('a');
+          const link = document.createElement("a");
           link.href = downloadUrl;
-          link.download = `${data.metadata.title}-${format(new Date(), 'yyyy-MM-dd')}.${reportConfig.format}`;
+          link.download = `${data.metadata.title}-${format(
+            new Date(),
+            "yyyy-MM-dd"
+          )}.${reportConfig.format}`;
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
         } catch (error) {
-          console.error('Download error:', error);
+          console.error("Download error:", error);
           toast({
             title: "Download Failed",
-            description: "Report generated but download failed. Please try again.",
+            description:
+              "Report generated but download failed. Please try again.",
             variant: "destructive",
           });
         }
@@ -121,15 +153,15 @@ export default function ReportingDashboard({ isEmbedded = false }: { isEmbedded?
         description: error.message,
         variant: "destructive",
       });
-    }
+    },
   });
 
   // Schedule report mutation
   const scheduleReport = useMutation({
     mutationFn: async () => {
-      return await apiRequest('POST', '/api/reports/schedule', {
+      return await apiRequest("POST", "/api/reports/schedule", {
         config: reportConfig,
-        schedule: scheduleConfig
+        schedule: scheduleConfig,
       });
     },
     onSuccess: () => {
@@ -145,7 +177,7 @@ export default function ReportingDashboard({ isEmbedded = false }: { isEmbedded?
         description: error.message,
         variant: "destructive",
       });
-    }
+    },
   });
 
   const handleQuickDateRange = (range: string) => {
@@ -153,19 +185,19 @@ export default function ReportingDashboard({ isEmbedded = false }: { isEmbedded?
     let start: Date;
 
     switch (range) {
-      case 'last7days':
+      case "last7days":
         start = subDays(now, 7);
         break;
-      case 'last30days':
+      case "last30days":
         start = subDays(now, 30);
         break;
-      case 'last3months':
+      case "last3months":
         start = subMonths(now, 3);
         break;
-      case 'last6months':
+      case "last6months":
         start = subMonths(now, 6);
         break;
-      case 'lastyear':
+      case "lastyear":
         start = subMonths(now, 12);
         break;
       default:
@@ -174,23 +206,23 @@ export default function ReportingDashboard({ isEmbedded = false }: { isEmbedded?
 
     // Validate dates before formatting
     if (isNaN(start.getTime()) || isNaN(now.getTime())) {
-      console.error('Invalid date detected in handleQuickDateRange');
+      console.error("Invalid date detected in handleQuickDateRange");
       return;
     }
 
     setReportConfig({
       ...reportConfig,
       dateRange: {
-        start: format(start, 'yyyy-MM-dd'),
-        end: format(now, 'yyyy-MM-dd')
-      }
+        start: format(start, "yyyy-MM-dd"),
+        end: format(now, "yyyy-MM-dd"),
+      },
     });
   };
 
   const addRecipient = () => {
     setScheduleConfig({
       ...scheduleConfig,
-      recipients: [...scheduleConfig.recipients, '']
+      recipients: [...scheduleConfig.recipients, ""],
     });
   };
 
@@ -199,14 +231,14 @@ export default function ReportingDashboard({ isEmbedded = false }: { isEmbedded?
     newRecipients[index] = value;
     setScheduleConfig({
       ...scheduleConfig,
-      recipients: newRecipients
+      recipients: newRecipients,
     });
   };
 
   const removeRecipient = (index: number) => {
     setScheduleConfig({
       ...scheduleConfig,
-      recipients: scheduleConfig.recipients.filter((_, i) => i !== index)
+      recipients: scheduleConfig.recipients.filter((_, i) => i !== index),
     });
   };
 
@@ -215,7 +247,9 @@ export default function ReportingDashboard({ isEmbedded = false }: { isEmbedded?
     <div className="max-w-7xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Reporting Dashboard</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+            Reporting Dashboard
+          </h1>
           <p className="text-sm sm:text-base text-gray-600 mt-2">
             Generate comprehensive reports and schedule automated deliveries
           </p>
@@ -236,10 +270,18 @@ export default function ReportingDashboard({ isEmbedded = false }: { isEmbedded?
 
       <Tabs defaultValue="generate" className="space-y-6">
         <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 h-auto">
-          <TabsTrigger value="generate" className="text-xs md:text-sm">Generate Report</TabsTrigger>
-          <TabsTrigger value="weekly" className="text-xs md:text-sm">Weekly Impact</TabsTrigger>
-          <TabsTrigger value="scheduled" className="text-xs md:text-sm">Scheduled Reports</TabsTrigger>
-          <TabsTrigger value="history" className="text-xs md:text-sm">Report History</TabsTrigger>
+          <TabsTrigger value="generate" className="text-xs md:text-sm">
+            Generate Report
+          </TabsTrigger>
+          <TabsTrigger value="weekly" className="text-xs md:text-sm">
+            Weekly Impact
+          </TabsTrigger>
+          <TabsTrigger value="scheduled" className="text-xs md:text-sm">
+            Scheduled Reports
+          </TabsTrigger>
+          <TabsTrigger value="history" className="text-xs md:text-sm">
+            Report History
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="generate">
@@ -259,16 +301,24 @@ export default function ReportingDashboard({ isEmbedded = false }: { isEmbedded?
                     <Label htmlFor="reportType">Report Type</Label>
                     <Select
                       value={reportConfig.type}
-                      onValueChange={(value: any) => setReportConfig({ ...reportConfig, type: value })}
+                      onValueChange={(value: any) =>
+                        setReportConfig({ ...reportConfig, type: value })
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="collections">Collection Analysis</SelectItem>
+                        <SelectItem value="collections">
+                          Collection Analysis
+                        </SelectItem>
                         <SelectItem value="hosts">Host Performance</SelectItem>
-                        <SelectItem value="impact">Impact Assessment</SelectItem>
-                        <SelectItem value="comprehensive">Comprehensive Report</SelectItem>
+                        <SelectItem value="impact">
+                          Impact Assessment
+                        </SelectItem>
+                        <SelectItem value="comprehensive">
+                          Comprehensive Report
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -278,46 +328,80 @@ export default function ReportingDashboard({ isEmbedded = false }: { isEmbedded?
                     <Label>Date Range</Label>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="startDate" className="text-sm">From</Label>
+                        <Label htmlFor="startDate" className="text-sm">
+                          From
+                        </Label>
                         <Input
                           id="startDate"
                           type="date"
                           value={reportConfig.dateRange.start}
-                          onChange={(e) => setReportConfig({
-                            ...reportConfig,
-                            dateRange: { ...reportConfig.dateRange, start: e.target.value }
-                          })}
+                          onChange={(e) =>
+                            setReportConfig({
+                              ...reportConfig,
+                              dateRange: {
+                                ...reportConfig.dateRange,
+                                start: e.target.value,
+                              },
+                            })
+                          }
                         />
                       </div>
                       <div>
-                        <Label htmlFor="endDate" className="text-sm">To</Label>
+                        <Label htmlFor="endDate" className="text-sm">
+                          To
+                        </Label>
                         <Input
                           id="endDate"
                           type="date"
                           value={reportConfig.dateRange.end}
-                          onChange={(e) => setReportConfig({
-                            ...reportConfig,
-                            dateRange: { ...reportConfig.dateRange, end: e.target.value }
-                          })}
+                          onChange={(e) =>
+                            setReportConfig({
+                              ...reportConfig,
+                              dateRange: {
+                                ...reportConfig.dateRange,
+                                end: e.target.value,
+                              },
+                            })
+                          }
                         />
                       </div>
                     </div>
-                    
+
                     {/* Quick Date Ranges */}
                     <div className="flex flex-wrap gap-2">
-                      <Button variant="outline" size="sm" onClick={() => handleQuickDateRange('last7days')}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleQuickDateRange("last7days")}
+                      >
                         Last 7 Days
                       </Button>
-                      <Button variant="outline" size="sm" onClick={() => handleQuickDateRange('last30days')}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleQuickDateRange("last30days")}
+                      >
                         Last 30 Days
                       </Button>
-                      <Button variant="outline" size="sm" onClick={() => handleQuickDateRange('last3months')}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleQuickDateRange("last3months")}
+                      >
                         Last 3 Months
                       </Button>
-                      <Button variant="outline" size="sm" onClick={() => handleQuickDateRange('last6months')}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleQuickDateRange("last6months")}
+                      >
                         Last 6 Months
                       </Button>
-                      <Button variant="outline" size="sm" onClick={() => handleQuickDateRange('lastyear')}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleQuickDateRange("lastyear")}
+                      >
                         Last Year
                       </Button>
                     </div>
@@ -329,7 +413,9 @@ export default function ReportingDashboard({ isEmbedded = false }: { isEmbedded?
                       <Label htmlFor="format">Output Format</Label>
                       <Select
                         value={reportConfig.format}
-                        onValueChange={(value: any) => setReportConfig({ ...reportConfig, format: value })}
+                        onValueChange={(value: any) =>
+                          setReportConfig({ ...reportConfig, format: value })
+                        }
                       >
                         <SelectTrigger>
                           <SelectValue />
@@ -341,12 +427,14 @@ export default function ReportingDashboard({ isEmbedded = false }: { isEmbedded?
                         </SelectContent>
                       </Select>
                     </div>
-                    
+
                     <div>
                       <Label htmlFor="groupBy">Group Data By</Label>
                       <Select
                         value={reportConfig.groupBy}
-                        onValueChange={(value: any) => setReportConfig({ ...reportConfig, groupBy: value })}
+                        onValueChange={(value: any) =>
+                          setReportConfig({ ...reportConfig, groupBy: value })
+                        }
                       >
                         <SelectTrigger>
                           <SelectValue />
@@ -364,7 +452,9 @@ export default function ReportingDashboard({ isEmbedded = false }: { isEmbedded?
                   {/* Chart Options */}
                   <div className="flex items-center justify-between">
                     <div className="space-y-1">
-                      <Label htmlFor="includeCharts">Include Charts & Visualizations</Label>
+                      <Label htmlFor="includeCharts">
+                        Include Charts & Visualizations
+                      </Label>
                       <p className="text-sm text-gray-500">
                         Add visual charts and graphs to your report
                       </p>
@@ -372,7 +462,12 @@ export default function ReportingDashboard({ isEmbedded = false }: { isEmbedded?
                     <Switch
                       id="includeCharts"
                       checked={reportConfig.includeCharts}
-                      onCheckedChange={(checked) => setReportConfig({ ...reportConfig, includeCharts: checked })}
+                      onCheckedChange={(checked) =>
+                        setReportConfig({
+                          ...reportConfig,
+                          includeCharts: checked,
+                        })
+                      }
                     />
                   </div>
                 </CardContent>
@@ -392,7 +487,12 @@ export default function ReportingDashboard({ isEmbedded = false }: { isEmbedded?
                     <Label htmlFor="frequency">Frequency</Label>
                     <Select
                       value={scheduleConfig.frequency}
-                      onValueChange={(value: any) => setScheduleConfig({ ...scheduleConfig, frequency: value })}
+                      onValueChange={(value: any) =>
+                        setScheduleConfig({
+                          ...scheduleConfig,
+                          frequency: value,
+                        })
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -412,7 +512,12 @@ export default function ReportingDashboard({ isEmbedded = false }: { isEmbedded?
                       id="time"
                       type="time"
                       value={scheduleConfig.time}
-                      onChange={(e) => setScheduleConfig({ ...scheduleConfig, time: e.target.value })}
+                      onChange={(e) =>
+                        setScheduleConfig({
+                          ...scheduleConfig,
+                          time: e.target.value,
+                        })
+                      }
                     />
                   </div>
 
@@ -420,7 +525,11 @@ export default function ReportingDashboard({ isEmbedded = false }: { isEmbedded?
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <Label>Email Recipients</Label>
-                      <Button variant="outline" size="sm" onClick={addRecipient}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={addRecipient}
+                      >
                         Add Recipient
                       </Button>
                     </div>
@@ -431,7 +540,9 @@ export default function ReportingDashboard({ isEmbedded = false }: { isEmbedded?
                             type="email"
                             placeholder="email@example.com"
                             value={recipient}
-                            onChange={(e) => updateRecipient(index, e.target.value)}
+                            onChange={(e) =>
+                              updateRecipient(index, e.target.value)
+                            }
                           />
                           {scheduleConfig.recipients.length > 1 && (
                             <Button
@@ -464,50 +575,67 @@ export default function ReportingDashboard({ isEmbedded = false }: { isEmbedded?
                     <div className="flex justify-between">
                       <span className="text-sm font-medium">Type:</span>
                       <Badge variant="secondary">
-                        {reportConfig.type === 'collections' && 'Collection Analysis'}
-                        {reportConfig.type === 'hosts' && 'Host Performance'}
-                        {reportConfig.type === 'impact' && 'Impact Assessment'}
-                        {reportConfig.type === 'comprehensive' && 'Comprehensive'}
+                        {reportConfig.type === "collections" &&
+                          "Collection Analysis"}
+                        {reportConfig.type === "hosts" && "Host Performance"}
+                        {reportConfig.type === "impact" && "Impact Assessment"}
+                        {reportConfig.type === "comprehensive" &&
+                          "Comprehensive"}
                       </Badge>
                     </div>
-                    
+
                     <div className="flex justify-between">
                       <span className="text-sm font-medium">Period:</span>
                       <span className="text-sm text-gray-600">
                         {(() => {
                           try {
-                            if (!reportConfig.dateRange.start || !reportConfig.dateRange.end) {
-                              return 'Invalid date range';
+                            if (
+                              !reportConfig.dateRange.start ||
+                              !reportConfig.dateRange.end
+                            ) {
+                              return "Invalid date range";
                             }
-                            const startDate = new Date(reportConfig.dateRange.start);
-                            const endDate = new Date(reportConfig.dateRange.end);
-                            if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-                              return 'Invalid date range';
+                            const startDate = new Date(
+                              reportConfig.dateRange.start
+                            );
+                            const endDate = new Date(
+                              reportConfig.dateRange.end
+                            );
+                            if (
+                              isNaN(startDate.getTime()) ||
+                              isNaN(endDate.getTime())
+                            ) {
+                              return "Invalid date range";
                             }
-                            return `${format(startDate, 'MMM dd')} - ${format(endDate, 'MMM dd, yyyy')}`;
+                            return `${format(startDate, "MMM dd")} - ${format(
+                              endDate,
+                              "MMM dd, yyyy"
+                            )}`;
                           } catch (error) {
-                            console.error('Date formatting error:', error);
-                            return 'Invalid date range';
+                            console.error("Date formatting error:", error);
+                            return "Invalid date range";
                           }
                         })()}
                       </span>
                     </div>
-                    
+
                     <div className="flex justify-between">
                       <span className="text-sm font-medium">Format:</span>
                       <span className="text-sm text-gray-600 uppercase">
                         {reportConfig.format}
                       </span>
                     </div>
-                    
+
                     <div className="flex justify-between">
                       <span className="text-sm font-medium">Charts:</span>
                       <span className="text-sm text-gray-600">
-                        {reportConfig.includeCharts ? 'Included' : 'Not included'}
+                        {reportConfig.includeCharts
+                          ? "Included"
+                          : "Not included"}
                       </span>
                     </div>
                   </div>
-                  
+
                   {reportConfig.includeCharts && (
                     <div className="pt-4 border-t">
                       <p className="text-sm font-medium mb-2">Chart Types:</p>
@@ -538,24 +666,32 @@ export default function ReportingDashboard({ isEmbedded = false }: { isEmbedded?
                   disabled={generateReport.isPending}
                 >
                   <Download className="w-4 h-4 mr-2" />
-                  {generateReport.isPending ? 'Generating...' : 'Generate Report'}
+                  {generateReport.isPending
+                    ? "Generating..."
+                    : "Generate Report"}
                 </Button>
-                
+
                 <Button
                   variant="outline"
                   className="w-full"
                   onClick={() => scheduleReport.mutate()}
-                  disabled={scheduleReport.isPending || scheduleConfig.recipients.some(r => !r.trim())}
+                  disabled={
+                    scheduleReport.isPending ||
+                    scheduleConfig.recipients.some((r) => !r.trim())
+                  }
                 >
                   <Calendar className="w-4 h-4 mr-2" />
-                  {scheduleReport.isPending ? 'Scheduling...' : 'Schedule Report'}
+                  {scheduleReport.isPending
+                    ? "Scheduling..."
+                    : "Schedule Report"}
                 </Button>
               </div>
 
-              {scheduleConfig.recipients.some(r => !r.trim()) && (
+              {scheduleConfig.recipients.some((r) => !r.trim()) && (
                 <Alert>
                   <AlertDescription>
-                    Please add at least one valid email recipient to schedule the report.
+                    Please add at least one valid email recipient to schedule
+                    the report.
                   </AlertDescription>
                 </Alert>
               )}
@@ -583,7 +719,8 @@ export default function ReportingDashboard({ isEmbedded = false }: { isEmbedded?
                     No Scheduled Reports
                   </h3>
                   <p className="text-gray-500">
-                    You haven't set up any automated reports yet. Create one from the Generate tab.
+                    You haven't set up any automated reports yet. Create one
+                    from the Generate tab.
                   </p>
                 </div>
               ) : (
@@ -593,19 +730,34 @@ export default function ReportingDashboard({ isEmbedded = false }: { isEmbedded?
                       <div className="flex items-center justify-between">
                         <div>
                           <h4 className="font-medium">
-                            {report.config.type === 'collections' && 'Collection Analysis'}
-                            {report.config.type === 'hosts' && 'Host Performance'}
-                            {report.config.type === 'impact' && 'Impact Assessment'}
-                            {report.config.type === 'comprehensive' && 'Comprehensive Report'}
+                            {report.config.type === "collections" &&
+                              "Collection Analysis"}
+                            {report.config.type === "hosts" &&
+                              "Host Performance"}
+                            {report.config.type === "impact" &&
+                              "Impact Assessment"}
+                            {report.config.type === "comprehensive" &&
+                              "Comprehensive Report"}
                           </h4>
                           <p className="text-sm text-gray-500">
-                            {report.schedule.frequency} at {report.schedule.time} • Next: {format(new Date(report.nextRun), 'MMM dd, yyyy HH:mm')}
+                            {report.schedule.frequency} at{" "}
+                            {report.schedule.time} • Next:{" "}
+                            {format(
+                              new Date(report.nextRun),
+                              "MMM dd, yyyy HH:mm"
+                            )}
                           </p>
                           <div className="flex items-center gap-4 mt-2">
                             <span className="text-xs text-gray-500">
                               {report.schedule.recipients.length} recipient(s)
                             </span>
-                            <Badge variant={report.status === 'active' ? 'default' : 'secondary'}>
+                            <Badge
+                              variant={
+                                report.status === "active"
+                                  ? "default"
+                                  : "secondary"
+                              }
+                            >
                               {report.status}
                             </Badge>
                           </div>
@@ -615,7 +767,7 @@ export default function ReportingDashboard({ isEmbedded = false }: { isEmbedded?
                             Edit
                           </Button>
                           <Button variant="outline" size="sm">
-                            {report.status === 'active' ? 'Pause' : 'Resume'}
+                            {report.status === "active" ? "Pause" : "Resume"}
                           </Button>
                         </div>
                       </div>
@@ -643,7 +795,8 @@ export default function ReportingDashboard({ isEmbedded = false }: { isEmbedded?
                     No Report History
                   </h3>
                   <p className="text-gray-500">
-                    Generated reports will appear here for easy access and download.
+                    Generated reports will appear here for easy access and
+                    download.
                   </p>
                 </div>
               ) : (
@@ -654,15 +807,17 @@ export default function ReportingDashboard({ isEmbedded = false }: { isEmbedded?
                         <div>
                           <h4 className="font-medium">{report.title}</h4>
                           <p className="text-sm text-gray-500">
-                            Generated {(() => {
+                            Generated{" "}
+                            {(() => {
                               try {
-                                if (!report.generatedAt) return 'Unknown date';
+                                if (!report.generatedAt) return "Unknown date";
                                 const date = new Date(report.generatedAt);
-                                if (isNaN(date.getTime())) return 'Invalid date';
-                                return format(date, 'MMM dd, yyyy HH:mm');
+                                if (isNaN(date.getTime()))
+                                  return "Invalid date";
+                                return format(date, "MMM dd, yyyy HH:mm");
                               } catch (error) {
-                                console.error('Date formatting error:', error);
-                                return 'Unknown date';
+                                console.error("Date formatting error:", error);
+                                return "Unknown date";
                               }
                             })()}
                           </p>
@@ -670,9 +825,7 @@ export default function ReportingDashboard({ isEmbedded = false }: { isEmbedded?
                             <span className="text-xs text-gray-500">
                               {report.format.toUpperCase()} • {report.size}
                             </span>
-                            <Badge variant="outline">
-                              {report.dateRange}
-                            </Badge>
+                            <Badge variant="outline">{report.dateRange}</Badge>
                           </div>
                         </div>
                         <div className="flex gap-2">
@@ -710,7 +863,9 @@ export default function ReportingDashboard({ isEmbedded = false }: { isEmbedded?
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <img src="/api/placeholder/32/32" alt="Logo" className="w-8 h-8" />
-            <span className="text-xl font-semibold text-slate-900">The Sandwich Project</span>
+            <span className="text-xl font-semibold text-slate-900">
+              The Sandwich Project
+            </span>
           </div>
           <Button variant="ghost" size="sm">
             <LogOut className="w-4 h-4 mr-2" />
@@ -726,9 +881,7 @@ export default function ReportingDashboard({ isEmbedded = false }: { isEmbedded?
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 p-6">
-          {renderReportingContent()}
-        </div>
+        <div className="flex-1 p-6">{renderReportingContent()}</div>
       </div>
     </div>
   );

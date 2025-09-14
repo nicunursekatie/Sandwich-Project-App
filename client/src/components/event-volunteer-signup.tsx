@@ -3,32 +3,24 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
   DialogTrigger,
-  DialogFooter 
+  DialogFooter,
 } from "@/components/ui/dialog";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { 
-  Users, 
-  Plus, 
-  UserPlus, 
-  Car, 
-  Mic, 
-  Heart,
-  X
-} from "lucide-react";
+import { Users, Plus, UserPlus, Car, Mic, Heart, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
@@ -46,94 +38,121 @@ interface EventVolunteer {
   volunteerUserId?: string;
   volunteerName?: string;
   volunteerEmail?: string;
-  role: 'driver' | 'speaker';
-  status: 'pending' | 'confirmed' | 'cancelled';
+  role: "driver" | "speaker";
+  status: "pending" | "confirmed" | "cancelled";
   signedUpAt: Date;
 }
 
 const roleIcons = {
   driver: Car,
-  speaker: Mic
+  speaker: Mic,
 };
 
 const roleLabels = {
   driver: "Driver",
-  speaker: "Speaker"
+  speaker: "Speaker",
 };
 
-export default function EventVolunteerSignup({ 
-  eventId, 
-  eventTitle, 
-  driversNeeded, 
-  speakersNeeded 
+export default function EventVolunteerSignup({
+  eventId,
+  eventTitle,
+  driversNeeded,
+  speakersNeeded,
 }: EventVolunteerSignupProps) {
   const { toast } = useToast();
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [showSignupDialog, setShowSignupDialog] = useState(false);
   const [showAssignDialog, setShowAssignDialog] = useState(false);
-  const [signupRole, setSignupRole] = useState<'driver' | 'speaker'>('driver');
-  const [assignRole, setAssignRole] = useState<'driver' | 'speaker'>('driver');
+  const [signupRole, setSignupRole] = useState<"driver" | "speaker">("driver");
+  const [assignRole, setAssignRole] = useState<"driver" | "speaker">("driver");
   const [selectedDriverId, setSelectedDriverId] = useState<string>("");
-  const [volunteerName, setVolunteerName] = useState((user as any)?.firstName && (user as any)?.lastName ? `${(user as any).firstName} ${(user as any).lastName}` : "");
-  const [volunteerEmail, setVolunteerEmail] = useState((user as any)?.email || "");
+  const [volunteerName, setVolunteerName] = useState(
+    (user as any)?.firstName && (user as any)?.lastName
+      ? `${(user as any).firstName} ${(user as any).lastName}`
+      : ""
+  );
+  const [volunteerEmail, setVolunteerEmail] = useState(
+    (user as any)?.email || ""
+  );
 
   // Fetch existing volunteers for this event
   const { data: volunteers = [], isLoading } = useQuery({
-    queryKey: ['/api/event-requests/volunteers', eventId],
-    queryFn: () => apiRequest('GET', `/api/event-requests/volunteers/${eventId}`)
+    queryKey: ["/api/event-requests/volunteers", eventId],
+    queryFn: () =>
+      apiRequest("GET", `/api/event-requests/volunteers/${eventId}`),
   });
 
   // Fetch available drivers for manual assignment
   const { data: availableDrivers = [] } = useQuery({
-    queryKey: ['/api/event-requests/drivers/available'],
-    queryFn: () => apiRequest('GET', '/api/event-requests/drivers/available')
+    queryKey: ["/api/event-requests/drivers/available"],
+    queryFn: () => apiRequest("GET", "/api/event-requests/drivers/available"),
   });
 
   // Sign up mutation
   const signupMutation = useMutation({
-    mutationFn: (data: any) => apiRequest('POST', '/api/event-requests/volunteers', data),
+    mutationFn: (data: any) =>
+      apiRequest("POST", "/api/event-requests/volunteers", data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/event-requests/volunteers', eventId] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/event-requests/volunteers", eventId],
+      });
       setShowSignupDialog(false);
-      setVolunteerName((user as any)?.firstName && (user as any)?.lastName ? `${(user as any).firstName} ${(user as any).lastName}` : "");
+      setVolunteerName(
+        (user as any)?.firstName && (user as any)?.lastName
+          ? `${(user as any).firstName} ${(user as any).lastName}`
+          : ""
+      );
       setVolunteerEmail((user as any)?.email || "");
       toast({ title: "Successfully signed up as volunteer!" });
     },
     onError: (error: any) => {
-      toast({ 
-        title: "Error signing up", 
+      toast({
+        title: "Error signing up",
         description: error.message,
-        variant: "destructive" 
+        variant: "destructive",
       });
-    }
+    },
   });
 
   // Remove volunteer mutation
   const removeMutation = useMutation({
-    mutationFn: (volunteerId: number) => apiRequest('DELETE', `/api/event-requests/volunteers/${volunteerId}`),
+    mutationFn: (volunteerId: number) =>
+      apiRequest("DELETE", `/api/event-requests/volunteers/${volunteerId}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/event-requests/volunteers', eventId] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/event-requests/volunteers", eventId],
+      });
       toast({ title: "Volunteer removed successfully" });
     },
     onError: (error: any) => {
-      toast({ 
-        title: "Error removing volunteer", 
+      toast({
+        title: "Error removing volunteer",
         description: error.message,
-        variant: "destructive" 
+        variant: "destructive",
       });
-    }
+    },
   });
 
   if (isLoading) {
     return <div className="text-center py-4">Loading volunteers...</div>;
   }
 
-  const driverVolunteers = (volunteers || []).filter((v: EventVolunteer) => v.role === 'driver' && v.status !== 'cancelled');
-  const speakerVolunteers = (volunteers || []).filter((v: EventVolunteer) => v.role === 'speaker' && v.status !== 'cancelled');
+  const driverVolunteers = (volunteers || []).filter(
+    (v: EventVolunteer) => v.role === "driver" && v.status !== "cancelled"
+  );
+  const speakerVolunteers = (volunteers || []).filter(
+    (v: EventVolunteer) => v.role === "speaker" && v.status !== "cancelled"
+  );
 
-  const availableDriverSpots = Math.max(0, driversNeeded - driverVolunteers.length);
-  const availableSpeakerSpots = Math.max(0, speakersNeeded - speakerVolunteers.length);
+  const availableDriverSpots = Math.max(
+    0,
+    driversNeeded - driverVolunteers.length
+  );
+  const availableSpeakerSpots = Math.max(
+    0,
+    speakersNeeded - speakerVolunteers.length
+  );
 
   const handleSignup = () => {
     if (!volunteerName.trim()) {
@@ -147,7 +166,7 @@ export default function EventVolunteerSignup({
       volunteerUserId: (user as any)?.id || null,
       volunteerName: volunteerName.trim(),
       volunteerEmail: volunteerEmail.trim() || null,
-      status: 'confirmed'
+      status: "confirmed",
     };
 
     signupMutation.mutate(data);
@@ -159,7 +178,9 @@ export default function EventVolunteerSignup({
       return;
     }
 
-    const selectedDriver = availableDrivers.find((d: any) => d.id.toString() === selectedDriverId);
+    const selectedDriver = availableDrivers.find(
+      (d: any) => d.id.toString() === selectedDriverId
+    );
     if (!selectedDriver) {
       toast({ title: "Driver not found", variant: "destructive" });
       return;
@@ -171,7 +192,7 @@ export default function EventVolunteerSignup({
       volunteerUserId: null, // Manual assignment, not user signup
       volunteerName: selectedDriver.name,
       volunteerEmail: selectedDriver.email || null,
-      status: 'confirmed'
+      status: "confirmed",
     };
 
     signupMutation.mutate(data);
@@ -188,7 +209,6 @@ export default function EventVolunteerSignup({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        
         {/* Drivers Section */}
         {driversNeeded > 0 && (
           <div>
@@ -199,22 +219,28 @@ export default function EventVolunteerSignup({
               </h3>
               {availableDriverSpots > 0 && (
                 <Badge variant="outline" className="bg-orange-50">
-                  {availableDriverSpots} spot{availableDriverSpots !== 1 ? 's' : ''} available
+                  {availableDriverSpots} spot
+                  {availableDriverSpots !== 1 ? "s" : ""} available
                 </Badge>
               )}
             </div>
-            
+
             <div className="space-y-2">
               {driverVolunteers.map((volunteer: EventVolunteer) => (
-                <div key={volunteer.id} className="flex items-center justify-between p-2 bg-gray-50 rounded border">
+                <div
+                  key={volunteer.id}
+                  className="flex items-center justify-between p-2 bg-gray-50 rounded border"
+                >
                   <span className="font-medium">{volunteer.volunteerName}</span>
                   <div className="flex items-center gap-2">
                     <Badge variant="outline" className="bg-orange-100">
                       {volunteer.status}
                     </Badge>
-                    {((user as any)?.id === volunteer.volunteerUserId || (user as any)?.permissions && (user as any).permissions > 0) && (
+                    {((user as any)?.id === volunteer.volunteerUserId ||
+                      ((user as any)?.permissions &&
+                        (user as any).permissions > 0)) && (
                       <Button
-                        size="sm" 
+                        size="sm"
                         variant="ghost"
                         onClick={() => removeMutation.mutate(volunteer.id)}
                         disabled={removeMutation.isPending}
@@ -225,17 +251,20 @@ export default function EventVolunteerSignup({
                   </div>
                 </div>
               ))}
-              
+
               {availableDriverSpots > 0 && (
                 <div className="grid grid-cols-2 gap-2">
-                  <Dialog open={showSignupDialog && signupRole === 'driver'} onOpenChange={(open) => {
-                    if (open) {
-                      setSignupRole('driver');
-                      setShowSignupDialog(true);
-                    } else {
-                      setShowSignupDialog(false);
-                    }
-                  }}>
+                  <Dialog
+                    open={showSignupDialog && signupRole === "driver"}
+                    onOpenChange={(open) => {
+                      if (open) {
+                        setSignupRole("driver");
+                        setShowSignupDialog(true);
+                      } else {
+                        setShowSignupDialog(false);
+                      }
+                    }}
+                  >
                     <DialogTrigger asChild>
                       <Button variant="outline">
                         <Plus className="h-4 w-4 mr-2" />
@@ -257,7 +286,9 @@ export default function EventVolunteerSignup({
                           />
                         </div>
                         <div>
-                          <Label htmlFor="volunteerEmail">Email (optional)</Label>
+                          <Label htmlFor="volunteerEmail">
+                            Email (optional)
+                          </Label>
                           <Input
                             id="volunteerEmail"
                             type="email"
@@ -268,27 +299,35 @@ export default function EventVolunteerSignup({
                         </div>
                       </div>
                       <DialogFooter>
-                        <Button variant="outline" onClick={() => setShowSignupDialog(false)}>
+                        <Button
+                          variant="outline"
+                          onClick={() => setShowSignupDialog(false)}
+                        >
                           Cancel
                         </Button>
-                        <Button 
+                        <Button
                           onClick={handleSignup}
                           disabled={signupMutation.isPending}
                         >
-                          {signupMutation.isPending ? "Signing up..." : "Sign Up"}
+                          {signupMutation.isPending
+                            ? "Signing up..."
+                            : "Sign Up"}
                         </Button>
                       </DialogFooter>
                     </DialogContent>
                   </Dialog>
 
-                  <Dialog open={showAssignDialog && assignRole === 'driver'} onOpenChange={(open) => {
-                    if (open) {
-                      setAssignRole('driver');
-                      setShowAssignDialog(true);
-                    } else {
-                      setShowAssignDialog(false);
-                    }
-                  }}>
+                  <Dialog
+                    open={showAssignDialog && assignRole === "driver"}
+                    onOpenChange={(open) => {
+                      if (open) {
+                        setAssignRole("driver");
+                        setShowAssignDialog(true);
+                      } else {
+                        setShowAssignDialog(false);
+                      }
+                    }}
+                  >
                     <DialogTrigger asChild>
                       <Button variant="outline">
                         <UserPlus className="h-4 w-4 mr-2" />
@@ -302,29 +341,45 @@ export default function EventVolunteerSignup({
                       <div className="space-y-4">
                         <div>
                           <Label htmlFor="driverSelect">Select Driver</Label>
-                          <Select value={selectedDriverId || ""} onValueChange={setSelectedDriverId}>
+                          <Select
+                            value={selectedDriverId || ""}
+                            onValueChange={setSelectedDriverId}
+                          >
                             <SelectTrigger>
                               <SelectValue placeholder="Choose a driver..." />
                             </SelectTrigger>
                             <SelectContent>
-                              {availableDrivers.filter((driver: any) => driver.id && driver.name).map((driver: any) => (
-                                <SelectItem key={driver.id} value={driver.id.toString()}>
-                                  {driver.name} {driver.email && `(${driver.email})`}
-                                </SelectItem>
-                              ))}
+                              {availableDrivers
+                                .filter(
+                                  (driver: any) => driver.id && driver.name
+                                )
+                                .map((driver: any) => (
+                                  <SelectItem
+                                    key={driver.id}
+                                    value={driver.id.toString()}
+                                  >
+                                    {driver.name}{" "}
+                                    {driver.email && `(${driver.email})`}
+                                  </SelectItem>
+                                ))}
                             </SelectContent>
                           </Select>
                         </div>
                       </div>
                       <DialogFooter>
-                        <Button variant="outline" onClick={() => setShowAssignDialog(false)}>
+                        <Button
+                          variant="outline"
+                          onClick={() => setShowAssignDialog(false)}
+                        >
                           Cancel
                         </Button>
-                        <Button 
+                        <Button
                           onClick={handleAssign}
                           disabled={signupMutation.isPending}
                         >
-                          {signupMutation.isPending ? "Assigning..." : "Assign Driver"}
+                          {signupMutation.isPending
+                            ? "Assigning..."
+                            : "Assign Driver"}
                         </Button>
                       </DialogFooter>
                     </DialogContent>
@@ -345,22 +400,28 @@ export default function EventVolunteerSignup({
               </h3>
               {availableSpeakerSpots > 0 && (
                 <Badge variant="outline" className="bg-teal-50">
-                  {availableSpeakerSpots} spot{availableSpeakerSpots !== 1 ? 's' : ''} available
+                  {availableSpeakerSpots} spot
+                  {availableSpeakerSpots !== 1 ? "s" : ""} available
                 </Badge>
               )}
             </div>
-            
+
             <div className="space-y-2">
               {speakerVolunteers.map((volunteer: EventVolunteer) => (
-                <div key={volunteer.id} className="flex items-center justify-between p-2 bg-gray-50 rounded border">
+                <div
+                  key={volunteer.id}
+                  className="flex items-center justify-between p-2 bg-gray-50 rounded border"
+                >
                   <span className="font-medium">{volunteer.volunteerName}</span>
                   <div className="flex items-center gap-2">
                     <Badge variant="outline" className="bg-teal-100">
                       {volunteer.status}
                     </Badge>
-                    {((user as any)?.id === volunteer.volunteerUserId || (user as any)?.permissions && (user as any).permissions > 0) && (
+                    {((user as any)?.id === volunteer.volunteerUserId ||
+                      ((user as any)?.permissions &&
+                        (user as any).permissions > 0)) && (
                       <Button
-                        size="sm" 
+                        size="sm"
                         variant="ghost"
                         onClick={() => removeMutation.mutate(volunteer.id)}
                         disabled={removeMutation.isPending}
@@ -371,70 +432,83 @@ export default function EventVolunteerSignup({
                   </div>
                 </div>
               ))}
-              
+
               {availableSpeakerSpots > 0 && (
                 <div className="grid grid-cols-2 gap-2">
-                  <Dialog open={showSignupDialog && signupRole === 'speaker'} onOpenChange={(open) => {
-                    if (open) {
-                      setSignupRole('speaker');
-                      setShowSignupDialog(true);
-                    } else {
-                      setShowSignupDialog(false);
-                    }
-                  }}>
+                  <Dialog
+                    open={showSignupDialog && signupRole === "speaker"}
+                    onOpenChange={(open) => {
+                      if (open) {
+                        setSignupRole("speaker");
+                        setShowSignupDialog(true);
+                      } else {
+                        setShowSignupDialog(false);
+                      }
+                    }}
+                  >
                     <DialogTrigger asChild>
                       <Button variant="outline">
                         <Plus className="h-4 w-4 mr-2" />
                         Sign Up as Speaker
                       </Button>
                     </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Sign Up as Speaker</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <div>
-                        <Label htmlFor="volunteerName">Your Name</Label>
-                        <Input
-                          id="volunteerName"
-                          value={volunteerName}
-                          onChange={(e) => setVolunteerName(e.target.value)}
-                          placeholder="Enter your name"
-                        />
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Sign Up as Speaker</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="volunteerName">Your Name</Label>
+                          <Input
+                            id="volunteerName"
+                            value={volunteerName}
+                            onChange={(e) => setVolunteerName(e.target.value)}
+                            placeholder="Enter your name"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="volunteerEmail">
+                            Email (optional)
+                          </Label>
+                          <Input
+                            id="volunteerEmail"
+                            type="email"
+                            value={volunteerEmail}
+                            onChange={(e) => setVolunteerEmail(e.target.value)}
+                            placeholder="Enter your email"
+                          />
+                        </div>
                       </div>
-                      <div>
-                        <Label htmlFor="volunteerEmail">Email (optional)</Label>
-                        <Input
-                          id="volunteerEmail"
-                          type="email"
-                          value={volunteerEmail}
-                          onChange={(e) => setVolunteerEmail(e.target.value)}
-                          placeholder="Enter your email"
-                        />
-                      </div>
-                    </div>
-                    <DialogFooter>
-                      <Button variant="outline" onClick={() => setShowSignupDialog(false)}>
-                        Cancel
-                      </Button>
-                      <Button 
-                        onClick={handleSignup}
-                        disabled={signupMutation.isPending}
-                      >
-                        {signupMutation.isPending ? "Signing up..." : "Sign Up"}
-                      </Button>
-                    </DialogFooter>
+                      <DialogFooter>
+                        <Button
+                          variant="outline"
+                          onClick={() => setShowSignupDialog(false)}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          onClick={handleSignup}
+                          disabled={signupMutation.isPending}
+                        >
+                          {signupMutation.isPending
+                            ? "Signing up..."
+                            : "Sign Up"}
+                        </Button>
+                      </DialogFooter>
                     </DialogContent>
                   </Dialog>
 
-                  <Dialog open={showAssignDialog && assignRole === 'speaker'} onOpenChange={(open) => {
-                    if (open) {
-                      setAssignRole('speaker');
-                      setShowAssignDialog(true);
-                    } else {
-                      setShowAssignDialog(false);
-                    }
-                  }}>
+                  <Dialog
+                    open={showAssignDialog && assignRole === "speaker"}
+                    onOpenChange={(open) => {
+                      if (open) {
+                        setAssignRole("speaker");
+                        setShowAssignDialog(true);
+                      } else {
+                        setShowAssignDialog(false);
+                      }
+                    }}
+                  >
                     <DialogTrigger asChild>
                       <Button variant="outline">
                         <UserPlus className="h-4 w-4 mr-2" />
@@ -448,29 +522,45 @@ export default function EventVolunteerSignup({
                       <div className="space-y-4">
                         <div>
                           <Label htmlFor="speakerSelect">Select Person</Label>
-                          <Select value={selectedDriverId || ""} onValueChange={setSelectedDriverId}>
+                          <Select
+                            value={selectedDriverId || ""}
+                            onValueChange={setSelectedDriverId}
+                          >
                             <SelectTrigger>
                               <SelectValue placeholder="Choose a person..." />
                             </SelectTrigger>
                             <SelectContent>
-                              {availableDrivers.filter((driver: any) => driver.id && driver.name).map((driver: any) => (
-                                <SelectItem key={driver.id} value={driver.id.toString()}>
-                                  {driver.name} {driver.email && `(${driver.email})`}
-                                </SelectItem>
-                              ))}
+                              {availableDrivers
+                                .filter(
+                                  (driver: any) => driver.id && driver.name
+                                )
+                                .map((driver: any) => (
+                                  <SelectItem
+                                    key={driver.id}
+                                    value={driver.id.toString()}
+                                  >
+                                    {driver.name}{" "}
+                                    {driver.email && `(${driver.email})`}
+                                  </SelectItem>
+                                ))}
                             </SelectContent>
                           </Select>
                         </div>
                       </div>
                       <DialogFooter>
-                        <Button variant="outline" onClick={() => setShowAssignDialog(false)}>
+                        <Button
+                          variant="outline"
+                          onClick={() => setShowAssignDialog(false)}
+                        >
                           Cancel
                         </Button>
-                        <Button 
+                        <Button
                           onClick={handleAssign}
                           disabled={signupMutation.isPending}
                         >
-                          {signupMutation.isPending ? "Assigning..." : "Assign Speaker"}
+                          {signupMutation.isPending
+                            ? "Assigning..."
+                            : "Assign Speaker"}
                         </Button>
                       </DialogFooter>
                     </DialogContent>

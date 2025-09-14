@@ -16,8 +16,8 @@ export class CoreService {
       environment: process.env.NODE_ENV || "development",
       dependencies: {
         googleCloudStorage: "@google-cloud/storage",
-        database: process.env.DATABASE_URL ? "connected" : "not configured"
-      }
+        database: process.env.DATABASE_URL ? "connected" : "not configured",
+      },
     };
   }
 
@@ -58,7 +58,7 @@ export class CoreService {
     const submissionStatus = await checkWeeklySubmissions();
     const now = new Date();
     const dayOfWeek = now.getDay();
-    
+
     // Calculate next scheduled check
     let nextCheck = "Thursday 7:00 PM";
     if (dayOfWeek === 4 && now.getHours() >= 19) {
@@ -68,28 +68,30 @@ export class CoreService {
     }
 
     // Get current week range (Wednesday to Tuesday) to display proper week period
-    const { getCurrentWeekRange } = await import('../../weekly-monitoring');
+    const { getCurrentWeekRange } = await import("../../weekly-monitoring");
     const { startDate, endDate } = getCurrentWeekRange();
-    
+
     // Format week display as "Wed Aug 14 - Tue Aug 20, 2025"
-    const weekDisplay = `${startDate.toLocaleDateString('en-US', { 
-      weekday: 'short', 
-      month: 'short', 
-      day: 'numeric' 
-    })} - ${endDate.toLocaleDateString('en-US', { 
-      weekday: 'short', 
-      month: 'short', 
-      day: 'numeric',
-      year: 'numeric' 
+    const weekDisplay = `${startDate.toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+    })} - ${endDate.toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      year: "numeric",
     })}`;
 
     return {
       currentWeek: weekDisplay,
       totalExpectedLocations: submissionStatus.length,
-      submittedLocations: submissionStatus.filter((s: any) => s.hasSubmitted).length,
-      missingLocations: submissionStatus.filter((s: any) => !s.hasSubmitted).length,
+      submittedLocations: submissionStatus.filter((s: any) => s.hasSubmitted)
+        .length,
+      missingLocations: submissionStatus.filter((s: any) => !s.hasSubmitted)
+        .length,
       lastCheckTime: now.toLocaleString(),
-      nextScheduledCheck: nextCheck
+      nextScheduledCheck: nextCheck,
     };
   }
 
@@ -97,15 +99,15 @@ export class CoreService {
    * Get project data status
    */
   static async getProjectDataStatus() {
-    const fs = await import('fs/promises');
-    const path = await import('path');
-    
-    const projectDataDir = path.join(process.cwd(), 'uploads', 'project-data');
-    
+    const fs = await import("fs/promises");
+    const path = await import("path");
+
+    const projectDataDir = path.join(process.cwd(), "uploads", "project-data");
+
     try {
       await fs.access(projectDataDir);
       const files = await fs.readdir(projectDataDir);
-      
+
       if (files.length > 0) {
         // Get info about the newest file
         const filesWithStats = await Promise.all(
@@ -116,43 +118,43 @@ export class CoreService {
               name: file,
               path: filePath,
               modified: stats.mtime,
-              size: stats.size
+              size: stats.size,
             };
           })
         );
-        
+
         // Sort by modification time, newest first
-        const sortedFiles = filesWithStats.sort((a, b) => 
-          b.modified.getTime() - a.modified.getTime()
+        const sortedFiles = filesWithStats.sort(
+          (a, b) => b.modified.getTime() - a.modified.getTime()
         );
-        
+
         const newestFile = sortedFiles[0];
-        
+
         return {
-          status: 'available',
+          status: "available",
           totalFiles: files.length,
           newestFile: {
             name: newestFile.name,
             modified: newestFile.modified.toISOString(),
-            size: newestFile.size
+            size: newestFile.size,
           },
-          allFiles: sortedFiles.map(f => ({
+          allFiles: sortedFiles.map((f) => ({
             name: f.name,
             modified: f.modified.toISOString(),
-            size: f.size
-          }))
+            size: f.size,
+          })),
         };
       } else {
         return {
-          status: 'empty',
-          message: 'Project data directory exists but contains no files'
+          status: "empty",
+          message: "Project data directory exists but contains no files",
         };
       }
     } catch (error) {
       return {
-        status: 'not_found',
-        message: 'Project data directory does not exist',
-        error: (error as Error).message
+        status: "not_found",
+        message: "Project data directory does not exist",
+        error: (error as Error).message,
       };
     }
   }

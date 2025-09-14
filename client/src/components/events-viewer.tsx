@@ -2,19 +2,27 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { ExternalLink, RefreshCw, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
+import {
+  ExternalLink,
+  RefreshCw,
+  ZoomIn,
+  ZoomOut,
+  RotateCcw,
+} from "lucide-react";
 
 export default function EventsViewer() {
   const [isLoading, setIsLoading] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(85); // Default zoom level (85%)
-  
+
   // Use published Google Sheets URL (no authentication required)
-  const embedUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT2r5KMRKuKSrqn1yQxtw8T0e5Ooi_iBfd0HlgGVcIHtFat3o54FrqyTLB_uq-RxojjSFg1GTvpIZLZ/pubhtml?widget=true&headers=false";
-  const fullViewUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT2r5KMRKuKSrqn1yQxtw8T0e5Ooi_iBfd0HlgGVcIHtFat3o54FrqyTLB_uq-RxojjSFg1GTvpIZLZ/pubhtml";
+  const embedUrl =
+    "https://docs.google.com/spreadsheets/d/e/2PACX-1vT2r5KMRKuKSrqn1yQxtw8T0e5Ooi_iBfd0HlgGVcIHtFat3o54FrqyTLB_uq-RxojjSFg1GTvpIZLZ/pubhtml?widget=true&headers=false";
+  const fullViewUrl =
+    "https://docs.google.com/spreadsheets/d/e/2PACX-1vT2r5KMRKuKSrqn1yQxtw8T0e5Ooi_iBfd0HlgGVcIHtFat3o54FrqyTLB_uq-RxojjSFg1GTvpIZLZ/pubhtml";
 
   // Load user's saved zoom preference
   useEffect(() => {
-    const savedZoom = localStorage.getItem('events-spreadsheet-zoom');
+    const savedZoom = localStorage.getItem("events-spreadsheet-zoom");
     if (savedZoom) {
       setZoomLevel(parseInt(savedZoom));
     }
@@ -24,13 +32,15 @@ export default function EventsViewer() {
   const handleZoomChange = (newZoom: number[]) => {
     const zoom = newZoom[0];
     setZoomLevel(zoom);
-    localStorage.setItem('events-spreadsheet-zoom', zoom.toString());
+    localStorage.setItem("events-spreadsheet-zoom", zoom.toString());
   };
 
   const handleRefresh = () => {
     setIsLoading(true);
     // Reload the iframe by changing its key
-    const iframe = document.getElementById('events-spreadsheet') as HTMLIFrameElement;
+    const iframe = document.getElementById(
+      "events-spreadsheet"
+    ) as HTMLIFrameElement;
     if (iframe) {
       iframe.src = iframe.src;
     }
@@ -38,7 +48,7 @@ export default function EventsViewer() {
   };
 
   const handleOpenInNewTab = () => {
-    window.open(fullViewUrl, '_blank');
+    window.open(fullViewUrl, "_blank");
   };
 
   const handleZoomIn = () => {
@@ -64,19 +74,21 @@ export default function EventsViewer() {
               🗓️ Events Calendar
             </CardTitle>
             <div className="flex items-center gap-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={handleRefresh}
                 disabled={isLoading}
                 className="flex items-center gap-2"
               >
-                <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+                <RefreshCw
+                  className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
+                />
                 Refresh
               </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={handleOpenInNewTab}
                 className="flex items-center gap-2"
               >
@@ -119,9 +131,11 @@ export default function EventsViewer() {
                 <RotateCcw className="h-3 w-3" />
               </Button>
             </div>
-            
+
             <div className="flex items-center gap-3 flex-1">
-              <span className="text-sm font-medium text-gray-700 whitespace-nowrap">Zoom:</span>
+              <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                Zoom:
+              </span>
               <Slider
                 value={[zoomLevel]}
                 onValueChange={handleZoomChange}
@@ -130,11 +144,13 @@ export default function EventsViewer() {
                 step={5}
                 className="flex-1 max-w-32"
               />
-              <span className="text-sm font-medium text-gray-900 min-w-[3rem]">{zoomLevel}%</span>
+              <span className="text-sm font-medium text-gray-900 min-w-[3rem]">
+                {zoomLevel}%
+              </span>
             </div>
           </div>
         </CardHeader>
-        
+
         <CardContent className="flex-1 p-0 h-full">
           <div className="w-full h-full relative overflow-hidden">
             {isLoading && (
@@ -145,17 +161,17 @@ export default function EventsViewer() {
                 </div>
               </div>
             )}
-            
+
             <iframe
               id="events-spreadsheet"
               src={embedUrl}
               className="border-0 rounded-b-lg"
-              style={{ 
-                height: 'calc(100vh - 180px)',
-                minHeight: '800px',
+              style={{
+                height: "calc(100vh - 180px)",
+                minHeight: "800px",
                 width: `${100 / (zoomLevel / 100)}%`,
                 transform: `scale(${zoomLevel / 100})`,
-                transformOrigin: 'top left'
+                transformOrigin: "top left",
               }}
               title="Events Calendar"
               loading="lazy"

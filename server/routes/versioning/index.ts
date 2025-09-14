@@ -4,9 +4,9 @@ import { createStandardMiddleware, createErrorHandler } from "../../middleware";
 
 const router = Router();
 
-// Apply standard middleware and error handling for this module  
+// Apply standard middleware and error handling for this module
 const standardMiddleware = createStandardMiddleware();
-const errorHandler = createErrorHandler('versioning');
+const errorHandler = createErrorHandler("versioning");
 
 /**
  * Version Control Routes - Entity versioning and change management
@@ -14,75 +14,91 @@ const errorHandler = createErrorHandler('versioning');
  */
 
 // Get version history for an entity
-router.get("/:entityType/:entityId/history", ...standardMiddleware, async (req, res) => {
-  try {
-    const { entityType, entityId } = req.params;
-    const history = await VersioningService.getVersionHistory(
-      entityType,
-      parseInt(entityId)
-    );
-    res.json(history);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+router.get(
+  "/:entityType/:entityId/history",
+  ...standardMiddleware,
+  async (req, res) => {
+    try {
+      const { entityType, entityId } = req.params;
+      const history = await VersioningService.getVersionHistory(
+        entityType,
+        parseInt(entityId)
+      );
+      res.json(history);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
   }
-});
+);
 
 // Get specific version of an entity
-router.get("/:entityType/:entityId/version/:version", ...standardMiddleware, async (req, res) => {
-  try {
-    const { entityType, entityId, version } = req.params;
-    const versionData = await VersioningService.getVersion(
-      entityType,
-      parseInt(entityId),
-      parseInt(version)
-    );
-    if (!versionData) {
-      return res.status(404).json({ error: "Version not found" });
+router.get(
+  "/:entityType/:entityId/version/:version",
+  ...standardMiddleware,
+  async (req, res) => {
+    try {
+      const { entityType, entityId, version } = req.params;
+      const versionData = await VersioningService.getVersion(
+        entityType,
+        parseInt(entityId),
+        parseInt(version)
+      );
+      if (!versionData) {
+        return res.status(404).json({ error: "Version not found" });
+      }
+      res.json(versionData);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
     }
-    res.json(versionData);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
   }
-});
+);
 
 // Restore a specific version of an entity
-router.post("/:entityType/:entityId/restore/:version", ...standardMiddleware, async (req, res) => {
-  try {
-    const { entityType, entityId, version } = req.params;
-    const userId = req.user?.claims?.sub;
+router.post(
+  "/:entityType/:entityId/restore/:version",
+  ...standardMiddleware,
+  async (req, res) => {
+    try {
+      const { entityType, entityId, version } = req.params;
+      const userId = req.user?.claims?.sub;
 
-    const success = await VersioningService.restoreVersion(
-      entityType,
-      parseInt(entityId),
-      parseInt(version),
-      userId
-    );
+      const success = await VersioningService.restoreVersion(
+        entityType,
+        parseInt(entityId),
+        parseInt(version),
+        userId
+      );
 
-    if (success) {
-      res.json({ success: true, message: "Version restored successfully" });
-    } else {
-      res.status(400).json({ error: "Failed to restore version" });
+      if (success) {
+        res.json({ success: true, message: "Version restored successfully" });
+      } else {
+        res.status(400).json({ error: "Failed to restore version" });
+      }
+    } catch (error) {
+      res.status(500).json({ error: error.message });
     }
-  } catch (error) {
-    res.status(500).json({ error: error.message });
   }
-});
+);
 
 // Compare two versions of an entity
-router.get("/:entityType/:entityId/compare/:version1/:version2", ...standardMiddleware, async (req, res) => {
-  try {
-    const { entityType, entityId, version1, version2 } = req.params;
-    const comparison = await VersioningService.compareVersions(
-      entityType,
-      parseInt(entityId),
-      parseInt(version1),
-      parseInt(version2)
-    );
-    res.json(comparison);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+router.get(
+  "/:entityType/:entityId/compare/:version1/:version2",
+  ...standardMiddleware,
+  async (req, res) => {
+    try {
+      const { entityType, entityId, version1, version2 } = req.params;
+      const comparison = await VersioningService.compareVersions(
+        entityType,
+        parseInt(entityId),
+        parseInt(version1),
+        parseInt(version2)
+      );
+      res.json(comparison);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
   }
-});
+);
 
 // Create a changeset
 router.post("/changeset", ...standardMiddleware, async (req, res) => {

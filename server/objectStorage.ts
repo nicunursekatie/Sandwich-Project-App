@@ -92,7 +92,7 @@ export class ObjectStorageService {
     try {
       // Get file metadata
       const [metadata] = await file.getMetadata();
-      
+
       // Set appropriate headers
       res.set({
         "Content-Type": metadata.contentType || "application/octet-stream",
@@ -144,7 +144,9 @@ export class ObjectStorageService {
   }
 }
 
-function parseObjectPath(path: string): {
+function parseObjectPath(
+  path: string
+): {
   bucketName: string;
   objectName: string;
 } {

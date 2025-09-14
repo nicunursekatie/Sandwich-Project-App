@@ -1,67 +1,76 @@
-import { Router } from 'express';
-import { isAuthenticated } from '../temp-auth';
-import { requirePermission } from '../middleware/auth';
-import { sendEmail } from '../sendgrid';
-import { storage } from '../storage';
-import { z } from 'zod';
+import { Router } from "express";
+import { isAuthenticated } from "../temp-auth";
+import { requirePermission } from "../middleware/auth";
+import { sendEmail } from "../sendgrid";
+import { storage } from "../storage";
+import { z } from "zod";
 
 const router = Router();
 
 const sendAnnouncementSchema = z.object({
-  testMode: z.boolean().optional().default(false),
-  testEmail: z.string().email().optional()
+  testMode: z
+    .boolean()
+    .optional()
+    .default(false),
+  testEmail: z
+    .string()
+    .email()
+    .optional(),
 });
 
 /**
  * Send SMS capability announcement to all registered users
  */
-router.post('/send-sms-announcement', isAuthenticated, requirePermission('USERS_EDIT'), async (req, res) => {
-  try {
-    const { testMode, testEmail } = sendAnnouncementSchema.parse(req.body);
-    const senderUser = req.user;
-    
-    if (!senderUser?.email) {
-      return res.status(400).json({ error: 'Sender email not found' });
-    }
+router.post(
+  "/send-sms-announcement",
+  isAuthenticated,
+  requirePermission("USERS_EDIT"),
+  async (req, res) => {
+    try {
+      const { testMode, testEmail } = sendAnnouncementSchema.parse(req.body);
+      const senderUser = req.user;
 
-    // Get all active users with email addresses
-    const allUsers = await storage.getAllUsers();
-    let recipients = allUsers.filter(user => 
-      user.email && 
-      user.email.includes('@') && 
-      user.isActive !== false
-    );
+      if (!senderUser?.email) {
+        return res.status(400).json({ error: "Sender email not found" });
+      }
 
-    // In test mode, only send to specified test email or sender
-    if (testMode) {
-      const targetEmail = testEmail || senderUser.email;
-      recipients = recipients.filter(user => user.email === targetEmail);
-      
+      // Get all active users with email addresses
+      const allUsers = await storage.getAllUsers();
+      let recipients = allUsers.filter(
+        (user) =>
+          user.email && user.email.includes("@") && user.isActive !== false
+      );
+
+      // In test mode, only send to specified test email or sender
+      if (testMode) {
+        const targetEmail = testEmail || senderUser.email;
+        recipients = recipients.filter((user) => user.email === targetEmail);
+
+        if (recipients.length === 0) {
+          return res.status(400).json({
+            error: `Test recipient ${targetEmail} not found in user list`,
+          });
+        }
+      }
+
       if (recipients.length === 0) {
-        return res.status(400).json({ 
-          error: `Test recipient ${targetEmail} not found in user list` 
+        return res.status(400).json({
+          error: "No valid email recipients found",
         });
       }
-    }
 
-    if (recipients.length === 0) {
-      return res.status(400).json({ 
-        error: 'No valid email recipients found' 
-      });
-    }
+      const appUrl = process.env.REPLIT_DOMAIN
+        ? `https://${process.env.REPLIT_DOMAIN}`
+        : req.headers.origin || "https://your-app.replit.app";
 
-    const appUrl = process.env.REPLIT_DOMAIN 
-      ? `https://${process.env.REPLIT_DOMAIN}` 
-      : req.headers.origin || 'https://your-app.replit.app';
+      const smsOptInUrl = `${appUrl}/sms-opt-in`;
 
-    const smsOptInUrl = `${appUrl}/sms-opt-in`;
+      // Email content
+      const subject = testMode
+        ? `[TEST] 📱 New SMS Reminders Available - The Sandwich Project`
+        : `📱 New SMS Reminders Available - The Sandwich Project`;
 
-    // Email content
-    const subject = testMode 
-      ? `[TEST] 📱 New SMS Reminders Available - The Sandwich Project`
-      : `📱 New SMS Reminders Available - The Sandwich Project`;
-
-    const textContent = `
+      const textContent = `
 Hi there!
 
 We're excited to announce a new feature that can help you stay connected with The Sandwich Project:
@@ -88,10 +97,10 @@ The Sandwich Project Team
 
 ---
 This email was sent to registered users of The Sandwich Project app.
-${testMode ? '\n[THIS IS A TEST EMAIL - No actual announcement was sent]' : ''}
+${testMode ? "\n[THIS IS A TEST EMAIL - No actual announcement was sent]" : ""}
 `;
 
-    const htmlContent = `
+      const htmlContent = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -144,7 +153,11 @@ ${testMode ? '\n[THIS IS A TEST EMAIL - No actual announcement was sent]' : ''}
         <p>Thanks for all you do,<br>
         <strong>The Sandwich Project Team</strong></p>
         
-        ${testMode ? '<div class="test-notice">[THIS IS A TEST EMAIL - No actual announcement was sent]</div>' : ''}
+        ${
+          testMode
+            ? '<div class="test-notice">[THIS IS A TEST EMAIL - No actual announcement was sent]</div>'
+            : ""
+        }
     </div>
     
     <div class="footer">
@@ -154,55 +167,58 @@ ${testMode ? '\n[THIS IS A TEST EMAIL - No actual announcement was sent]' : ''}
 </html>
 `;
 
-    // Send emails
-    let successCount = 0;
-    let failureCount = 0;
-    const errors = [];
+      // Send emails
+      let successCount = 0;
+      let failureCount = 0;
+      const errors = [];
 
-    // Use Katie's verified email as sender
-    const fromEmail = 'katielong2316@gmail.com';
+      // Use Katie's verified email as sender
+      const fromEmail = "katielong2316@gmail.com";
 
-    for (const user of recipients) {
-      try {
-        await sendEmail({
-          to: user.email,
-          from: fromEmail,
-          subject: subject,
-          text: textContent,
-          html: htmlContent
-        });
-        successCount++;
-        console.log(`✅ SMS announcement sent to ${user.email}`);
-      } catch (error: any) {
-        failureCount++;
-        errors.push({ email: user.email, error: error.message });
-        console.error(`❌ Failed to send SMS announcement to ${user.email}:`, error.message);
+      for (const user of recipients) {
+        try {
+          await sendEmail({
+            to: user.email,
+            from: fromEmail,
+            subject: subject,
+            text: textContent,
+            html: htmlContent,
+          });
+          successCount++;
+          console.log(`✅ SMS announcement sent to ${user.email}`);
+        } catch (error) {
+          failureCount++;
+          errors.push({ email: user.email, error: error.message });
+          console.error(
+            `❌ Failed to send SMS announcement to ${user.email}:`,
+            error.message
+          );
+        }
       }
+
+      const result = {
+        success: successCount > 0,
+        message: testMode
+          ? `Test SMS announcement sent: ${successCount}/${recipients.length} successful`
+          : `SMS announcement sent: ${successCount}/${recipients.length} successful`,
+        successCount,
+        failureCount,
+        totalRecipients: recipients.length,
+        testMode,
+        smsOptInUrl,
+        errors: errors.length > 0 ? errors : undefined,
+      };
+
+      console.log(`📧 SMS announcement results:`, result);
+      res.json(result);
+    } catch (error) {
+      console.error("Error sending SMS announcement:", error);
+      res.status(500).json({
+        error: "Failed to send SMS announcement",
+        message: error.message,
+      });
     }
-
-    const result = {
-      success: successCount > 0,
-      message: testMode 
-        ? `Test SMS announcement sent: ${successCount}/${recipients.length} successful`
-        : `SMS announcement sent: ${successCount}/${recipients.length} successful`,
-      successCount,
-      failureCount,
-      totalRecipients: recipients.length,
-      testMode,
-      smsOptInUrl,
-      errors: errors.length > 0 ? errors : undefined
-    };
-
-    console.log(`📧 SMS announcement results:`, result);
-    res.json(result);
-
-  } catch (error: any) {
-    console.error('Error sending SMS announcement:', error);
-    res.status(500).json({ 
-      error: 'Failed to send SMS announcement',
-      message: error.message 
-    });
   }
-});
+);
 
 export { router as smsAnnouncementRoutes };

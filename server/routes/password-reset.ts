@@ -2,12 +2,15 @@ import { Router } from "express";
 import { z } from "zod";
 import { storage } from "../storage-wrapper";
 import crypto from "crypto";
-import sgMail from '@sendgrid/mail';
+import sgMail from "@sendgrid/mail";
 
 const router = Router();
 
 // Store password reset tokens temporarily (in production, use Redis or database)
-const resetTokens = new Map<string, { userId: string, email: string, expires: number }>();
+const resetTokens = new Map<
+  string,
+  { userId: string; email: string; expires: number }
+>();
 
 // Clean up expired tokens periodically
 setInterval(() => {
@@ -23,7 +26,7 @@ setInterval(() => {
 router.post("/forgot-password", async (req, res) => {
   try {
     const schema = z.object({
-      email: z.string().email("Please enter a valid email address")
+      email: z.string().email("Please enter a valid email address"),
     });
 
     const { email } = schema.parse(req.body);
@@ -32,38 +35,39 @@ router.post("/forgot-password", async (req, res) => {
     const user = await storage.getUserByEmail(email);
     if (!user) {
       // Don't reveal if email exists for security reasons
-      return res.json({ 
-        success: true, 
-        message: "If an account with this email exists, you will receive a password reset link." 
+      return res.json({
+        success: true,
+        message:
+          "If an account with this email exists, you will receive a password reset link.",
       });
     }
 
     // Generate secure reset token
-    const resetToken = crypto.randomBytes(32).toString('hex');
-    const expires = Date.now() + (60 * 60 * 1000); // 1 hour
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    const expires = Date.now() + 60 * 60 * 1000; // 1 hour
 
     // Store token
     resetTokens.set(resetToken, {
       userId: user.id!,
       email: user.email,
-      expires
+      expires,
     });
 
     // Send password reset email
     try {
       // Use the proper domain for reset links
       let baseUrl;
-      
+
       // Check if we have a custom RESET_BASE_URL environment variable (for production)
       if (process.env.RESET_BASE_URL) {
         baseUrl = process.env.RESET_BASE_URL;
-      } 
+      }
       // Check if we're in a deployed environment using REPLIT_DEPLOYMENT
       else if (process.env.REPLIT_DEPLOYMENT) {
         // Use the production domain from REPLIT_DOMAINS or construct the .replit.app domain
         const domains = process.env.REPLIT_DOMAINS;
         if (domains) {
-          baseUrl = `https://${domains.split(',')[0].trim()}`;
+          baseUrl = `https://${domains.split(",")[0].trim()}`;
         } else {
           // Construct the standard Replit app domain
           baseUrl = `https://${process.env.REPL_SLUG}.replit.app`;
@@ -72,31 +76,31 @@ router.post("/forgot-password", async (req, res) => {
       // Development environment
       else {
         // For development, try to use a cleaner URL without port if possible
-        const host = req.get('host') || 'localhost:5000';
-        const protocol = req.protocol || 'http';
-        
+        const host = req.get("host") || "localhost:5000";
+        const protocol = req.protocol || "http";
+
         // If we have REPLIT_DOMAINS in development, use it (cleaner for emails)
         if (process.env.REPLIT_DOMAINS) {
-          const devDomain = process.env.REPLIT_DOMAINS.split(',')[0].trim();
+          const devDomain = process.env.REPLIT_DOMAINS.split(",")[0].trim();
           baseUrl = `https://${devDomain}`;
         } else {
           baseUrl = `${protocol}://${host}`;
         }
       }
-      
+
       const resetLink = `${baseUrl}/reset-password?token=${resetToken}`;
-      
+
       // Use SendGrid directly for password reset emails
       if (!process.env.SENDGRID_API_KEY) {
-        throw new Error('SendGrid API key not configured');
+        throw new Error("SendGrid API key not configured");
       }
-      
+
       sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-      
+
       await sgMail.send({
         to: email,
-        from: 'katie@thesandwichproject.org',
-        subject: 'Password Reset - The Sandwich Project',
+        from: "katie@thesandwichproject.org",
+        subject: "Password Reset - The Sandwich Project",
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8f9fa;">
             <div style="background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
@@ -167,39 +171,40 @@ Fighting food insecurity one sandwich at a time
 
 This is a password reset email sent at your request. If you did not request this, please ignore it.
 To unsubscribe from system notifications, please contact us at katie@thesandwichproject.org
-        `
+        `,
       });
 
       console.log(`✅ Password reset email sent successfully to: ${email}`);
     } catch (emailError) {
       console.error("❌ Failed to send password reset email:", emailError);
       // For development, log the reset link as fallback
-      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV === "development") {
         console.log(`
 🔧 DEVELOPMENT FALLBACK - Email failed, but reset link available:
 📧 Email: ${email}
-🔗 Reset Link: ${req.protocol}://${req.get('host') || 'localhost:5000'}/reset-password?token=${resetToken}
+🔗 Reset Link: ${req.protocol}://${req.get("host") ||
+          "localhost:5000"}/reset-password?token=${resetToken}
 ⏰ Expires: ${new Date(expires).toLocaleString()}
         `);
       }
     }
 
-    res.json({ 
-      success: true, 
-      message: "If an account with this email exists, you will receive a password reset link."
+    res.json({
+      success: true,
+      message:
+        "If an account with this email exists, you will receive a password reset link.",
     });
-
   } catch (error) {
     console.error("Forgot password error:", error);
     if (error instanceof z.ZodError) {
       return res.status(400).json({
         success: false,
-        message: "Please enter a valid email address"
+        message: "Please enter a valid email address",
       });
     }
     res.status(500).json({
       success: false,
-      message: "An error occurred. Please try again later."
+      message: "An error occurred. Please try again later.",
     });
   }
 });
@@ -209,9 +214,13 @@ router.post("/reset-password", async (req, res) => {
   try {
     const schema = z.object({
       token: z.string().min(1, "Reset token is required"),
-      newPassword: z.string()
+      newPassword: z
+        .string()
         .min(8, "Password must be at least 8 characters")
-        .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, "Password must contain at least one lowercase letter, one uppercase letter, and one number")
+        .regex(
+          /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+          "Password must contain at least one lowercase letter, one uppercase letter, and one number"
+        ),
     });
 
     const { token, newPassword } = schema.parse(req.body);
@@ -221,7 +230,8 @@ router.post("/reset-password", async (req, res) => {
     if (!tokenData || Date.now() > tokenData.expires) {
       return res.status(400).json({
         success: false,
-        message: "Invalid or expired reset token. Please request a new password reset."
+        message:
+          "Invalid or expired reset token. Please request a new password reset.",
       });
     }
 
@@ -231,7 +241,7 @@ router.post("/reset-password", async (req, res) => {
       resetTokens.delete(token);
       return res.status(400).json({
         success: false,
-        message: "User not found"
+        message: "User not found",
       });
     }
 
@@ -240,8 +250,8 @@ router.post("/reset-password", async (req, res) => {
       ...user,
       metadata: {
         ...(user.metadata || {}),
-        password: newPassword
-      }
+        password: newPassword,
+      },
     };
 
     await storage.updateUser(user.id!, updatedUser);
@@ -253,20 +263,21 @@ router.post("/reset-password", async (req, res) => {
 
     res.json({
       success: true,
-      message: "Password has been reset successfully. You can now log in with your new password."
+      message:
+        "Password has been reset successfully. You can now log in with your new password.",
     });
-
   } catch (error) {
     console.error("Reset password error:", error);
     if (error instanceof z.ZodError) {
       return res.status(400).json({
         success: false,
-        message: error.errors[0].message
+        message: error.errors[0].message,
       });
     }
     res.status(500).json({
       success: false,
-      message: "An error occurred while resetting your password. Please try again."
+      message:
+        "An error occurred while resetting your password. Please try again.",
     });
   }
 });
@@ -275,17 +286,17 @@ router.post("/reset-password", async (req, res) => {
 router.get("/verify-reset-token/:token", (req, res) => {
   const { token } = req.params;
   const tokenData = resetTokens.get(token);
-  
+
   if (!tokenData || Date.now() > tokenData.expires) {
     return res.status(400).json({
       valid: false,
-      message: "Invalid or expired reset token"
+      message: "Invalid or expired reset token",
     });
   }
 
   res.json({
     valid: true,
-    email: tokenData.email
+    email: tokenData.email,
   });
 });
 

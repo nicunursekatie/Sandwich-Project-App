@@ -1,13 +1,27 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { useToast } from '@/hooks/use-toast';
-import { apiRequest } from '@/lib/queryClient';
-import { ExternalLink, Download, Upload, RefreshCw, FileSpreadsheet, AlertCircle, CheckCircle } from 'lucide-react';
+import React, { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+import {
+  ExternalLink,
+  Download,
+  Upload,
+  RefreshCw,
+  FileSpreadsheet,
+  AlertCircle,
+  CheckCircle,
+} from "lucide-react";
 
 export function GoogleSheetsIntegration() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -16,27 +30,32 @@ export function GoogleSheetsIntegration() {
   const [dryRun, setDryRun] = useState(true);
   const [analysis, setAnalysis] = useState<any>(null);
   const [importResult, setImportResult] = useState<any>(null);
-  const [sheetName, setSheetName] = useState('Sheet1');
+  const [sheetName, setSheetName] = useState("Sheet1");
   const { toast } = useToast();
 
   // Your provided Google Sheet URL and extracted ID
-  const targetSheetUrl = 'https://docs.google.com/spreadsheets/d/1mjx5o6boluo8mNx8tzAV76NBGS6tF0um2Rq9bIdxPo8/edit?gid=2137648950#gid=2137648950';
-  const sheetId = '1mjx5o6boluo8mNx8tzAV76NBGS6tF0um2Rq9bIdxPo8';
+  const targetSheetUrl =
+    "https://docs.google.com/spreadsheets/d/1mjx5o6boluo8mNx8tzAV76NBGS6tF0um2Rq9bIdxPo8/edit?gid=2137648950#gid=2137648950";
+  const sheetId = "1mjx5o6boluo8mNx8tzAV76NBGS6tF0um2Rq9bIdxPo8";
 
   const analyzeSheet = async () => {
     setIsAnalyzing(true);
     try {
-      const response = await apiRequest('GET', `/api/google-sheets/sync/analyze?sheet=${sheetName}`);
+      const response = await apiRequest(
+        "GET",
+        `/api/google-sheets/sync/analyze?sheet=${sheetName}`
+      );
       setAnalysis(response.analysis);
       toast({
         title: "Sheet Analysis Complete",
         description: `Found ${response.analysis.totalRows} rows with ${response.analysis.headers.length} columns`,
       });
     } catch (error) {
-      console.error('Analysis failed:', error);
+      console.error("Analysis failed:", error);
       toast({
         title: "Analysis Failed",
-        description: "Unable to connect to Google Sheets. Please check API credentials.",
+        description:
+          "Unable to connect to Google Sheets. Please check API credentials.",
         variant: "destructive",
       });
     } finally {
@@ -47,17 +66,22 @@ export function GoogleSheetsIntegration() {
   const importFromSheet = async () => {
     setIsImporting(true);
     try {
-      const response = await apiRequest('POST', '/api/google-sheets/sync/import', {
-        sheetName,
-        dryRun
-      });
-      
+      const response = await apiRequest(
+        "POST",
+        "/api/google-sheets/sync/import",
+        {
+          sheetName,
+          dryRun,
+        }
+      );
+
       setImportResult(response.result);
-      
+
       if (dryRun) {
         toast({
           title: "Import Preview Complete",
-          description: `Preview: ${response.result.preview?.length || 0} rows would be imported`,
+          description: `Preview: ${response.result.preview?.length ||
+            0} rows would be imported`,
         });
       } else {
         toast({
@@ -66,7 +90,7 @@ export function GoogleSheetsIntegration() {
         });
       }
     } catch (error) {
-      console.error('Import failed:', error);
+      console.error("Import failed:", error);
       toast({
         title: "Import Failed",
         description: "Unable to import data from Google Sheets",
@@ -80,16 +104,20 @@ export function GoogleSheetsIntegration() {
   const exportToSheet = async () => {
     setIsExporting(true);
     try {
-      const response = await apiRequest('POST', '/api/google-sheets/sync/export', {
-        sheetName: 'Database_Export'
-      });
-      
+      const response = await apiRequest(
+        "POST",
+        "/api/google-sheets/sync/export",
+        {
+          sheetName: "Database_Export",
+        }
+      );
+
       toast({
         title: "Export Complete",
         description: `Exported ${response.result.exported} records to Google Sheets`,
       });
     } catch (error) {
-      console.error('Export failed:', error);
+      console.error("Export failed:", error);
       toast({
         title: "Export Failed",
         description: "Unable to export data to Google Sheets",
@@ -110,7 +138,8 @@ export function GoogleSheetsIntegration() {
             Google Sheets Integration
           </CardTitle>
           <CardDescription>
-            Connect to your sandwich collection tracking spreadsheet for real-time data sync
+            Connect to your sandwich collection tracking spreadsheet for
+            real-time data sync
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -124,7 +153,7 @@ export function GoogleSheetsIntegration() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => window.open(targetSheetUrl, '_blank')}
+              onClick={() => window.open(targetSheetUrl, "_blank")}
             >
               <ExternalLink className="w-4 h-4 mr-2" />
               Open Sheet
@@ -167,19 +196,27 @@ export function GoogleSheetsIntegration() {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-4">
               <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">{analysis.totalRows}</div>
+                <div className="text-2xl font-bold text-blue-600">
+                  {analysis.totalRows}
+                </div>
                 <div className="text-sm text-gray-600">Total Rows</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">{analysis.headers.length}</div>
+                <div className="text-2xl font-bold text-green-600">
+                  {analysis.headers.length}
+                </div>
                 <div className="text-sm text-gray-600">Columns</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-orange-600">{analysis.dateColumns.length}</div>
+                <div className="text-2xl font-bold text-orange-600">
+                  {analysis.dateColumns.length}
+                </div>
                 <div className="text-sm text-gray-600">Date Columns</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-purple-600">{analysis.sandwichColumns.length}</div>
+                <div className="text-2xl font-bold text-purple-600">
+                  {analysis.sandwichColumns.length}
+                </div>
                 <div className="text-sm text-gray-600">Data Columns</div>
               </div>
             </div>
@@ -199,8 +236,8 @@ export function GoogleSheetsIntegration() {
               <div>
                 <Label>Sample Data Row</Label>
                 <div className="mt-2 p-3 bg-gray-50 rounded text-sm font-mono">
-                  {analysis.sampleRow.slice(0, 5).join(' | ')}
-                  {analysis.sampleRow.length > 5 && '...'}
+                  {analysis.sampleRow.slice(0, 5).join(" | ")}
+                  {analysis.sampleRow.length > 5 && "..."}
                 </div>
               </div>
             )}
@@ -216,16 +253,13 @@ export function GoogleSheetsIntegration() {
             Import from Google Sheets
           </CardTitle>
           <CardDescription>
-            Import sandwich collection data from your Google Sheet to the database
+            Import sandwich collection data from your Google Sheet to the
+            database
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center space-x-2">
-            <Switch
-              id="dry-run"
-              checked={dryRun}
-              onCheckedChange={setDryRun}
-            />
+            <Switch id="dry-run" checked={dryRun} onCheckedChange={setDryRun} />
             <Label htmlFor="dry-run">
               Preview mode (dry run) - recommended for first import
             </Label>
@@ -241,7 +275,7 @@ export function GoogleSheetsIntegration() {
             ) : (
               <Download className="w-4 h-4 mr-2" />
             )}
-            {dryRun ? 'Preview Import' : 'Import Data'}
+            {dryRun ? "Preview Import" : "Import Data"}
           </Button>
 
           {!analysis && (
@@ -259,34 +293,46 @@ export function GoogleSheetsIntegration() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <CheckCircle className="w-5 h-5 text-green-600" />
-              {dryRun ? 'Import Preview Results' : 'Import Results'}
+              {dryRun ? "Import Preview Results" : "Import Results"}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {importResult.preview && (
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-600">{importResult.preview.length}</div>
+                  <div className="text-2xl font-bold text-blue-600">
+                    {importResult.preview.length}
+                  </div>
                   <div className="text-sm text-gray-600">Rows Analyzed</div>
                 </div>
               )}
               <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">{importResult.imported || 0}</div>
+                <div className="text-2xl font-bold text-green-600">
+                  {importResult.imported || 0}
+                </div>
                 <div className="text-sm text-gray-600">Imported</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-orange-600">{importResult.skipped || 0}</div>
+                <div className="text-2xl font-bold text-orange-600">
+                  {importResult.skipped || 0}
+                </div>
                 <div className="text-sm text-gray-600">Skipped</div>
               </div>
             </div>
 
             {importResult.errors && importResult.errors.length > 0 && (
               <div>
-                <Label className="text-red-600">Errors ({importResult.errors.length})</Label>
+                <Label className="text-red-600">
+                  Errors ({importResult.errors.length})
+                </Label>
                 <div className="mt-2 p-3 bg-red-50 rounded text-sm max-h-32 overflow-y-auto">
-                  {importResult.errors.slice(0, 5).map((error: string, index: number) => (
-                    <div key={index} className="text-red-700">{error}</div>
-                  ))}
+                  {importResult.errors
+                    .slice(0, 5)
+                    .map((error: string, index: number) => (
+                      <div key={index} className="text-red-700">
+                        {error}
+                      </div>
+                    ))}
                   {importResult.errors.length > 5 && (
                     <div className="text-red-600 font-medium">
                       ... and {importResult.errors.length - 5} more errors
@@ -322,7 +368,8 @@ export function GoogleSheetsIntegration() {
             Export to Google Sheets
           </CardTitle>
           <CardDescription>
-            Export current database records to a new sheet in your Google Sheets document
+            Export current database records to a new sheet in your Google Sheets
+            document
           </CardDescription>
         </CardHeader>
         <CardContent>

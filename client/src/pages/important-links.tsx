@@ -1,31 +1,52 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { ExternalLink, RefreshCw, ZoomIn, ZoomOut, RotateCcw, Calculator, Link as LinkIcon } from "lucide-react";
+import {
+  ExternalLink,
+  RefreshCw,
+  ZoomIn,
+  ZoomOut,
+  RotateCcw,
+  Calculator,
+  Link as LinkIcon,
+} from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function ImportantLinks() {
   const [isLoading, setIsLoading] = useState(false);
   const [eventsZoomLevel, setEventsZoomLevel] = useState(85);
   const [userSheetZoomLevel, setUserSheetZoomLevel] = useState(85);
-  
+
   // URLs for all the important links
-  const inventoryCalculatorUrl = "https://nicunursekatie.github.io/sandwichinventory/inventorycalculator.html";
-  
+  const inventoryCalculatorUrl =
+    "https://nicunursekatie.github.io/sandwichinventory/inventorycalculator.html";
+
   // Events Google Sheet (published version)
-  const eventsEmbedUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT2r5KMRKuKSrqn1yQxtw8T0e5Ooi_iBfd0HlgGVcIHtFat3o54FrqyTLB_uq-RxojjSFg1GTvpIZLZ/pubhtml?widget=true&headers=false";
-  const eventsFullViewUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT2r5KMRKuKSrqn1yQxtw8T0e5Ooi_iBfd0HlgGVcIHtFat3o54FrqyTLB_uq-RxojjSFg1GTvpIZLZ/pubhtml";
-  
+  const eventsEmbedUrl =
+    "https://docs.google.com/spreadsheets/d/e/2PACX-1vT2r5KMRKuKSrqn1yQxtw8T0e5Ooi_iBfd0HlgGVcIHtFat3o54FrqyTLB_uq-RxojjSFg1GTvpIZLZ/pubhtml?widget=true&headers=false";
+  const eventsFullViewUrl =
+    "https://docs.google.com/spreadsheets/d/e/2PACX-1vT2r5KMRKuKSrqn1yQxtw8T0e5Ooi_iBfd0HlgGVcIHtFat3o54FrqyTLB_uq-RxojjSFg1GTvpIZLZ/pubhtml";
+
   // User's specific Google Sheet
-  const userSheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRAgug7UWU-j96KzlWYnff0oS61ezmshAvgDFugYvC-EHSeHcl5TlIKuE2dbyAJ9hz2DexSCJbf6Cpr/pubhtml";
-  const userSheetEmbedUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRAgug7UWU-j96KzlWYnff0oS61ezmshAvgDFugYvC-EHSeHcl5TlIKuE2dbyAJ9hz2DexSCJbf6Cpr/pubhtml?widget=true&headers=false";
+  const userSheetUrl =
+    "https://docs.google.com/spreadsheets/d/e/2PACX-1vRAgug7UWU-j96KzlWYnff0oS61ezmshAvgDFugYvC-EHSeHcl5TlIKuE2dbyAJ9hz2DexSCJbf6Cpr/pubhtml";
+  const userSheetEmbedUrl =
+    "https://docs.google.com/spreadsheets/d/e/2PACX-1vRAgug7UWU-j96KzlWYnff0oS61ezmshAvgDFugYvC-EHSeHcl5TlIKuE2dbyAJ9hz2DexSCJbf6Cpr/pubhtml?widget=true&headers=false";
 
   // Load user's saved zoom preferences
   useEffect(() => {
-    const savedEventsZoom = localStorage.getItem('important-links-events-zoom');
-    const savedUserSheetZoom = localStorage.getItem('important-links-user-sheet-zoom');
-    
+    const savedEventsZoom = localStorage.getItem("important-links-events-zoom");
+    const savedUserSheetZoom = localStorage.getItem(
+      "important-links-user-sheet-zoom"
+    );
+
     if (savedEventsZoom) {
       setEventsZoomLevel(parseInt(savedEventsZoom));
     }
@@ -38,7 +59,7 @@ export default function ImportantLinks() {
   const handleEventsZoomChange = (newZoom: number[]) => {
     const zoom = (newZoom || [])[0] || 85;
     setEventsZoomLevel(zoom);
-    localStorage.setItem('important-links-events-zoom', zoom.toString());
+    localStorage.setItem("important-links-events-zoom", zoom.toString());
   };
 
   const handleEventsZoomIn = () => {
@@ -59,7 +80,7 @@ export default function ImportantLinks() {
   const handleUserSheetZoomChange = (newZoom: number[]) => {
     const zoom = (newZoom || [])[0] || 85;
     setUserSheetZoomLevel(zoom);
-    localStorage.setItem('important-links-user-sheet-zoom', zoom.toString());
+    localStorage.setItem("important-links-user-sheet-zoom", zoom.toString());
   };
 
   const handleUserSheetZoomIn = () => {
@@ -78,7 +99,9 @@ export default function ImportantLinks() {
 
   const handleRefreshEvents = () => {
     setIsLoading(true);
-    const iframe = document.getElementById('events-spreadsheet') as HTMLIFrameElement;
+    const iframe = document.getElementById(
+      "events-spreadsheet"
+    ) as HTMLIFrameElement;
     if (iframe) {
       iframe.src = iframe.src;
     }
@@ -87,7 +110,9 @@ export default function ImportantLinks() {
 
   const handleRefreshUserSheet = () => {
     setIsLoading(true);
-    const iframe = document.getElementById('user-spreadsheet') as HTMLIFrameElement;
+    const iframe = document.getElementById(
+      "user-spreadsheet"
+    ) as HTMLIFrameElement;
     if (iframe) {
       iframe.src = iframe.src;
     }
@@ -97,8 +122,13 @@ export default function ImportantLinks() {
   return (
     <div className="h-full flex flex-col bg-gray-50 p-6">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-[#236383] mb-2">Important Links</h1>
-        <p className="text-gray-600">Quick access to essential tools and spreadsheets for planning and coordination.</p>
+        <h1 className="text-3xl font-bold text-[#236383] mb-2">
+          Important Links
+        </h1>
+        <p className="text-gray-600">
+          Quick access to essential tools and spreadsheets for planning and
+          coordination.
+        </p>
       </div>
 
       <Tabs defaultValue="calculator" className="flex-1 flex flex-col">
@@ -125,7 +155,8 @@ export default function ImportantLinks() {
                 Inventory Calculator
               </CardTitle>
               <CardDescription>
-                Interactive tool for calculating sandwich inventory and planning quantities for collections
+                Interactive tool for calculating sandwich inventory and planning
+                quantities for collections
               </CardDescription>
             </CardHeader>
             <CardContent className="flex-1 flex flex-col">
@@ -133,7 +164,9 @@ export default function ImportantLinks() {
                 <div className="flex gap-3">
                   <Button
                     size="lg"
-                    onClick={() => window.open(inventoryCalculatorUrl, '_blank')}
+                    onClick={() =>
+                      window.open(inventoryCalculatorUrl, "_blank")
+                    }
                     className="bg-[#236383] hover:bg-[#007E8C] text-white font-semibold px-8 py-3 text-base flex-1"
                   >
                     <Calculator className="w-5 h-5 mr-2" />
@@ -142,7 +175,9 @@ export default function ImportantLinks() {
                   <Button
                     size="lg"
                     variant="outline"
-                    onClick={() => window.open(inventoryCalculatorUrl, '_blank')}
+                    onClick={() =>
+                      window.open(inventoryCalculatorUrl, "_blank")
+                    }
                     className="border-[#236383] text-[#236383] hover:bg-[#236383]/5 px-6 py-3 font-medium"
                   >
                     <ExternalLink className="w-5 h-5 mr-2" />
@@ -156,9 +191,9 @@ export default function ImportantLinks() {
                   <iframe
                     src={inventoryCalculatorUrl}
                     className="w-full h-full border-0"
-                    style={{ 
-                      minHeight: '800px',
-                      height: '100%'
+                    style={{
+                      minHeight: "800px",
+                      height: "100%",
                     }}
                     title="Inventory Calculator"
                     loading="eager"
@@ -179,20 +214,22 @@ export default function ImportantLinks() {
                   📅 Events Calendar Sheet
                 </CardTitle>
                 <div className="flex items-center gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={handleRefreshEvents}
                     disabled={isLoading}
                     className="flex items-center gap-2"
                   >
-                    <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+                    <RefreshCw
+                      className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
+                    />
                     Refresh
                   </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => window.open(eventsFullViewUrl, '_blank')}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => window.open(eventsFullViewUrl, "_blank")}
                     className="flex items-center gap-2"
                   >
                     <ExternalLink className="h-4 w-4" />
@@ -234,9 +271,11 @@ export default function ImportantLinks() {
                     <RotateCcw className="h-3 w-3" />
                   </Button>
                 </div>
-                
+
                 <div className="flex items-center gap-3 flex-1">
-                  <span className="text-sm font-medium text-gray-700 whitespace-nowrap">Zoom:</span>
+                  <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                    Zoom:
+                  </span>
                   <Slider
                     value={[eventsZoomLevel]}
                     onValueChange={handleEventsZoomChange}
@@ -245,13 +284,18 @@ export default function ImportantLinks() {
                     step={5}
                     className="flex-1 max-w-32"
                   />
-                  <span className="text-sm font-medium text-gray-900 min-w-[3rem]">{eventsZoomLevel}%</span>
+                  <span className="text-sm font-medium text-gray-900 min-w-[3rem]">
+                    {eventsZoomLevel}%
+                  </span>
                 </div>
               </div>
             </CardHeader>
-            
+
             <CardContent className="p-0 flex-1">
-              <div className="w-full relative overflow-hidden" style={{ height: 'calc(100vh - 320px)', minHeight: '700px' }}>
+              <div
+                className="w-full relative overflow-hidden"
+                style={{ height: "calc(100vh - 320px)", minHeight: "700px" }}
+              >
                 {isLoading && (
                   <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
                     <div className="flex items-center gap-2 text-gray-600">
@@ -260,18 +304,18 @@ export default function ImportantLinks() {
                     </div>
                   </div>
                 )}
-                
+
                 <iframe
                   id="events-spreadsheet"
                   src={eventsEmbedUrl}
                   className="border-0 rounded-b-lg"
-                  style={{ 
+                  style={{
                     transform: `scale(${eventsZoomLevel / 100})`,
-                    transformOrigin: 'top left',
+                    transformOrigin: "top left",
                     width: `${100 / (eventsZoomLevel / 100)}%`,
                     height: `${100 / (eventsZoomLevel / 100)}%`,
-                    minWidth: '1200px',
-                    minHeight: '800px'
+                    minWidth: "1200px",
+                    minHeight: "800px",
                   }}
                   title="Events Calendar"
                   loading="lazy"
@@ -293,24 +337,27 @@ export default function ImportantLinks() {
                     Historical Collections Record
                   </CardTitle>
                   <CardDescription>
-                    Historical collections tracking spreadsheet - available as link and embedded view
+                    Historical collections tracking spreadsheet - available as
+                    link and embedded view
                   </CardDescription>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={handleRefreshUserSheet}
                     disabled={isLoading}
                     className="flex items-center gap-2"
                   >
-                    <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+                    <RefreshCw
+                      className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
+                    />
                     Refresh
                   </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => window.open(userSheetUrl, '_blank')}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => window.open(userSheetUrl, "_blank")}
                     className="flex items-center gap-2"
                   >
                     <ExternalLink className="h-4 w-4" />
@@ -323,12 +370,16 @@ export default function ImportantLinks() {
               <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-blue-900">Direct Link Access</p>
-                    <p className="text-xs text-blue-700 truncate max-w-md">{userSheetUrl}</p>
+                    <p className="text-sm font-medium text-blue-900">
+                      Direct Link Access
+                    </p>
+                    <p className="text-xs text-blue-700 truncate max-w-md">
+                      {userSheetUrl}
+                    </p>
                   </div>
-                  <Button 
+                  <Button
                     size="sm"
-                    onClick={() => window.open(userSheetUrl, '_blank')}
+                    onClick={() => window.open(userSheetUrl, "_blank")}
                     className="bg-[#236383] hover:bg-[#007E8C] text-white"
                   >
                     <ExternalLink className="h-4 w-4 mr-1" />
@@ -370,9 +421,11 @@ export default function ImportantLinks() {
                     <RotateCcw className="h-3 w-3" />
                   </Button>
                 </div>
-                
+
                 <div className="flex items-center gap-3 flex-1">
-                  <span className="text-sm font-medium text-gray-700 whitespace-nowrap">Zoom:</span>
+                  <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                    Zoom:
+                  </span>
                   <Slider
                     value={[userSheetZoomLevel]}
                     onValueChange={handleUserSheetZoomChange}
@@ -381,13 +434,18 @@ export default function ImportantLinks() {
                     step={5}
                     className="flex-1 max-w-32"
                   />
-                  <span className="text-sm font-medium text-gray-900 min-w-[3rem]">{userSheetZoomLevel}%</span>
+                  <span className="text-sm font-medium text-gray-900 min-w-[3rem]">
+                    {userSheetZoomLevel}%
+                  </span>
                 </div>
               </div>
             </CardHeader>
-            
+
             <CardContent className="p-0 flex-1">
-              <div className="w-full relative overflow-hidden" style={{ height: 'calc(100vh - 180px)', minHeight: '800px' }}>
+              <div
+                className="w-full relative overflow-hidden"
+                style={{ height: "calc(100vh - 180px)", minHeight: "800px" }}
+              >
                 {isLoading && (
                   <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
                     <div className="flex items-center gap-2 text-gray-600">
@@ -396,18 +454,18 @@ export default function ImportantLinks() {
                     </div>
                   </div>
                 )}
-                
+
                 <iframe
                   id="user-spreadsheet"
                   src={userSheetEmbedUrl}
                   className="border-0 rounded-b-lg"
-                  style={{ 
+                  style={{
                     transform: `scale(${userSheetZoomLevel / 100})`,
-                    transformOrigin: 'top left',
+                    transformOrigin: "top left",
                     width: `${100 / (userSheetZoomLevel / 100)}%`,
                     height: `${100 / (userSheetZoomLevel / 100)}%`,
-                    minWidth: '1200px',
-                    minHeight: '800px'
+                    minWidth: "1200px",
+                    minHeight: "800px",
                   }}
                   title="Historical Collections Record"
                   loading="lazy"

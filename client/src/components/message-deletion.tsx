@@ -9,20 +9,23 @@ interface MessageDeletionProps {
   onDelete?: () => void;
 }
 
-export default function MessageDeletion({ messageId, onDelete }: MessageDeletionProps) {
+export default function MessageDeletion({
+  messageId,
+  onDelete,
+}: MessageDeletionProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const deleteMutation = useMutation({
     mutationFn: async () => {
       const response = await fetch(`/api/messages/${messageId}`, {
-        method: 'DELETE'
+        method: "DELETE",
       });
-      if (!response.ok) throw new Error('Failed to delete message');
+      if (!response.ok) throw new Error("Failed to delete message");
       return response;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/messages'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/messages"] });
       toast({
         title: "Message deleted",
         description: "The message has been successfully removed.",
@@ -35,7 +38,7 @@ export default function MessageDeletion({ messageId, onDelete }: MessageDeletion
         description: "Failed to delete message. Please try again.",
         variant: "destructive",
       });
-    }
+    },
   });
 
   return (

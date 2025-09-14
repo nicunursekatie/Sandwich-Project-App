@@ -10,44 +10,54 @@ import { AlertCircle, CheckCircle, XCircle } from "lucide-react";
 export default function AuthStatusDebug() {
   const [email, setEmail] = useState("admin@sandwich.project");
   const [password, setPassword] = useState("sandwich123");
-  const [loginStatus, setLoginStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [loginStatus, setLoginStatus] = useState<
+    "idle" | "loading" | "success" | "error"
+  >("idle");
 
   const queryClient = useQueryClient();
 
   // Check authentication status
-  const { data: authStatus, isLoading: checkingAuth, refetch: refetchAuth } = useQuery({
-    queryKey: ['/api/auth/user'],
-    queryFn: () => apiRequest('GET', '/api/auth/user'),
-    retry: false
+  const {
+    data: authStatus,
+    isLoading: checkingAuth,
+    refetch: refetchAuth,
+  } = useQuery({
+    queryKey: ["/api/auth/user"],
+    queryFn: () => apiRequest("GET", "/api/auth/user"),
+    retry: false,
   });
 
   // Test messages endpoint
-  const { data: messagesTest, isLoading: checkingMessages, refetch: refetchMessages } = useQuery({
-    queryKey: ['/api/real-time-messages-test'],
-    queryFn: () => apiRequest('GET', '/api/real-time-messages'),
+  const {
+    data: messagesTest,
+    isLoading: checkingMessages,
+    refetch: refetchMessages,
+  } = useQuery({
+    queryKey: ["/api/real-time-messages-test"],
+    queryFn: () => apiRequest("GET", "/api/real-time-messages"),
     retry: false,
-    enabled: false // Only run when explicitly called
+    enabled: false, // Only run when explicitly called
   });
 
   // Login mutation
   const loginMutation = useMutation({
     mutationFn: async (credentials: { email: string; password: string }) => {
-      const response = await apiRequest('POST', '/api/auth/login', credentials);
+      const response = await apiRequest("POST", "/api/auth/login", credentials);
       return response;
     },
     onSuccess: () => {
-      setLoginStatus('success');
+      setLoginStatus("success");
       queryClient.invalidateQueries();
       refetchAuth();
     },
     onError: (error) => {
-      console.error('Login error:', error);
-      setLoginStatus('error');
-    }
+      console.error("Login error:", error);
+      setLoginStatus("error");
+    },
   });
 
   const handleLogin = () => {
-    setLoginStatus('loading');
+    setLoginStatus("loading");
     loginMutation.mutate({ email, password });
   };
 
@@ -67,7 +77,9 @@ export default function AuthStatusDebug() {
         <CardContent className="space-y-4">
           {/* Current Auth Status */}
           <div>
-            <h3 className="font-semibold mb-2">Current Authentication Status</h3>
+            <h3 className="font-semibold mb-2">
+              Current Authentication Status
+            </h3>
             <div className="flex items-center gap-2">
               {checkingAuth ? (
                 <>
@@ -77,8 +89,13 @@ export default function AuthStatusDebug() {
               ) : authStatus ? (
                 <>
                   <CheckCircle className="h-4 w-4 text-green-500" />
-                  <Badge variant="default" className="bg-green-500">Authenticated</Badge>
-                  <span>Logged in as: {authStatus.email || authStatus.firstName || 'User'}</span>
+                  <Badge variant="default" className="bg-green-500">
+                    Authenticated
+                  </Badge>
+                  <span>
+                    Logged in as:{" "}
+                    {authStatus.email || authStatus.firstName || "User"}
+                  </span>
                 </>
               ) : (
                 <>
@@ -94,8 +111,12 @@ export default function AuthStatusDebug() {
           <div>
             <h3 className="font-semibold mb-2">Messages API Access</h3>
             <div className="flex items-center gap-2 mb-2">
-              <Button onClick={testMessages} disabled={checkingMessages} size="sm">
-                {checkingMessages ? 'Testing...' : 'Test Messages API'}
+              <Button
+                onClick={testMessages}
+                disabled={checkingMessages}
+                size="sm"
+              >
+                {checkingMessages ? "Testing..." : "Test Messages API"}
               </Button>
             </div>
             <div className="flex items-center gap-2">
@@ -107,14 +128,22 @@ export default function AuthStatusDebug() {
               ) : messagesTest ? (
                 <>
                   <CheckCircle className="h-4 w-4 text-green-500" />
-                  <Badge variant="default" className="bg-green-500">Success</Badge>
-                  <span>Messages API accessible ({Array.isArray(messagesTest) ? messagesTest.length : 0} messages)</span>
+                  <Badge variant="default" className="bg-green-500">
+                    Success
+                  </Badge>
+                  <span>
+                    Messages API accessible (
+                    {Array.isArray(messagesTest) ? messagesTest.length : 0}{" "}
+                    messages)
+                  </span>
                 </>
               ) : (
                 <>
                   <XCircle className="h-4 w-4 text-red-500" />
                   <Badge variant="destructive">Failed</Badge>
-                  <span>Messages API not accessible - authentication required</span>
+                  <span>
+                    Messages API not accessible - authentication required
+                  </span>
                 </>
               )}
             </div>
@@ -137,20 +166,20 @@ export default function AuthStatusDebug() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
-                <Button 
+                <Button
                   onClick={handleLogin}
                   disabled={loginMutation.isPending}
                   className="w-full"
                 >
-                  {loginMutation.isPending ? 'Logging in...' : 'Login'}
+                  {loginMutation.isPending ? "Logging in..." : "Login"}
                 </Button>
-                {loginStatus === 'success' && (
+                {loginStatus === "success" && (
                   <div className="flex items-center gap-2 text-green-600">
                     <CheckCircle className="h-4 w-4" />
                     <span>Login successful! You can now send messages.</span>
                   </div>
                 )}
-                {loginStatus === 'error' && (
+                {loginStatus === "error" && (
                   <div className="flex items-center gap-2 text-red-600">
                     <XCircle className="h-4 w-4" />
                     <span>Login failed. Check your credentials.</span>
@@ -164,8 +193,13 @@ export default function AuthStatusDebug() {
           <div className="bg-gray-50 p-3 rounded text-sm">
             <h4 className="font-semibold mb-2">Available Test Accounts:</h4>
             <div className="space-y-1">
-              <div><strong>Admin:</strong> admin@sandwich.project / sandwich123</div>
-              <div><strong>Committee Member:</strong> katielong2316@gmail.com / sandwich123</div>
+              <div>
+                <strong>Admin:</strong> admin@sandwich.project / sandwich123
+              </div>
+              <div>
+                <strong>Committee Member:</strong> katielong2316@gmail.com /
+                sandwich123
+              </div>
             </div>
           </div>
         </CardContent>

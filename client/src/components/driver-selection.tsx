@@ -1,28 +1,28 @@
-import React, { useState, useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
-import { 
-  User, 
-  Phone, 
-  Mail, 
-  Truck, 
-  MapPin, 
-  Clock, 
+import React, { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import {
+  User,
+  Phone,
+  Mail,
+  Truck,
+  MapPin,
+  Clock,
   AlertCircle,
   CheckCircle2,
   Search,
   Plus,
-  Minus
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { useToast } from '@/hooks/use-toast';
+  Minus,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 interface Driver {
   id: number;
@@ -54,28 +54,32 @@ export function DriverSelection({
   currentDriversArranged = false,
   currentDriverPickupTime,
   currentDriverNotes,
-  onDriversUpdate
+  onDriversUpdate,
 }: DriverSelectionProps) {
   const [selectedDriverIds, setSelectedDriverIds] = useState<number[]>([]);
-  const [pickupTime, setPickupTime] = useState(currentDriverPickupTime || '');
-  const [driverNotes, setDriverNotes] = useState(currentDriverNotes || '');
-  const [driversArranged, setDriversArranged] = useState(currentDriversArranged);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [pickupTime, setPickupTime] = useState(currentDriverPickupTime || "");
+  const [driverNotes, setDriverNotes] = useState(currentDriverNotes || "");
+  const [driversArranged, setDriversArranged] = useState(
+    currentDriversArranged
+  );
+  const [searchTerm, setSearchTerm] = useState("");
   const [showAvailableOnly, setShowAvailableOnly] = useState(true);
-  
+
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   // Fetch available drivers
   const { data: drivers = [], isLoading: driversLoading } = useQuery({
-    queryKey: ['/api/event-requests/drivers/available'],
-    enabled: true
+    queryKey: ["/api/event-requests/drivers/available"],
+    enabled: true,
   });
 
   // Initialize selected drivers from current assignments
   useEffect(() => {
     if (currentDrivers && currentDrivers.length > 0) {
-      const driverIds = currentDrivers.map(id => parseInt(id.toString())).filter(id => !isNaN(id));
+      const driverIds = currentDrivers
+        .map((id) => parseInt(id.toString()))
+        .filter((id) => !isNaN(id));
       setSelectedDriverIds(driverIds);
     }
   }, [currentDrivers]);
@@ -89,56 +93,58 @@ export function DriverSelection({
       driversArranged: boolean;
     }) => {
       const response = await fetch(`/api/event-requests/${eventId}/drivers`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
       });
-      if (!response.ok) throw new Error('Failed to update driver assignments');
+      if (!response.ok) throw new Error("Failed to update driver assignments");
       return response.json();
     },
     onSuccess: () => {
       toast({
         title: "Success",
-        description: "Driver assignments updated successfully"
+        description: "Driver assignments updated successfully",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/event-requests'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/event-requests"] });
       onDriversUpdate?.();
     },
     onError: () => {
       toast({
         title: "Error",
         description: "Failed to update driver assignments",
-        variant: "destructive"
+        variant: "destructive",
       });
-    }
+    },
   });
 
   // Filter drivers based on search and availability
   const filteredDrivers = (drivers as Driver[]).filter((driver: Driver) => {
-    const matchesSearch = !searchTerm || 
+    const matchesSearch =
+      !searchTerm ||
       driver.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       driver.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       driver.phone?.includes(searchTerm) ||
       driver.hostLocation?.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const isAvailable = !showAvailableOnly || 
-      driver.availability === 'available' || 
+
+    const isAvailable =
+      !showAvailableOnly ||
+      driver.availability === "available" ||
       selectedDriverIds.includes(driver.id);
-    
+
     return matchesSearch && isAvailable;
   });
 
   // Handle driver selection
   const toggleDriverSelection = (driverId: number) => {
-    setSelectedDriverIds(prev => 
-      prev.includes(driverId) 
-        ? prev.filter(id => id !== driverId)
+    setSelectedDriverIds((prev) =>
+      prev.includes(driverId)
+        ? prev.filter((id) => id !== driverId)
         : [...prev, driverId]
     );
   };
 
   // Get selected drivers info
-  const selectedDrivers = (drivers as Driver[]).filter((driver: Driver) => 
+  const selectedDrivers = (drivers as Driver[]).filter((driver: Driver) =>
     selectedDriverIds.includes(driver.id)
   );
 
@@ -148,19 +154,31 @@ export function DriverSelection({
       assignedDriverIds: selectedDriverIds,
       driverPickupTime: pickupTime,
       driverNotes: driverNotes,
-      driversArranged: driversArranged
+      driversArranged: driversArranged,
     });
   };
 
   // Get availability badge color
   const getAvailabilityBadge = (availability: string) => {
     switch (availability) {
-      case 'available':
-        return <Badge variant="secondary" className="bg-green-100 text-green-800">Available</Badge>;
-      case 'busy':
-        return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">Busy</Badge>;
-      case 'off-duty':
-        return <Badge variant="secondary" className="bg-red-100 text-red-800">Off-duty</Badge>;
+      case "available":
+        return (
+          <Badge variant="secondary" className="bg-green-100 text-green-800">
+            Available
+          </Badge>
+        );
+      case "busy":
+        return (
+          <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+            Busy
+          </Badge>
+        );
+      case "off-duty":
+        return (
+          <Badge variant="secondary" className="bg-red-100 text-red-800">
+            Off-duty
+          </Badge>
+        );
       default:
         return <Badge variant="outline">Unknown</Badge>;
     }
@@ -213,12 +231,14 @@ export function DriverSelection({
               className="pl-10"
             />
           </div>
-          
+
           <div className="flex items-center space-x-2">
             <Checkbox
               id="available-only"
               checked={showAvailableOnly}
-              onCheckedChange={(checked) => setShowAvailableOnly(checked === true)}
+              onCheckedChange={(checked) =>
+                setShowAvailableOnly(checked === true)
+              }
             />
             <Label htmlFor="available-only" className="text-sm">
               Show available drivers only
@@ -234,7 +254,10 @@ export function DriverSelection({
             </h4>
             <div className="space-y-2">
               {selectedDrivers.map((driver: Driver) => (
-                <div key={driver.id} className="flex items-center justify-between bg-white rounded px-3 py-2">
+                <div
+                  key={driver.id}
+                  className="flex items-center justify-between bg-white rounded px-3 py-2"
+                >
                   <div className="flex items-center gap-3">
                     <User className="h-4 w-4 text-blue-600" />
                     <div>
@@ -261,8 +284,10 @@ export function DriverSelection({
 
         {/* Driver List */}
         <div className="space-y-3">
-          <h4 className="font-medium">Available Drivers ({filteredDrivers.length})</h4>
-          
+          <h4 className="font-medium">
+            Available Drivers ({filteredDrivers.length})
+          </h4>
+
           {filteredDrivers.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <Truck className="h-8 w-8 mx-auto mb-2 opacity-50" />
@@ -272,14 +297,14 @@ export function DriverSelection({
             <div className="space-y-2 max-h-96 overflow-y-auto">
               {filteredDrivers.map((driver: Driver) => {
                 const isSelected = selectedDriverIds.includes(driver.id);
-                
+
                 return (
                   <div
                     key={driver.id}
                     className={cn(
                       "border rounded-lg p-4 cursor-pointer transition-colors",
-                      isSelected 
-                        ? "border-blue-500 bg-blue-50" 
+                      isSelected
+                        ? "border-blue-500 bg-blue-50"
                         : "border-gray-200 hover:border-gray-300"
                     )}
                     onClick={() => toggleDriverSelection(driver.id)}
@@ -296,40 +321,40 @@ export function DriverSelection({
                             </Badge>
                           )}
                         </div>
-                        
+
                         {driver.email && (
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <Mail className="h-3 w-3" />
                             {driver.email}
                           </div>
                         )}
-                        
+
                         {driver.phone && (
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <Phone className="h-3 w-3" />
                             {driver.phone}
                           </div>
                         )}
-                        
+
                         {driver.hostLocation && (
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <MapPin className="h-3 w-3" />
                             {driver.hostLocation}
                           </div>
                         )}
-                        
+
                         {driver.routeDescription && (
                           <div className="text-sm text-muted-foreground">
                             Route: {driver.routeDescription}
                           </div>
                         )}
-                        
+
                         {driver.vehicleType && (
                           <div className="text-sm text-muted-foreground">
                             Vehicle: {driver.vehicleType}
                           </div>
                         )}
-                        
+
                         {driver.availabilityNotes && (
                           <div className="text-sm text-muted-foreground bg-gray-50 rounded p-2">
                             <AlertCircle className="h-3 w-3 inline mr-1" />
@@ -337,7 +362,7 @@ export function DriverSelection({
                           </div>
                         )}
                       </div>
-                      
+
                       <div className="ml-4">
                         {isSelected ? (
                           <CheckCircle2 className="h-5 w-5 text-blue-600" />
@@ -370,9 +395,7 @@ export function DriverSelection({
 
         {/* Driver Notes */}
         <div className="space-y-2">
-          <Label htmlFor="driver-notes">
-            Driver Notes & Instructions
-          </Label>
+          <Label htmlFor="driver-notes">Driver Notes & Instructions</Label>
           <Textarea
             id="driver-notes"
             value={driverNotes}
@@ -385,11 +408,13 @@ export function DriverSelection({
         {/* Legacy Driver Details */}
         {currentDriverDetails && (
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-            <h4 className="font-medium text-amber-900 mb-2">Legacy Driver Details</h4>
+            <h4 className="font-medium text-amber-900 mb-2">
+              Legacy Driver Details
+            </h4>
             <p className="text-sm text-amber-800">{currentDriverDetails}</p>
             <p className="text-xs text-amber-700 mt-1">
-              This information was entered before the new driver selection system. 
-              Please review and update using the driver selection above.
+              This information was entered before the new driver selection
+              system. Please review and update using the driver selection above.
             </p>
           </div>
         )}
@@ -401,7 +426,9 @@ export function DriverSelection({
             disabled={updateDriversMutation.isPending}
             className="min-w-[120px]"
           >
-            {updateDriversMutation.isPending ? "Saving..." : "Save Driver Assignment"}
+            {updateDriversMutation.isPending
+              ? "Saving..."
+              : "Save Driver Assignment"}
           </Button>
         </div>
       </CardContent>

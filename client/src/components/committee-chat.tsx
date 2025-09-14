@@ -22,36 +22,36 @@ interface Message {
 }
 
 const committees = [
-  { 
-    id: "grants_committee", 
-    name: "Grants Committee", 
+  {
+    id: "grants_committee",
+    name: "Grants Committee",
     description: "Grant applications and funding opportunities",
-    permission: "CHAT_GRANTS_COMMITTEE"
+    permission: "CHAT_GRANTS_COMMITTEE",
   },
-  { 
-    id: "events_committee", 
-    name: "Events Committee", 
+  {
+    id: "events_committee",
+    name: "Events Committee",
     description: "Event planning and coordination",
-    permission: "CHAT_EVENTS_COMMITTEE"
+    permission: "CHAT_EVENTS_COMMITTEE",
   },
-  { 
-    id: "board_chat", 
-    name: "Board Chat", 
+  {
+    id: "board_chat",
+    name: "Board Chat",
     description: "Board member discussions and governance",
-    permission: "CHAT_BOARD"
+    permission: "CHAT_BOARD",
   },
-  { 
-    id: "web_committee", 
-    name: "Web Committee", 
+  {
+    id: "web_committee",
+    name: "Web Committee",
     description: "Website development and digital strategy",
-    permission: "CHAT_WEB_COMMITTEE"
+    permission: "CHAT_WEB_COMMITTEE",
   },
-  { 
-    id: "volunteer_management", 
-    name: "Volunteer Management", 
+  {
+    id: "volunteer_management",
+    name: "Volunteer Management",
     description: "Volunteer coordination and support",
-    permission: "CHAT_VOLUNTEER_MANAGEMENT"
-  }
+    permission: "CHAT_VOLUNTEER_MANAGEMENT",
+  },
 ];
 
 export default function CommitteeChat() {
@@ -60,7 +60,7 @@ export default function CommitteeChat() {
   const [selectedCommittee, setSelectedCommittee] = useState<any>(null);
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  
+
   // Initialize read tracking hook
   const { useAutoMarkAsRead } = useMessageReads();
 
@@ -72,7 +72,7 @@ export default function CommitteeChat() {
 
   // Get user name from profile or fallback to email prefix
   const getUserName = () => {
-    if (userProfile && typeof userProfile === 'object') {
+    if (userProfile && typeof userProfile === "object") {
       const profile = userProfile as any;
       if (profile.displayName) {
         return profile.displayName;
@@ -81,10 +81,10 @@ export default function CommitteeChat() {
         return profile.firstName;
       }
     }
-    if (user && typeof user === 'object' && 'email' in user && user.email) {
-      return String(user.email).split('@')[0];
+    if (user && typeof user === "object" && "email" in user && user.email) {
+      return String(user.email).split("@")[0];
     }
-    return 'Team Member';
+    return "Team Member";
   };
 
   // Get or create committee conversation
@@ -92,9 +92,9 @@ export default function CommitteeChat() {
     queryKey: ["/api/conversations/committee", selectedCommittee?.id],
     queryFn: async () => {
       if (!selectedCommittee) return null;
-      const response = await apiRequest('POST', '/api/conversations', {
-        type: 'channel',
-        name: `${selectedCommittee.name}`
+      const response = await apiRequest("POST", "/api/conversations", {
+        type: "channel",
+        name: `${selectedCommittee.name}`,
       });
       return response;
     },
@@ -107,20 +107,20 @@ export default function CommitteeChat() {
     enabled: !!committeeConversation,
     refetchInterval: 120000, // Reduced from 3 seconds to 2 minutes
   });
-  const [optimisticMessages, setOptimisticMessages] = useState<Message[] | null>(null);
+  const [optimisticMessages, setOptimisticMessages] = useState<
+    Message[] | null
+  >(null);
   const displayedMessages = optimisticMessages || messages;
 
   // Auto-mark messages as read when viewing committee
-  useAutoMarkAsRead(
-    selectedCommittee?.id || "", 
-    messages, 
-    !!selectedCommittee
-  );
+  useAutoMarkAsRead(selectedCommittee?.id || "", messages, !!selectedCommittee);
 
   useEffect(() => {
     setOptimisticMessages(null);
     if (committeeConversation?.id) {
-      queryClient.invalidateQueries({ queryKey: ["/api/conversations", committeeConversation.id, "messages"] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/conversations", committeeConversation.id, "messages"],
+      });
     }
   }, [committeeConversation?.id]);
 
@@ -128,7 +128,7 @@ export default function CommitteeChat() {
   useEffect(() => {
     if (messages.length > 0 && selectedCommittee) {
       setTimeout(() => {
-        window.dispatchEvent(new CustomEvent('refreshNotifications'));
+        window.dispatchEvent(new CustomEvent("refreshNotifications"));
       }, 500);
     }
   }, [messages.length, selectedCommittee]);
@@ -136,12 +136,18 @@ export default function CommitteeChat() {
   const sendMessageMutation = useMutation({
     mutationFn: async (data: { content: string }) => {
       if (!committeeConversation) throw new Error("No conversation available");
-      return await apiRequest('POST', `/api/conversations/${committeeConversation.id}/messages`, {
-        content: data.content
-      });
+      return await apiRequest(
+        "POST",
+        `/api/conversations/${committeeConversation.id}/messages`,
+        {
+          content: data.content,
+        }
+      );
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/conversations", committeeConversation?.id, "messages"] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/conversations", committeeConversation?.id, "messages"],
+      });
       setNewMessage("");
     },
     onError: () => {
@@ -150,12 +156,12 @@ export default function CommitteeChat() {
         description: "Failed to send message",
         variant: "destructive",
       });
-    }
+    },
   });
 
   const deleteMessageMutation = useMutation({
     mutationFn: async (messageId: number) => {
-      return await apiRequest('DELETE', `/api/messages/${messageId}`);
+      return await apiRequest("DELETE", `/api/messages/${messageId}`);
     },
     onMutate: async (messageId: number) => {
       setOptimisticMessages((prev) => {
@@ -164,7 +170,9 @@ export default function CommitteeChat() {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/conversations", committeeConversation?.id, "messages"] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/conversations", committeeConversation?.id, "messages"],
+      });
       setOptimisticMessages(null);
       toast({
         title: "Message deleted",
@@ -173,20 +181,22 @@ export default function CommitteeChat() {
     },
     onError: () => {
       setOptimisticMessages(null);
-      queryClient.invalidateQueries({ queryKey: ["/api/conversations", committeeConversation?.id, "messages"] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/conversations", committeeConversation?.id, "messages"],
+      });
       toast({
         title: "Error",
         description: "Failed to delete message",
         variant: "destructive",
       });
-    }
+    },
   });
 
   const handleSendMessage = () => {
     if (!newMessage.trim()) return;
 
     sendMessageMutation.mutate({
-      content: newMessage.trim()
+      content: newMessage.trim(),
     });
   };
 
@@ -197,7 +207,7 @@ export default function CommitteeChat() {
   // Filter committees based on user permissions
   const availableCommittees = useMemo(() => {
     if (!user || !user.permissions) return [];
-    return committees.filter(committee => 
+    return committees.filter((committee) =>
       user.permissions.includes(committee.permission)
     );
   }, [user]);
@@ -209,7 +219,7 @@ export default function CommitteeChat() {
           <Users className="w-6 h-6 mr-2" />
           Committee Chat
         </h2>
-        
+
         {availableCommittees.length === 0 ? (
           <div className="text-center text-gray-500 py-8">
             <Users className="w-12 h-12 mx-auto mb-3 opacity-30" />
@@ -218,20 +228,22 @@ export default function CommitteeChat() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {availableCommittees.map((committee) => (
-            <div
-              key={committee.id}
-              onClick={() => setSelectedCommittee(committee)}
-              className="p-6 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
-            >
-              <div className="flex items-center mb-3">
-                <Users className="w-8 h-8 text-blue-500 mr-3" />
-                <div>
-                  <h3 className="font-semibold">{committee.name}</h3>
-                  <p className="text-sm text-gray-600">{committee.description}</p>
+              <div
+                key={committee.id}
+                onClick={() => setSelectedCommittee(committee)}
+                className="p-6 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+              >
+                <div className="flex items-center mb-3">
+                  <Users className="w-8 h-8 text-blue-500 mr-3" />
+                  <div>
+                    <h3 className="font-semibold">{committee.name}</h3>
+                    <p className="text-sm text-gray-600">
+                      {committee.description}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
           </div>
         )}
       </div>
@@ -272,18 +284,24 @@ export default function CommitteeChat() {
               <div key={message.id} className="flex space-x-3 group">
                 <Avatar className="w-8 h-8">
                   <AvatarFallback className="bg-gray-500 text-white text-xs">
-                    {message.sender?.split(' ').map((n: string) => n[0]).join('').slice(0, 2) || 'TM'}
+                    {message.sender
+                      ?.split(" ")
+                      .map((n: string) => n[0])
+                      .join("")
+                      .slice(0, 2) || "TM"}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center space-x-2">
-                      <span className="font-medium text-sm">{message.sender}</span>
+                      <span className="font-medium text-sm">
+                        {message.sender}
+                      </span>
                       <span className="text-xs text-gray-500">
-                        {message.timestamp && !isNaN(new Date(message.timestamp).getTime()) 
+                        {message.timestamp &&
+                        !isNaN(new Date(message.timestamp).getTime())
                           ? new Date(message.timestamp).toLocaleTimeString()
-                          : 'Just now'
-                        }
+                          : "Just now"}
                       </span>
                     </div>
                     {/* Only show delete button for user's own messages */}
@@ -318,14 +336,16 @@ export default function CommitteeChat() {
       <div className="border-t p-4 space-y-3">
         <div className="flex items-center space-x-2">
           <span className="text-sm font-medium text-gray-600">Posting as:</span>
-          <span className="text-sm font-semibold text-gray-800">{getUserName()}</span>
+          <span className="text-sm font-semibold text-gray-800">
+            {getUserName()}
+          </span>
         </div>
         <div className="flex space-x-2">
           <Input
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             placeholder={`Message ${selectedCommittee.name}...`}
-            onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+            onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
             disabled={sendMessageMutation.isPending}
           />
           <Button

@@ -19,7 +19,9 @@ export default function UnifiedMeetings() {
         </div>
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Meetings</h1>
-          <p className="text-gray-600">Meeting minutes, agendas, and calendar</p>
+          <p className="text-gray-600">
+            Meeting minutes, agendas, and calendar
+          </p>
         </div>
       </div>
 
@@ -58,7 +60,7 @@ export default function UnifiedMeetings() {
           <MeetingCalendar isEmbedded={true} />
         </TabsContent>
       </Tabs>
-      
+
       {/* Quick Help Button */}
       <QuickHelp section="meetings" />
     </div>

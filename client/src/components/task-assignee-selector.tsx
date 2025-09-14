@@ -1,7 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
@@ -22,8 +28,8 @@ interface TaskAssigneeSelectorProps {
     assigneeIds?: string[];
     assigneeNames?: string[];
   };
-  onChange: (value: { 
-    assigneeId?: string; 
+  onChange: (value: {
+    assigneeId?: string;
     assigneeName?: string;
     assigneeIds?: string[];
     assigneeNames?: string[];
@@ -32,15 +38,20 @@ interface TaskAssigneeSelectorProps {
   multiple?: boolean;
 }
 
-export function TaskAssigneeSelector({ value, onChange, placeholder = "Assign to...", multiple = false }: TaskAssigneeSelectorProps) {
-  const [inputMode, setInputMode] = useState<'user' | 'text'>('user');
-  const [textInput, setTextInput] = useState('');
+export function TaskAssigneeSelector({
+  value,
+  onChange,
+  placeholder = "Assign to...",
+  multiple = false,
+}: TaskAssigneeSelectorProps) {
+  const [inputMode, setInputMode] = useState<"user" | "text">("user");
+  const [textInput, setTextInput] = useState("");
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [selectedNames, setSelectedNames] = useState<string[]>([]);
 
   // Fetch users from the system
   const { data: users = [], isLoading } = useQuery<User[]>({
-    queryKey: ['/api/users'],
+    queryKey: ["/api/users"],
   });
 
   // Initialize state with existing values
@@ -51,56 +62,60 @@ export function TaskAssigneeSelector({ value, onChange, placeholder = "Assign to
       const names = value?.assigneeNames || [];
       setSelectedUsers(ids);
       setSelectedNames(names);
-      
+
       // If we have names but no IDs, switch to text mode
       if (names.length > 0 && ids.length === 0) {
-        setInputMode('text');
-        setTextInput(names.join(', '));
+        setInputMode("text");
+        setTextInput(names.join(", "));
       }
     } else {
       // Single user mode - backward compatibility
       if (value?.assigneeName && !value?.assigneeId) {
         setTextInput(value.assigneeName);
-        setInputMode('text');
+        setInputMode("text");
       }
     }
   }, [value, multiple]);
 
   const handleUserSelect = (userId: string) => {
-    if (userId === 'none') {
+    if (userId === "none") {
       // Clear selection
       if (multiple) {
         setSelectedUsers([]);
         setSelectedNames([]);
         onChange({
           assigneeIds: undefined,
-          assigneeNames: undefined
+          assigneeNames: undefined,
         });
       } else {
         onChange({
           assigneeId: undefined,
-          assigneeName: undefined
+          assigneeName: undefined,
         });
       }
       return;
     }
 
-    const selectedUser = users.find(u => u.id === userId);
+    const selectedUser = users.find((u) => u.id === userId);
     if (!selectedUser) return;
 
-    const userName = `${selectedUser.firstName} ${selectedUser.lastName}`.trim() || selectedUser.email;
+    const userName =
+      `${selectedUser.firstName} ${selectedUser.lastName}`.trim() ||
+      selectedUser.email;
 
     if (multiple) {
       // Multi-user mode
       if (selectedUsers.includes(userId)) {
         // Remove user
-        const newIds = selectedUsers.filter(id => id !== userId);
-        const newNames = selectedNames.filter((_, index) => selectedUsers[index] !== userId);
+        const newIds = selectedUsers.filter((id) => id !== userId);
+        const newNames = selectedNames.filter(
+          (_, index) => selectedUsers[index] !== userId
+        );
         setSelectedUsers(newIds);
         setSelectedNames(newNames);
         onChange({
           assigneeIds: newIds.length > 0 ? newIds : undefined,
-          assigneeNames: newNames.length > 0 ? newNames : undefined
+          assigneeNames: newNames.length > 0 ? newNames : undefined,
         });
       } else {
         // Add user
@@ -110,14 +125,14 @@ export function TaskAssigneeSelector({ value, onChange, placeholder = "Assign to
         setSelectedNames(newNames);
         onChange({
           assigneeIds: newIds,
-          assigneeNames: newNames
+          assigneeNames: newNames,
         });
       }
     } else {
       // Single user mode
       onChange({
         assigneeId: userId,
-        assigneeName: userName
+        assigneeName: userName,
       });
     }
   };
@@ -125,60 +140,69 @@ export function TaskAssigneeSelector({ value, onChange, placeholder = "Assign to
   const handleTextChange = (text: string) => {
     setTextInput(text);
     if (multiple) {
-      const names = text.split(',').map(name => name.trim()).filter(name => name.length > 0);
+      const names = text
+        .split(",")
+        .map((name) => name.trim())
+        .filter((name) => name.length > 0);
       setSelectedNames(names);
       onChange({
         assigneeIds: undefined,
-        assigneeNames: names.length > 0 ? names : undefined
+        assigneeNames: names.length > 0 ? names : undefined,
       });
     } else {
       onChange({
         assigneeId: undefined,
-        assigneeName: text || undefined
+        assigneeName: text || undefined,
       });
     }
   };
 
   const removeUser = (indexToRemove: number) => {
     if (multiple) {
-      const newIds = selectedUsers.filter((_, index) => index !== indexToRemove);
-      const newNames = selectedNames.filter((_, index) => index !== indexToRemove);
+      const newIds = selectedUsers.filter(
+        (_, index) => index !== indexToRemove
+      );
+      const newNames = selectedNames.filter(
+        (_, index) => index !== indexToRemove
+      );
       setSelectedUsers(newIds);
       setSelectedNames(newNames);
       onChange({
         assigneeIds: newIds.length > 0 ? newIds : undefined,
-        assigneeNames: newNames.length > 0 ? newNames : undefined
+        assigneeNames: newNames.length > 0 ? newNames : undefined,
       });
     }
   };
 
   const handleClear = () => {
-    setTextInput('');
+    setTextInput("");
     setSelectedUsers([]);
     setSelectedNames([]);
     if (multiple) {
       onChange({
         assigneeIds: undefined,
-        assigneeNames: undefined
+        assigneeNames: undefined,
       });
     } else {
       onChange({
         assigneeId: undefined,
-        assigneeName: undefined
+        assigneeName: undefined,
       });
     }
   };
 
   const getDisplayValue = () => {
     if (multiple) {
-      return ''; // Multi-user display handled separately
+      return ""; // Multi-user display handled separately
     } else {
       // Single user mode
       if (value?.assigneeId) {
-        const user = users.find(u => u.id === value.assigneeId);
-        return user ? `${user.firstName} ${user.lastName}`.trim() || user.email : value.assigneeName;
+        const user = users.find((u) => u.id === value.assigneeId);
+        return user
+          ? `${user.firstName} ${user.lastName}`.trim() || user.email
+          : value.assigneeName;
       }
-      return value?.assigneeName || '';
+      return value?.assigneeName || "";
     }
   };
 
@@ -188,20 +212,20 @@ export function TaskAssigneeSelector({ value, onChange, placeholder = "Assign to
     if (multiple) {
       // Multi-user mode
       const allAssignees = [];
-      
+
       // Add system users
       selectedUsers.forEach((userId, index) => {
-        const user = users.find(u => u.id === userId);
+        const user = users.find((u) => u.id === userId);
         if (user) {
           allAssignees.push({
             id: userId,
             name: `${user.firstName} ${user.lastName}`.trim() || user.email,
             isSystemUser: true,
-            index
+            index,
           });
         }
       });
-      
+
       // Add text-only names
       selectedNames.forEach((name, index) => {
         if (!selectedUsers[index]) {
@@ -209,11 +233,11 @@ export function TaskAssigneeSelector({ value, onChange, placeholder = "Assign to
             id: `text-${index}`,
             name,
             isSystemUser: false,
-            index
+            index,
           });
         }
       });
-      
+
       return allAssignees;
     }
     return [];
@@ -226,23 +250,23 @@ export function TaskAssigneeSelector({ value, onChange, placeholder = "Assign to
       <div className="flex gap-2">
         <Button
           type="button"
-          variant={inputMode === 'user' ? 'default' : 'outline'}
+          variant={inputMode === "user" ? "default" : "outline"}
           size="sm"
-          onClick={() => setInputMode('user')}
+          onClick={() => setInputMode("user")}
           className="text-xs"
         >
-          {multiple ? 'Select Users' : 'Select User'}
+          {multiple ? "Select Users" : "Select User"}
         </Button>
         <Button
           type="button"
-          variant={inputMode === 'text' ? 'default' : 'outline'}
+          variant={inputMode === "text" ? "default" : "outline"}
           size="sm"
-          onClick={() => setInputMode('text')}
+          onClick={() => setInputMode("text")}
           className="text-xs"
         >
           Free Text
         </Button>
-        {multiple && (assignedUsers.length > 0) && (
+        {multiple && assignedUsers.length > 0 && (
           <Button
             type="button"
             variant="outline"
@@ -255,20 +279,22 @@ export function TaskAssigneeSelector({ value, onChange, placeholder = "Assign to
         )}
       </div>
 
-      {inputMode === 'user' ? (
+      {inputMode === "user" ? (
         <div className="space-y-2">
           <Select
-            value={multiple ? 'none' : (value?.assigneeId || 'none')}
+            value={multiple ? "none" : value?.assigneeId || "none"}
             onValueChange={handleUserSelect}
             disabled={isLoading}
           >
             <SelectTrigger>
-              <SelectValue placeholder={isLoading ? "Loading users..." : placeholder} />
+              <SelectValue
+                placeholder={isLoading ? "Loading users..." : placeholder}
+              />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="none">Unassigned</SelectItem>
               {users
-                .filter(user => user.isActive)
+                .filter((user) => user.isActive)
                 .map((user) => (
                   <SelectItem key={user.id} value={user.id}>
                     <div className="flex items-center gap-2">
@@ -276,7 +302,8 @@ export function TaskAssigneeSelector({ value, onChange, placeholder = "Assign to
                         <span className="text-green-600">✓</span>
                       )}
                       <span className="font-medium">
-                        {`${user.firstName} ${user.lastName}`.trim() || user.email}
+                        {`${user.firstName} ${user.lastName}`.trim() ||
+                          user.email}
                       </span>
                       <Badge variant="secondary" className="text-xs">
                         {user.role}
@@ -292,7 +319,11 @@ export function TaskAssigneeSelector({ value, onChange, placeholder = "Assign to
           <Input
             value={textInput}
             onChange={(e) => handleTextChange(e.target.value)}
-            placeholder={multiple ? "Enter names separated by commas..." : "Enter assignee name..."}
+            placeholder={
+              multiple
+                ? "Enter names separated by commas..."
+                : "Enter assignee name..."
+            }
           />
         </div>
       )}
@@ -303,9 +334,9 @@ export function TaskAssigneeSelector({ value, onChange, placeholder = "Assign to
           <div className="text-sm font-medium text-gray-700">Assigned to:</div>
           <div className="flex flex-wrap gap-2">
             {assignedUsers.map((assignee) => (
-              <Badge 
-                key={assignee.id} 
-                variant="outline" 
+              <Badge
+                key={assignee.id}
+                variant="outline"
                 className="flex items-center gap-1 pr-1"
               >
                 {assignee.name}

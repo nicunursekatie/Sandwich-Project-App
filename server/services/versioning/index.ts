@@ -10,7 +10,10 @@ export class VersioningService {
    */
   static async getVersionHistory(entityType: string, entityId: number) {
     try {
-      return await VersionControl.getVersionHistory(entityType as any, entityId);
+      return await VersionControl.getVersionHistory(
+        entityType as any,
+        entityId
+      );
     } catch (error) {
       throw new Error(`Failed to get version history: ${error.message}`);
     }
@@ -19,7 +22,11 @@ export class VersioningService {
   /**
    * Get specific version of an entity
    */
-  static async getVersion(entityType: string, entityId: number, version: number) {
+  static async getVersion(
+    entityType: string,
+    entityId: number,
+    version: number
+  ) {
     try {
       const versionData = await VersionControl.getVersion(
         entityType as any,
@@ -38,7 +45,12 @@ export class VersioningService {
   /**
    * Restore a specific version of an entity
    */
-  static async restoreVersion(entityType: string, entityId: number, version: number, userId: string) {
+  static async restoreVersion(
+    entityType: string,
+    entityId: number,
+    version: number,
+    userId: string
+  ) {
     try {
       const success = await VersionControl.restoreVersion(
         entityType as any,
@@ -56,9 +68,9 @@ export class VersioningService {
    * Compare two versions of an entity
    */
   static async compareVersions(
-    entityType: string, 
-    entityId: number, 
-    version1: number, 
+    entityType: string,
+    entityId: number,
+    version1: number,
     version2: number
   ) {
     try {
@@ -80,7 +92,7 @@ export class VersioningService {
     try {
       return await VersionControl.createChangeset({
         ...changesetData,
-        userId
+        userId,
       });
     } catch (error) {
       throw new Error(`Failed to create changeset: ${error.message}`);
@@ -91,9 +103,9 @@ export class VersioningService {
    * Get change statistics
    */
   static async getChangeStats(
-    entityType?: string, 
-    userId?: string, 
-    startDate?: Date, 
+    entityType?: string,
+    userId?: string,
+    startDate?: Date,
     endDate?: Date
   ) {
     try {

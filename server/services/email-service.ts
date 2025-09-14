@@ -43,10 +43,10 @@ export class EmailService {
             eq(emailMessages.isTrashed, false)
           )
         );
-      
+
       return result[0]?.count || 0;
     } catch (error) {
-      console.error('Failed to get unread email count:', error);
+      console.error("Failed to get unread email count:", error);
       return 0;
     }
   }
@@ -54,12 +54,15 @@ export class EmailService {
   /**
    * Get emails for a specific folder - SIMPLIFIED (No threading)
    */
-  async getEmailsByFolder(userId: string, folder: string): Promise<EmailMessage[]> {
+  async getEmailsByFolder(
+    userId: string,
+    folder: string
+  ): Promise<EmailMessage[]> {
     try {
       let query;
 
       switch (folder) {
-        case 'inbox':
+        case "inbox":
           query = db
             .select()
             .from(emailMessages)
@@ -73,7 +76,7 @@ export class EmailService {
             );
           break;
 
-        case 'starred':
+        case "starred":
           query = db
             .select()
             .from(emailMessages)
@@ -89,7 +92,7 @@ export class EmailService {
             );
           break;
 
-        case 'sent':
+        case "sent":
           query = db
             .select()
             .from(emailMessages)
@@ -102,7 +105,7 @@ export class EmailService {
             );
           break;
 
-        case 'drafts':
+        case "drafts":
           query = db
             .select()
             .from(emailMessages)
@@ -114,7 +117,7 @@ export class EmailService {
             );
           break;
 
-        case 'archived':
+        case "archived":
           query = db
             .select()
             .from(emailMessages)
@@ -130,7 +133,7 @@ export class EmailService {
             );
           break;
 
-        case 'trash':
+        case "trash":
           query = db
             .select()
             .from(emailMessages)
@@ -221,10 +224,10 @@ export class EmailService {
       // Then try to send SendGrid notification (but don't fail if it doesn't work)
       if (!data.isDraft) {
         try {
-          const { sendEmail: sendGridEmail } = await import('../sendgrid');
+          const { sendEmail: sendGridEmail } = await import("../sendgrid");
           await sendGridEmail({
             to: data.recipientEmail,
-            from: 'katielong2316@gmail.com', // Your verified sender
+            from: "katielong2316@gmail.com", // Your verified sender
             subject: `New message: ${data.subject}`,
             text: `You have a new message from ${data.senderName}.\n\nSubject: ${data.subject}\n\n${data.content}\n\nPlease log in to your account to view and respond to this message.`,
             html: `
@@ -237,18 +240,23 @@ export class EmailService {
                 </div>
                 <p>Please log in to your account to view and respond to this message.</p>
               </div>
-            `
+            `,
           });
-          console.log(`[Email Service] SendGrid notification sent successfully to ${data.recipientEmail}`);
-        } catch (emailError: any) {
-          console.warn(`[Email Service] SendGrid notification failed (but internal message saved): ${emailError?.message || 'Unknown error'}`);
+          console.log(
+            `[Email Service] SendGrid notification sent successfully to ${data.recipientEmail}`
+          );
+        } catch (emailError) {
+          console.warn(
+            `[Email Service] SendGrid notification failed (but internal message saved): ${emailError?.message ||
+              "Unknown error"}`
+          );
           // Don't throw - the internal message was saved successfully
         }
       }
 
       return newEmail as EmailMessage;
     } catch (error) {
-      console.error('Failed to save internal email:', error);
+      console.error("Failed to save internal email:", error);
       throw error;
     }
   }
@@ -284,17 +292,19 @@ export class EmailService {
         );
 
       if (!email) {
-        console.error('Email not found or user does not have access');
+        console.error("Email not found or user does not have access");
         return false;
       }
 
       // CRITICAL FIX: Only allow recipients to mark emails as read
       // If sender is trying to mark as read, ignore that update to prevent affecting recipient's unread status
       if (updates.isRead !== undefined && email.senderId === userId) {
-        console.log(`Sender ${userId} attempted to mark email ${emailId} as read - ignoring to protect recipient read status`);
+        console.log(
+          `Sender ${userId} attempted to mark email ${emailId} as read - ignoring to protect recipient read status`
+        );
         // Remove isRead from updates for senders
         const { isRead, ...otherUpdates } = updates;
-        
+
         // Update only other fields (star, archive, etc.) for senders
         if (Object.keys(otherUpdates).length > 0) {
           await db
@@ -320,7 +330,7 @@ export class EmailService {
 
       return true;
     } catch (error) {
-      console.error('Failed to update email status:', error);
+      console.error("Failed to update email status:", error);
       return false;
     }
   }
@@ -352,7 +362,7 @@ export class EmailService {
 
       return true;
     } catch (error) {
-      console.error('Failed to delete email:', error);
+      console.error("Failed to delete email:", error);
       return false;
     }
   }
@@ -360,7 +370,10 @@ export class EmailService {
   /**
    * Get email by ID
    */
-  async getEmailById(emailId: number, userId: string): Promise<EmailMessage | null> {
+  async getEmailById(
+    emailId: number,
+    userId: string
+  ): Promise<EmailMessage | null> {
     try {
       const [email] = await db
         .select()
@@ -375,9 +388,9 @@ export class EmailService {
           )
         );
 
-      return email as EmailMessage || null;
+      return (email as EmailMessage) || null;
     } catch (error) {
-      console.error('Failed to get email by ID:', error);
+      console.error("Failed to get email by ID:", error);
       return null;
     }
   }
@@ -388,7 +401,10 @@ export class EmailService {
   /**
    * Search emails
    */
-  async searchEmails(userId: string, searchTerm: string): Promise<EmailMessage[]> {
+  async searchEmails(
+    userId: string,
+    searchTerm: string
+  ): Promise<EmailMessage[]> {
     try {
       const results = await db
         .select()
@@ -412,7 +428,7 @@ export class EmailService {
 
       return results as EmailMessage[];
     } catch (error) {
-      console.error('Failed to search emails:', error);
+      console.error("Failed to search emails:", error);
       throw error;
     }
   }

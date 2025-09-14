@@ -42,7 +42,7 @@ export default function SimpleChat({ channel, title, icon }: SimpleChatProps) {
     if (!user) return;
 
     const socketUrl = window.location.origin;
-    
+
     const socketInstance = io(socketUrl, {
       path: "/socket.io/",
       transports: ["polling"],
@@ -59,7 +59,7 @@ export default function SimpleChat({ channel, title, icon }: SimpleChatProps) {
       socketInstance.emit("join-channel", {
         channel,
         userId: user.id,
-        userName: user.firstName || user.email || "User"
+        userName: user.firstName || user.email || "User",
       });
     });
 
@@ -68,20 +68,23 @@ export default function SimpleChat({ channel, title, icon }: SimpleChatProps) {
       setIsConnected(false);
     });
 
-    socketInstance.on("joined-channel", ({ channel: joinedChannel, userName }) => {
-      console.log(`Joined channel: ${joinedChannel} as ${userName}`);
-    });
+    socketInstance.on(
+      "joined-channel",
+      ({ channel: joinedChannel, userName }) => {
+        console.log(`Joined channel: ${joinedChannel} as ${userName}`);
+      }
+    );
 
     socketInstance.on("new-message", (newMessage: ChatMessage) => {
-      setMessages(prev => [...prev, newMessage]);
+      setMessages((prev) => [...prev, newMessage]);
     });
 
     socketInstance.on("message-history", (history: ChatMessage[]) => {
       console.log(`Loaded ${history.length} messages from history`);
-      setMessages(prev => {
+      setMessages((prev) => {
         // Merge history with any existing messages, avoiding duplicates
-        const existingIds = new Set(prev.map(m => m.id));
-        const newHistory = history.filter(m => !existingIds.has(m.id));
+        const existingIds = new Set(prev.map((m) => m.id));
+        const newHistory = history.filter((m) => !existingIds.has(m.id));
         return [...newHistory, ...prev];
       });
     });
@@ -98,7 +101,7 @@ export default function SimpleChat({ channel, title, icon }: SimpleChatProps) {
       socketInstance.emit("leave-channel", {
         channel,
         userId: user.id,
-        userName: user.firstName || user.email || "User"
+        userName: user.firstName || user.email || "User",
       });
       socketInstance.disconnect();
     };
@@ -109,7 +112,7 @@ export default function SimpleChat({ channel, title, icon }: SimpleChatProps) {
 
     socket.emit("send-message", {
       channel,
-      content: message.trim()
+      content: message.trim(),
     });
 
     setMessage("");
@@ -138,14 +141,18 @@ export default function SimpleChat({ channel, title, icon }: SimpleChatProps) {
         <CardTitle className="flex items-center gap-2 text-lg">
           {icon}
           {title}
-          <span className={`ml-auto text-xs px-2 py-1 rounded ${
-            isConnected ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-          }`}>
-            {isConnected ? 'Connected' : 'Disconnected'}
+          <span
+            className={`ml-auto text-xs px-2 py-1 rounded ${
+              isConnected
+                ? "bg-green-100 text-green-700"
+                : "bg-red-100 text-red-700"
+            }`}
+          >
+            {isConnected ? "Connected" : "Disconnected"}
           </span>
         </CardTitle>
       </CardHeader>
-      
+
       <CardContent className="flex-1 flex flex-col p-4 min-h-0">
         {/* Messages area */}
         <div className="flex-1 overflow-y-auto mb-4 space-y-3 min-h-0">
@@ -179,7 +186,9 @@ export default function SimpleChat({ channel, title, icon }: SimpleChatProps) {
             value={message}
             onChange={setMessage}
             onSend={sendMessage}
-            placeholder={isConnected ? "Type @ to mention someone..." : "Connecting..."}
+            placeholder={
+              isConnected ? "Type @ to mention someone..." : "Connecting..."
+            }
             disabled={!isConnected}
           />
         </div>

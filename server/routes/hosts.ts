@@ -32,7 +32,9 @@ function canViewHosts(req: any) {
 router.get("/hosts", isAuthenticated, async (req, res) => {
   // Check if user has permission to view hosts
   if (!canViewHosts(req)) {
-    return res.status(403).json({ error: "Insufficient permissions to view hosts" });
+    return res
+      .status(403)
+      .json({ error: "Insufficient permissions to view hosts" });
   }
   try {
     const hosts = await storage.getAllHosts();
@@ -46,7 +48,9 @@ router.get("/hosts", isAuthenticated, async (req, res) => {
 router.get("/hosts-with-contacts", isAuthenticated, async (req, res) => {
   // Check if user has permission to view hosts
   if (!canViewHosts(req)) {
-    return res.status(403).json({ error: "Insufficient permissions to view hosts" });
+    return res
+      .status(403)
+      .json({ error: "Insufficient permissions to view hosts" });
   }
   try {
     const hostsWithContacts = await storage.getAllHostsWithContacts();
@@ -60,7 +64,9 @@ router.get("/hosts-with-contacts", isAuthenticated, async (req, res) => {
 router.get("/hosts/:id", isAuthenticated, async (req, res) => {
   // Check if user has permission to view hosts
   if (!canViewHosts(req)) {
-    return res.status(403).json({ error: "Insufficient permissions to view hosts" });
+    return res
+      .status(403)
+      .json({ error: "Insufficient permissions to view hosts" });
   }
   try {
     const id = parseInt(req.params.id);
@@ -78,7 +84,9 @@ router.get("/hosts/:id", isAuthenticated, async (req, res) => {
 router.post("/hosts", isAuthenticated, sanitizeMiddleware, async (req, res) => {
   // Check if user has permission to manage hosts
   if (!canManageHosts(req)) {
-    return res.status(403).json({ error: "Insufficient permissions to create hosts" });
+    return res
+      .status(403)
+      .json({ error: "Insufficient permissions to create hosts" });
   }
   try {
     const result = insertHostSchema.safeParse(req.body);
@@ -93,29 +101,38 @@ router.post("/hosts", isAuthenticated, sanitizeMiddleware, async (req, res) => {
   }
 });
 
-router.patch("/hosts/:id", isAuthenticated, sanitizeMiddleware, async (req, res) => {
-  // Check if user has permission to manage hosts
-  if (!canManageHosts(req)) {
-    return res.status(403).json({ error: "Insufficient permissions to update hosts" });
-  }
-  try {
-    const id = parseInt(req.params.id);
-    const updates = req.body;
-    const host = await storage.updateHost(id, updates);
-    if (!host) {
-      return res.status(404).json({ error: "Host not found" });
+router.patch(
+  "/hosts/:id",
+  isAuthenticated,
+  sanitizeMiddleware,
+  async (req, res) => {
+    // Check if user has permission to manage hosts
+    if (!canManageHosts(req)) {
+      return res
+        .status(403)
+        .json({ error: "Insufficient permissions to update hosts" });
     }
-    res.json(host);
-  } catch (error) {
-    console.error("Error updating host:", error);
-    res.status(500).json({ error: "Failed to update host" });
+    try {
+      const id = parseInt(req.params.id);
+      const updates = req.body;
+      const host = await storage.updateHost(id, updates);
+      if (!host) {
+        return res.status(404).json({ error: "Host not found" });
+      }
+      res.json(host);
+    } catch (error) {
+      console.error("Error updating host:", error);
+      res.status(500).json({ error: "Failed to update host" });
+    }
   }
-});
+);
 
 router.delete("/hosts/:id", isAuthenticated, async (req, res) => {
   // Check if user has permission to manage hosts
   if (!canManageHosts(req)) {
-    return res.status(403).json({ error: "Insufficient permissions to delete hosts" });
+    return res
+      .status(403)
+      .json({ error: "Insufficient permissions to delete hosts" });
   }
   try {
     const id = parseInt(req.params.id);
@@ -128,9 +145,9 @@ router.delete("/hosts/:id", isAuthenticated, async (req, res) => {
     console.error("Error deleting host:", error);
     // Check if it's a constraint error (has associated records)
     if (error.message && error.message.includes("associated collection")) {
-      return res.status(409).json({ 
+      return res.status(409).json({
         error: error.message,
-        code: "CONSTRAINT_VIOLATION"
+        code: "CONSTRAINT_VIOLATION",
       });
     }
     res.status(500).json({ error: "Failed to delete host" });
@@ -140,14 +157,16 @@ router.delete("/hosts/:id", isAuthenticated, async (req, res) => {
 // Host contact routes
 router.get("/host-contacts", async (req, res) => {
   try {
-    const hostId = req.query.hostId ? parseInt(req.query.hostId as string) : undefined;
+    const hostId = req.query.hostId
+      ? parseInt(req.query.hostId as string)
+      : undefined;
     if (hostId) {
       const contacts = await storage.getHostContacts(hostId);
       res.json(contacts);
     } else {
       // Return all host contacts
       const hosts = await storage.getAllHostsWithContacts();
-      const allContacts = hosts.flatMap(host => host.contacts);
+      const allContacts = hosts.flatMap((host) => host.contacts);
       res.json(allContacts);
     }
   } catch (error) {
@@ -156,47 +175,63 @@ router.get("/host-contacts", async (req, res) => {
   }
 });
 
-router.post("/host-contacts", isAuthenticated, sanitizeMiddleware, async (req, res) => {
-  // Check if user has permission to manage hosts
-  if (!canManageHosts(req)) {
-    return res.status(403).json({ error: "Insufficient permissions to create host contacts" });
-  }
-  try {
-    const result = insertHostContactSchema.safeParse(req.body);
-    if (!result.success) {
-      return res.status(400).json({ error: result.error.message });
+router.post(
+  "/host-contacts",
+  isAuthenticated,
+  sanitizeMiddleware,
+  async (req, res) => {
+    // Check if user has permission to manage hosts
+    if (!canManageHosts(req)) {
+      return res
+        .status(403)
+        .json({ error: "Insufficient permissions to create host contacts" });
     }
-    const contact = await storage.createHostContact(result.data);
-    res.status(201).json(contact);
-  } catch (error) {
-    console.error("Error creating host contact:", error);
-    res.status(500).json({ error: "Failed to create host contact" });
+    try {
+      const result = insertHostContactSchema.safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ error: result.error.message });
+      }
+      const contact = await storage.createHostContact(result.data);
+      res.status(201).json(contact);
+    } catch (error) {
+      console.error("Error creating host contact:", error);
+      res.status(500).json({ error: "Failed to create host contact" });
+    }
   }
-});
+);
 
-router.patch("/host-contacts/:id", isAuthenticated, sanitizeMiddleware, async (req, res) => {
-  // Check if user has permission to manage hosts
-  if (!canManageHosts(req)) {
-    return res.status(403).json({ error: "Insufficient permissions to update host contacts" });
-  }
-  try {
-    const id = parseInt(req.params.id);
-    const updates = req.body;
-    const contact = await storage.updateHostContact(id, updates);
-    if (!contact) {
-      return res.status(404).json({ error: "Host contact not found" });
+router.patch(
+  "/host-contacts/:id",
+  isAuthenticated,
+  sanitizeMiddleware,
+  async (req, res) => {
+    // Check if user has permission to manage hosts
+    if (!canManageHosts(req)) {
+      return res
+        .status(403)
+        .json({ error: "Insufficient permissions to update host contacts" });
     }
-    res.json(contact);
-  } catch (error) {
-    console.error("Error updating host contact:", error);
-    res.status(500).json({ error: "Failed to update host contact" });
+    try {
+      const id = parseInt(req.params.id);
+      const updates = req.body;
+      const contact = await storage.updateHostContact(id, updates);
+      if (!contact) {
+        return res.status(404).json({ error: "Host contact not found" });
+      }
+      res.json(contact);
+    } catch (error) {
+      console.error("Error updating host contact:", error);
+      res.status(500).json({ error: "Failed to update host contact" });
+    }
   }
-});
+);
 
 router.delete("/host-contacts/:id", isAuthenticated, async (req, res) => {
   // Check if user has permission to manage hosts
   if (!canManageHosts(req)) {
-    return res.status(403).json({ error: "Insufficient permissions to delete host contacts" });
+    return res
+      .status(403)
+      .json({ error: "Insufficient permissions to delete host contacts" });
   }
   try {
     const id = parseInt(req.params.id);

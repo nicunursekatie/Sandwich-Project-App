@@ -26,7 +26,13 @@ interface MentionInputProps {
   disabled?: boolean;
 }
 
-export function MentionInput({ value, onChange, onSend, placeholder, disabled }: MentionInputProps) {
+export function MentionInput({
+  value,
+  onChange,
+  onSend,
+  placeholder,
+  disabled,
+}: MentionInputProps) {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [suggestions, setSuggestions] = useState<MentionSuggestion[]>([]);
   const [selectedSuggestion, setSelectedSuggestion] = useState(0);
@@ -98,54 +104,68 @@ export function MentionInput({ value, onChange, onSend, placeholder, disabled }:
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     const cursorPosition = e.target.selectionStart || 0;
-    
+
     onChange(newValue);
 
     // Check if we're typing a mention
     const textBeforeCursor = newValue.slice(0, cursorPosition);
     const lastAtIndex = textBeforeCursor.lastIndexOf("@");
-    
+
     if (lastAtIndex !== -1) {
       const textAfterAt = textBeforeCursor.slice(lastAtIndex + 1);
-      
+
       // Check if it's a valid mention context (no spaces after @)
       if (!textAfterAt.includes(" ") && textAfterAt.length >= 0) {
         setMentionSearch(textAfterAt.toLowerCase());
         setMentionPosition(lastAtIndex);
-        
+
         // Filter users based on search and sort alphabetically
         const filteredUsers = (users || [])
-          .filter(user => {
-            const fullName = user.firstName && user.lastName 
-              ? `${user.firstName} ${user.lastName}` 
-              : user.displayName || user.firstName || user.email.split('@')[0];
+          .filter((user) => {
+            const fullName =
+              user.firstName && user.lastName
+                ? `${user.firstName} ${user.lastName}`
+                : user.displayName ||
+                  user.firstName ||
+                  user.email.split("@")[0];
             const email = user.email;
             const searchTerm = textAfterAt.toLowerCase();
-            
-            console.log(`Filtering user: ${fullName} (${email}) against "${searchTerm}"`);
-            
-            return fullName.toLowerCase().includes(searchTerm) || 
-                   email.toLowerCase().includes(searchTerm);
+
+            console.log(
+              `Filtering user: ${fullName} (${email}) against "${searchTerm}"`
+            );
+
+            return (
+              fullName.toLowerCase().includes(searchTerm) ||
+              email.toLowerCase().includes(searchTerm)
+            );
           })
           .sort((a, b) => {
-            const nameA = (a.firstName && a.lastName 
-              ? `${a.firstName} ${a.lastName}` 
-              : a.displayName || a.firstName || a.email.split('@')[0]).toLowerCase();
-            const nameB = (b.firstName && b.lastName 
-              ? `${b.firstName} ${b.lastName}` 
-              : b.displayName || b.firstName || b.email.split('@')[0]).toLowerCase();
+            const nameA = (a.firstName && a.lastName
+              ? `${a.firstName} ${a.lastName}`
+              : a.displayName || a.firstName || a.email.split("@")[0]
+            ).toLowerCase();
+            const nameB = (b.firstName && b.lastName
+              ? `${b.firstName} ${b.lastName}`
+              : b.displayName || b.firstName || b.email.split("@")[0]
+            ).toLowerCase();
             return nameA.localeCompare(nameB);
           })
           .slice(0, 5) // Limit to 5 suggestions
-          .map(user => ({
+          .map((user) => ({
             id: user.id,
-            name: user.firstName && user.lastName 
-              ? `${user.firstName} ${user.lastName}` 
-              : user.displayName || user.firstName || user.email.split('@')[0],
-            email: user.email
+            name:
+              user.firstName && user.lastName
+                ? `${user.firstName} ${user.lastName}`
+                : user.displayName ||
+                  user.firstName ||
+                  user.email.split("@")[0],
+            email: user.email,
           }));
 
-        console.log(`Found ${filteredUsers.length} matching users for "@${textAfterAt}"`);
+        console.log(
+          `Found ${filteredUsers.length} matching users for "@${textAfterAt}"`
+        );
         console.log("Filtered users:", filteredUsers);
 
         setSuggestions(filteredUsers);
@@ -164,12 +184,12 @@ export function MentionInput({ value, onChange, onSend, placeholder, disabled }:
     if (showSuggestions) {
       if (e.key === "ArrowDown") {
         e.preventDefault();
-        setSelectedSuggestion(prev => 
+        setSelectedSuggestion((prev) =>
           prev < suggestions.length - 1 ? prev + 1 : 0
         );
       } else if (e.key === "ArrowUp") {
         e.preventDefault();
-        setSelectedSuggestion(prev => 
+        setSelectedSuggestion((prev) =>
           prev > 0 ? prev - 1 : suggestions.length - 1
         );
       } else if (e.key === "Tab" || e.key === "Enter") {
@@ -192,22 +212,25 @@ export function MentionInput({ value, onChange, onSend, placeholder, disabled }:
   const insertMention = (suggestion: MentionSuggestion) => {
     const beforeMention = value.slice(0, mentionPosition);
     const afterCursor = value.slice(inputRef.current?.selectionStart || 0);
-    
+
     // Use quotes if name contains spaces
-    const mentionText = suggestion.name.includes(' ') 
+    const mentionText = suggestion.name.includes(" ")
       ? `"${suggestion.name}"`
       : suggestion.name;
-    
+
     const newValue = `${beforeMention}@${mentionText} ${afterCursor}`;
     onChange(newValue);
     setShowSuggestions(false);
-    
+
     // Focus back to input
     setTimeout(() => {
       if (inputRef.current) {
         const newCursorPosition = beforeMention.length + mentionText.length + 2;
         inputRef.current.focus();
-        inputRef.current.setSelectionRange(newCursorPosition, newCursorPosition);
+        inputRef.current.setSelectionRange(
+          newCursorPosition,
+          newCursorPosition
+        );
       }
     }, 0);
   };
@@ -230,7 +253,7 @@ export function MentionInput({ value, onChange, onSend, placeholder, disabled }:
             disabled={disabled}
             className="pr-12"
           />
-          
+
           {/* Mention suggestions dropdown */}
           {showSuggestions && (
             <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
@@ -238,19 +261,25 @@ export function MentionInput({ value, onChange, onSend, placeholder, disabled }:
                 <div
                   key={suggestion.id}
                   className={`px-3 py-2 cursor-pointer hover:bg-gray-100 ${
-                    index === selectedSuggestion ? "bg-blue-50 border-l-2 border-blue-500" : ""
+                    index === selectedSuggestion
+                      ? "bg-blue-50 border-l-2 border-blue-500"
+                      : ""
                   }`}
                   onClick={() => handleSuggestionClick(suggestion)}
                 >
-                  <div className="font-medium text-gray-900">{suggestion.name}</div>
-                  <div className="text-sm text-gray-500">{suggestion.email}</div>
+                  <div className="font-medium text-gray-900">
+                    {suggestion.name}
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    {suggestion.email}
+                  </div>
                 </div>
               ))}
             </div>
           )}
         </div>
-        
-        <Button 
+
+        <Button
           onClick={onSend}
           disabled={disabled || !value.trim()}
           size="icon"
@@ -258,10 +287,11 @@ export function MentionInput({ value, onChange, onSend, placeholder, disabled }:
           <Send className="h-4 w-4" />
         </Button>
       </div>
-      
+
       {/* Help text */}
       <div className="text-xs text-gray-500 mt-1">
-        Type @ to mention users • Press Tab or Enter to select • Press Esc to cancel
+        Type @ to mention users • Press Tab or Enter to select • Press Esc to
+        cancel
       </div>
     </div>
   );

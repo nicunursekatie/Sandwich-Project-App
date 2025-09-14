@@ -1,7 +1,12 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Edit2, Trash2, Check, X } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
@@ -23,7 +28,11 @@ interface ChatMessageProps {
   onDelete: (messageId: string) => void;
 }
 
-export default function ChatMessageComponent({ message, onEdit, onDelete }: ChatMessageProps) {
+export default function ChatMessageComponent({
+  message,
+  onEdit,
+  onDelete,
+}: ChatMessageProps) {
   const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(message.content);
@@ -46,16 +55,27 @@ export default function ChatMessageComponent({ message, onEdit, onDelete }: Chat
   };
 
   const getUserInitials = (userName: string) => {
-    return userName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    return userName
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
   };
 
   const getAvatarColor = (userId: string) => {
     const colors = [
-      'bg-red-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500',
-      'bg-purple-500', 'bg-pink-500', 'bg-indigo-500', 'bg-teal-500'
+      "bg-red-500",
+      "bg-blue-500",
+      "bg-green-500",
+      "bg-yellow-500",
+      "bg-purple-500",
+      "bg-pink-500",
+      "bg-indigo-500",
+      "bg-teal-500",
     ];
-    const hash = userId.split('').reduce((a, b) => {
-      a = ((a << 5) - a) + b.charCodeAt(0);
+    const hash = userId.split("").reduce((a, b) => {
+      a = (a << 5) - a + b.charCodeAt(0);
       return a & a;
     }, 0);
     return colors[Math.abs(hash) % colors.length];
@@ -63,10 +83,14 @@ export default function ChatMessageComponent({ message, onEdit, onDelete }: Chat
 
   return (
     <div className="flex gap-3 py-2 px-4 hover:bg-gray-50 group">
-      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-semibold ${getAvatarColor(message.userId)}`}>
+      <div
+        className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-semibold ${getAvatarColor(
+          message.userId
+        )}`}
+      >
         {getUserInitials(message.userName)}
       </div>
-      
+
       <div className="flex-1 min-w-0">
         <div className="flex items-baseline gap-2 mb-1">
           <span className="font-semibold text-sm text-gray-900">
@@ -74,10 +98,12 @@ export default function ChatMessageComponent({ message, onEdit, onDelete }: Chat
           </span>
           <span className="text-xs text-gray-500">
             {formatDistanceToNow(message.timestamp, { addSuffix: true })}
-            {message.edited && <span className="ml-1 text-gray-400">(edited)</span>}
+            {message.edited && (
+              <span className="ml-1 text-gray-400">(edited)</span>
+            )}
           </span>
         </div>
-        
+
         {isEditing ? (
           <div className="space-y-2">
             <Textarea
@@ -85,15 +111,19 @@ export default function ChatMessageComponent({ message, onEdit, onDelete }: Chat
               onChange={(e) => setEditContent(e.target.value)}
               className="min-h-[60px] text-sm"
               onKeyDown={(e) => {
-                if (e.key === 'Enter' && e.ctrlKey) {
+                if (e.key === "Enter" && e.ctrlKey) {
                   handleSaveEdit();
-                } else if (e.key === 'Escape') {
+                } else if (e.key === "Escape") {
                   handleCancelEdit();
                 }
               }}
             />
             <div className="flex gap-2">
-              <Button size="sm" onClick={handleSaveEdit} disabled={!editContent.trim()}>
+              <Button
+                size="sm"
+                onClick={handleSaveEdit}
+                disabled={!editContent.trim()}
+              >
                 <Check className="w-3 h-3 mr-1" />
                 Save
               </Button>

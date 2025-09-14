@@ -1,24 +1,36 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { LoadingState } from "@/components/ui/loading";
 import { apiRequest } from "@/lib/queryClient";
-import { 
-  Download, 
-  Search, 
-  Database, 
-  FileText, 
-  Shield, 
+import {
+  Download,
+  Search,
+  Database,
+  FileText,
+  Shield,
   AlertTriangle,
   CheckCircle2,
   RefreshCw,
-  Trash2
+  Trash2,
 } from "lucide-react";
 
 export function DataManagementDashboard() {
@@ -39,7 +51,11 @@ export function DataManagementDashboard() {
   });
 
   // Search functionality
-  const { data: searchResults, isLoading: searchLoading, refetch: performSearch } = useQuery({
+  const {
+    data: searchResults,
+    isLoading: searchLoading,
+    refetch: performSearch,
+  } = useQuery({
     queryKey: ["/api/search", searchQuery, searchType],
     enabled: false, // Manual trigger
   });
@@ -47,24 +63,28 @@ export function DataManagementDashboard() {
   // Export mutations
   const exportCollectionsMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch(`/api/data/export/collections?format=${exportFormat}`);
-      if (!response.ok) throw new Error('Export failed');
-      
-      if (exportFormat === 'csv') {
+      const response = await fetch(
+        `/api/data/export/collections?format=${exportFormat}`
+      );
+      if (!response.ok) throw new Error("Export failed");
+
+      if (exportFormat === "csv") {
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
+        const a = document.createElement("a");
         a.href = url;
-        a.download = 'sandwich_collections.csv';
+        a.download = "sandwich_collections.csv";
         a.click();
         window.URL.revokeObjectURL(url);
       } else {
         const data = await response.json();
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const blob = new Blob([JSON.stringify(data, null, 2)], {
+          type: "application/json",
+        });
         const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
+        const a = document.createElement("a");
         a.href = url;
-        a.download = 'sandwich_collections.json';
+        a.download = "sandwich_collections.json";
         a.click();
         window.URL.revokeObjectURL(url);
       }
@@ -81,29 +101,33 @@ export function DataManagementDashboard() {
         description: "Failed to export collections data",
         variant: "destructive",
       });
-    }
+    },
   });
 
   const exportHostsMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch(`/api/data/export/hosts?format=${exportFormat}`);
-      if (!response.ok) throw new Error('Export failed');
-      
-      if (exportFormat === 'csv') {
+      const response = await fetch(
+        `/api/data/export/hosts?format=${exportFormat}`
+      );
+      if (!response.ok) throw new Error("Export failed");
+
+      if (exportFormat === "csv") {
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
+        const a = document.createElement("a");
         a.href = url;
-        a.download = 'hosts.csv';
+        a.download = "hosts.csv";
         a.click();
         window.URL.revokeObjectURL(url);
       } else {
         const data = await response.json();
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const blob = new Blob([JSON.stringify(data, null, 2)], {
+          type: "application/json",
+        });
         const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
+        const a = document.createElement("a");
         a.href = url;
-        a.download = 'hosts.json';
+        a.download = "hosts.json";
         a.click();
         window.URL.revokeObjectURL(url);
       }
@@ -113,19 +137,22 @@ export function DataManagementDashboard() {
         title: "Export Complete",
         description: "Hosts data exported successfully",
       });
-    }
+    },
   });
 
   // Bulk operations
   const deduplicateHostsMutation = useMutation({
-    mutationFn: () => apiRequest("/api/data/bulk/deduplicate-hosts", { method: "POST" }),
+    mutationFn: () =>
+      apiRequest("/api/data/bulk/deduplicate-hosts", { method: "POST" }),
     onSuccess: (data: any) => {
       toast({
         title: "Deduplication Complete",
         description: `Removed ${data.deleted || 0} duplicate hosts`,
       });
       queryClient.invalidateQueries({ queryKey: ["/api/data/summary"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/data/integrity/check"] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/data/integrity/check"],
+      });
     },
     onError: () => {
       toast({
@@ -133,7 +160,7 @@ export function DataManagementDashboard() {
         description: "Failed to deduplicate hosts",
         variant: "destructive",
       });
-    }
+    },
   });
 
   const handleSearch = () => {
@@ -183,7 +210,9 @@ export function DataManagementDashboard() {
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span>Collections:</span>
-                      <Badge>{summary.collections?.toLocaleString() || 0}</Badge>
+                      <Badge>
+                        {summary.collections?.toLocaleString() || 0}
+                      </Badge>
                     </div>
                     <div className="flex justify-between">
                       <span>Hosts:</span>
@@ -216,20 +245,34 @@ export function DataManagementDashboard() {
                   <div className="space-y-2">
                     <div className="flex justify-between items-center">
                       <span>Total Issues:</span>
-                      <Badge variant={integrityData.summary.totalIssues > 0 ? "destructive" : "secondary"}>
+                      <Badge
+                        variant={
+                          integrityData.summary.totalIssues > 0
+                            ? "destructive"
+                            : "secondary"
+                        }
+                      >
                         {integrityData.summary.totalIssues}
                       </Badge>
                     </div>
                     <div className="flex justify-between items-center">
                       <span>Critical Issues:</span>
-                      <Badge variant={integrityData.summary.criticalIssues > 0 ? "destructive" : "secondary"}>
+                      <Badge
+                        variant={
+                          integrityData.summary.criticalIssues > 0
+                            ? "destructive"
+                            : "secondary"
+                        }
+                      >
                         {integrityData.summary.criticalIssues}
                       </Badge>
                     </div>
                     {integrityData.summary.totalIssues === 0 && (
                       <div className="flex items-center gap-2 text-green-600">
                         <CheckCircle2 className="w-4 h-4" />
-                        <span className="text-sm">Data integrity excellent</span>
+                        <span className="text-sm">
+                          Data integrity excellent
+                        </span>
                       </div>
                     )}
                   </div>
@@ -288,7 +331,7 @@ export function DataManagementDashboard() {
                   placeholder="Search collections, hosts, projects..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                   className="flex-1"
                 />
                 <Select value={searchType} onValueChange={setSearchType}>
@@ -316,47 +359,62 @@ export function DataManagementDashboard() {
                 <div className="space-y-4">
                   <div className="flex items-center gap-2">
                     <Badge variant="secondary">
-                      {searchResults.summary?.total || searchResults.results?.length || 0} results
+                      {searchResults.summary?.total ||
+                        searchResults.results?.length ||
+                        0}{" "}
+                      results
                     </Badge>
                     {searchResults.summary && (
                       <div className="flex gap-2">
                         {searchResults.summary.collections > 0 && (
-                          <Badge variant="outline">Collections: {searchResults.summary.collections}</Badge>
+                          <Badge variant="outline">
+                            Collections: {searchResults.summary.collections}
+                          </Badge>
                         )}
                         {searchResults.summary.hosts > 0 && (
-                          <Badge variant="outline">Hosts: {searchResults.summary.hosts}</Badge>
+                          <Badge variant="outline">
+                            Hosts: {searchResults.summary.hosts}
+                          </Badge>
                         )}
                         {searchResults.summary.projects > 0 && (
-                          <Badge variant="outline">Projects: {searchResults.summary.projects}</Badge>
+                          <Badge variant="outline">
+                            Projects: {searchResults.summary.projects}
+                          </Badge>
                         )}
                         {searchResults.summary.contacts > 0 && (
-                          <Badge variant="outline">Contacts: {searchResults.summary.contacts}</Badge>
+                          <Badge variant="outline">
+                            Contacts: {searchResults.summary.contacts}
+                          </Badge>
                         )}
                       </div>
                     )}
                   </div>
 
                   <div className="space-y-2 max-h-96 overflow-y-auto">
-                    {(searchResults.results || []).map((result: any, index: number) => (
-                      <Card key={index} className="p-4">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <Badge variant="outline" className="capitalize">
-                                {result.type}
-                              </Badge>
-                              <span className="font-medium">{result.title}</span>
+                    {(searchResults.results || []).map(
+                      (result: any, index: number) => (
+                        <Card key={index} className="p-4">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <Badge variant="outline" className="capitalize">
+                                  {result.type}
+                                </Badge>
+                                <span className="font-medium">
+                                  {result.title}
+                                </span>
+                              </div>
+                              <p className="text-sm text-gray-600">
+                                {result.description}
+                              </p>
                             </div>
-                            <p className="text-sm text-gray-600">
-                              {result.description}
-                            </p>
+                            <Badge variant="secondary" className="ml-2">
+                              {Math.round(result.relevance * 100)}% match
+                            </Badge>
                           </div>
-                          <Badge variant="secondary" className="ml-2">
-                            {Math.round(result.relevance * 100)}% match
-                          </Badge>
-                        </div>
-                      </Card>
-                    ))}
+                        </Card>
+                      )
+                    )}
                   </div>
                 </div>
               )}
@@ -378,8 +436,15 @@ export function DataManagementDashboard() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Export Format</label>
-                  <Select value={exportFormat} onValueChange={(value: "csv" | "json") => setExportFormat(value)}>
+                  <label className="text-sm font-medium mb-2 block">
+                    Export Format
+                  </label>
+                  <Select
+                    value={exportFormat}
+                    onValueChange={(value: "csv" | "json") =>
+                      setExportFormat(value)
+                    }
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -428,25 +493,25 @@ export function DataManagementDashboard() {
                   <Database className="w-5 h-5" />
                   Full Dataset
                 </CardTitle>
-                <CardDescription>
-                  Complete backup with all data
-                </CardDescription>
+                <CardDescription>Complete backup with all data</CardDescription>
               </CardHeader>
               <CardContent>
                 <Button
                   onClick={async () => {
                     try {
-                      const response = await fetch('/api/data/export/full-dataset');
-                      if (!response.ok) throw new Error('Export failed');
-                      
+                      const response = await fetch(
+                        "/api/data/export/full-dataset"
+                      );
+                      if (!response.ok) throw new Error("Export failed");
+
                       const blob = await response.blob();
                       const url = window.URL.createObjectURL(blob);
-                      const a = document.createElement('a');
+                      const a = document.createElement("a");
                       a.href = url;
-                      a.download = 'full_dataset.json';
+                      a.download = "full_dataset.json";
                       a.click();
                       window.URL.revokeObjectURL(url);
-                      
+
                       toast({
                         title: "Export Complete",
                         description: "Full dataset exported successfully",
@@ -496,15 +561,22 @@ export function DataManagementDashboard() {
                   ) : (
                     <div className="space-y-3">
                       {integrityData.issues.map((issue: any, index: number) => (
-                        <div key={index} className="flex items-start gap-3 p-3 border rounded-lg">
+                        <div
+                          key={index}
+                          className="flex items-start gap-3 p-3 border rounded-lg"
+                        >
                           <AlertTriangle className="w-5 h-5 text-amber-500 mt-0.5" />
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
-                              <span className="font-medium">{issue.description}</span>
-                              <Badge variant="destructive">{issue.count} items</Badge>
+                              <span className="font-medium">
+                                {issue.description}
+                              </span>
+                              <Badge variant="destructive">
+                                {issue.count} items
+                              </Badge>
                             </div>
                             <p className="text-sm text-gray-600 capitalize">
-                              Type: {issue.type.replace(/_/g, ' ')}
+                              Type: {issue.type.replace(/_/g, " ")}
                             </p>
                           </div>
                         </div>

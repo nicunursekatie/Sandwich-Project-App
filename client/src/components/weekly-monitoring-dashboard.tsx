@@ -3,9 +3,32 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CheckCircle, XCircle, Clock, Mail, RefreshCw, Calendar, MapPin, AlertTriangle, FileBarChart, Users, Info, MessageSquare, Smartphone, Settings, Send, Download } from "lucide-react";
+import {
+  CheckCircle,
+  XCircle,
+  Clock,
+  Mail,
+  RefreshCw,
+  Calendar,
+  MapPin,
+  AlertTriangle,
+  FileBarChart,
+  Users,
+  Info,
+  MessageSquare,
+  Smartphone,
+  Settings,
+  Send,
+  Download,
+} from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 
@@ -60,59 +83,80 @@ export default function WeeklyMonitoringDashboard() {
   const [selectedWeek, setSelectedWeek] = useState(0); // 0 = current week, 1 = last week, etc.
   const [reportWeeks, setReportWeeks] = useState(4); // Number of weeks for multi-week report
   const [showSMSTest, setShowSMSTest] = useState(false);
-  const [testPhoneNumber, setTestPhoneNumber] = useState('');
+  const [testPhoneNumber, setTestPhoneNumber] = useState("");
   const [showAnnouncementPanel, setShowAnnouncementPanel] = useState(false);
-  const [emailingSingleLocation, setEmailingSingleLocation] = useState<string | null>(null);
+  const [emailingSingleLocation, setEmailingSingleLocation] = useState<
+    string | null
+  >(null);
   const [smsingLocation, setSmsingLocation] = useState<string | null>(null);
-  
+
   // Get monitoring status for selected week
-  const { data: submissionStatus = [], isLoading: statusLoading, error: statusError } = useQuery({
-    queryKey: ['/api/monitoring/weekly-status', selectedWeek],
-    queryFn: () => apiRequest('GET', `/api/monitoring/weekly-status/${selectedWeek}`),
+  const {
+    data: submissionStatus = [],
+    isLoading: statusLoading,
+    error: statusError,
+  } = useQuery({
+    queryKey: ["/api/monitoring/weekly-status", selectedWeek],
+    queryFn: () =>
+      apiRequest("GET", `/api/monitoring/weekly-status/${selectedWeek}`),
     refetchInterval: selectedWeek === 0 ? 5 * 60 * 1000 : undefined, // Only auto-refresh for current week
   });
-  
+
   // Get multi-week report
   const { data: multiWeekReport, isLoading: reportLoading } = useQuery({
-    queryKey: ['/api/monitoring/multi-week-report', reportWeeks],
-    queryFn: () => apiRequest('GET', `/api/monitoring/multi-week-report/${reportWeeks}`),
+    queryKey: ["/api/monitoring/multi-week-report", reportWeeks],
+    queryFn: () =>
+      apiRequest("GET", `/api/monitoring/multi-week-report/${reportWeeks}`),
     enabled: reportWeeks > 0,
   });
 
   // Get monitoring statistics
   const { data: stats, isLoading: statsLoading } = useQuery({
-    queryKey: ['/api/monitoring/stats'],
-    queryFn: () => apiRequest('GET', '/api/monitoring/stats'),
+    queryKey: ["/api/monitoring/stats"],
+    queryFn: () => apiRequest("GET", "/api/monitoring/stats"),
     refetchInterval: 5 * 60 * 1000,
   });
 
   // Manual check mutation for current week
   const manualCheckMutation = useMutation({
-    mutationFn: () => apiRequest('POST', '/api/monitoring/check-now'),
+    mutationFn: () => apiRequest("POST", "/api/monitoring/check-now"),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/monitoring/weekly-status'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/monitoring/stats'] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/monitoring/weekly-status"],
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/monitoring/stats"] });
     },
   });
-  
+
   // Check specific week mutation
   const checkWeekMutation = useMutation({
-    mutationFn: (weeksAgo: number) => apiRequest('POST', `/api/monitoring/check-week/${weeksAgo}`),
+    mutationFn: (weeksAgo: number) =>
+      apiRequest("POST", `/api/monitoring/check-week/${weeksAgo}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/monitoring/weekly-status'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/monitoring/multi-week-report'] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/monitoring/weekly-status"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/monitoring/multi-week-report"],
+      });
     },
   });
-  
+
   // SMS mutations
   const sendSMSRemindersMutation = useMutation({
-    mutationFn: (data: { missingLocations: string[]; appUrl?: string }) => 
-      apiRequest('POST', '/api/monitoring/send-sms-reminders', data),
+    mutationFn: (data: { missingLocations: string[]; appUrl?: string }) =>
+      apiRequest("POST", "/api/monitoring/send-sms-reminders", data),
   });
-  
+
   const sendSingleSMSMutation = useMutation({
-    mutationFn: (data: { location: string; appUrl?: string }) => 
-      apiRequest('POST', `/api/monitoring/send-sms-reminder/${encodeURIComponent(data.location)}`, { appUrl: data.appUrl }),
+    mutationFn: (data: { location: string; appUrl?: string }) =>
+      apiRequest(
+        "POST",
+        `/api/monitoring/send-sms-reminder/${encodeURIComponent(
+          data.location
+        )}`,
+        { appUrl: data.appUrl }
+      ),
     onMutate: (data) => {
       setSmsingLocation(data.location);
     },
@@ -120,22 +164,26 @@ export default function WeeklyMonitoringDashboard() {
       setSmsingLocation(null);
     },
   });
-  
+
   const testSMSMutation = useMutation({
-    mutationFn: (data: { phoneNumber: string; appUrl?: string }) => 
-      apiRequest('POST', '/api/monitoring/test-sms', data),
+    mutationFn: (data: { phoneNumber: string; appUrl?: string }) =>
+      apiRequest("POST", "/api/monitoring/test-sms", data),
   });
 
   // Function to generate stylized export of non-reporting groups
   const generateNonReportingExport = () => {
     if (!submissionStatus || !Array.isArray(submissionStatus)) return;
 
-    const nonReportingGroups = submissionStatus.filter(status => !status.hasSubmitted);
-    const reportingGroups = submissionStatus.filter(status => status.hasSubmitted);
-    
+    const nonReportingGroups = submissionStatus.filter(
+      (status) => !status.hasSubmitted
+    );
+    const reportingGroups = submissionStatus.filter(
+      (status) => status.hasSubmitted
+    );
+
     const currentDate = new Date();
     const weekLabel = getWeekLabel(selectedWeek);
-    
+
     // Create HTML content for the export
     const htmlContent = `
       <!DOCTYPE html>
@@ -318,22 +366,42 @@ export default function WeeklyMonitoringDashboard() {
           <div class="section-title">
             ❌ Locations Missing Reports
           </div>
-          ${nonReportingGroups.length === 0 ? 
-            '<div class="empty-state"><div class="empty-icon">🎉</div><strong>Excellent!</strong><br>All locations have submitted their reports this week!</div>' :
-            nonReportingGroups.map(status => `
+          ${
+            nonReportingGroups.length === 0
+              ? '<div class="empty-state"><div class="empty-icon">🎉</div><strong>Excellent!</strong><br>All locations have submitted their reports this week!</div>'
+              : nonReportingGroups
+                  .map(
+                    (status) => `
               <div class="status-item missing">
                 <div class="status-icon missing">✗</div>
                 <div>
                   ${status.location}
-                  ${status.location === 'Dunwoody/PTC' && status.dunwoodyStatus ? 
-                    `<span class="dunwoody-badge">
-                      Missing: ${!status.dunwoodyStatus.lisaHiles && !status.dunwoodyStatus.stephanieOrMarcy ? 'Both Required' : 
-                                 !status.dunwoodyStatus.lisaHiles ? 'Lisa Hiles' : 'Stephanie/Marcy'}
-                    </span>` : ''}
-                  ${status.lastSubmissionDate ? `<br><small style="color: #6b7280;">Last submission: ${new Date(status.lastSubmissionDate).toLocaleDateString()}</small>` : ''}
+                  ${
+                    status.location === "Dunwoody/PTC" && status.dunwoodyStatus
+                      ? `<span class="dunwoody-badge">
+                      Missing: ${
+                        !status.dunwoodyStatus.lisaHiles &&
+                        !status.dunwoodyStatus.stephanieOrMarcy
+                          ? "Both Required"
+                          : !status.dunwoodyStatus.lisaHiles
+                          ? "Lisa Hiles"
+                          : "Stephanie/Marcy"
+                      }
+                    </span>`
+                      : ""
+                  }
+                  ${
+                    status.lastSubmissionDate
+                      ? `<br><small style="color: #6b7280;">Last submission: ${new Date(
+                          status.lastSubmissionDate
+                        ).toLocaleDateString()}</small>`
+                      : ""
+                  }
                 </div>
               </div>
-            `).join('')
+            `
+                  )
+                  .join("")
           }
         </div>
 
@@ -341,18 +409,28 @@ export default function WeeklyMonitoringDashboard() {
           <div class="section-title">
             ✅ Locations With Reports
           </div>
-          ${reportingGroups.length === 0 ? 
-            '<div style="text-align: center; color: #6b7280; padding: 20px;">No locations have submitted reports yet.</div>' :
-            reportingGroups.map(status => `
+          ${
+            reportingGroups.length === 0
+              ? '<div style="text-align: center; color: #6b7280; padding: 20px;">No locations have submitted reports yet.</div>'
+              : reportingGroups
+                  .map(
+                    (status) => `
               <div class="status-item submitted">
                 <div class="status-icon submitted">✓</div>
                 <div>
                   ${status.location}
-                  ${status.submittedBy && status.submittedBy.length > 0 ? 
-                    `<br><small style="color: #6b7280;">Submitted by: ${status.submittedBy.join(', ')}</small>` : ''}
+                  ${
+                    status.submittedBy && status.submittedBy.length > 0
+                      ? `<br><small style="color: #6b7280;">Submitted by: ${status.submittedBy.join(
+                          ", "
+                        )}</small>`
+                      : ""
+                  }
                 </div>
               </div>
-            `).join('')
+            `
+                  )
+                  .join("")
           }
         </div>
 
@@ -365,38 +443,46 @@ export default function WeeklyMonitoringDashboard() {
     `;
 
     // Create and download the report
-    const blob = new Blob([htmlContent], { type: 'text/html' });
+    const blob = new Blob([htmlContent], { type: "text/html" });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
-    link.download = `Weekly-Monitoring-${weekLabel.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.html`;
+    link.download = `Weekly-Monitoring-${weekLabel.replace(/\s+/g, "-")}-${
+      new Date().toISOString().split("T")[0]
+    }.html`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
   };
-  
+
   // SMS announcement mutation
   const sendAnnouncementMutation = useMutation({
-    mutationFn: (data: { testMode?: boolean; testEmail?: string }) => 
-      apiRequest('POST', '/api/sms-announcement/send-sms-announcement', data),
+    mutationFn: (data: { testMode?: boolean; testEmail?: string }) =>
+      apiRequest("POST", "/api/sms-announcement/send-sms-announcement", data),
   });
-  
+
   // Get SMS configuration status
   const { data: smsConfig } = useQuery({
-    queryKey: ['/api/monitoring/sms-config'],
-    queryFn: () => apiRequest('GET', '/api/monitoring/sms-config'),
+    queryKey: ["/api/monitoring/sms-config"],
+    queryFn: () => apiRequest("GET", "/api/monitoring/sms-config"),
   });
 
   // Send test email mutation
   const testEmailMutation = useMutation({
-    mutationFn: () => apiRequest('POST', '/api/monitoring/test-email'),
+    mutationFn: () => apiRequest("POST", "/api/monitoring/test-email"),
   });
 
   // Email reminder mutations
   const sendSingleEmailMutation = useMutation({
-    mutationFn: (data: { location: string; appUrl?: string }) => 
-      apiRequest('POST', `/api/monitoring/send-email-reminder/${encodeURIComponent(data.location)}`, { appUrl: data.appUrl }),
+    mutationFn: (data: { location: string; appUrl?: string }) =>
+      apiRequest(
+        "POST",
+        `/api/monitoring/send-email-reminder/${encodeURIComponent(
+          data.location
+        )}`,
+        { appUrl: data.appUrl }
+      ),
     onMutate: (data) => {
       setEmailingSingleLocation(data.location);
     },
@@ -406,39 +492,46 @@ export default function WeeklyMonitoringDashboard() {
   });
 
   const getStatusColor = (hasSubmitted: boolean) => {
-    return hasSubmitted 
-      ? "bg-green-100 text-green-800 border-green-200" 
+    return hasSubmitted
+      ? "bg-green-100 text-green-800 border-green-200"
       : "bg-red-100 text-red-800 border-red-200";
   };
 
   const getStatusIcon = (hasSubmitted: boolean) => {
-    return hasSubmitted 
-      ? <CheckCircle className="h-4 w-4" />
-      : <XCircle className="h-4 w-4" />;
+    return hasSubmitted ? (
+      <CheckCircle className="h-4 w-4" />
+    ) : (
+      <XCircle className="h-4 w-4" />
+    );
   };
-  
+
   const getWeekLabel = (weeksAgo: number) => {
     if (weeksAgo === 0) return "This Week";
     if (weeksAgo === 1) return "Last Week";
     return `${weeksAgo} Weeks Ago`;
   };
-  
+
   const getDunwoodyBadge = (status: WeeklySubmissionStatus) => {
-    if (status.location !== 'Dunwoody/PTC' || !status.dunwoodyStatus) return null;
-    
+    if (status.location !== "Dunwoody/PTC" || !status.dunwoodyStatus)
+      return null;
+
     const { lisaHiles, stephanieOrMarcy, complete } = status.dunwoodyStatus;
-    
+
     if (complete) {
-      return <Badge className="bg-green-100 text-green-800 text-xs ml-2">Both Required ✓</Badge>;
+      return (
+        <Badge className="bg-green-100 text-green-800 text-xs ml-2">
+          Both Required ✓
+        </Badge>
+      );
     }
-    
+
     const missing = [];
-    if (!lisaHiles) missing.push('Lisa Hiles');
-    if (!stephanieOrMarcy) missing.push('Stephanie/Marcy');
-    
+    if (!lisaHiles) missing.push("Lisa Hiles");
+    if (!stephanieOrMarcy) missing.push("Stephanie/Marcy");
+
     return (
       <Badge className="bg-orange-100 text-orange-800 text-xs ml-2">
-        Missing: {missing.join(', ')}
+        Missing: {missing.join(", ")}
       </Badge>
     );
   };
@@ -449,7 +542,8 @@ export default function WeeklyMonitoringDashboard() {
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
-            Failed to load monitoring data. Please check your connection and try again.
+            Failed to load monitoring data. Please check your connection and try
+            again.
           </AlertDescription>
         </Alert>
       </div>
@@ -472,14 +566,18 @@ export default function WeeklyMonitoringDashboard() {
           <Button
             onClick={generateNonReportingExport}
             variant="outline"
-            disabled={!submissionStatus || !Array.isArray(submissionStatus) || submissionStatus.length === 0}
+            disabled={
+              !submissionStatus ||
+              !Array.isArray(submissionStatus) ||
+              submissionStatus.length === 0
+            }
             className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2 h-8 sm:h-9 text-purple-700 border-purple-200 hover:bg-purple-50"
           >
             <Download className="h-3 w-3 sm:h-4 sm:w-4" />
             <span className="hidden lg:inline">Export Report</span>
             <span className="lg:hidden">Export</span>
           </Button>
-          
+
           <Button
             onClick={() => testEmailMutation.mutate()}
             variant="outline"
@@ -487,33 +585,46 @@ export default function WeeklyMonitoringDashboard() {
             className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2 h-8 sm:h-9"
           >
             <Mail className="h-3 w-3 sm:h-4 sm:w-4" />
-            <span className="hidden sm:inline">{testEmailMutation.isPending ? "Sending..." : "Test Email"}</span>
-            <span className="sm:hidden">{testEmailMutation.isPending ? "Send..." : "Email"}</span>
+            <span className="hidden sm:inline">
+              {testEmailMutation.isPending ? "Sending..." : "Test Email"}
+            </span>
+            <span className="sm:hidden">
+              {testEmailMutation.isPending ? "Send..." : "Email"}
+            </span>
           </Button>
-          
+
           {smsConfig?.isConfigured && (
             <Button
               onClick={() => {
                 const missingLocations = submissionStatus
-                  .filter(s => !s.hasSubmitted)
-                  .map(s => s.location);
+                  .filter((s) => !s.hasSubmitted)
+                  .map((s) => s.location);
                 if (missingLocations.length > 0) {
-                  sendSMSRemindersMutation.mutate({ 
+                  sendSMSRemindersMutation.mutate({
                     missingLocations,
-                    appUrl: window.location.origin 
+                    appUrl: window.location.origin,
                   });
                 }
               }}
               variant="outline"
-              disabled={sendSMSRemindersMutation.isPending || !submissionStatus.some(s => !s.hasSubmitted)}
+              disabled={
+                sendSMSRemindersMutation.isPending ||
+                !submissionStatus.some((s) => !s.hasSubmitted)
+              }
               className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-green-700 border-green-200 hover:bg-green-50 px-2 sm:px-3 py-1 sm:py-2 h-8 sm:h-9"
             >
               <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden lg:inline">{sendSMSRemindersMutation.isPending ? "Sending SMS..." : "Send SMS Reminders"}</span>
-              <span className="lg:hidden">{sendSMSRemindersMutation.isPending ? "SMS..." : "SMS All"}</span>
+              <span className="hidden lg:inline">
+                {sendSMSRemindersMutation.isPending
+                  ? "Sending SMS..."
+                  : "Send SMS Reminders"}
+              </span>
+              <span className="lg:hidden">
+                {sendSMSRemindersMutation.isPending ? "SMS..." : "SMS All"}
+              </span>
             </Button>
           )}
-          
+
           <Button
             onClick={() => setShowSMSTest(!showSMSTest)}
             variant="outline"
@@ -524,7 +635,7 @@ export default function WeeklyMonitoringDashboard() {
             <span className="hidden sm:inline">Test SMS</span>
             <span className="sm:hidden">Test</span>
           </Button>
-          
+
           <Button
             onClick={() => setShowAnnouncementPanel(!showAnnouncementPanel)}
             variant="outline"
@@ -533,19 +644,39 @@ export default function WeeklyMonitoringDashboard() {
             <Send className="h-3 w-3 sm:h-4 sm:w-4" />
             <span>SMS Announcement</span>
           </Button>
-          
+
           <Button
-            onClick={() => selectedWeek === 0 ? manualCheckMutation.mutate() : checkWeekMutation.mutate(selectedWeek)}
-            disabled={manualCheckMutation.isPending || checkWeekMutation.isPending}
+            onClick={() =>
+              selectedWeek === 0
+                ? manualCheckMutation.mutate()
+                : checkWeekMutation.mutate(selectedWeek)
+            }
+            disabled={
+              manualCheckMutation.isPending || checkWeekMutation.isPending
+            }
             className="flex items-center gap-1 sm:gap-2 bg-[#236383] hover:bg-[#1d5470] text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2 h-8 sm:h-9"
           >
-            <RefreshCw className={`h-3 w-3 sm:h-4 sm:w-4 ${(manualCheckMutation.isPending || checkWeekMutation.isPending) ? 'animate-spin' : ''}`} />
-            <span className="hidden lg:inline">{(manualCheckMutation.isPending || checkWeekMutation.isPending) ? "Checking..." : `Check ${getWeekLabel(selectedWeek)}`}</span>
-            <span className="lg:hidden">{(manualCheckMutation.isPending || checkWeekMutation.isPending) ? "Check..." : "Check"}</span>
+            <RefreshCw
+              className={`h-3 w-3 sm:h-4 sm:w-4 ${
+                manualCheckMutation.isPending || checkWeekMutation.isPending
+                  ? "animate-spin"
+                  : ""
+              }`}
+            />
+            <span className="hidden lg:inline">
+              {manualCheckMutation.isPending || checkWeekMutation.isPending
+                ? "Checking..."
+                : `Check ${getWeekLabel(selectedWeek)}`}
+            </span>
+            <span className="lg:hidden">
+              {manualCheckMutation.isPending || checkWeekMutation.isPending
+                ? "Check..."
+                : "Check"}
+            </span>
           </Button>
         </div>
       </div>
-      
+
       {/* Week Selection */}
       <Card className="mb-6">
         <CardHeader>
@@ -558,7 +689,10 @@ export default function WeeklyMonitoringDashboard() {
           <div className="flex items-center gap-4">
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium">Week:</label>
-              <Select value={selectedWeek.toString()} onValueChange={(value) => setSelectedWeek(parseInt(value))}>
+              <Select
+                value={selectedWeek.toString()}
+                onValueChange={(value) => setSelectedWeek(parseInt(value))}
+              >
                 <SelectTrigger className="w-[200px]">
                   <SelectValue />
                 </SelectTrigger>
@@ -596,7 +730,7 @@ export default function WeeklyMonitoringDashboard() {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center gap-2">
@@ -610,26 +744,30 @@ export default function WeeklyMonitoringDashboard() {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center gap-2">
                 <XCircle className="h-5 w-5 text-red-600" />
                 <div>
                   <p className="text-sm text-gray-600">Missing</p>
-                  <p className="text-lg font-semibold">{stats.missingLocations}</p>
+                  <p className="text-lg font-semibold">
+                    {stats.missingLocations}
+                  </p>
                 </div>
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center gap-2">
                 <Clock className="h-5 w-5 text-teal-600" />
                 <div>
                   <p className="text-sm text-gray-600">Next Check</p>
-                  <p className="text-sm font-semibold">{stats.nextScheduledCheck}</p>
+                  <p className="text-sm font-semibold">
+                    {stats.nextScheduledCheck}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -665,7 +803,7 @@ export default function WeeklyMonitoringDashboard() {
           </div>
         </CardContent>
       </Card>
-      
+
       {/* SMS Test Panel */}
       {showSMSTest && (
         <Card className="mb-6">
@@ -681,7 +819,9 @@ export default function WeeklyMonitoringDashboard() {
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 text-green-700">
                     <CheckCircle className="h-4 w-4" />
-                    <span className="text-sm">SMS service is configured and ready</span>
+                    <span className="text-sm">
+                      SMS service is configured and ready
+                    </span>
                   </div>
                   <div className="flex gap-2">
                     <input
@@ -692,15 +832,19 @@ export default function WeeklyMonitoringDashboard() {
                       className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
                     />
                     <Button
-                      onClick={() => testSMSMutation.mutate({ 
-                        phoneNumber: testPhoneNumber,
-                        appUrl: window.location.origin 
-                      })}
+                      onClick={() =>
+                        testSMSMutation.mutate({
+                          phoneNumber: testPhoneNumber,
+                          appUrl: window.location.origin,
+                        })
+                      }
                       disabled={testSMSMutation.isPending || !testPhoneNumber}
                       className="flex items-center gap-2"
                     >
                       <MessageSquare className="h-4 w-4" />
-                      {testSMSMutation.isPending ? "Sending..." : "Send Test SMS"}
+                      {testSMSMutation.isPending
+                        ? "Sending..."
+                        : "Send Test SMS"}
                     </Button>
                   </div>
                   {testSMSMutation.isSuccess && (
@@ -715,7 +859,8 @@ export default function WeeklyMonitoringDashboard() {
                     <Alert variant="destructive">
                       <AlertTriangle className="h-4 w-4" />
                       <AlertDescription>
-                        Failed to send test SMS. Check your phone number format and Twilio configuration.
+                        Failed to send test SMS. Check your phone number format
+                        and Twilio configuration.
                       </AlertDescription>
                     </Alert>
                   )}
@@ -724,13 +869,17 @@ export default function WeeklyMonitoringDashboard() {
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 text-orange-700">
                     <Settings className="h-4 w-4" />
-                    <span className="text-sm">SMS service requires configuration</span>
+                    <span className="text-sm">
+                      SMS service requires configuration
+                    </span>
                   </div>
                   <div className="text-sm text-gray-600">
                     <p>Missing environment variables:</p>
                     <ul className="list-disc list-inside mt-1">
-                      {smsConfig?.missingItems?.map(item => (
-                        <li key={item} className="font-mono text-xs">{item}</li>
+                      {smsConfig?.missingItems?.map((item) => (
+                        <li key={item} className="font-mono text-xs">
+                          {item}
+                        </li>
                       ))}
                     </ul>
                   </div>
@@ -753,29 +902,41 @@ export default function WeeklyMonitoringDashboard() {
           <CardContent>
             <div className="space-y-4">
               <div className="bg-teal-50 p-4 rounded-lg">
-                <h4 className="font-medium text-teal-900 mb-2">What this announcement does:</h4>
+                <h4 className="font-medium text-teal-900 mb-2">
+                  What this announcement does:
+                </h4>
                 <ul className="text-sm text-teal-800 space-y-1">
                   <li>• Sends an email to all registered app users</li>
                   <li>• Explains the new SMS reminder feature</li>
-                  <li>• Includes a link for users to opt-in to SMS notifications</li>
+                  <li>
+                    • Includes a link for users to opt-in to SMS notifications
+                  </li>
                   <li>• Emphasizes that SMS is completely voluntary</li>
                 </ul>
               </div>
 
               <div className="flex gap-3">
                 <Button
-                  onClick={() => sendAnnouncementMutation.mutate({ testMode: true })}
+                  onClick={() =>
+                    sendAnnouncementMutation.mutate({ testMode: true })
+                  }
                   variant="outline"
                   disabled={sendAnnouncementMutation.isPending}
                   className="flex items-center gap-2"
                 >
                   <Mail className="h-4 w-4" />
-                  {sendAnnouncementMutation.isPending ? "Sending..." : "Send Test (to yourself)"}
+                  {sendAnnouncementMutation.isPending
+                    ? "Sending..."
+                    : "Send Test (to yourself)"}
                 </Button>
-                
+
                 <Button
                   onClick={() => {
-                    if (confirm("Send SMS announcement to ALL registered users? This cannot be undone.")) {
+                    if (
+                      confirm(
+                        "Send SMS announcement to ALL registered users? This cannot be undone."
+                      )
+                    ) {
                       sendAnnouncementMutation.mutate({ testMode: false });
                     }
                   }}
@@ -783,7 +944,9 @@ export default function WeeklyMonitoringDashboard() {
                   className="flex items-center gap-2 bg-[#236383] hover:bg-[#1d5470]"
                 >
                   <Send className="h-4 w-4" />
-                  {sendAnnouncementMutation.isPending ? "Sending..." : "Send to All Users"}
+                  {sendAnnouncementMutation.isPending
+                    ? "Sending..."
+                    : "Send to All Users"}
                 </Button>
               </div>
 
@@ -795,7 +958,7 @@ export default function WeeklyMonitoringDashboard() {
                     {sendAnnouncementMutation.data?.smsOptInUrl && (
                       <div className="mt-2">
                         <span className="font-medium">Opt-in URL: </span>
-                        <a 
+                        <a
                           href={sendAnnouncementMutation.data.smsOptInUrl}
                           target="_blank"
                           rel="noopener noreferrer"
@@ -834,7 +997,7 @@ export default function WeeklyMonitoringDashboard() {
             Multi-Week Report
           </TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="weekly" className="mt-6">
           {/* Current Week Status */}
           <Card>
@@ -848,13 +1011,16 @@ export default function WeeklyMonitoringDashboard() {
               {statusLoading ? (
                 <div className="flex items-center justify-center py-8">
                   <RefreshCw className="h-6 w-6 animate-spin text-gray-400" />
-                  <span className="ml-2 text-gray-600">Loading submission status...</span>
+                  <span className="ml-2 text-gray-600">
+                    Loading submission status...
+                  </span>
                 </div>
               ) : statusError ? (
                 <div className="text-center py-8 text-red-500">
                   Error loading submission data: {statusError.message}
                 </div>
-              ) : Array.isArray(submissionStatus) && submissionStatus.length > 0 ? (
+              ) : Array.isArray(submissionStatus) &&
+                submissionStatus.length > 0 ? (
                 <div className="grid gap-3">
                   {submissionStatus.map((status: WeeklySubmissionStatus) => (
                     <div
@@ -862,24 +1028,31 @@ export default function WeeklyMonitoringDashboard() {
                       className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 rounded-lg border bg-white hover:shadow-sm transition-shadow gap-3"
                     >
                       <div className="flex items-center gap-3">
-                        <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
-                          status.hasSubmitted ? 'bg-green-100' : 'bg-red-100'
-                        }`}>
+                        <div
+                          className={`flex items-center justify-center w-8 h-8 rounded-full ${
+                            status.hasSubmitted ? "bg-green-100" : "bg-red-100"
+                          }`}
+                        >
                           {getStatusIcon(status.hasSubmitted)}
                         </div>
                         <div className="flex-1">
                           <div className="flex items-center">
-                            <h4 className="font-medium text-gray-900">{status.location}</h4>
+                            <h4 className="font-medium text-gray-900">
+                              {status.location}
+                            </h4>
                             {getDunwoodyBadge(status)}
                           </div>
                           {status.lastSubmissionDate && (
                             <p className="text-sm text-gray-600">
-                              Last submission: {(() => {
+                              Last submission:{" "}
+                              {(() => {
                                 // Handle date without timezone conversion issues
                                 const dateStr = status.lastSubmissionDate;
-                                if (dateStr.includes('-')) {
+                                if (dateStr.includes("-")) {
                                   // Parse YYYY-MM-DD format directly to avoid timezone issues
-                                  const [year, month, day] = dateStr.split('-').map(Number);
+                                  const [year, month, day] = dateStr
+                                    .split("-")
+                                    .map(Number);
                                   const date = new Date(year, month - 1, day); // month is 0-indexed
                                   return date.toLocaleDateString();
                                 }
@@ -887,53 +1060,66 @@ export default function WeeklyMonitoringDashboard() {
                               })()}
                             </p>
                           )}
-                          {status.submittedBy && status.submittedBy.length > 0 && (
-                            <p className="text-sm text-gray-500">
-                              Submitted by: {status.submittedBy.join(', ')}
-                            </p>
-                          )}
+                          {status.submittedBy &&
+                            status.submittedBy.length > 0 && (
+                              <p className="text-sm text-gray-500">
+                                Submitted by: {status.submittedBy.join(", ")}
+                              </p>
+                            )}
                         </div>
                       </div>
-                      
+
                       <div className="flex items-center gap-2 sm:flex-shrink-0">
-                        <Badge 
-                          className={`${getStatusColor(status.hasSubmitted)} flex items-center gap-1`}
+                        <Badge
+                          className={`${getStatusColor(
+                            status.hasSubmitted
+                          )} flex items-center gap-1`}
                         >
                           {getStatusIcon(status.hasSubmitted)}
                           {status.hasSubmitted ? "Submitted" : "Missing"}
                         </Badge>
-                        
+
                         {!status.hasSubmitted && (
                           <div className="flex items-center gap-1">
                             {/* Email Reminder Button */}
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => sendSingleEmailMutation.mutate({ 
-                                location: status.location,
-                                appUrl: window.location.origin 
-                              })}
-                              disabled={emailingSingleLocation === status.location}
+                              onClick={() =>
+                                sendSingleEmailMutation.mutate({
+                                  location: status.location,
+                                  appUrl: window.location.origin,
+                                })
+                              }
+                              disabled={
+                                emailingSingleLocation === status.location
+                              }
                               className="flex items-center gap-1 text-xs px-2 py-1 h-7 text-teal-600 border-teal-200 hover:bg-teal-50"
                             >
                               <Mail className="h-3 w-3" />
-                              {emailingSingleLocation === status.location ? "Sending..." : "Email"}
+                              {emailingSingleLocation === status.location
+                                ? "Sending..."
+                                : "Email"}
                             </Button>
-                            
+
                             {/* SMS Button (only if configured) */}
                             {smsConfig?.isConfigured && (
                               <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => sendSingleSMSMutation.mutate({ 
-                                  location: status.location,
-                                  appUrl: window.location.origin 
-                                })}
+                                onClick={() =>
+                                  sendSingleSMSMutation.mutate({
+                                    location: status.location,
+                                    appUrl: window.location.origin,
+                                  })
+                                }
                                 disabled={smsingLocation === status.location}
                                 className="flex items-center gap-1 text-xs px-2 py-1 h-7"
                               >
                                 <MessageSquare className="h-3 w-3" />
-                                {smsingLocation === status.location ? "Sending..." : "SMS"}
+                                {smsingLocation === status.location
+                                  ? "Sending..."
+                                  : "SMS"}
                               </Button>
                             )}
                           </div>
@@ -944,13 +1130,14 @@ export default function WeeklyMonitoringDashboard() {
                 </div>
               ) : (
                 <div className="text-center py-8 text-gray-500">
-                  No submission data available for this week. (Data: {JSON.stringify(submissionStatus)})
+                  No submission data available for this week. (Data:{" "}
+                  {JSON.stringify(submissionStatus)})
                 </div>
               )}
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="report" className="mt-6">
           {/* Multi-Week Report */}
           <div className="space-y-6">
@@ -964,8 +1151,13 @@ export default function WeeklyMonitoringDashboard() {
               <CardContent>
                 <div className="flex items-center gap-4">
                   <div className="flex flex-col gap-2">
-                    <label className="text-sm font-medium">Number of weeks to analyze:</label>
-                    <Select value={reportWeeks.toString()} onValueChange={(value) => setReportWeeks(parseInt(value))}>
+                    <label className="text-sm font-medium">
+                      Number of weeks to analyze:
+                    </label>
+                    <Select
+                      value={reportWeeks.toString()}
+                      onValueChange={(value) => setReportWeeks(parseInt(value))}
+                    >
                       <SelectTrigger className="w-[150px]">
                         <SelectValue />
                       </SelectTrigger>
@@ -982,62 +1174,115 @@ export default function WeeklyMonitoringDashboard() {
                 </div>
               </CardContent>
             </Card>
-            
+
             {reportLoading ? (
               <div className="flex items-center justify-center py-8">
                 <RefreshCw className="h-6 w-6 animate-spin text-gray-400" />
-                <span className="ml-2 text-gray-600">Loading multi-week report...</span>
+                <span className="ml-2 text-gray-600">
+                  Loading multi-week report...
+                </span>
               </div>
-            ) : multiWeekReport && multiWeekReport.weeks && multiWeekReport.summary ? (
+            ) : multiWeekReport &&
+              multiWeekReport.weeks &&
+              multiWeekReport.summary ? (
               <>
                 {/* Summary Statistics */}
                 <Card>
                   <CardHeader>
-                    <CardTitle>Summary Statistics ({multiWeekReport.reportPeriod})</CardTitle>
+                    <CardTitle>
+                      Summary Statistics ({multiWeekReport.reportPeriod})
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="space-y-2">
-                        <h4 className="font-medium text-green-700">Most Reliable (≥75%)</h4>
+                        <h4 className="font-medium text-green-700">
+                          Most Reliable (≥75%)
+                        </h4>
                         <div className="space-y-1">
-                          {multiWeekReport.summary.mostReliable && multiWeekReport.summary.mostReliable.map ? multiWeekReport.summary.mostReliable.map((location: string) => (
-                            <div key={location} className="flex items-center gap-2 text-sm">
-                              <CheckCircle className="h-4 w-4 text-green-600" />
-                              <span>{location}</span>
-                              <Badge className="bg-green-100 text-green-800 text-xs">
-                                {multiWeekReport.summary.overallStats[location]?.percentage}%
-                              </Badge>
+                          {multiWeekReport.summary.mostReliable &&
+                          multiWeekReport.summary.mostReliable.map ? (
+                            multiWeekReport.summary.mostReliable.map(
+                              (location: string) => (
+                                <div
+                                  key={location}
+                                  className="flex items-center gap-2 text-sm"
+                                >
+                                  <CheckCircle className="h-4 w-4 text-green-600" />
+                                  <span>{location}</span>
+                                  <Badge className="bg-green-100 text-green-800 text-xs">
+                                    {
+                                      multiWeekReport.summary.overallStats[
+                                        location
+                                      ]?.percentage
+                                    }
+                                    %
+                                  </Badge>
+                                </div>
+                              )
+                            )
+                          ) : (
+                            <div className="text-sm text-gray-500">
+                              No data available
                             </div>
-                          )) : <div className="text-sm text-gray-500">No data available</div>}
+                          )}
                         </div>
                       </div>
-                      
+
                       <div className="space-y-2">
-                        <h4 className="font-medium text-red-700">Most Missing</h4>
+                        <h4 className="font-medium text-red-700">
+                          Most Missing
+                        </h4>
                         <div className="space-y-1">
-                          {multiWeekReport.summary.mostMissing && multiWeekReport.summary.mostMissing.map ? multiWeekReport.summary.mostMissing.map((location: string) => (
-                            <div key={location} className="flex items-center gap-2 text-sm">
-                              <XCircle className="h-4 w-4 text-red-600" />
-                              <span>{location}</span>
-                              <Badge className="bg-red-100 text-red-800 text-xs">
-                                {multiWeekReport.summary.overallStats[location]?.missed} missed
-                              </Badge>
+                          {multiWeekReport.summary.mostMissing &&
+                          multiWeekReport.summary.mostMissing.map ? (
+                            multiWeekReport.summary.mostMissing.map(
+                              (location: string) => (
+                                <div
+                                  key={location}
+                                  className="flex items-center gap-2 text-sm"
+                                >
+                                  <XCircle className="h-4 w-4 text-red-600" />
+                                  <span>{location}</span>
+                                  <Badge className="bg-red-100 text-red-800 text-xs">
+                                    {
+                                      multiWeekReport.summary.overallStats[
+                                        location
+                                      ]?.missed
+                                    }{" "}
+                                    missed
+                                  </Badge>
+                                </div>
+                              )
+                            )
+                          ) : (
+                            <div className="text-sm text-gray-500">
+                              No data available
                             </div>
-                          )) : <div className="text-sm text-gray-500">No data available</div>}
+                          )}
                         </div>
                       </div>
-                      
+
                       <div className="space-y-2">
-                        <h4 className="font-medium text-gray-700">Overall Stats</h4>
+                        <h4 className="font-medium text-gray-700">
+                          Overall Stats
+                        </h4>
                         <div className="text-sm space-y-1">
-                          <p>Total weeks analyzed: {multiWeekReport.summary.totalWeeks || 0}</p>
-                          <p>Locations tracked: {multiWeekReport.summary.locationsTracked?.length || 0}</p>
+                          <p>
+                            Total weeks analyzed:{" "}
+                            {multiWeekReport.summary.totalWeeks || 0}
+                          </p>
+                          <p>
+                            Locations tracked:{" "}
+                            {multiWeekReport.summary.locationsTracked?.length ||
+                              0}
+                          </p>
                         </div>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
-                
+
                 {/* Week-by-Week Breakdown */}
                 <Card>
                   <CardHeader>
@@ -1045,34 +1290,63 @@ export default function WeeklyMonitoringDashboard() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {multiWeekReport.weeks && multiWeekReport.weeks.map ? multiWeekReport.weeks.map((week: any, index: number) => (
-                        <div key={index} className="border rounded-lg p-4">
-                          <h4 className="font-medium mb-3">{week.weekLabel}</h4>
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                            {week.submissionStatus && week.submissionStatus.map ? week.submissionStatus.map((status: any) => (
-                              <div
-                                key={status.location}
-                                className={`p-2 rounded text-sm flex items-center gap-2 ${
-                                  status.hasSubmitted 
-                                    ? 'bg-green-50 text-green-800 border border-green-200' 
-                                    : 'bg-red-50 text-red-800 border border-red-200'
-                                }`}
-                              >
-                                {getStatusIcon(status.hasSubmitted)}
-                                <span className="truncate">{status.location}</span>
-                                {status.location === 'Dunwoody/PTC' && status.dunwoodyStatus && (
-                                  <div className="text-xs">
-                                    {status.dunwoodyStatus.complete ? '✓✓' : 
-                                     !status.dunwoodyStatus.lisaHiles && !status.dunwoodyStatus.stephanieOrMarcy ? '✗' :
-                                     !status.dunwoodyStatus.lisaHiles ? 'L' : 
-                                     !status.dunwoodyStatus.stephanieOrMarcy ? 'S/M' : '✗'}
+                      {multiWeekReport.weeks && multiWeekReport.weeks.map ? (
+                        multiWeekReport.weeks.map(
+                          (week: any, index: number) => (
+                            <div key={index} className="border rounded-lg p-4">
+                              <h4 className="font-medium mb-3">
+                                {week.weekLabel}
+                              </h4>
+                              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                {week.submissionStatus &&
+                                week.submissionStatus.map ? (
+                                  week.submissionStatus.map((status: any) => (
+                                    <div
+                                      key={status.location}
+                                      className={`p-2 rounded text-sm flex items-center gap-2 ${
+                                        status.hasSubmitted
+                                          ? "bg-green-50 text-green-800 border border-green-200"
+                                          : "bg-red-50 text-red-800 border border-red-200"
+                                      }`}
+                                    >
+                                      {getStatusIcon(status.hasSubmitted)}
+                                      <span className="truncate">
+                                        {status.location}
+                                      </span>
+                                      {status.location === "Dunwoody/PTC" &&
+                                        status.dunwoodyStatus && (
+                                          <div className="text-xs">
+                                            {status.dunwoodyStatus.complete
+                                              ? "✓✓"
+                                              : !status.dunwoodyStatus
+                                                  .lisaHiles &&
+                                                !status.dunwoodyStatus
+                                                  .stephanieOrMarcy
+                                              ? "✗"
+                                              : !status.dunwoodyStatus.lisaHiles
+                                              ? "L"
+                                              : !status.dunwoodyStatus
+                                                  .stephanieOrMarcy
+                                              ? "S/M"
+                                              : "✗"}
+                                          </div>
+                                        )}
+                                    </div>
+                                  ))
+                                ) : (
+                                  <div className="text-sm text-gray-500">
+                                    No submission data for this week
                                   </div>
                                 )}
                               </div>
-                            )) : <div className="text-sm text-gray-500">No submission data for this week</div>}
-                          </div>
+                            </div>
+                          )
+                        )
+                      ) : (
+                        <div className="text-center py-8 text-gray-500">
+                          No weekly data available
                         </div>
-                      )) : <div className="text-center py-8 text-gray-500">No weekly data available</div>}
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -1095,25 +1369,25 @@ export default function WeeklyMonitoringDashboard() {
           <div className="space-y-4">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
               {[
-                'East Cobb/Roswell',
-                'Dunwoody/PTC', 
-                'Alpharetta',
-                'Sandy Springs',
-                'Intown/Druid Hills',
-                'Dacula',
-                'Flowery Branch',
-                'Collective Learning'
+                "East Cobb/Roswell",
+                "Dunwoody/PTC",
+                "Alpharetta",
+                "Sandy Springs",
+                "Intown/Druid Hills",
+                "Dacula",
+                "Flowery Branch",
+                "Collective Learning",
               ].map((location) => (
                 <div
                   key={location}
                   className={`p-2 rounded-lg text-sm text-center ${
-                    location === 'Dunwoody/PTC' 
-                      ? 'bg-teal-50 border border-teal-200 text-teal-800'
-                      : 'bg-teal-50/50 border border-teal-100 text-teal-600'
+                    location === "Dunwoody/PTC"
+                      ? "bg-teal-50 border border-teal-200 text-teal-800"
+                      : "bg-teal-50/50 border border-teal-100 text-teal-600"
                   }`}
                 >
                   {location}
-                  {location === 'Dunwoody/PTC' && (
+                  {location === "Dunwoody/PTC" && (
                     <Info className="h-3 w-3 inline ml-1" />
                   )}
                 </div>
@@ -1128,11 +1402,16 @@ export default function WeeklyMonitoringDashboard() {
                 Dunwoody operates with two separate data sources:
               </p>
               <ul className="text-sm text-teal-700 mt-2 space-y-1">
-                <li>• <strong>Lisa Hiles</strong> entry</li>
-                <li>• <strong>Stephanie OR Marcy</strong> entry</li>
+                <li>
+                  • <strong>Lisa Hiles</strong> entry
+                </li>
+                <li>
+                  • <strong>Stephanie OR Marcy</strong> entry
+                </li>
               </ul>
               <p className="text-xs text-teal-600 mt-2">
-                Both entries are needed for complete weekly data from this location.
+                Both entries are needed for complete weekly data from this
+                location.
               </p>
             </div>
             <p className="text-sm text-gray-600">
@@ -1161,7 +1440,11 @@ export default function WeeklyMonitoringDashboard() {
         </Alert>
       )}
 
-      {(manualCheckMutation.isError || testEmailMutation.isError || checkWeekMutation.isError || sendSMSRemindersMutation.isError || sendSingleSMSMutation.isError) && (
+      {(manualCheckMutation.isError ||
+        testEmailMutation.isError ||
+        checkWeekMutation.isError ||
+        sendSMSRemindersMutation.isError ||
+        sendSingleSMSMutation.isError) && (
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
@@ -1169,16 +1452,17 @@ export default function WeeklyMonitoringDashboard() {
           </AlertDescription>
         </Alert>
       )}
-      
+
       {checkWeekMutation.isSuccess && (
         <Alert>
           <CheckCircle className="h-4 w-4" />
           <AlertDescription>
-            Week check completed! {checkWeekMutation.data?.missingCount || 0} locations missing.
+            Week check completed! {checkWeekMutation.data?.missingCount || 0}{" "}
+            locations missing.
           </AlertDescription>
         </Alert>
       )}
-      
+
       {sendSMSRemindersMutation.isSuccess && (
         <Alert>
           <CheckCircle className="h-4 w-4" />
@@ -1187,13 +1471,11 @@ export default function WeeklyMonitoringDashboard() {
           </AlertDescription>
         </Alert>
       )}
-      
+
       {sendSingleSMSMutation.isSuccess && (
         <Alert>
           <CheckCircle className="h-4 w-4" />
-          <AlertDescription>
-            SMS reminder sent successfully!
-          </AlertDescription>
+          <AlertDescription>SMS reminder sent successfully!</AlertDescription>
         </Alert>
       )}
     </div>

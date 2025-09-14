@@ -5,12 +5,27 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { hasPermission, PERMISSIONS } from "@shared/auth-utils";
-import { Database, FileText, MapPin, BarChart3, RefreshCw, ArrowLeft, Upload, Download, Scan } from "lucide-react";
+import {
+  Database,
+  FileText,
+  MapPin,
+  BarChart3,
+  RefreshCw,
+  ArrowLeft,
+  Upload,
+  Download,
+  Scan,
+} from "lucide-react";
 
 interface MappingStats {
   hostName: string;
@@ -32,11 +47,11 @@ interface BulkDataManagerProps {
   onCleanOGDuplicates?: () => void;
 }
 
-export default function BulkDataManager({ 
-  onImportCSV, 
-  onExportCSV, 
-  onCheckDuplicates, 
-  onCleanOGDuplicates 
+export default function BulkDataManager({
+  onImportCSV,
+  onExportCSV,
+  onCheckDuplicates,
+  onCleanOGDuplicates,
 }: BulkDataManagerProps = {}) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -51,39 +66,45 @@ export default function BulkDataManager({
 
   // Fetch collection statistics
   const { data: stats, isLoading: statsLoading } = useQuery({
-    queryKey: ['/api/collection-stats'],
+    queryKey: ["/api/collection-stats"],
     refetchInterval: 120000, // Reduced from 5 seconds to 2 minutes
   });
 
   // Fetch host mapping distribution
   const { data: mappingStats, isLoading: mappingLoading } = useQuery({
-    queryKey: ['/api/host-mapping-stats'],
+    queryKey: ["/api/host-mapping-stats"],
     refetchInterval: 120000, // Reduced from 5 seconds to 2 minutes
   });
 
   // Fetch collections for selected host
-  const { data: hostCollections, isLoading: hostCollectionsLoading } = useQuery({
-    queryKey: ['/api/collections-by-host', selectedHost],
-    queryFn: async () => {
-      if (!selectedHost) return [];
-      const response = await fetch(`/api/collections-by-host/${encodeURIComponent(selectedHost)}`);
-      if (!response.ok) throw new Error('Failed to fetch host collections');
-      return response.json();
-    },
-    enabled: !!selectedHost,
-  });
+  const { data: hostCollections, isLoading: hostCollectionsLoading } = useQuery(
+    {
+      queryKey: ["/api/collections-by-host", selectedHost],
+      queryFn: async () => {
+        if (!selectedHost) return [];
+        const response = await fetch(
+          `/api/collections-by-host/${encodeURIComponent(selectedHost)}`
+        );
+        if (!response.ok) throw new Error("Failed to fetch host collections");
+        return response.json();
+      },
+      enabled: !!selectedHost,
+    }
+  );
 
   // Run bulk mapping
   const bulkMapMutation = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest('POST', '/api/bulk-map-hosts', {});
+      const response = await apiRequest("POST", "/api/bulk-map-hosts", {});
       return response.json();
     },
     onSuccess: (result) => {
-      queryClient.invalidateQueries({ queryKey: ['/api/collection-stats'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/host-mapping-stats'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/sandwich-collections'] });
-      
+      queryClient.invalidateQueries({ queryKey: ["/api/collection-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/host-mapping-stats"] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/sandwich-collections"],
+      });
+
       toast({
         title: "Bulk mapping completed",
         description: `Updated ${result.updatedRecords} collection records`,
@@ -92,16 +113,21 @@ export default function BulkDataManager({
     onError: (error) => {
       toast({
         title: "Mapping failed",
-        description: error instanceof Error ? error.message : "Unknown error occurred",
+        description:
+          error instanceof Error ? error.message : "Unknown error occurred",
         variant: "destructive",
       });
-    }
+    },
   });
 
   // Fix data corruption mutation
   const fixDataMutation = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest('PATCH', '/api/sandwich-collections/fix-data-corruption', {});
+      const response = await apiRequest(
+        "PATCH",
+        "/api/sandwich-collections/fix-data-corruption",
+        {}
+      );
       return response;
     },
     onSuccess: (data) => {
@@ -109,8 +135,10 @@ export default function BulkDataManager({
         title: "Data Issues Fixed",
         description: `Successfully fixed ${data.fixedCount} data corruption issues out of ${data.totalChecked} records checked.`,
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/collection-stats'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/sandwich-collections'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/collection-stats"] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/sandwich-collections"],
+      });
     },
     onError: (error) => {
       console.error("Data fix failed:", error);
@@ -123,8 +151,9 @@ export default function BulkDataManager({
   });
 
   // Calculate progress percentage
-  const progress = stats ? 
-    Math.round((stats.mappedRecords / stats.totalRecords) * 100) : 0;
+  const progress = stats
+    ? Math.round((stats.mappedRecords / stats.totalRecords) * 100)
+    : 0;
 
   const handleHostClick = (hostName: string) => {
     setSelectedHost(hostName);
@@ -134,8 +163,12 @@ export default function BulkDataManager({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-slate-900">Data Management Center</h2>
-        <p className="text-slate-600">Monitor and manage your collection data import and mapping</p>
+        <h2 className="text-2xl font-bold text-slate-900">
+          Data Management Center
+        </h2>
+        <p className="text-slate-600">
+          Monitor and manage your collection data import and mapping
+        </p>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -149,12 +182,16 @@ export default function BulkDataManager({
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Collections</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Total Collections
+                </CardTitle>
                 <Database className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {statsLoading ? "..." : stats?.totalRecords?.toLocaleString() || "0"}
+                  {statsLoading
+                    ? "..."
+                    : stats?.totalRecords?.toLocaleString() || "0"}
                 </div>
                 <p className="text-xs text-muted-foreground">
                   Historical sandwich collection records
@@ -164,12 +201,16 @@ export default function BulkDataManager({
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Mapped Records</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Mapped Records
+                </CardTitle>
                 <MapPin className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-green-600">
-                  {statsLoading ? "..." : stats?.mappedRecords?.toLocaleString() || "0"}
+                  {statsLoading
+                    ? "..."
+                    : stats?.mappedRecords?.toLocaleString() || "0"}
                 </div>
                 <p className="text-xs text-muted-foreground">
                   Connected to host locations
@@ -179,12 +220,16 @@ export default function BulkDataManager({
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Unmapped Records</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Unmapped Records
+                </CardTitle>
                 <FileText className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-amber-600">
-                  {statsLoading ? "..." : stats?.unmappedRecords?.toLocaleString() || "0"}
+                  {statsLoading
+                    ? "..."
+                    : stats?.unmappedRecords?.toLocaleString() || "0"}
                 </div>
                 <p className="text-xs text-muted-foreground">
                   Pending host assignment
@@ -194,7 +239,9 @@ export default function BulkDataManager({
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Completion</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Completion
+                </CardTitle>
                 <BarChart3 className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -213,7 +260,9 @@ export default function BulkDataManager({
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span>Data Import & Mapping Progress</span>
-                    <span>{stats.mappedRecords} of {stats.totalRecords} records</span>
+                    <span>
+                      {stats.mappedRecords} of {stats.totalRecords} records
+                    </span>
                   </div>
                   <Progress value={progress} className="h-2" />
                   <div className="flex justify-between text-xs text-muted-foreground">
@@ -237,19 +286,28 @@ export default function BulkDataManager({
             </CardHeader>
             <CardContent>
               {mappingLoading ? (
-                <div className="text-center py-4">Loading mapping statistics...</div>
+                <div className="text-center py-4">
+                  Loading mapping statistics...
+                </div>
               ) : (
                 <div className="space-y-3">
                   {mappingStats?.map((stat: MappingStats, index: number) => (
-                    <div 
-                      key={index} 
+                    <div
+                      key={index}
                       className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
                       onClick={() => handleHostClick(stat.hostName)}
                     >
                       <div className="flex items-center space-x-3">
-                        <div className="w-3 h-3 rounded-full" style={{backgroundColor: 'var(--tsp-teal)'}}></div>
+                        <div
+                          className="w-3 h-3 rounded-full"
+                          style={{ backgroundColor: "var(--tsp-teal)" }}
+                        ></div>
                         <span className="font-medium">{stat.hostName}</span>
-                        {stat.mapped && <Badge variant="outline" className="text-green-600">Mapped</Badge>}
+                        {stat.mapped && (
+                          <Badge variant="outline" className="text-green-600">
+                            Mapped
+                          </Badge>
+                        )}
                       </div>
                       <Badge variant="secondary">
                         {stat.count.toLocaleString()} records
@@ -281,7 +339,7 @@ export default function BulkDataManager({
                       </p>
                     </div>
                   </div>
-                  <Button 
+                  <Button
                     onClick={onImportCSV}
                     disabled={!canImport}
                     className="w-full flex items-center space-x-2"
@@ -301,7 +359,7 @@ export default function BulkDataManager({
                       </p>
                     </div>
                   </div>
-                  <Button 
+                  <Button
                     onClick={onExportCSV}
                     disabled={!canExport}
                     className="w-full flex items-center space-x-2"
@@ -321,7 +379,7 @@ export default function BulkDataManager({
                       </p>
                     </div>
                   </div>
-                  <Button 
+                  <Button
                     onClick={onCheckDuplicates}
                     className="w-full flex items-center space-x-2"
                     variant="outline"
@@ -340,7 +398,7 @@ export default function BulkDataManager({
                       </p>
                     </div>
                   </div>
-                  <Button 
+                  <Button
                     onClick={onCleanOGDuplicates}
                     className="w-full flex items-center space-x-2 bg-amber-50 border-amber-300 text-amber-800 hover:bg-amber-100"
                     variant="outline"
@@ -359,7 +417,7 @@ export default function BulkDataManager({
                       </p>
                     </div>
                   </div>
-                  <Button 
+                  <Button
                     onClick={() => fixDataMutation.mutate()}
                     disabled={fixDataMutation.isPending}
                     className="w-full flex items-center space-x-2 bg-blue-50 border-blue-300 text-blue-700 hover:bg-blue-100"
@@ -388,12 +446,14 @@ export default function BulkDataManager({
                       Map collection records to their appropriate host locations
                     </p>
                   </div>
-                  <Button 
+                  <Button
                     onClick={() => bulkMapMutation.mutate()}
                     disabled={bulkMapMutation.isPending}
                     className="flex items-center space-x-2"
                   >
-                    {bulkMapMutation.isPending && <RefreshCw className="w-4 h-4 animate-spin" />}
+                    {bulkMapMutation.isPending && (
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                    )}
                     <span>
                       {bulkMapMutation.isPending ? "Mapping..." : "Run Mapping"}
                     </span>
@@ -405,11 +465,13 @@ export default function BulkDataManager({
                 <div className="flex items-start space-x-3">
                   <Database className="w-5 h-5 text-blue-600 mt-0.5" />
                   <div>
-                    <h4 className="font-medium text-blue-900">Data Import Status</h4>
+                    <h4 className="font-medium text-blue-900">
+                      Data Import Status
+                    </h4>
                     <p className="text-sm text-blue-700 mt-1">
-                      Your CSV data import is running in the background. The system automatically
-                      maps new records as they're imported. You can manually trigger mapping
-                      above if needed.
+                      Your CSV data import is running in the background. The
+                      system automatically maps new records as they're imported.
+                      You can manually trigger mapping above if needed.
                     </p>
                   </div>
                 </div>
@@ -424,8 +486,8 @@ export default function BulkDataManager({
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <div className="flex items-center space-x-2">
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 size="sm"
                 onClick={() => setShowHostRecords(false)}
                 className="p-1"
@@ -441,7 +503,10 @@ export default function BulkDataManager({
             ) : (
               <div className="space-y-3">
                 {hostCollections?.map((collection: any, index: number) => (
-                  <div key={collection.id || index} className="border rounded-lg p-4">
+                  <div
+                    key={collection.id || index}
+                    className="border rounded-lg p-4"
+                  >
                     <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                       <div>
                         <span className="font-medium text-gray-600">Date:</span>
@@ -452,17 +517,28 @@ export default function BulkDataManager({
                         <div>{collection.hostName}</div>
                       </div>
                       <div>
-                        <span className="font-medium text-gray-600">Individual:</span>
+                        <span className="font-medium text-gray-600">
+                          Individual:
+                        </span>
                         <div>{collection.individualSandwiches || 0}</div>
                       </div>
                       <div>
-                        <span className="font-medium text-gray-600">Groups:</span>
-                        <div>{((collection as any).group1Count || 0) + ((collection as any).group2Count || 0)}</div>
+                        <span className="font-medium text-gray-600">
+                          Groups:
+                        </span>
+                        <div>
+                          {((collection as any).group1Count || 0) +
+                            ((collection as any).group2Count || 0)}
+                        </div>
                       </div>
                       {collection.notes && (
                         <div className="col-span-2 md:col-span-4">
-                          <span className="font-medium text-gray-600">Notes:</span>
-                          <div className="text-gray-700">{collection.notes}</div>
+                          <span className="font-medium text-gray-600">
+                            Notes:
+                          </span>
+                          <div className="text-gray-700">
+                            {collection.notes}
+                          </div>
                         </div>
                       )}
                     </div>

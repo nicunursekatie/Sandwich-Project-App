@@ -1,5 +1,11 @@
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Download, FileText, Eye, ExternalLink } from "lucide-react";
@@ -8,7 +14,7 @@ import { DocumentPreview } from "./document-preview";
 interface GovernanceDocument {
   name: string;
   path: string;
-  type: 'pdf' | 'xlsx' | 'docx' | 'txt' | 'other';
+  type: "pdf" | "xlsx" | "docx" | "txt" | "other";
   category: string;
   description?: string;
 }
@@ -19,33 +25,36 @@ const governanceDocuments: GovernanceDocument[] = [
     path: "/attached_assets/Articles of Incorporation.pdf",
     type: "pdf",
     category: "Legal Foundation",
-    description: "Official Articles of Incorporation establishing The Sandwich Project as a legal entity"
+    description:
+      "Official Articles of Incorporation establishing The Sandwich Project as a legal entity",
   },
   {
     name: "2020 Georgia Code Title 51",
     path: "/attached_assets/2020 Georgia Code Title 51.pdf",
-    type: "pdf", 
+    type: "pdf",
     category: "Legal Reference",
-    description: "Georgia state code governing nonprofit organizations and corporate governance"
+    description:
+      "Georgia state code governing nonprofit organizations and corporate governance",
   },
   {
     name: "IRS Tax Exempt Letter",
     path: "/attached_assets/IRS Tax Exempt Letter (Contains EIN).pdf",
     type: "pdf",
     category: "Tax Status",
-    description: "IRS determination letter granting 501(c)(3) tax-exempt status with EIN information"
-  }
+    description:
+      "IRS determination letter granting 501(c)(3) tax-exempt status with EIN information",
+  },
 ];
 
 const getFileIcon = (type: string) => {
   switch (type) {
-    case 'pdf':
+    case "pdf":
       return <FileText className="h-5 w-5 text-red-500" />;
-    case 'xlsx':
+    case "xlsx":
       return <FileText className="h-5 w-5 text-green-500" />;
-    case 'docx':
+    case "docx":
       return <FileText className="h-5 w-5 text-blue-500" />;
-    case 'txt':
+    case "txt":
       return <FileText className="h-5 w-5 text-gray-500" />;
     default:
       return <FileText className="h-5 w-5 text-gray-500" />;
@@ -54,33 +63,40 @@ const getFileIcon = (type: string) => {
 
 const getCategoryColor = (category: string) => {
   switch (category) {
-    case 'Legal Foundation':
-      return 'bg-purple-100 text-purple-800';
-    case 'Legal Reference':
-      return 'bg-blue-100 text-blue-800';
-    case 'Tax Status':
-      return 'bg-green-100 text-green-800';
+    case "Legal Foundation":
+      return "bg-purple-100 text-purple-800";
+    case "Legal Reference":
+      return "bg-blue-100 text-blue-800";
+    case "Tax Status":
+      return "bg-green-100 text-green-800";
     default:
-      return 'bg-gray-100 text-gray-800';
+      return "bg-gray-100 text-gray-800";
   }
 };
 
 export function GovernanceDocuments() {
-  const [selectedCategory, setSelectedCategory] = useState<string>('All');
-  const [previewDocument, setPreviewDocument] = useState<GovernanceDocument | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [
+    previewDocument,
+    setPreviewDocument,
+  ] = useState<GovernanceDocument | null>(null);
 
-  const categories = ['All', ...Array.from(new Set(governanceDocuments.map(doc => doc.category)))];
-  
-  const filteredDocuments = selectedCategory === 'All' 
-    ? governanceDocuments 
-    : governanceDocuments.filter(doc => doc.category === selectedCategory);
+  const categories = [
+    "All",
+    ...Array.from(new Set(governanceDocuments.map((doc) => doc.category))),
+  ];
+
+  const filteredDocuments =
+    selectedCategory === "All"
+      ? governanceDocuments
+      : governanceDocuments.filter((doc) => doc.category === selectedCategory);
 
   const handlePreview = (document: GovernanceDocument) => {
     setPreviewDocument(document);
   };
 
   const handleDownload = (document: GovernanceDocument) => {
-    const link = window.document.createElement('a');
+    const link = window.document.createElement("a");
     link.href = document.path;
     link.download = document.name;
     window.document.body.appendChild(link);
@@ -89,7 +105,7 @@ export function GovernanceDocuments() {
   };
 
   const handleExternalOpen = (document: GovernanceDocument) => {
-    window.open(document.path, '_blank');
+    window.open(document.path, "_blank");
   };
 
   return (
@@ -121,7 +137,10 @@ export function GovernanceDocuments() {
       {/* Documents Grid - Better tablet responsiveness with wider cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
         {filteredDocuments.map((document, index) => (
-          <Card key={index} className="hover:shadow-lg transition-shadow duration-200 h-full flex flex-col border-2 hover:border-blue-200">
+          <Card
+            key={index}
+            className="hover:shadow-lg transition-shadow duration-200 h-full flex flex-col border-2 hover:border-blue-200"
+          >
             <CardHeader className="pb-4 flex-shrink-0">
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center space-x-3 min-w-0 flex-1">
@@ -134,10 +153,17 @@ export function GovernanceDocuments() {
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                <Badge className={`text-xs font-medium px-2 py-0.5 ${getCategoryColor(document.category)}`}>
+                <Badge
+                  className={`text-xs font-medium px-2 py-0.5 ${getCategoryColor(
+                    document.category
+                  )}`}
+                >
                   {document.category}
                 </Badge>
-                <Badge variant="outline" className="text-xs font-medium px-2 py-0.5">
+                <Badge
+                  variant="outline"
+                  className="text-xs font-medium px-2 py-0.5"
+                >
                   {document.type.toUpperCase()}
                 </Badge>
               </div>

@@ -295,7 +295,7 @@ function PhoneDirectoryFixed() {
           (contact) =>
             contact.name.toLowerCase().includes(s) ||
             contact.phone.includes(searchTerm) ||
-            (contact.email && contact.email.toLowerCase().includes(s)),
+            (contact.email && contact.email.toLowerCase().includes(s))
         ))
     );
   });
@@ -303,7 +303,10 @@ function PhoneDirectoryFixed() {
   const filteredRecipients = recipients.filter((r) => {
     if (!searchTerm) return true;
     const s = searchTerm.toLowerCase();
-    return r.name.toLowerCase().includes(s) || (r.phone && r.phone.includes(searchTerm));
+    return (
+      r.name.toLowerCase().includes(s) ||
+      (r.phone && r.phone.includes(searchTerm))
+    );
   });
 
   const filteredVolunteers = volunteers.filter((v) => {
@@ -396,7 +399,9 @@ function PhoneDirectoryFixed() {
         role: volunteer.volunteerType || "Volunteer",
         type: "Volunteer",
         address: volunteer.homeAddress,
-        notes: `Zone: ${volunteer.zone}${volunteer.notes ? ` - ${volunteer.notes}` : ""}`,
+        notes: `Zone: ${volunteer.zone}${
+          volunteer.notes ? ` - ${volunteer.notes}` : ""
+        }`,
         zone: volunteer.zone,
         volunteerType: volunteer.volunteerType,
         source: "volunteers",
@@ -405,21 +410,23 @@ function PhoneDirectoryFixed() {
 
     // Remove duplicates based on normalized phone number
     const normalizePhone = (phone: string): string => {
-      return phone.replace(/\D/g, ''); // Remove all non-digits
+      return phone.replace(/\D/g, ""); // Remove all non-digits
     };
 
     const deduplicatedAll: any[] = [];
     const seenPhones = new Set<string>();
 
     all.forEach((contact) => {
-      const normalizedPhone = normalizePhone(contact.phone || '');
-      
+      const normalizedPhone = normalizePhone(contact.phone || "");
+
       if (!normalizedPhone || !seenPhones.has(normalizedPhone)) {
         if (normalizedPhone) seenPhones.add(normalizedPhone);
         deduplicatedAll.push(contact);
       } else {
         // If duplicate found, log it for debugging
-        console.log(`Duplicate contact found and removed: ${contact.name} (${contact.phone}) - ${contact.source}`);
+        console.log(
+          `Duplicate contact found and removed: ${contact.name} (${contact.phone}) - ${contact.source}`
+        );
       }
     });
 
@@ -852,8 +859,11 @@ function PhoneDirectoryFixed() {
 
       await apiRequest(
         "PUT",
-        `/api/contacts/universal/${editingContact.id.replace(/^(host|recipient|driver|volunteer)-/, "")}`,
-        { ...updateData, originalSource: editingContact.source },
+        `/api/contacts/universal/${editingContact.id.replace(
+          /^(host|recipient|driver|volunteer)-/,
+          ""
+        )}`,
+        { ...updateData, originalSource: editingContact.source }
       );
 
       queryClient.invalidateQueries({ queryKey: ["/api/hosts-with-contacts"] });
@@ -942,8 +952,6 @@ function PhoneDirectoryFixed() {
           </TabsList>
         </div>
 
-
-
         {/* Hosts */}
         {canViewHosts && (
           <TabsContent value="hosts" className="space-y-6 mt-6">
@@ -1028,13 +1036,15 @@ function PhoneDirectoryFixed() {
                                 placeholder="Add location address..."
                                 className="text-sm"
                                 onKeyDown={(e) => {
-                                  if (e.key === 'Enter') {
+                                  if (e.key === "Enter") {
                                     const target = e.target as HTMLInputElement;
                                     if (target.value.trim()) {
                                       // Update host address
                                       updateHostMutation.mutate({
                                         id: host.id,
-                                        updates: { address: target.value.trim() }
+                                        updates: {
+                                          address: target.value.trim(),
+                                        },
                                       });
                                     }
                                   }
@@ -1045,7 +1055,7 @@ function PhoneDirectoryFixed() {
                                     // Update host address
                                     updateHostMutation.mutate({
                                       id: host.id,
-                                      updates: { address: target.value.trim() }
+                                      updates: { address: target.value.trim() },
                                     });
                                   }
                                 }}
@@ -1131,12 +1141,12 @@ function PhoneDirectoryFixed() {
                                         onClick={() => {
                                           if (
                                             confirm(
-                                              `Delete contact ${contact.name}?`,
+                                              `Delete contact ${contact.name}?`
                                             )
                                           ) {
                                             console.log(
                                               "Delete contact:",
-                                              contact,
+                                              contact
                                             );
                                           }
                                         }}
@@ -2255,13 +2265,15 @@ function PhoneDirectoryFixed() {
                                           rows={3}
                                         />
                                       </div>
-                                      
+
                                       {/* Status and Checkboxes */}
                                       <div className="grid grid-cols-3 gap-4">
                                         <div className="flex items-center space-x-2">
                                           <Checkbox
                                             id="edit-driver-active"
-                                            checked={editingDriver.isActive !== false}
+                                            checked={
+                                              editingDriver.isActive !== false
+                                            }
                                             onCheckedChange={(checked) =>
                                               setEditingDriver({
                                                 ...editingDriver,
@@ -2269,12 +2281,17 @@ function PhoneDirectoryFixed() {
                                               })
                                             }
                                           />
-                                          <Label htmlFor="edit-driver-active">Active</Label>
+                                          <Label htmlFor="edit-driver-active">
+                                            Active
+                                          </Label>
                                         </div>
                                         <div className="flex items-center space-x-2">
                                           <Checkbox
                                             id="edit-driver-agreement"
-                                            checked={editingDriver.emailAgreementSent || false}
+                                            checked={
+                                              editingDriver.emailAgreementSent ||
+                                              false
+                                            }
                                             onCheckedChange={(checked) =>
                                               setEditingDriver({
                                                 ...editingDriver,
@@ -2282,12 +2299,16 @@ function PhoneDirectoryFixed() {
                                               })
                                             }
                                           />
-                                          <Label htmlFor="edit-driver-agreement">Agreement Signed</Label>
+                                          <Label htmlFor="edit-driver-agreement">
+                                            Agreement Signed
+                                          </Label>
                                         </div>
                                         <div className="flex items-center space-x-2">
                                           <Checkbox
                                             id="edit-driver-van"
-                                            checked={editingDriver.vanApproved || false}
+                                            checked={
+                                              editingDriver.vanApproved || false
+                                            }
                                             onCheckedChange={(checked) =>
                                               setEditingDriver({
                                                 ...editingDriver,
@@ -2295,7 +2316,9 @@ function PhoneDirectoryFixed() {
                                               })
                                             }
                                           />
-                                          <Label htmlFor="edit-driver-van">Van Approved</Label>
+                                          <Label htmlFor="edit-driver-van">
+                                            Van Approved
+                                          </Label>
                                         </div>
                                       </div>
                                       <div className="flex gap-3 pt-4">
@@ -2422,7 +2445,8 @@ function PhoneDirectoryFixed() {
                 </div>
                 {editingContact.organization && (
                   <p className="text-sm text-muted-foreground">
-                    Role Type - Location Designation: {editingContact.type} - {editingContact.organization}
+                    Role Type - Location Designation: {editingContact.type} -{" "}
+                    {editingContact.organization}
                   </p>
                 )}
                 {!editingContact.organization && (
@@ -2541,7 +2565,9 @@ function PhoneDirectoryFixed() {
                           Recipient Organization Contact
                         </SelectItem>
                         <SelectItem value="drivers">Driver</SelectItem>
-                        <SelectItem value="contacts">General Contact</SelectItem>
+                        <SelectItem value="contacts">
+                          General Contact
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -2608,7 +2634,8 @@ function PhoneDirectoryFixed() {
                         </SelectContent>
                       </Select>
                       <p className="text-xs text-muted-foreground mt-1">
-                        This person will become a contact for the selected recipient organization
+                        This person will become a contact for the selected
+                        recipient organization
                       </p>
                     </div>
                   )}
@@ -2699,7 +2726,9 @@ function PhoneDirectoryFixed() {
                               })
                             }
                           />
-                          <Label htmlFor="email-agreement-sent">Agreement Signed</Label>
+                          <Label htmlFor="email-agreement-sent">
+                            Agreement Signed
+                          </Label>
                         </div>
                       </div>
                     </div>

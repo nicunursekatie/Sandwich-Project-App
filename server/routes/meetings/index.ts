@@ -6,7 +6,11 @@ import { createReadStream } from "fs";
 import { storage } from "../../storage-wrapper";
 import { logger } from "../../middleware/logger";
 import { meetingMinutesUpload } from "../../middleware/uploads";
-import { insertMeetingMinutesSchema, insertAgendaItemSchema, insertMeetingSchema } from "@shared/schema";
+import {
+  insertMeetingMinutesSchema,
+  insertAgendaItemSchema,
+  insertMeetingSchema,
+} from "@shared/schema";
 
 const meetingsRouter = Router();
 
@@ -42,21 +46,19 @@ meetingsRouter.get("/minutes", async (req: any, res) => {
       // Committee members only see minutes for their committees
       const userCommittees = await storage.getUserCommittees(userId);
       const committeeTypes = userCommittees.map(
-        (membership) => membership.membership.committeeId,
+        (membership) => membership.membership.committeeId
       );
 
       const filteredMinutes = minutes.filter(
         (minute) =>
-          !minute.committeeType || // General meeting minutes (no committee assignment)
-          committeeTypes.includes(minute.committeeType),
+          !minute.committeeType || committeeTypes.includes(minute.committeeType) // General meeting minutes (no committee assignment)
       );
       res.json(filteredMinutes);
     } else {
       // Other roles see general meeting minutes and their role-specific minutes
       const filteredMinutes = minutes.filter(
         (minute) =>
-          !minute.committeeType || // General meeting minutes
-          minute.committeeType === user.role,
+          !minute.committeeType || minute.committeeType === user.role // General meeting minutes
       );
       res.json(filteredMinutes);
     }
@@ -94,7 +96,7 @@ meetingsRouter.delete("/minutes/:id", async (req, res) => {
     } else {
       res.status(404).json({ message: "Meeting minutes not found" });
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error("Failed to delete meeting minutes", error);
     res.status(500).json({ message: "Failed to delete meeting minutes" });
   }
@@ -131,7 +133,7 @@ meetingsRouter.post(
           const uploadsDir = path.join(
             process.cwd(),
             "uploads",
-            "meeting-minutes",
+            "meeting-minutes"
           );
           await fs.mkdir(uploadsDir, { recursive: true });
 
@@ -225,121 +227,116 @@ meetingsRouter.post(
         filename: req.file?.originalname,
         extractedContent: documentContent ? true : false,
       });
-    } catch (error: any) {
+    } catch (error) {
       logger.error("Failed to upload meeting minutes", error);
       res.status(500).json({
         message: "Failed to upload meeting minutes",
         error: error.message,
       });
     }
-  },
+  }
 );
 
 // File serving endpoint for meeting minutes documents by ID
-meetingsRouter.get(
-  "/minutes/:id/file",
-  async (req: any, res) => {
-    try {
-      const minutesId = parseInt(req.params.id);
-      if (isNaN(minutesId)) {
-        return res
-          .status(400)
-          .json({ message: "Invalid meeting minutes ID" });
-      }
-
-      // Get all meeting minutes and find the specific one
-      const allMinutes = await storage.getAllMeetingMinutes();
-      const minutes = allMinutes.find((m: any) => m.id === minutesId);
-      if (!minutes) {
-        return res.status(404).json({ message: "Meeting minutes not found" });
-      }
-
-      if (!minutes.filePath) {
-        return res
-          .status(404)
-          .json({ message: "No file associated with these meeting minutes" });
-      }
-
-      // Debug logging
-      logger.info("Meeting minutes file debug", {
-        minutesId,
-        storedFilePath: minutes.filePath,
-        fileName: minutes.fileName,
-      });
-
-      // Handle both absolute and relative paths
-      const filePath = path.isAbsolute(minutes.filePath)
-        ? minutes.filePath
-        : path.join(process.cwd(), minutes.filePath);
-
-      // Check if file exists
-      try {
-        await fs.access(filePath);
-      } catch (error) {
-        logger.error("File access failed", {
-          filePath,
-          storedPath: minutes.filePath,
-          error: error.message,
-        });
-        return res.status(404).json({ message: "File not found on disk" });
-      }
-
-      // Get file info
-      const stats = await fs.stat(filePath);
-
-      // Detect actual file type by reading first few bytes
-      const buffer = Buffer.alloc(50);
-      const fd = await fs.open(filePath, "r");
-      await fd.read(buffer, 0, 50, 0);
-      await fd.close();
-
-      let contentType = "application/octet-stream";
-      const fileHeader = buffer.toString("utf8", 0, 20);
-
-      if (fileHeader.startsWith("%PDF")) {
-        contentType = "application/pdf";
-      } else if (
-        fileHeader.includes("[Content_Types].xml") ||
-        fileHeader.startsWith("PK")
-      ) {
-        // This is a Microsoft Office document (DOCX, XLSX, etc.)
-        if (minutes.fileName.toLowerCase().endsWith(".docx")) {
-          contentType =
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-        } else if (minutes.fileName.toLowerCase().endsWith(".xlsx")) {
-          contentType =
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-        } else {
-          contentType =
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"; // Default to DOCX
-        }
-      }
-
-      logger.info("File type detected", {
-        fileName: minutes.fileName,
-        detectedType: contentType,
-        fileHeader: fileHeader.substring(0, 20),
-      });
-
-      // Set appropriate headers
-      res.setHeader("Content-Type", contentType);
-      res.setHeader("Content-Length", stats.size);
-      res.setHeader(
-        "Content-Disposition",
-        contentType === "application/pdf"
-          ? `inline; filename="${minutes.fileName}"`
-          : `attachment; filename="${minutes.fileName}"`,
-      );
-
-      // Stream the file
-      const fileStream = createReadStream(filePath);
-      fileStream.pipe(res);
-    } catch (error) {
-      logger.error("Failed to serve meeting minutes file", error);
-      res.status(500).json({ message: "Failed to serve file" });
+meetingsRouter.get("/minutes/:id/file", async (req: any, res) => {
+  try {
+    const minutesId = parseInt(req.params.id);
+    if (isNaN(minutesId)) {
+      return res.status(400).json({ message: "Invalid meeting minutes ID" });
     }
-  },
-);
+
+    // Get all meeting minutes and find the specific one
+    const allMinutes = await storage.getAllMeetingMinutes();
+    const minutes = allMinutes.find((m: any) => m.id === minutesId);
+    if (!minutes) {
+      return res.status(404).json({ message: "Meeting minutes not found" });
+    }
+
+    if (!minutes.filePath) {
+      return res
+        .status(404)
+        .json({ message: "No file associated with these meeting minutes" });
+    }
+
+    // Debug logging
+    logger.info("Meeting minutes file debug", {
+      minutesId,
+      storedFilePath: minutes.filePath,
+      fileName: minutes.fileName,
+    });
+
+    // Handle both absolute and relative paths
+    const filePath = path.isAbsolute(minutes.filePath)
+      ? minutes.filePath
+      : path.join(process.cwd(), minutes.filePath);
+
+    // Check if file exists
+    try {
+      await fs.access(filePath);
+    } catch (error) {
+      logger.error("File access failed", {
+        filePath,
+        storedPath: minutes.filePath,
+        error: error.message,
+      });
+      return res.status(404).json({ message: "File not found on disk" });
+    }
+
+    // Get file info
+    const stats = await fs.stat(filePath);
+
+    // Detect actual file type by reading first few bytes
+    const buffer = Buffer.alloc(50);
+    const fd = await fs.open(filePath, "r");
+    await fd.read(buffer, 0, 50, 0);
+    await fd.close();
+
+    let contentType = "application/octet-stream";
+    const fileHeader = buffer.toString("utf8", 0, 20);
+
+    if (fileHeader.startsWith("%PDF")) {
+      contentType = "application/pdf";
+    } else if (
+      fileHeader.includes("[Content_Types].xml") ||
+      fileHeader.startsWith("PK")
+    ) {
+      // This is a Microsoft Office document (DOCX, XLSX, etc.)
+      if (minutes.fileName.toLowerCase().endsWith(".docx")) {
+        contentType =
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+      } else if (minutes.fileName.toLowerCase().endsWith(".xlsx")) {
+        contentType =
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+      } else {
+        contentType =
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document"; // Default to DOCX
+      }
+    }
+
+    logger.info("File type detected", {
+      fileName: minutes.fileName,
+      detectedType: contentType,
+      fileHeader: fileHeader.substring(0, 20),
+    });
+
+    // Set appropriate headers
+    res.setHeader("Content-Type", contentType);
+    res.setHeader("Content-Length", stats.size);
+    res.setHeader(
+      "Content-Disposition",
+      contentType === "application/pdf"
+        ? `inline; filename="${minutes.fileName}"`
+        : `attachment; filename="${minutes.fileName}"`
+    );
+
+    // Stream the file
+    const fileStream = createReadStream(filePath);
+    fileStream.pipe(res);
+  } catch (error) {
+    logger.error("Failed to serve meeting minutes file", error);
+    res.status(500).json({ message: "Failed to serve file" });
+  }
+});
 
 // File serving endpoint for meeting minutes documents by filename (legacy)
 meetingsRouter.get("/files/:filename", async (req, res) => {
@@ -349,7 +346,7 @@ meetingsRouter.get("/files/:filename", async (req, res) => {
       process.cwd(),
       "uploads",
       "meeting-minutes",
-      filename,
+      filename
     );
 
     // Check if file exists
@@ -499,41 +496,38 @@ meetingsRouter.put("/agenda-items/:id", async (req, res) => {
   }
 });
 
-meetingsRouter.delete(
-  "/agenda-items/:id",
-  async (req: any, res) => {
-    try {
-      const userId = req.user?.claims?.sub || req.user?.id;
-      if (!userId) {
-        return res.status(401).json({ message: "User ID not found" });
-      }
-      const user = await storage.getUser(userId);
-
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-
-      // Committee members cannot delete agenda items
-      if (user.role === "committee_member") {
-        return res
-          .status(403)
-          .json({ message: "Committee members cannot delete agenda items" });
-      }
-
-      const id = parseInt(req.params.id);
-      const success = await storage.deleteAgendaItem(id);
-
-      if (!success) {
-        res.status(404).json({ message: "Agenda item not found" });
-        return;
-      }
-
-      res.json({ message: "Agenda item deleted successfully" });
-    } catch (error) {
-      res.status(500).json({ message: "Failed to delete agenda item" });
+meetingsRouter.delete("/agenda-items/:id", async (req: any, res) => {
+  try {
+    const userId = req.user?.claims?.sub || req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ message: "User ID not found" });
     }
-  },
-);
+    const user = await storage.getUser(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Committee members cannot delete agenda items
+    if (user.role === "committee_member") {
+      return res
+        .status(403)
+        .json({ message: "Committee members cannot delete agenda items" });
+    }
+
+    const id = parseInt(req.params.id);
+    const success = await storage.deleteAgendaItem(id);
+
+    if (!success) {
+      res.status(404).json({ message: "Agenda item not found" });
+      return;
+    }
+
+    res.json({ message: "Agenda item deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to delete agenda item" });
+  }
+});
 
 // Meetings
 meetingsRouter.get("/current", async (req, res) => {

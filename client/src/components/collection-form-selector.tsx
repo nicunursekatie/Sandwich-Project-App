@@ -14,21 +14,32 @@ interface CollectionFormSelectorProps {
   onCancel?: () => void;
 }
 
-export default function CollectionFormSelector({ onSuccess, onCancel }: CollectionFormSelectorProps) {
-  const [selectedMethod, setSelectedMethod] = useState<"standard" | "walkthrough" | null>(null);
+export default function CollectionFormSelector({
+  onSuccess,
+  onCancel,
+}: CollectionFormSelectorProps) {
+  const [selectedMethod, setSelectedMethod] = useState<
+    "standard" | "walkthrough" | null
+  >(null);
   const { user } = useAuth();
-  
+
   // Check if user has walkthrough permission
-  const canUseWalkthrough = user && hasPermission(user, PERMISSIONS.USE_COLLECTION_WALKTHROUGH);
-  const canCreateCollections = user && hasPermission(user, PERMISSIONS.CREATE_COLLECTIONS);
+  const canUseWalkthrough =
+    user && hasPermission(user, PERMISSIONS.USE_COLLECTION_WALKTHROUGH);
+  const canCreateCollections =
+    user && hasPermission(user, PERMISSIONS.CREATE_COLLECTIONS);
 
   // If user can't create collections at all, show error
   if (!canCreateCollections) {
     return (
       <Card className="max-w-2xl mx-auto">
         <CardContent className="p-8 text-center">
-          <p className="text-gray-600">You don't have permission to submit collection data.</p>
-          <p className="text-sm text-gray-500 mt-2">Contact an administrator if you need access.</p>
+          <p className="text-gray-600">
+            You don't have permission to submit collection data.
+          </p>
+          <p className="text-sm text-gray-500 mt-2">
+            Contact an administrator if you need access.
+          </p>
         </CardContent>
       </Card>
     );
@@ -38,10 +49,12 @@ export default function CollectionFormSelector({ onSuccess, onCancel }: Collecti
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">Standard Collection Form</h2>
+          <h2 className="text-lg font-semibold text-gray-900">
+            Standard Collection Form
+          </h2>
           {canUseWalkthrough && (
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               size="sm"
               onClick={() => setSelectedMethod(null)}
             >
@@ -56,7 +69,7 @@ export default function CollectionFormSelector({ onSuccess, onCancel }: Collecti
 
   if (selectedMethod === "walkthrough") {
     return (
-      <CollectionWalkthrough 
+      <CollectionWalkthrough
         onComplete={onSuccess}
         onCancel={() => setSelectedMethod(null)}
       />
@@ -68,7 +81,9 @@ export default function CollectionFormSelector({ onSuccess, onCancel }: Collecti
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">Collection Form</h2>
+          <h2 className="text-lg font-semibold text-gray-900">
+            Collection Form
+          </h2>
           {onCancel && (
             <Button variant="outline" size="sm" onClick={onCancel}>
               Cancel
@@ -97,31 +112,38 @@ export default function CollectionFormSelector({ onSuccess, onCancel }: Collecti
             </Button>
           )}
         </CardTitle>
-        <p className="text-white/90 text-xs sm:text-sm">Choose how you'd like to enter your collection data</p>
+        <p className="text-white/90 text-xs sm:text-sm">
+          Choose how you'd like to enter your collection data
+        </p>
       </CardHeader>
-      
+
       <CardContent className="p-4 sm:p-8">
         <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4 sm:gap-6">
           {/* Standard Form Option */}
-          <Card 
+          <Card
             className="cursor-pointer border-2 hover:border-[#236383] transition-colors touch-manipulation"
             onClick={() => setSelectedMethod("standard")}
           >
             <CardHeader className="text-center p-4 sm:p-6">
               <FormInput className="w-8 h-8 sm:w-12 sm:h-12 mx-auto text-[#236383] mb-2 sm:mb-3" />
-              <CardTitle className="text-base sm:text-lg">Standard Form</CardTitle>
-              <Badge variant="outline" className="mx-auto text-xs">Quick Entry</Badge>
+              <CardTitle className="text-base sm:text-lg">
+                Standard Form
+              </CardTitle>
+              <Badge variant="outline" className="mx-auto text-xs">
+                Quick Entry
+              </Badge>
             </CardHeader>
             <CardContent className="text-center space-y-3 p-4 sm:p-6 pt-0">
               <p className="text-gray-600 text-sm sm:text-base">
-                Fill out all fields at once if you're comfortable with forms and have all your data ready.
+                Fill out all fields at once if you're comfortable with forms and
+                have all your data ready.
               </p>
               <div className="space-y-1 sm:space-y-2 text-xs sm:text-sm text-gray-500">
                 <div>✓ All fields visible at once</div>
                 <div>✓ Faster for experienced users</div>
                 <div>✓ Good for multiple group entries</div>
               </div>
-              <Button 
+              <Button
                 className="w-full bg-[#236383] hover:bg-[#1a4d66] h-10 sm:h-auto text-sm sm:text-base touch-manipulation"
                 onClick={() => setSelectedMethod("standard")}
               >
@@ -132,25 +154,33 @@ export default function CollectionFormSelector({ onSuccess, onCancel }: Collecti
           </Card>
 
           {/* Walkthrough Option */}
-          <Card 
+          <Card
             className="cursor-pointer border-2 hover:border-[#007E8C] transition-colors touch-manipulation"
             onClick={() => setSelectedMethod("walkthrough")}
           >
             <CardHeader className="text-center p-4 sm:p-6">
               <Users className="w-8 h-8 sm:w-12 sm:h-12 mx-auto text-[#007E8C] mb-2 sm:mb-3" />
-              <CardTitle className="text-base sm:text-lg">Step-by-Step Guide</CardTitle>
-              <Badge variant="outline" className="mx-auto bg-blue-50 text-blue-700 text-xs">Recommended</Badge>
+              <CardTitle className="text-base sm:text-lg">
+                Step-by-Step Guide
+              </CardTitle>
+              <Badge
+                variant="outline"
+                className="mx-auto bg-blue-50 text-blue-700 text-xs"
+              >
+                Recommended
+              </Badge>
             </CardHeader>
             <CardContent className="text-center space-y-3 p-4 sm:p-6 pt-0">
               <p className="text-gray-600 text-sm sm:text-base">
-                Get guided through each question one at a time, with automatic date calculations.
+                Get guided through each question one at a time, with automatic
+                date calculations.
               </p>
               <div className="space-y-1 sm:space-y-2 text-xs sm:text-sm text-gray-500">
                 <div>✓ One question at a time</div>
                 <div>✓ Automatic Thursday calculation</div>
                 <div>✓ Clear instructions for each step</div>
               </div>
-              <Button 
+              <Button
                 className="w-full bg-[#007E8C] hover:bg-[#006B75] h-10 sm:h-auto text-sm sm:text-base touch-manipulation"
                 onClick={() => setSelectedMethod("walkthrough")}
               >
@@ -165,8 +195,10 @@ export default function CollectionFormSelector({ onSuccess, onCancel }: Collecti
           <div className="flex items-start gap-2 sm:gap-3">
             <HelpCircle className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 mt-0.5 flex-shrink-0" />
             <div className="text-xs sm:text-sm text-blue-800">
-              <strong>Important:</strong> Both methods will ask you for the <em>actual date you collected the sandwiches</em>, not today's date. 
-              We automatically track when you submit the form for our records.
+              <strong>Important:</strong> Both methods will ask you for the{" "}
+              <em>actual date you collected the sandwiches</em>, not today's
+              date. We automatically track when you submit the form for our
+              records.
             </div>
           </div>
         </div>

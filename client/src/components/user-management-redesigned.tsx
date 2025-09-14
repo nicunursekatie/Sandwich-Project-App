@@ -1,30 +1,51 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { useCelebration, CelebrationToast } from "@/components/celebration-toast";
-import { hasPermission, USER_ROLES, PERMISSIONS, getRoleDisplayName } from "@shared/auth-utils";
+import {
+  useCelebration,
+  CelebrationToast,
+} from "@/components/celebration-toast";
+import {
+  hasPermission,
+  USER_ROLES,
+  PERMISSIONS,
+  getRoleDisplayName,
+} from "@shared/auth-utils";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { 
-  Users, 
-  Shield, 
-  Settings, 
-  Search, 
-  Plus, 
-  MoreVertical, 
-  Edit, 
-  Trash2, 
-  UserCheck, 
-  Activity, 
+import {
+  Users,
+  Shield,
+  Settings,
+  Search,
+  Plus,
+  MoreVertical,
+  Edit,
+  Trash2,
+  UserCheck,
+  Activity,
   Calendar,
   Mail,
   Phone,
@@ -42,7 +63,7 @@ import {
   Building,
   TrendingUp,
   KeyRound,
-  BarChart3
+  BarChart3,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -126,7 +147,13 @@ const ROLE_ICONS = {
 
 function Crown({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
       <path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm8 8h4" />
     </svg>
   );
@@ -136,9 +163,20 @@ export default function UserManagementRedesigned() {
   const { user: currentUser } = useAuth();
   const { toast } = useToast();
   const { celebration, triggerCelebration, hideCelebration } = useCelebration();
-  const [activeTab, setActiveTab] = useState<"overview" | "users" | "user-activity" | "activity" | "announcements" | "shoutouts" | "system-health" | "debug">("overview");
+  const [activeTab, setActiveTab] = useState<
+    | "overview"
+    | "users"
+    | "user-activity"
+    | "activity"
+    | "announcements"
+    | "shoutouts"
+    | "system-health"
+    | "debug"
+  >("overview");
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [viewingUserActivity, setViewingUserActivity] = useState<User | null>(null);
+  const [viewingUserActivity, setViewingUserActivity] = useState<User | null>(
+    null
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
   const [showAddUserDialog, setShowAddUserDialog] = useState(false);
@@ -147,7 +185,7 @@ export default function UserManagementRedesigned() {
     firstName: "",
     lastName: "",
     role: "volunteer",
-    password: ""
+    password: "",
   });
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [passwordUser, setPasswordUser] = useState<User | null>(null);
@@ -169,7 +207,8 @@ export default function UserManagementRedesigned() {
             </div>
             <CardTitle className="text-xl">Access Restricted</CardTitle>
             <CardDescription>
-              You don't have permission to manage users. Contact an administrator if you need access.
+              You don't have permission to manage users. Contact an
+              administrator if you need access.
             </CardDescription>
           </CardHeader>
         </Card>
@@ -185,7 +224,15 @@ export default function UserManagementRedesigned() {
 
   // User management mutations
   const updateUserMutation = useMutation({
-    mutationFn: async ({ userId, role, permissions }: { userId: string; role: string; permissions: string[] }) => {
+    mutationFn: async ({
+      userId,
+      role,
+      permissions,
+    }: {
+      userId: string;
+      role: string;
+      permissions: string[];
+    }) => {
       return apiRequest("PATCH", `/api/users/${userId}`, { role, permissions });
     },
     onSuccess: () => {
@@ -207,7 +254,13 @@ export default function UserManagementRedesigned() {
   });
 
   const toggleUserStatusMutation = useMutation({
-    mutationFn: async ({ userId, isActive }: { userId: string; isActive: boolean }) => {
+    mutationFn: async ({
+      userId,
+      isActive,
+    }: {
+      userId: string;
+      isActive: boolean;
+    }) => {
       return apiRequest("PATCH", `/api/users/${userId}/status`, { isActive });
     },
     onSuccess: () => {
@@ -247,7 +300,12 @@ export default function UserManagementRedesigned() {
   });
 
   const addUserMutation = useMutation({
-    mutationFn: async (userData: { email: string; firstName: string; lastName: string; role: string }) => {
+    mutationFn: async (userData: {
+      email: string;
+      firstName: string;
+      lastName: string;
+      role: string;
+    }) => {
       return apiRequest("POST", "/api/users", userData);
     },
     onSuccess: () => {
@@ -282,7 +340,14 @@ export default function UserManagementRedesigned() {
   };
 
   const editUserMutation = useMutation({
-    mutationFn: async (data: { userId: string; email: string; firstName: string; lastName: string; role: string; isActive: boolean }) => {
+    mutationFn: async (data: {
+      userId: string;
+      email: string;
+      firstName: string;
+      lastName: string;
+      role: string;
+      isActive: boolean;
+    }) => {
       return apiRequest("PATCH", `/api/users/${data.userId}/profile`, {
         email: data.email,
         firstName: data.firstName,
@@ -315,7 +380,12 @@ export default function UserManagementRedesigned() {
   };
 
   const handleSaveUserEdit = () => {
-    if (!editUser || !editUser.email || !editUser.firstName || !editUser.lastName) {
+    if (
+      !editUser ||
+      !editUser.email ||
+      !editUser.firstName ||
+      !editUser.lastName
+    ) {
       toast({
         title: "Missing Information",
         description: "Please fill in all required fields.",
@@ -335,7 +405,13 @@ export default function UserManagementRedesigned() {
   };
 
   const setPasswordMutation = useMutation({
-    mutationFn: async ({ userId, password }: { userId: string; password: string }) => {
+    mutationFn: async ({
+      userId,
+      password,
+    }: {
+      userId: string;
+      password: string;
+    }) => {
       return apiRequest("PATCH", `/api/users/${userId}/password`, { password });
     },
     onSuccess: () => {
@@ -358,26 +434,36 @@ export default function UserManagementRedesigned() {
   });
 
   const updateSMSConsentMutation = useMutation({
-    mutationFn: async ({ userId, phoneNumber, enabled }: { userId: string; phoneNumber?: string; enabled: boolean }) => {
+    mutationFn: async ({
+      userId,
+      phoneNumber,
+      enabled,
+    }: {
+      userId: string;
+      phoneNumber?: string;
+      enabled: boolean;
+    }) => {
       // Get current user data from the existing users query
       const currentUsers = queryClient.getQueryData(["/api/users"]) as User[];
-      const currentUser = currentUsers?.find(u => u.id === userId);
-      
+      const currentUser = currentUsers?.find((u) => u.id === userId);
+
       if (!currentUser) {
         throw new Error("User not found");
       }
-      
+
       const existingMetadata = currentUser.metadata || {};
-      
+
       let smsConsent;
       if (enabled && phoneNumber) {
         // Opt in
         smsConsent = {
           enabled: true,
-          phoneNumber: phoneNumber.startsWith('+1') ? phoneNumber : `+1${phoneNumber.replace(/\D/g, '')}`,
+          phoneNumber: phoneNumber.startsWith("+1")
+            ? phoneNumber
+            : `+1${phoneNumber.replace(/\D/g, "")}`,
           displayPhone: phoneNumber,
           optInDate: new Date().toISOString(),
-          consent: true
+          consent: true,
         };
       } else {
         // Opt out
@@ -386,20 +472,20 @@ export default function UserManagementRedesigned() {
           phoneNumber: null,
           displayPhone: null,
           optOutDate: new Date().toISOString(),
-          consent: false
+          consent: false,
         };
       }
 
       const updatedMetadata = {
         ...existingMetadata,
-        smsConsent
+        smsConsent,
       };
 
       // Send ALL current user data plus the updated metadata to prevent overwriting other fields
       return apiRequest("PATCH", `/api/users/${userId}`, {
         role: currentUser.role,
         permissions: currentUser.permissions,
-        metadata: updatedMetadata
+        metadata: updatedMetadata,
       });
     },
     onSuccess: () => {
@@ -432,7 +518,10 @@ export default function UserManagementRedesigned() {
     }
 
     if (passwordUser) {
-      setPasswordMutation.mutate({ userId: passwordUser.id, password: newPassword });
+      setPasswordMutation.mutate({
+        userId: passwordUser.id,
+        password: newPassword,
+      });
     }
   };
 
@@ -455,19 +544,19 @@ export default function UserManagementRedesigned() {
     updateSMSConsentMutation.mutate({
       userId: smsUser!.id,
       phoneNumber: smsPhoneNumber,
-      enabled
+      enabled,
     });
   };
 
   // Filter users
   const filteredUsers = (users as User[]).filter((user: User) => {
-    const matchesSearch = 
+    const matchesSearch =
       user.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.email.toLowerCase().includes(searchQuery.toLowerCase());
-    
+
     const matchesRole = roleFilter === "all" || user.role === roleFilter;
-    
+
     return matchesSearch && matchesRole;
   });
 
@@ -488,7 +577,7 @@ export default function UserManagementRedesigned() {
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    
+
     if (diffDays === 0) return "Today";
     if (diffDays === 1) return "Yesterday";
     if (diffDays < 7) return `${diffDays} days ago`;
@@ -513,7 +602,9 @@ export default function UserManagementRedesigned() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
-          <p className="text-gray-600 mt-1">Manage user accounts, permissions, and system access</p>
+          <p className="text-gray-600 mt-1">
+            Manage user accounts, permissions, and system access
+          </p>
         </div>
         <div className="flex items-center gap-3">
           <Button variant="outline" size="sm">
@@ -524,10 +615,8 @@ export default function UserManagementRedesigned() {
             <Upload className="h-4 w-4 mr-2" />
             Import
           </Button>
-          <ButtonTooltip 
-            text="Open form to add a new user to the platform"
-          >
-            <Button 
+          <ButtonTooltip text="Open form to add a new user to the platform">
+            <Button
               className="bg-[#236383] hover:bg-[#1a4d66]"
               onClick={() => setShowAddUserDialog(true)}
             >
@@ -538,7 +627,11 @@ export default function UserManagementRedesigned() {
         </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)} className="space-y-6">
+      <Tabs
+        value={activeTab}
+        onValueChange={(value) => setActiveTab(value as any)}
+        className="space-y-6"
+      >
         <TabsList className="grid grid-cols-8 w-full max-w-5xl">
           <TabsTrigger value="overview" className="flex items-center gap-2">
             <Activity className="h-4 w-4" />
@@ -548,7 +641,10 @@ export default function UserManagementRedesigned() {
             <Users className="h-4 w-4" />
             <span className="hidden sm:inline">Users</span>
           </TabsTrigger>
-          <TabsTrigger value="user-activity" className="flex items-center gap-2">
+          <TabsTrigger
+            value="user-activity"
+            className="flex items-center gap-2"
+          >
             <Clock className="h-4 w-4" />
             <span className="hidden sm:inline">Activity</span>
           </TabsTrigger>
@@ -556,7 +652,10 @@ export default function UserManagementRedesigned() {
             <TrendingUp className="h-4 w-4" />
             <span className="hidden sm:inline">Impact</span>
           </TabsTrigger>
-          <TabsTrigger value="announcements" className="flex items-center gap-2">
+          <TabsTrigger
+            value="announcements"
+            className="flex items-center gap-2"
+          >
             <Megaphone className="h-4 w-4" />
             <span className="hidden sm:inline">Announce</span>
           </TabsTrigger>
@@ -564,7 +663,10 @@ export default function UserManagementRedesigned() {
             <Award className="h-4 w-4" />
             <span className="hidden sm:inline">Shoutouts</span>
           </TabsTrigger>
-          <TabsTrigger value="system-health" className="flex items-center gap-2">
+          <TabsTrigger
+            value="system-health"
+            className="flex items-center gap-2"
+          >
             <Shield className="h-4 w-4" />
             <span className="hidden sm:inline">Tests</span>
           </TabsTrigger>
@@ -579,7 +681,9 @@ export default function UserManagementRedesigned() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Total Users
+                </CardTitle>
                 <Users className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -592,12 +696,15 @@ export default function UserManagementRedesigned() {
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Administrators</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Administrators
+                </CardTitle>
                 <Shield className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {(userStats.byRole[USER_ROLES.SUPER_ADMIN] || 0) + (userStats.byRole[USER_ROLES.ADMIN] || 0)}
+                  {(userStats.byRole[USER_ROLES.SUPER_ADMIN] || 0) +
+                    (userStats.byRole[USER_ROLES.ADMIN] || 0)}
                 </div>
                 <p className="text-xs text-muted-foreground">
                   Super admins & admins
@@ -607,12 +714,15 @@ export default function UserManagementRedesigned() {
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Volunteers</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Volunteers
+                </CardTitle>
                 <Award className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {(userStats.byRole[USER_ROLES.VOLUNTEER] || 0) + (userStats.byRole[USER_ROLES.HOST] || 0)}
+                  {(userStats.byRole[USER_ROLES.VOLUNTEER] || 0) +
+                    (userStats.byRole[USER_ROLES.HOST] || 0)}
                 </div>
                 <p className="text-xs text-muted-foreground">
                   Hosts & volunteers
@@ -622,11 +732,15 @@ export default function UserManagementRedesigned() {
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Recipients</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Recipients
+                </CardTitle>
                 <UserCheck className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{userStats.byRole[USER_ROLES.RECIPIENT] || 0}</div>
+                <div className="text-2xl font-bold">
+                  {userStats.byRole[USER_ROLES.RECIPIENT] || 0}
+                </div>
                 <p className="text-xs text-muted-foreground">
                   Community members
                 </p>
@@ -646,16 +760,31 @@ export default function UserManagementRedesigned() {
                     .filter(([, count]) => count > 0)
                     .sort(([, a], [, b]) => b - a)
                     .map(([role, count]) => {
-                      const RoleIcon = ROLE_ICONS[role as keyof typeof ROLE_ICONS] || Users;
+                      const RoleIcon =
+                        ROLE_ICONS[role as keyof typeof ROLE_ICONS] || Users;
                       return (
-                        <div key={role} className="flex items-center justify-between">
+                        <div
+                          key={role}
+                          className="flex items-center justify-between"
+                        >
                           <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded-lg ${ROLE_COLORS[role as keyof typeof ROLE_COLORS] || 'bg-gray-100'}`}>
+                            <div
+                              className={`p-2 rounded-lg ${ROLE_COLORS[
+                                role as keyof typeof ROLE_COLORS
+                              ] || "bg-gray-100"}`}
+                            >
                               <RoleIcon className="h-4 w-4" />
                             </div>
-                            <span className="font-medium">{getRoleDisplayName(role)}</span>
+                            <span className="font-medium">
+                              {getRoleDisplayName(role)}
+                            </span>
                           </div>
-                          <Badge variant="outline" className="bg-[#236383] text-white border-[#236383]">{count}</Badge>
+                          <Badge
+                            variant="outline"
+                            className="bg-[#236383] text-white border-[#236383]"
+                          >
+                            {count}
+                          </Badge>
                         </div>
                       );
                     })}
@@ -666,17 +795,26 @@ export default function UserManagementRedesigned() {
             <Card>
               <CardHeader>
                 <CardTitle>Recent Activity</CardTitle>
-                <CardDescription>Latest user logins and activity</CardDescription>
+                <CardDescription>
+                  Latest user logins and activity
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <ScrollArea className="h-[300px]">
                   <div className="space-y-3">
                     {(users as User[])
                       .filter((user: User) => user.lastLoginAt)
-                      .sort((a: User, b: User) => new Date(b.lastLoginAt!).getTime() - new Date(a.lastLoginAt!).getTime())
+                      .sort(
+                        (a: User, b: User) =>
+                          new Date(b.lastLoginAt!).getTime() -
+                          new Date(a.lastLoginAt!).getTime()
+                      )
                       .slice(0, 10)
                       .map((user: User) => (
-                        <div key={user.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">
+                        <div
+                          key={user.id}
+                          className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50"
+                        >
                           <Avatar className="h-8 w-8">
                             <AvatarFallback className="text-xs">
                               {getInitials(user.firstName, user.lastName)}
@@ -745,7 +883,9 @@ export default function UserManagementRedesigned() {
               <div className="flex justify-between items-center">
                 <div>
                   <CardTitle>Users ({filteredUsers.length})</CardTitle>
-                  <CardDescription>Manage user accounts and permissions</CardDescription>
+                  <CardDescription>
+                    Manage user accounts and permissions
+                  </CardDescription>
                 </div>
               </div>
             </CardHeader>
@@ -766,13 +906,18 @@ export default function UserManagementRedesigned() {
                   <TableBody>
                     {filteredUsers.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={7} className="text-center py-8 text-gray-500">
+                        <TableCell
+                          colSpan={7}
+                          className="text-center py-8 text-gray-500"
+                        >
                           No users found matching your criteria
                         </TableCell>
                       </TableRow>
                     ) : (
                       filteredUsers.map((user: User) => {
-                        const RoleIcon = ROLE_ICONS[user.role as keyof typeof ROLE_ICONS] || Users;
+                        const RoleIcon =
+                          ROLE_ICONS[user.role as keyof typeof ROLE_ICONS] ||
+                          Users;
                         return (
                           <TableRow key={user.id} className="hover:bg-gray-50">
                             <TableCell>
@@ -786,34 +931,52 @@ export default function UserManagementRedesigned() {
                                   <div className="font-medium text-gray-900">
                                     {user.firstName} {user.lastName}
                                   </div>
-                                  <div className="text-sm text-gray-500">{user.email}</div>
+                                  <div className="text-sm text-gray-500">
+                                    {user.email}
+                                  </div>
                                 </div>
                               </div>
                             </TableCell>
                             <TableCell>
-                              <Badge variant="outline" className={`${ROLE_COLORS[user.role as keyof typeof ROLE_COLORS] || 'bg-gray-100'}`}>
+                              <Badge
+                                variant="outline"
+                                className={`${ROLE_COLORS[
+                                  user.role as keyof typeof ROLE_COLORS
+                                ] || "bg-gray-100"}`}
+                              >
                                 <RoleIcon className="h-3 w-3 mr-1" />
                                 {getRoleDisplayName(user.role)}
                               </Badge>
                             </TableCell>
                             <TableCell>
-                              <Badge variant={user.isActive ? "default" : "secondary"}>
+                              <Badge
+                                variant={
+                                  user.isActive ? "default" : "secondary"
+                                }
+                              >
                                 {user.isActive ? "Active" : "Inactive"}
                               </Badge>
                             </TableCell>
                             <TableCell>
                               {user.metadata?.smsConsent?.enabled ? (
                                 <div className="flex items-center gap-2">
-                                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                                  <Badge
+                                    variant="outline"
+                                    className="bg-green-50 text-green-700 border-green-200"
+                                  >
                                     <Phone className="h-3 w-3 mr-1" />
                                     Opted In
                                   </Badge>
                                   <span className="text-xs text-gray-500">
-                                    {user.metadata.smsConsent.displayPhone || user.metadata.smsConsent.phoneNumber}
+                                    {user.metadata.smsConsent.displayPhone ||
+                                      user.metadata.smsConsent.phoneNumber}
                                   </span>
                                 </div>
                               ) : (
-                                <Badge variant="outline" className="bg-gray-50 text-gray-600">
+                                <Badge
+                                  variant="outline"
+                                  className="bg-gray-50 text-gray-600"
+                                >
                                   <Phone className="h-3 w-3 mr-1" />
                                   Not Opted In
                                 </Badge>
@@ -837,37 +1000,49 @@ export default function UserManagementRedesigned() {
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
-                                  <DropdownMenuItem onClick={() => handleEditUser(user)}>
+                                  <DropdownMenuItem
+                                    onClick={() => handleEditUser(user)}
+                                  >
                                     <Edit className="h-4 w-4 mr-2" />
                                     Edit User Details
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => setSelectedUser(user)}>
+                                  <DropdownMenuItem
+                                    onClick={() => setSelectedUser(user)}
+                                  >
                                     <Settings className="h-4 w-4 mr-2" />
                                     Edit Permissions
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => {
-                                    setPasswordUser(user);
-                                    setShowPasswordDialog(true);
-                                  }}>
+                                  <DropdownMenuItem
+                                    onClick={() => {
+                                      setPasswordUser(user);
+                                      setShowPasswordDialog(true);
+                                    }}
+                                  >
                                     <KeyRound className="h-4 w-4 mr-2" />
                                     Set Password
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => handleManageSMS(user)}>
+                                  <DropdownMenuItem
+                                    onClick={() => handleManageSMS(user)}
+                                  >
                                     <Phone className="h-4 w-4 mr-2" />
                                     Manage SMS
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => {
-                                    setViewingUserActivity(user);
-                                    setActiveTab("user-activity");
-                                  }}>
+                                  <DropdownMenuItem
+                                    onClick={() => {
+                                      setViewingUserActivity(user);
+                                      setActiveTab("user-activity");
+                                    }}
+                                  >
                                     <BarChart3 className="h-4 w-4 mr-2" />
                                     View Activity
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem 
-                                    onClick={() => toggleUserStatusMutation.mutate({ 
-                                      userId: user.id, 
-                                      isActive: !user.isActive 
-                                    })}
+                                  <DropdownMenuItem
+                                    onClick={() =>
+                                      toggleUserStatusMutation.mutate({
+                                        userId: user.id,
+                                        isActive: !user.isActive,
+                                      })
+                                    }
                                   >
                                     {user.isActive ? (
                                       <>
@@ -882,8 +1057,10 @@ export default function UserManagementRedesigned() {
                                     )}
                                   </DropdownMenuItem>
                                   <DropdownMenuSeparator />
-                                  <DropdownMenuItem 
-                                    onClick={() => deleteUserMutation.mutate(user.id)}
+                                  <DropdownMenuItem
+                                    onClick={() =>
+                                      deleteUserMutation.mutate(user.id)
+                                    }
                                     className="text-red-600"
                                   >
                                     <Trash2 className="h-4 w-4 mr-2" />
@@ -906,7 +1083,7 @@ export default function UserManagementRedesigned() {
         {/* User Activity Tab */}
         <TabsContent value="user-activity">
           {viewingUserActivity ? (
-            <IndividualUserActivity 
+            <IndividualUserActivity
               user={viewingUserActivity}
               onBack={() => setViewingUserActivity(null)}
             />
@@ -947,7 +1124,8 @@ export default function UserManagementRedesigned() {
           <DialogHeader>
             <DialogTitle>Add New User</DialogTitle>
             <DialogDescription>
-              Create a new user account. They will receive login instructions via email.
+              Create a new user account. They will receive login instructions
+              via email.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -957,7 +1135,9 @@ export default function UserManagementRedesigned() {
                 id="email"
                 type="email"
                 value={newUser.email}
-                onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                onChange={(e) =>
+                  setNewUser({ ...newUser, email: e.target.value })
+                }
                 placeholder="user@example.com"
               />
             </div>
@@ -967,7 +1147,9 @@ export default function UserManagementRedesigned() {
                 <Input
                   id="firstName"
                   value={newUser.firstName}
-                  onChange={(e) => setNewUser({ ...newUser, firstName: e.target.value })}
+                  onChange={(e) =>
+                    setNewUser({ ...newUser, firstName: e.target.value })
+                  }
                   placeholder="John"
                 />
               </div>
@@ -976,14 +1158,21 @@ export default function UserManagementRedesigned() {
                 <Input
                   id="lastName"
                   value={newUser.lastName}
-                  onChange={(e) => setNewUser({ ...newUser, lastName: e.target.value })}
+                  onChange={(e) =>
+                    setNewUser({ ...newUser, lastName: e.target.value })
+                  }
                   placeholder="Doe"
                 />
               </div>
             </div>
             <div>
               <Label htmlFor="role">Role</Label>
-              <Select value={newUser.role} onValueChange={(value) => setNewUser({ ...newUser, role: value })}>
+              <Select
+                value={newUser.role}
+                onValueChange={(value) =>
+                  setNewUser({ ...newUser, role: value })
+                }
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -992,7 +1181,9 @@ export default function UserManagementRedesigned() {
                   <SelectItem value="host">Host</SelectItem>
                   <SelectItem value="driver">Driver</SelectItem>
                   <SelectItem value="core_team">Core Team</SelectItem>
-                  <SelectItem value="committee_member">Committee Member</SelectItem>
+                  <SelectItem value="committee_member">
+                    Committee Member
+                  </SelectItem>
                   <SelectItem value="admin">Admin</SelectItem>
                   <SelectItem value="viewer">Viewer</SelectItem>
                 </SelectContent>
@@ -1004,24 +1195,33 @@ export default function UserManagementRedesigned() {
                 id="password"
                 type="password"
                 value={newUser.password}
-                onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                onChange={(e) =>
+                  setNewUser({ ...newUser, password: e.target.value })
+                }
                 placeholder="Leave blank for no password"
               />
               <p className="text-xs text-gray-500 mt-1">
-                If no password is set, user will need to use email login or reset password
+                If no password is set, user will need to use email login or
+                reset password
               </p>
             </div>
             <div className="flex justify-end gap-2 pt-4">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => {
                   setShowAddUserDialog(false);
-                  setNewUser({ email: "", firstName: "", lastName: "", role: "volunteer", password: "" });
+                  setNewUser({
+                    email: "",
+                    firstName: "",
+                    lastName: "",
+                    role: "volunteer",
+                    password: "",
+                  });
                 }}
               >
                 Cancel
               </Button>
-              <Button 
+              <Button
                 onClick={handleAddUser}
                 disabled={addUserMutation.isPending}
                 className="bg-[#236383] hover:bg-[#1a4d66]"
@@ -1037,9 +1237,13 @@ export default function UserManagementRedesigned() {
       <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Set Password for {passwordUser?.firstName} {passwordUser?.lastName}</DialogTitle>
+            <DialogTitle>
+              Set Password for {passwordUser?.firstName}{" "}
+              {passwordUser?.lastName}
+            </DialogTitle>
             <DialogDescription>
-              Set a new password for this user. They can use this password to log in directly.
+              Set a new password for this user. They can use this password to
+              log in directly.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -1080,9 +1284,13 @@ export default function UserManagementRedesigned() {
       <Dialog open={showSMSDialog} onOpenChange={setShowSMSDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Manage SMS Notifications for {smsUser?.firstName} {smsUser?.lastName}</DialogTitle>
+            <DialogTitle>
+              Manage SMS Notifications for {smsUser?.firstName}{" "}
+              {smsUser?.lastName}
+            </DialogTitle>
             <DialogDescription>
-              Update SMS notification preferences for this user. Users can also manage their own preferences in their profile.
+              Update SMS notification preferences for this user. Users can also
+              manage their own preferences in their profile.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-6 py-4">
@@ -1093,14 +1301,20 @@ export default function UserManagementRedesigned() {
                   <p className="font-medium">Current Status</p>
                   <p className="text-sm text-gray-600">
                     {smsUser?.metadata?.smsConsent?.enabled ? (
-                      <span className="text-green-700">Opted in to SMS notifications</span>
+                      <span className="text-green-700">
+                        Opted in to SMS notifications
+                      </span>
                     ) : (
-                      <span className="text-gray-500">Not opted in to SMS notifications</span>
+                      <span className="text-gray-500">
+                        Not opted in to SMS notifications
+                      </span>
                     )}
                   </p>
                   {smsUser?.metadata?.smsConsent?.phoneNumber && (
                     <p className="text-sm text-gray-500">
-                      Phone: {smsUser.metadata.smsConsent.displayPhone || smsUser.metadata.smsConsent.phoneNumber}
+                      Phone:{" "}
+                      {smsUser.metadata.smsConsent.displayPhone ||
+                        smsUser.metadata.smsConsent.phoneNumber}
                     </p>
                   )}
                 </div>
@@ -1130,7 +1344,9 @@ export default function UserManagementRedesigned() {
                 className="bg-green-50 hover:bg-green-100 border-green-200 text-green-700"
               >
                 <Phone className="h-4 w-4 mr-2" />
-                {updateSMSConsentMutation.isPending ? "Updating..." : "Enable SMS"}
+                {updateSMSConsentMutation.isPending
+                  ? "Updating..."
+                  : "Enable SMS"}
               </Button>
               <Button
                 variant="outline"
@@ -1138,7 +1354,9 @@ export default function UserManagementRedesigned() {
                 disabled={updateSMSConsentMutation.isPending}
                 className="bg-red-50 hover:bg-red-100 border-red-200 text-red-700"
               >
-                {updateSMSConsentMutation.isPending ? "Updating..." : "Disable SMS"}
+                {updateSMSConsentMutation.isPending
+                  ? "Updating..."
+                  : "Disable SMS"}
               </Button>
             </div>
             <Button
@@ -1172,7 +1390,9 @@ export default function UserManagementRedesigned() {
                   id="editEmail"
                   type="email"
                   value={editUser.email}
-                  onChange={(e) => setEditUser({ ...editUser, email: e.target.value })}
+                  onChange={(e) =>
+                    setEditUser({ ...editUser, email: e.target.value })
+                  }
                   placeholder="user@example.com"
                 />
               </div>
@@ -1182,7 +1402,9 @@ export default function UserManagementRedesigned() {
                   <Input
                     id="editFirstName"
                     value={editUser.firstName}
-                    onChange={(e) => setEditUser({ ...editUser, firstName: e.target.value })}
+                    onChange={(e) =>
+                      setEditUser({ ...editUser, firstName: e.target.value })
+                    }
                     placeholder="John"
                   />
                 </div>
@@ -1191,14 +1413,21 @@ export default function UserManagementRedesigned() {
                   <Input
                     id="editLastName"
                     value={editUser.lastName}
-                    onChange={(e) => setEditUser({ ...editUser, lastName: e.target.value })}
+                    onChange={(e) =>
+                      setEditUser({ ...editUser, lastName: e.target.value })
+                    }
                     placeholder="Doe"
                   />
                 </div>
               </div>
               <div>
                 <Label htmlFor="editRole">Role</Label>
-                <Select value={editUser.role} onValueChange={(value) => setEditUser({ ...editUser, role: value })}>
+                <Select
+                  value={editUser.role}
+                  onValueChange={(value) =>
+                    setEditUser({ ...editUser, role: value })
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -1206,8 +1435,12 @@ export default function UserManagementRedesigned() {
                     <SelectItem value="volunteer">Volunteer</SelectItem>
                     <SelectItem value="host">Host</SelectItem>
                     <SelectItem value="admin">Administrator</SelectItem>
-                    <SelectItem value="super_admin">Super Administrator</SelectItem>
-                    <SelectItem value="committee_member">Committee Member</SelectItem>
+                    <SelectItem value="super_admin">
+                      Super Administrator
+                    </SelectItem>
+                    <SelectItem value="committee_member">
+                      Committee Member
+                    </SelectItem>
                     <SelectItem value="core_team">Core Team</SelectItem>
                     <SelectItem value="driver">Driver</SelectItem>
                     <SelectItem value="recipient">Recipient</SelectItem>
@@ -1221,13 +1454,15 @@ export default function UserManagementRedesigned() {
                   type="checkbox"
                   id="editActive"
                   checked={editUser.isActive}
-                  onChange={(e) => setEditUser({ ...editUser, isActive: e.target.checked })}
+                  onChange={(e) =>
+                    setEditUser({ ...editUser, isActive: e.target.checked })
+                  }
                   className="w-4 h-4 text-[#236383] border-slate-300 rounded focus:ring-[#236383]"
                 />
                 <Label htmlFor="editActive">User is active</Label>
               </div>
               <div className="flex justify-end gap-2 pt-4">
-                <Button 
+                <Button
                   variant="outline"
                   onClick={() => {
                     setShowEditDialog(false);
@@ -1236,7 +1471,7 @@ export default function UserManagementRedesigned() {
                 >
                   Cancel
                 </Button>
-                <Button 
+                <Button
                   onClick={handleSaveUserEdit}
                   disabled={editUserMutation.isPending}
                   className="bg-[#236383] hover:bg-[#1a4d66]"

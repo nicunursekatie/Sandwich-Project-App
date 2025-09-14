@@ -36,44 +36,44 @@ export function MessageComposer({
 
   // Fetch all users for direct messaging
   const { data: users = [], isLoading: isLoadingUsers } = useQuery({
-    queryKey: ['/api/users'],
+    queryKey: ["/api/users"],
     queryFn: async () => {
       try {
-        const response = await apiRequest('GET', '/api/users');
+        const response = await apiRequest("GET", "/api/users");
         return Array.isArray(response) ? response : [];
       } catch (error) {
-        console.error('Error fetching users:', error);
+        console.error("Error fetching users:", error);
         return [];
       }
     },
-    enabled: contextType === 'direct',
+    enabled: contextType === "direct",
   });
 
   const handleSend = async () => {
     if (!content.trim()) {
-      toast({ 
-        title: "Message content required", 
-        description: "Please enter a message", 
-        variant: "destructive" 
+      toast({
+        title: "Message content required",
+        description: "Please enter a message",
+        variant: "destructive",
       });
       return;
     }
 
     if (selectedRecipients.length === 0) {
-      toast({ 
-        title: "Recipients required", 
-        description: "Please select at least one recipient", 
-        variant: "destructive" 
+      toast({
+        title: "Recipients required",
+        description: "Please select at least one recipient",
+        variant: "destructive",
       });
       return;
     }
 
-    console.log('Sending message:', {
+    console.log("Sending message:", {
       recipientIds: selectedRecipients,
       content: content.trim(),
       contextType,
       contextId,
-      recipientCount: selectedRecipients.length
+      recipientCount: selectedRecipients.length,
     });
 
     try {
@@ -91,13 +91,14 @@ export function MessageComposer({
       toast({
         description: "Message sent successfully",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/messages'] }); // Refresh messages
+      queryClient.invalidateQueries({ queryKey: ["/api/messages"] }); // Refresh messages
     } catch (error) {
       console.error("Failed to send message:", error);
-      toast({ 
-        title: "Failed to send message", 
-        description: error instanceof Error ? error.message : "Please try again", 
-        variant: "destructive" 
+      toast({
+        title: "Failed to send message",
+        description:
+          error instanceof Error ? error.message : "Please try again",
+        variant: "destructive",
       });
     }
   };
@@ -135,29 +136,44 @@ export function MessageComposer({
             ) : (
               <div className="mt-2 space-y-2 max-h-40 overflow-y-auto border rounded-lg p-3 bg-white">
                 {users.length === 0 ? (
-                  <div className="text-sm text-gray-500">No users available</div>
+                  <div className="text-sm text-gray-500">
+                    No users available
+                  </div>
                 ) : (
                   users.map((user: any) => (
-                    <div key={user.id} className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-md transition-colors">
+                    <div
+                      key={user.id}
+                      className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-md transition-colors"
+                    >
                       <Checkbox
                         id={user.id}
                         checked={selectedRecipients.includes(user.id)}
                         onCheckedChange={(checked) => {
                           if (checked) {
-                            setSelectedRecipients([...selectedRecipients, user.id]);
+                            setSelectedRecipients([
+                              ...selectedRecipients,
+                              user.id,
+                            ]);
                           } else {
-                            setSelectedRecipients(selectedRecipients.filter(id => id !== user.id));
+                            setSelectedRecipients(
+                              selectedRecipients.filter((id) => id !== user.id)
+                            );
                           }
                         }}
                       />
-                      <label htmlFor={user.id} className="text-sm cursor-pointer text-gray-900 font-medium flex-1">
+                      <label
+                        htmlFor={user.id}
+                        className="text-sm cursor-pointer text-gray-900 font-medium flex-1"
+                      >
                         <span className="text-gray-900">
-                          {user.firstName && user.lastName 
-                            ? `${user.firstName} ${user.lastName}` 
+                          {user.firstName && user.lastName
+                            ? `${user.firstName} ${user.lastName}`
                             : user.email}
                         </span>
                         {user.email && user.firstName && (
-                          <span className="text-gray-600 ml-1 font-normal">({user.email})</span>
+                          <span className="text-gray-600 ml-1 font-normal">
+                            ({user.email})
+                          </span>
                         )}
                       </label>
                     </div>
@@ -169,12 +185,16 @@ export function MessageComposer({
               <div className="mt-2">
                 <div className="text-sm font-medium">Selected:</div>
                 <div className="flex flex-wrap gap-1 mt-1">
-                  {selectedRecipients.map(recipientId => {
+                  {selectedRecipients.map((recipientId) => {
                     const user = users.find((u: any) => u.id === recipientId);
                     return user ? (
-                      <Badge key={recipientId} variant="outline" className="text-xs">
-                        {user.firstName && user.lastName 
-                          ? `${user.firstName} ${user.lastName}` 
+                      <Badge
+                        key={recipientId}
+                        variant="outline"
+                        className="text-xs"
+                      >
+                        {user.firstName && user.lastName
+                          ? `${user.firstName} ${user.lastName}`
                           : user.email}
                       </Badge>
                     ) : null;
@@ -204,7 +224,11 @@ export function MessageComposer({
           )}
           <Button
             onClick={handleSend}
-            disabled={!content.trim() || isSending || (contextType === "direct" && selectedRecipients.length === 0)}
+            disabled={
+              !content.trim() ||
+              isSending ||
+              (contextType === "direct" && selectedRecipients.length === 0)
+            }
             className="flex items-center gap-2"
           >
             <Send className="h-4 w-4" />

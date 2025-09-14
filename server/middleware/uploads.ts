@@ -26,7 +26,7 @@ export const meetingMinutesUpload = multer({
     const allowedExtensions = [".pdf", ".doc", ".docx"];
     const hasValidMimeType = allowedMimeTypes.includes(file.mimetype);
     const hasValidExtension = allowedExtensions.some((ext) =>
-      file.originalname.toLowerCase().endsWith(ext),
+      file.originalname.toLowerCase().endsWith(ext)
     );
 
     if (hasValidMimeType || hasValidExtension) {
@@ -34,8 +34,8 @@ export const meetingMinutesUpload = multer({
     } else {
       cb(
         new Error(
-          "Only PDF, DOC, and DOCX files are allowed for meeting minutes",
-        ),
+          "Only PDF, DOC, and DOCX files are allowed for meeting minutes"
+        )
       );
     }
   },
@@ -54,7 +54,7 @@ export const importUpload = multer({
     const allowedExtensions = [".csv", ".xls", ".xlsx"];
     const hasValidType = allowedTypes.includes(file.mimetype);
     const hasValidExtension = allowedExtensions.some((ext) =>
-      file.originalname.toLowerCase().endsWith(ext),
+      file.originalname.toLowerCase().endsWith(ext)
     );
 
     if (hasValidType || hasValidExtension) {
@@ -105,17 +105,21 @@ export const projectDataUpload = multer({
   fileFilter: (req, file, cb) => {
     // Allow Excel files, CSV files, and PDFs
     const allowedTypes = [
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
-      'application/vnd.ms-excel', // .xls
-      'text/csv', // .csv
-      'application/pdf' // .pdf
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // .xlsx
+      "application/vnd.ms-excel", // .xls
+      "text/csv", // .csv
+      "application/pdf", // .pdf
     ];
     if (allowedTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error('Only Excel, CSV, and PDF files are allowed for project data uploads'));
+      cb(
+        new Error(
+          "Only Excel, CSV, and PDF files are allowed for project data uploads"
+        )
+      );
     }
-  }
+  },
 });
 
 // Configure multer for document uploads
@@ -134,7 +138,7 @@ export const documentsUpload = multer({
       "application/vnd.ms-powerpoint",
       "application/vnd.openxmlformats-officedocument.presentationml.presentation",
       "image/jpeg",
-      "image/jpg", 
+      "image/jpg",
       "image/png",
       "image/gif",
       "image/webp",
@@ -146,7 +150,7 @@ export const documentsUpload = multer({
     if (allowedTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error('File type not supported for document uploads'));
+      cb(new Error("File type not supported for document uploads"));
     }
-  }
+  },
 });

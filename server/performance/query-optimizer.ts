@@ -3,7 +3,10 @@
  */
 
 export class QueryOptimizer {
-  private static queryCache = new Map<string, { data: any; timestamp: number; ttl: number }>();
+  private static queryCache = new Map<
+    string,
+    { data: any; timestamp: number; ttl: number }
+  >();
   private static readonly DEFAULT_TTL = 30000; // 30 seconds
 
   /**
@@ -17,13 +20,13 @@ export class QueryOptimizer {
     const cached = this.queryCache.get(key);
     const now = Date.now();
 
-    if (cached && (now - cached.timestamp) < cached.ttl) {
+    if (cached && now - cached.timestamp < cached.ttl) {
       return cached.data;
     }
 
     const data = await queryFn();
     this.queryCache.set(key, { data, timestamp: now, ttl });
-    
+
     return data;
   }
 
@@ -44,7 +47,7 @@ export class QueryOptimizer {
   static cleanupCache() {
     const now = Date.now();
     for (const [key, value] of this.queryCache.entries()) {
-      if ((now - value.timestamp) > value.ttl) {
+      if (now - value.timestamp > value.ttl) {
         this.queryCache.delete(key);
       }
     }
@@ -56,7 +59,7 @@ export class QueryOptimizer {
   static getCacheStats() {
     return {
       size: this.queryCache.size,
-      keys: Array.from(this.queryCache.keys())
+      keys: Array.from(this.queryCache.keys()),
     };
   }
 }

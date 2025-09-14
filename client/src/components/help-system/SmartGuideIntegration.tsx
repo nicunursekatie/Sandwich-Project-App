@@ -1,5 +1,10 @@
-import React from 'react';
-import { IntelligentGuideSystem, FeatureTooltip, TipTooltip, InfoTooltip } from './IntelligentGuideSystem';
+import React from "react";
+import {
+  IntelligentGuideSystem,
+  FeatureTooltip,
+  TipTooltip,
+  InfoTooltip,
+} from "./IntelligentGuideSystem";
 
 // Integration wrapper that demonstrates how to use the Smart Contextual Tooltip Guide System
 // throughout the application
@@ -8,16 +13,18 @@ interface SmartGuideIntegrationProps {
   children: React.ReactNode;
 }
 
-export function SmartGuideIntegration({ children }: SmartGuideIntegrationProps) {
-  return (
-    <IntelligentGuideSystem>
-      {children}
-    </IntelligentGuideSystem>
-  );
+export function SmartGuideIntegration({
+  children,
+}: SmartGuideIntegrationProps) {
+  return <IntelligentGuideSystem>{children}</IntelligentGuideSystem>;
 }
 
 // Example usage components that show how to integrate tooltips into UI elements
-export function SmartCollectionButton({ onClick, children, ...props }: {
+export function SmartCollectionButton({
+  onClick,
+  children,
+  ...props
+}: {
   onClick: () => void;
   children: React.ReactNode;
   [key: string]: any;
@@ -29,8 +36,8 @@ export function SmartCollectionButton({ onClick, children, ...props }: {
       trigger="hover"
       placement="bottom"
     >
-      <button 
-        onClick={onClick} 
+      <button
+        onClick={onClick}
         data-guide="add-collection"
         className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-md transition-colors"
         {...props}
@@ -41,7 +48,12 @@ export function SmartCollectionButton({ onClick, children, ...props }: {
   );
 }
 
-export function SmartNavigationItem({ to, children, guideId, tooltipContent }: {
+export function SmartNavigationItem({
+  to,
+  children,
+  guideId,
+  tooltipContent,
+}: {
   to: string;
   children: React.ReactNode;
   guideId: string;
@@ -57,7 +69,7 @@ export function SmartNavigationItem({ to, children, guideId, tooltipContent }: {
       trigger="hover"
       placement="right"
     >
-      <a 
+      <a
         href={to}
         data-guide={guideId}
         className="flex items-center px-4 py-2 text-slate-700 hover:bg-slate-100 rounded-md transition-colors"
@@ -68,7 +80,12 @@ export function SmartNavigationItem({ to, children, guideId, tooltipContent }: {
   );
 }
 
-export function SmartFormField({ label, tooltip, children, guideId }: {
+export function SmartFormField({
+  label,
+  tooltip,
+  children,
+  guideId,
+}: {
   label: string;
   tooltip: string;
   children: React.ReactNode;
@@ -82,7 +99,7 @@ export function SmartFormField({ label, tooltip, children, guideId }: {
         trigger="hover"
         placement="top"
       >
-        <label 
+        <label
           className="block text-sm font-medium text-slate-700"
           data-guide={guideId}
         >
@@ -141,5 +158,5 @@ export const SmartGuideExamples = {
         {/* User management section */}
       </div>
     </IntelligentGuideSystem>
-  `
+  `,
 };

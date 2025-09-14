@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { StreamChat } from 'stream-chat';
+import { useState, useEffect } from "react";
+import { StreamChat } from "stream-chat";
 import {
   Chat,
   Channel,
@@ -9,29 +9,37 @@ import {
   MessageInput,
   Thread,
   LoadingIndicator,
-  ChannelList
-} from 'stream-chat-react';
-import 'stream-chat-react/dist/css/v2/index.css';
+  ChannelList,
+} from "stream-chat-react";
+import "stream-chat-react/dist/css/v2/index.css";
 
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from "@/hooks/useAuth";
 
 // Type guard for user object
-function isValidUser(user: any): user is { id: number; firstName?: string; lastName?: string; email: string } {
-  return user && typeof user.id !== 'undefined' && user.email;
+function isValidUser(
+  user: any
+): user is {
+  id: number;
+  firstName?: string;
+  lastName?: string;
+  email: string;
+} {
+  return user && typeof user.id !== "undefined" && user.email;
 }
-import { useToast } from '@/hooks/use-toast';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { 
-  MessageCircle, 
-  Plus, 
-  Users,
-  Hash,
-  Loader2
-} from 'lucide-react';
+import { useToast } from "@/hooks/use-toast";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { MessageCircle, Plus, Users, Hash, Loader2 } from "lucide-react";
 
 export default function StreamMessagesPage() {
   const [client, setClient] = useState<StreamChat | null>(null);
@@ -39,8 +47,10 @@ export default function StreamMessagesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showNewChannel, setShowNewChannel] = useState(false);
-  const [channelName, setChannelName] = useState('');
-  const [channelType, setChannelType] = useState<'messaging' | 'team'>('messaging');
+  const [channelName, setChannelName] = useState("");
+  const [channelType, setChannelType] = useState<"messaging" | "team">(
+    "messaging"
+  );
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [availableUsers, setAvailableUsers] = useState<any[]>([]);
   const { user } = useAuth();
@@ -49,27 +59,32 @@ export default function StreamMessagesPage() {
   // Fetch available users for creating channels
   const fetchAvailableUsers = async () => {
     try {
-      const response = await fetch('/api/users', {
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' }
+      const response = await fetch("/api/users", {
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
       });
       if (response.ok) {
         const data = await response.json();
-        const activeUsers = Array.isArray(data) ? data : (data.users || []);
-        const filteredUsers = activeUsers.filter((dbUser: any) => 
-          dbUser.isActive && 
-          dbUser.id !== (isValidUser(user) ? user.id : null) &&
-          dbUser.email
-        ).map((dbUser: any) => ({
-          id: dbUser.id.toString(),
-          name: dbUser.firstName ? `${dbUser.firstName} ${dbUser.lastName || ''}`.trim() : dbUser.email,
-          email: dbUser.email
-        }));
+        const activeUsers = Array.isArray(data) ? data : data.users || [];
+        const filteredUsers = activeUsers
+          .filter(
+            (dbUser: any) =>
+              dbUser.isActive &&
+              dbUser.id !== (isValidUser(user) ? user.id : null) &&
+              dbUser.email
+          )
+          .map((dbUser: any) => ({
+            id: dbUser.id.toString(),
+            name: dbUser.firstName
+              ? `${dbUser.firstName} ${dbUser.lastName || ""}`.trim()
+              : dbUser.email,
+            email: dbUser.email,
+          }));
         return filteredUsers;
       }
       return [];
     } catch (error) {
-      console.error('Failed to fetch users:', error);
+      console.error("Failed to fetch users:", error);
       return [];
     }
   };
@@ -81,49 +96,51 @@ export default function StreamMessagesPage() {
 
       try {
         setLoading(true);
-        console.log('🚀 Initializing Stream Chat...');
+        console.log("🚀 Initializing Stream Chat...");
 
         // First sync users to Stream
-        const syncResponse = await fetch('/api/stream/sync-users', {
-          method: 'POST',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' }
+        const syncResponse = await fetch("/api/stream/sync-users", {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
         });
 
         if (!syncResponse.ok) {
-          throw new Error('Failed to sync users to Stream');
+          throw new Error("Failed to sync users to Stream");
         }
 
-        console.log('✅ Users synced to Stream successfully');
+        console.log("✅ Users synced to Stream successfully");
 
         // Get Stream token for current user
-        const tokenResponse = await fetch('/api/stream/token', {
-          method: 'POST',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: user.id.toString() })
+        const tokenResponse = await fetch("/api/stream/token", {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: user.id.toString() }),
         });
 
         if (!tokenResponse.ok) {
-          throw new Error('Failed to get Stream token');
+          throw new Error("Failed to get Stream token");
         }
 
         const { token, apiKey } = await tokenResponse.json();
-        console.log('✅ Stream token received');
+        console.log("✅ Stream token received");
 
         // Initialize Stream Chat client
         const chatClient = StreamChat.getInstance(apiKey);
-        
+
         // Connect user to Stream
         await chatClient.connectUser(
           {
             id: user.id.toString(),
-            name: user.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : user.email
+            name: user.firstName
+              ? `${user.firstName} ${user.lastName || ""}`.trim()
+              : user.email,
           },
           token
         );
 
-        console.log('✅ Connected to Stream Chat');
+        console.log("✅ Connected to Stream Chat");
         setClient(chatClient);
 
         // Fetch available users for creating channels
@@ -131,13 +148,14 @@ export default function StreamMessagesPage() {
         setAvailableUsers(users);
 
         setError(null);
-      } catch (err: any) {
-        console.error('Stream Chat initialization failed:', err);
+      } catch (err) {
+        console.error("Stream Chat initialization failed:", err);
         setError(err.message);
         toast({
-          title: 'Connection Failed',
-          description: 'Unable to connect to messaging service. Please try again.',
-          variant: 'destructive'
+          title: "Connection Failed",
+          description:
+            "Unable to connect to messaging service. Please try again.",
+          variant: "destructive",
         });
       } finally {
         setLoading(false);
@@ -162,34 +180,35 @@ export default function StreamMessagesPage() {
 
       const currentUser = user as any; // Type assertion since we've validated with isValidUser
       let channel;
-      if (channelType === 'messaging') {
+      if (channelType === "messaging") {
         // For messaging channels, use auto-generated ID
         channel = client.channel(channelType, {
-          members: [currentUser.id.toString(), ...selectedUsers]
+          members: [currentUser.id.toString(), ...selectedUsers],
         });
       } else {
         // For team channels, include name in metadata
         channel = client.channel(channelType, channelName, {
-          members: [currentUser.id.toString(), ...selectedUsers]
+          members: [currentUser.id.toString(), ...selectedUsers],
         });
       }
 
       await channel.create();
       setActiveChannel(channel);
       setShowNewChannel(false);
-      setChannelName('');
+      setChannelName("");
       setSelectedUsers([]);
 
       toast({
-        title: 'Channel Created',
-        description: `${channelName || 'Direct message'} has been created successfully.`
+        title: "Channel Created",
+        description: `${channelName ||
+          "Direct message"} has been created successfully.`,
       });
-    } catch (err: any) {
-      console.error('Failed to create channel:', err);
+    } catch (err) {
+      console.error("Failed to create channel:", err);
       toast({
-        title: 'Creation Failed',
-        description: 'Unable to create channel. Please try again.',
-        variant: 'destructive'
+        title: "Creation Failed",
+        description: "Unable to create channel. Please try again.",
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -197,9 +216,9 @@ export default function StreamMessagesPage() {
   };
 
   const toggleUserSelection = (userId: string) => {
-    setSelectedUsers(prev => 
-      prev.includes(userId) 
-        ? prev.filter(id => id !== userId)
+    setSelectedUsers((prev) =>
+      prev.includes(userId)
+        ? prev.filter((id) => id !== userId)
         : [...prev, userId]
     );
   };
@@ -223,9 +242,7 @@ export default function StreamMessagesPage() {
             <MessageCircle className="h-8 w-8 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">Connection Error</h3>
             <p className="text-muted-foreground mb-4">{error}</p>
-            <Button onClick={() => window.location.reload()}>
-              Try Again
-            </Button>
+            <Button onClick={() => window.location.reload()}>Try Again</Button>
           </div>
         </Card>
       </div>
@@ -240,7 +257,9 @@ export default function StreamMessagesPage() {
     );
   }
 
-  const filters = { members: { $in: [isValidUser(user) ? user.id.toString() : ''] } };
+  const filters = {
+    members: { $in: [isValidUser(user) ? user.id.toString() : ""] },
+  };
   const sort = [{ last_message_at: -1 }] as const;
 
   return (
@@ -251,7 +270,7 @@ export default function StreamMessagesPage() {
           <MessageCircle className="h-5 w-5 text-blue-600" />
           <h1 className="text-xl font-semibold">Stream Chat Messages</h1>
         </div>
-        
+
         <Dialog open={showNewChannel} onOpenChange={setShowNewChannel}>
           <DialogTrigger asChild>
             <Button>
@@ -266,7 +285,7 @@ export default function StreamMessagesPage() {
                 Start a new conversation with team members
               </DialogDescription>
             </DialogHeader>
-            
+
             <div className="space-y-4">
               <div>
                 <Label htmlFor="channelName">Channel Name</Label>
@@ -283,7 +302,9 @@ export default function StreamMessagesPage() {
                 <select
                   id="channelType"
                   value={channelType}
-                  onChange={(e) => setChannelType(e.target.value as 'messaging' | 'team')}
+                  onChange={(e) =>
+                    setChannelType(e.target.value as "messaging" | "team")
+                  }
                   className="w-full px-3 py-2 border rounded-md"
                 >
                   <option value="messaging">Direct Message</option>
@@ -295,7 +316,10 @@ export default function StreamMessagesPage() {
                 <Label>Select Users</Label>
                 <div className="max-h-40 overflow-y-auto border rounded-md p-2 space-y-2">
                   {availableUsers.map((availableUser) => (
-                    <div key={availableUser.id} className="flex items-center space-x-2">
+                    <div
+                      key={availableUser.id}
+                      className="flex items-center space-x-2"
+                    >
                       <input
                         type="checkbox"
                         id={`user-${availableUser.id}`}
@@ -303,7 +327,10 @@ export default function StreamMessagesPage() {
                         onChange={() => toggleUserSelection(availableUser.id)}
                         className="rounded"
                       />
-                      <label htmlFor={`user-${availableUser.id}`} className="text-sm">
+                      <label
+                        htmlFor={`user-${availableUser.id}`}
+                        className="text-sm"
+                      >
                         {availableUser.name}
                       </label>
                     </div>
@@ -311,8 +338,8 @@ export default function StreamMessagesPage() {
                 </div>
               </div>
 
-              <Button 
-                onClick={createChannel} 
+              <Button
+                onClick={createChannel}
                 className="w-full"
                 disabled={!channelName.trim() || loading}
               >
@@ -322,7 +349,7 @@ export default function StreamMessagesPage() {
                     Creating...
                   </>
                 ) : (
-                  'Create Channel'
+                  "Create Channel"
                 )}
               </Button>
             </div>
@@ -335,11 +362,7 @@ export default function StreamMessagesPage() {
         <Chat client={client} theme="str-chat__theme-light">
           {/* Channel List Sidebar */}
           <div className="w-80 border-r">
-            <ChannelList
-              filters={filters}
-              sort={sort}
-              showChannelSearch
-            />
+            <ChannelList filters={filters} sort={sort} showChannelSearch />
           </div>
 
           {/* Main Chat Area */}
@@ -357,7 +380,9 @@ export default function StreamMessagesPage() {
               <div className="flex items-center justify-center h-full">
                 <div className="text-center">
                   <Hash className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">Select a Channel</h3>
+                  <h3 className="text-lg font-semibold mb-2">
+                    Select a Channel
+                  </h3>
                   <p className="text-muted-foreground">
                     Choose a channel from the sidebar to start messaging
                   </p>

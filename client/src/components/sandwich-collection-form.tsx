@@ -38,11 +38,21 @@ export default function SandwichCollectionForm({
 
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const { trackView, trackClick, trackFormSubmit, trackActivity } = useActivityTracker();
+  const {
+    trackView,
+    trackClick,
+    trackFormSubmit,
+    trackActivity,
+  } = useActivityTracker();
 
   // Track form view on component mount
   useEffect(() => {
-    trackView('Sandwich Collection Form', 'Collections', 'Data Entry', 'User opened standard collection form');
+    trackView(
+      "Sandwich Collection Form",
+      "Collections",
+      "Data Entry",
+      "User opened standard collection form"
+    );
   }, [trackView]);
 
   // Fetch active hosts
@@ -87,28 +97,33 @@ export default function SandwichCollectionForm({
       return response.json();
     },
     onSuccess: (data) => {
-      const totalSandwiches = (parseInt(individualCount) || 0) + 
+      const totalSandwiches =
+        (parseInt(individualCount) || 0) +
         groups.reduce((sum, group) => sum + (group.count || 0), 0);
-      
+
       // Track successful submission
-      trackFormSubmit('Collection Form', 'Collections', 'Data Entry', true);
+      trackFormSubmit("Collection Form", "Collections", "Data Entry", true);
       trackActivity({
-        action: 'Submit Success',
-        section: 'Collections',
-        feature: 'Data Entry',
-        details: `Successfully submitted collection for ${location || customLocation} (${totalSandwiches} sandwiches)`,
+        action: "Submit Success",
+        section: "Collections",
+        feature: "Data Entry",
+        details: `Successfully submitted collection for ${location ||
+          customLocation} (${totalSandwiches} sandwiches)`,
         metadata: {
           hostName: location || customLocation,
           totalSandwiches,
           individualSandwiches: parseInt(individualCount) || 0,
-          groupSandwiches: groups.length
-        }
+          groupSandwiches: groups.length,
+        },
       });
-      
+
       // Show clear success message with details
       toast({
         title: "Collection Submitted Successfully! 🥪",
-        description: `Recorded ${totalSandwiches} sandwiches from ${location || customLocation} on ${new Date(date).toLocaleDateString()}. Thank you for your contribution!`,
+        description: `Recorded ${totalSandwiches} sandwiches from ${location ||
+          customLocation} on ${new Date(
+          date
+        ).toLocaleDateString()}. Thank you for your contribution!`,
         duration: 5000,
       });
 
@@ -126,27 +141,29 @@ export default function SandwichCollectionForm({
       queryClient.invalidateQueries({
         queryKey: ["/api/sandwich-collections/stats"],
       });
-      
+
       if (onSuccess) onSuccess();
     },
     onError: (error) => {
       // Track failed submission
-      trackFormSubmit('Collection Form', 'Collections', 'Data Entry', false);
+      trackFormSubmit("Collection Form", "Collections", "Data Entry", false);
       trackActivity({
-        action: 'Submit Failed',
-        section: 'Collections',
-        feature: 'Data Entry',
-        details: `Failed to submit collection for ${location || customLocation}`,
+        action: "Submit Failed",
+        section: "Collections",
+        feature: "Data Entry",
+        details: `Failed to submit collection for ${location ||
+          customLocation}`,
         metadata: {
           hostName: location || customLocation,
-          error: String(error)
-        }
+          error: String(error),
+        },
       });
-      
+
       // Show clear error message
       toast({
         title: "Submission Failed",
-        description: "There was a problem submitting your collection. Please try again or contact support if the issue persists.",
+        description:
+          "There was a problem submitting your collection. Please try again or contact support if the issue persists.",
         variant: "destructive",
         duration: 7000,
       });
@@ -160,14 +177,16 @@ export default function SandwichCollectionForm({
     if (value !== "other") {
       setCustomLocation("");
     }
-    
+
     // Track location selection
     trackActivity({
-      action: 'Select',
-      section: 'Collections',
-      feature: 'Data Entry',
-      details: `Selected location: ${value === "other" ? "Custom Location" : value}`,
-      metadata: { location: value, isCustom: value === "other" }
+      action: "Select",
+      section: "Collections",
+      feature: "Data Entry",
+      details: `Selected location: ${
+        value === "other" ? "Custom Location" : value
+      }`,
+      metadata: { location: value, isCustom: value === "other" },
     });
   };
 
@@ -176,7 +195,7 @@ export default function SandwichCollectionForm({
     const individual = parseInt(individualCount) || 0;
     const groupTotal = groups.reduce(
       (sum, group) => sum + (parseInt(group.count) || 0),
-      0,
+      0
     );
     return individual + groupTotal;
   };
@@ -184,9 +203,14 @@ export default function SandwichCollectionForm({
   // Add group
   const addGroup = () => {
     setGroups([...groups, { id: Date.now().toString(), name: "", count: 0 }]);
-    
+
     // Track group addition
-    trackClick('Add Group', 'Collections', 'Data Entry', `Added group ${groups.length + 1}`);
+    trackClick(
+      "Add Group",
+      "Collections",
+      "Data Entry",
+      `Added group ${groups.length + 1}`
+    );
   };
 
   // Remove group
@@ -197,102 +221,102 @@ export default function SandwichCollectionForm({
   // Secure math parser to replace eval()
   const safeMathEvaluator = (expression: string): number => {
     // Remove spaces and validate characters
-    const cleaned = expression.replace(/\s/g, '');
-    
+    const cleaned = expression.replace(/\s/g, "");
+
     // Only allow numbers, operators, and decimal points
     if (!/^[0-9+\-*/.()]*$/.test(cleaned)) {
-      throw new Error('Invalid characters');
+      throw new Error("Invalid characters");
     }
-    
+
     // Simple tokenizer
     const tokens: (number | string)[] = [];
-    let current = '';
-    
+    let current = "";
+
     for (let i = 0; i < cleaned.length; i++) {
       const char = cleaned[i];
-      
-      if ('+-*/()'.includes(char)) {
+
+      if ("+-*/()".includes(char)) {
         if (current) {
           const num = parseFloat(current);
-          if (isNaN(num)) throw new Error('Invalid number');
+          if (isNaN(num)) throw new Error("Invalid number");
           tokens.push(num);
-          current = '';
+          current = "";
         }
         tokens.push(char);
       } else {
         current += char;
       }
     }
-    
+
     if (current) {
       const num = parseFloat(current);
-      if (isNaN(num)) throw new Error('Invalid number');
+      if (isNaN(num)) throw new Error("Invalid number");
       tokens.push(num);
     }
-    
+
     if (tokens.length === 0) return 0;
-    
+
     // Evaluate expression with proper order of operations
     const evaluateTokens = (tokens: (number | string)[]): number => {
       // Handle parentheses first
-      while (tokens.includes('(')) {
+      while (tokens.includes("(")) {
         let openIndex = -1;
         let closeIndex = -1;
-        
+
         for (let i = 0; i < tokens.length; i++) {
-          if (tokens[i] === '(') openIndex = i;
-          if (tokens[i] === ')') {
+          if (tokens[i] === "(") openIndex = i;
+          if (tokens[i] === ")") {
             closeIndex = i;
             break;
           }
         }
-        
+
         if (openIndex === -1 || closeIndex === -1) {
-          throw new Error('Mismatched parentheses');
+          throw new Error("Mismatched parentheses");
         }
-        
+
         const subTokens = tokens.slice(openIndex + 1, closeIndex);
         const result = evaluateTokens(subTokens);
         tokens.splice(openIndex, closeIndex - openIndex + 1, result);
       }
-      
+
       // Handle multiplication and division
       for (let i = 1; i < tokens.length; i += 2) {
-        if (tokens[i] === '*' || tokens[i] === '/') {
+        if (tokens[i] === "*" || tokens[i] === "/") {
           const left = tokens[i - 1] as number;
           const right = tokens[i + 1] as number;
           const operator = tokens[i] as string;
-          
-          if (operator === '/' && right === 0) {
-            throw new Error('Division by zero');
+
+          if (operator === "/" && right === 0) {
+            throw new Error("Division by zero");
           }
-          
-          const result = operator === '*' ? left * right : left / right;
+
+          const result = operator === "*" ? left * right : left / right;
           tokens.splice(i - 1, 3, result);
           i -= 2;
         }
       }
-      
+
       // Handle addition and subtraction
       for (let i = 1; i < tokens.length; i += 2) {
-        if (tokens[i] === '+' || tokens[i] === '-') {
+        if (tokens[i] === "+" || tokens[i] === "-") {
           const left = tokens[i - 1] as number;
           const right = tokens[i + 1] as number;
           const operator = tokens[i] as string;
-          
-          const result = operator === '+' ? left + right : left - right;
+
+          const result = operator === "+" ? left + right : left - right;
           tokens.splice(i - 1, 3, result);
           i -= 2;
         }
       }
-      
-      if (tokens.length !== 1 || typeof tokens[0] !== 'number') {
-        throw new Error('Invalid expression');
+
+      if (tokens.length !== 1 || typeof tokens[0] !== "number") {
+        throw new Error("Invalid expression");
       }
-      
+
       return tokens[0];
     };
-    
+
     return evaluateTokens([...tokens]);
   };
 
@@ -329,20 +353,23 @@ export default function SandwichCollectionForm({
     let finalLocation = location;
 
     // Track submission attempt
-    const totalSandwiches = (parseInt(individualCount) || 0) + groups.reduce((sum, group) => sum + (group.count || 0), 0);
+    const totalSandwiches =
+      (parseInt(individualCount) || 0) +
+      groups.reduce((sum, group) => sum + (group.count || 0), 0);
     trackActivity({
-      action: 'Submit Attempt',
-      section: 'Collections',
-      feature: 'Data Entry',
-      details: `Attempting to submit collection for ${finalLocation || 'unknown location'}`,
+      action: "Submit Attempt",
+      section: "Collections",
+      feature: "Data Entry",
+      details: `Attempting to submit collection for ${finalLocation ||
+        "unknown location"}`,
       metadata: {
         date,
         location: finalLocation,
         individualCount: parseInt(individualCount) || 0,
         groupCount: groups.length,
         totalSandwiches,
-        hasCustomLocation: location === "other"
-      }
+        hasCustomLocation: location === "other",
+      },
     });
 
     // If "other" is selected, create new host and use custom location
@@ -350,25 +377,25 @@ export default function SandwichCollectionForm({
       try {
         await createHostMutation.mutateAsync(customLocation.trim());
         finalLocation = customLocation.trim();
-        
+
         // Track new host creation
         trackActivity({
-          action: 'Create',
-          section: 'Collections',
-          feature: 'Host Management',
+          action: "Create",
+          section: "Collections",
+          feature: "Host Management",
           details: `Created new host: ${finalLocation}`,
-          metadata: { hostName: finalLocation }
+          metadata: { hostName: finalLocation },
         });
       } catch (error) {
         console.error("Failed to create new host:", error);
-        
+
         // Track failed host creation
         trackActivity({
-          action: 'Create Failed',
-          section: 'Collections',
-          feature: 'Host Management',
+          action: "Create Failed",
+          section: "Collections",
+          feature: "Host Management",
           details: `Failed to create new host: ${customLocation.trim()}`,
-          metadata: { hostName: customLocation.trim(), error: String(error) }
+          metadata: { hostName: customLocation.trim(), error: String(error) },
         });
         return;
       }
@@ -380,7 +407,7 @@ export default function SandwichCollectionForm({
       individualSandwiches: parseInt(individualCount) || 0,
       groupSandwiches: groups.reduce(
         (sum, group) => sum + (group.count || 0),
-        0,
+        0
       ),
       groupCollections: groups.filter((g) => g.name.trim() && g.count > 0),
       notes: `Submitted via collection form on ${new Date().toLocaleString()}`,
@@ -500,7 +527,7 @@ export default function SandwichCollectionForm({
       display: "grid",
       gridTemplateColumns: "160px 1fr",
       flexDirection: "row",
-    }
+    },
   };
 
   const formGroupStyle = {
@@ -766,14 +793,14 @@ export default function SandwichCollectionForm({
   };
   // Event handlers
   const handleInputFocus = (
-    e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>,
+    e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     e.currentTarget.style.outline = "none";
     e.currentTarget.style.borderColor = "#236383";
   };
 
   const handleInputBlur = (
-    e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>,
+    e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     e.currentTarget.style.borderColor = "#E9E6E6";
   };
@@ -866,37 +893,46 @@ export default function SandwichCollectionForm({
             <span style={accentBarStyle}></span>
             Individual Sandwiches
           </h3>
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "12px", justifyContent: "center" }}>
-            <input
-              type="number"
-              id="individual-count"
-              min="0"
-              placeholder="0"
-              value={individualCount}
-              onChange={(e) => setIndividualCount(e.target.value)}
-              style={individualInputStyle}
-              onFocus={handleInputFocus}
-              onBlur={handleInputBlur}
-            />
-            <button
-              type="button"
-              onClick={() => setShowCalculator(true)}
-              style={calcButtonSmallStyle}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "#e2e8f0";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "#f1f5f9";
+          <div
+            style={{ display: "flex", flexDirection: "column", gap: "12px" }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                justifyContent: "center",
               }}
             >
-              <Calculator style={{ width: "14px", height: "14px" }} />
-              Calculator
-            </button>
-          </div>
-          <p style={helperTextStyle}>
-            Count only individual sandwiches here (don't include group totals)
-          </p>
+              <input
+                type="number"
+                id="individual-count"
+                min="0"
+                placeholder="0"
+                value={individualCount}
+                onChange={(e) => setIndividualCount(e.target.value)}
+                style={individualInputStyle}
+                onFocus={handleInputFocus}
+                onBlur={handleInputBlur}
+              />
+              <button
+                type="button"
+                onClick={() => setShowCalculator(true)}
+                style={calcButtonSmallStyle}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "#e2e8f0";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "#f1f5f9";
+                }}
+              >
+                <Calculator style={{ width: "14px", height: "14px" }} />
+                Calculator
+              </button>
+            </div>
+            <p style={helperTextStyle}>
+              Count only individual sandwiches here (don't include group totals)
+            </p>
           </div>
         </div>
 
@@ -964,7 +1000,9 @@ export default function SandwichCollectionForm({
                 <div>
                   {groups.map((group, i) => (
                     <div key={group.id} style={groupItemStyle}>
-                      <label style={{ ...labelStyle, marginBottom: "4px" }}>Group Name</label>
+                      <label style={{ ...labelStyle, marginBottom: "4px" }}>
+                        Group Name
+                      </label>
                       <input
                         type="text"
                         placeholder="Enter group or organization name"
@@ -978,10 +1016,19 @@ export default function SandwichCollectionForm({
                         onFocus={handleInputFocus}
                         onBlur={handleInputBlur}
                       />
-                      
-                      <div style={{ display: "flex", alignItems: "center", gap: "12px", marginTop: "8px" }}>
+
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "12px",
+                          marginTop: "8px",
+                        }}
+                      >
                         <div style={{ flex: 1 }}>
-                          <label style={{ ...labelStyle, marginBottom: "4px" }}>Sandwich Count</label>
+                          <label style={{ ...labelStyle, marginBottom: "4px" }}>
+                            Sandwich Count
+                          </label>
                           <input
                             type="number"
                             placeholder="0"
@@ -1013,7 +1060,7 @@ export default function SandwichCollectionForm({
                             onBlur={handleInputBlur}
                           />
                         </div>
-                        
+
                         <button
                           type="button"
                           onClick={() => removeGroup(group.id)}

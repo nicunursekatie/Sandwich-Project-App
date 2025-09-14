@@ -11,7 +11,9 @@ export default function AnalyticsPage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <img src="/api/placeholder/32/32" alt="Logo" className="w-8 h-8" />
-            <span className="text-xl font-semibold text-slate-900">The Sandwich Project</span>
+            <span className="text-xl font-semibold text-slate-900">
+              The Sandwich Project
+            </span>
           </div>
           <Button variant="ghost" size="sm">
             <LogOut className="w-4 h-4 mr-2" />

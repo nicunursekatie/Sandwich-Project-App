@@ -13,7 +13,7 @@ export interface BackupManifest {
   fileSize: number;
   checksum: string;
   metadata: {
-    triggeredBy: 'schedule' | 'manual' | 'migration';
+    triggeredBy: "schedule" | "manual" | "migration";
     userId?: string;
     reason?: string;
   };
@@ -27,28 +27,28 @@ export interface RestoreOptions {
 }
 
 export class BackupManager {
-  private static backupsPath = './backups';
+  private static backupsPath = "./backups";
   private static maxBackups = 30; // Keep last 30 backups
 
   static async initialize(): Promise<void> {
     try {
       await fs.mkdir(this.backupsPath, { recursive: true });
     } catch (error) {
-      console.error('Failed to initialize backup directory:', error);
+      console.error("Failed to initialize backup directory:", error);
     }
   }
 
   static async createBackup(
-    triggeredBy: BackupManifest['metadata']['triggeredBy'] = 'manual',
+    triggeredBy: BackupManifest["metadata"]["triggeredBy"] = "manual",
     userId?: string,
     reason?: string
   ): Promise<BackupManifest> {
-    const backupId = `backup_${new Date().toISOString().replace(/[:.]/g, '-')}`;
+    const backupId = `backup_${new Date().toISOString().replace(/[:.]/g, "-")}`;
     const backupDir = path.join(this.backupsPath, backupId);
-    
+
     try {
       await fs.mkdir(backupDir, { recursive: true });
-      
+
       // Get ALL data including USERS
       const collections = await storage.getAllSandwichCollections();
       const hosts = await storage.getAllHosts();
@@ -61,7 +61,7 @@ export class BackupManager {
 
       // Create backup data structure
       const backupData = {
-        version: '1.0',
+        version: "1.0",
         timestamp: new Date().toISOString(),
         data: {
           sandwich_collections: collections,
@@ -71,12 +71,12 @@ export class BackupManager {
           users: users,
           drivers: drivers,
           recipients: recipients,
-          audit_logs: auditLogs
-        }
+          audit_logs: auditLogs,
+        },
       };
 
       // Write backup file
-      const backupFile = path.join(backupDir, 'data.json');
+      const backupFile = path.join(backupDir, "data.json");
       await fs.writeFile(backupFile, JSON.stringify(backupData, null, 2));
 
       // Calculate file size and checksum
@@ -87,8 +87,17 @@ export class BackupManager {
       const manifest: BackupManifest = {
         id: backupId,
         timestamp: new Date(),
-        version: '1.0',
-        tables: ['sandwich_collections', 'hosts', 'projects', 'contacts', 'users', 'drivers', 'recipients', 'audit_logs'],
+        version: "1.0",
+        tables: [
+          "sandwich_collections",
+          "hosts",
+          "projects",
+          "contacts",
+          "users",
+          "drivers",
+          "recipients",
+          "audit_logs",
+        ],
         recordCounts: {
           sandwich_collections: collections.length,
           hosts: hosts.length,
@@ -97,31 +106,31 @@ export class BackupManager {
           users: users.length,
           drivers: drivers.length,
           recipients: recipients.length,
-          audit_logs: auditLogs.length
+          audit_logs: auditLogs.length,
         },
         fileSize: stats.size,
         checksum,
         metadata: {
           triggeredBy,
           userId,
-          reason
-        }
+          reason,
+        },
       };
 
       // Save manifest
-      const manifestFile = path.join(backupDir, 'manifest.json');
+      const manifestFile = path.join(backupDir, "manifest.json");
       await fs.writeFile(manifestFile, JSON.stringify(manifest, null, 2));
 
       // Log backup creation
       await AuditLogger.log(
-        'backup_created',
-        'system',
-        'system',
+        "backup_created",
+        "system",
+        "system",
         {
           backupId,
           recordCounts: manifest.recordCounts,
           fileSize: manifest.fileSize,
-          triggeredBy
+          triggeredBy,
         },
         { userId }
       );
@@ -130,17 +139,16 @@ export class BackupManager {
       await this.cleanupOldBackups();
 
       return manifest;
-
     } catch (error) {
-      console.error('Backup creation failed:', error);
-      
+      console.error("Backup creation failed:", error);
+
       // Clean up partial backup
       try {
         await fs.rm(backupDir, { recursive: true, force: true });
       } catch (cleanupError) {
-        console.error('Failed to clean up partial backup:', cleanupError);
+        console.error("Failed to clean up partial backup:", cleanupError);
       }
-      
+
       throw error;
     }
   }
@@ -151,10 +159,14 @@ export class BackupManager {
       const manifests: BackupManifest[] = [];
 
       for (const dir of backupDirs) {
-        if (dir.startsWith('backup_')) {
+        if (dir.startsWith("backup_")) {
           try {
-            const manifestPath = path.join(this.backupsPath, dir, 'manifest.json');
-            const manifestData = await fs.readFile(manifestPath, 'utf8');
+            const manifestPath = path.join(
+              this.backupsPath,
+              dir,
+              "manifest.json"
+            );
+            const manifestData = await fs.readFile(manifestPath, "utf8");
             manifests.push(JSON.parse(manifestData));
           } catch (error) {
             console.warn(`Failed to read manifest for backup ${dir}:`, error);
@@ -162,102 +174,120 @@ export class BackupManager {
         }
       }
 
-      return manifests.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+      return manifests.sort(
+        (a, b) => b.timestamp.getTime() - a.timestamp.getTime()
+      );
     } catch (error) {
-      console.error('Failed to list backups:', error);
+      console.error("Failed to list backups:", error);
       return [];
     }
   }
 
   static async getBackupInfo(backupId: string): Promise<BackupManifest | null> {
     try {
-      const manifestPath = path.join(this.backupsPath, backupId, 'manifest.json');
-      const manifestData = await fs.readFile(manifestPath, 'utf8');
+      const manifestPath = path.join(
+        this.backupsPath,
+        backupId,
+        "manifest.json"
+      );
+      const manifestData = await fs.readFile(manifestPath, "utf8");
       return JSON.parse(manifestData);
     } catch (error) {
       return null;
     }
   }
 
-  static async validateBackup(backupId: string): Promise<{
+  static async validateBackup(
+    backupId: string
+  ): Promise<{
     valid: boolean;
     errors: string[];
     manifest?: BackupManifest;
   }> {
     const errors: string[] = [];
-    
+
     try {
       const manifest = await this.getBackupInfo(backupId);
       if (!manifest) {
-        return { valid: false, errors: ['Backup manifest not found'] };
+        return { valid: false, errors: ["Backup manifest not found"] };
       }
 
       // Check if backup file exists
-      const backupFile = path.join(this.backupsPath, backupId, 'data.json');
+      const backupFile = path.join(this.backupsPath, backupId, "data.json");
       try {
         await fs.access(backupFile);
       } catch {
-        errors.push('Backup data file not found');
+        errors.push("Backup data file not found");
       }
 
       // Verify checksum
       try {
         const currentChecksum = await this.calculateChecksum(backupFile);
         if (currentChecksum !== manifest.checksum) {
-          errors.push('Backup file checksum mismatch - file may be corrupted');
+          errors.push("Backup file checksum mismatch - file may be corrupted");
         }
       } catch (error) {
-        errors.push('Failed to verify backup checksum');
+        errors.push("Failed to verify backup checksum");
       }
 
       // Validate backup data structure
       try {
-        const backupData = JSON.parse(await fs.readFile(backupFile, 'utf8'));
-        
+        const backupData = JSON.parse(await fs.readFile(backupFile, "utf8"));
+
         if (!backupData.data) {
-          errors.push('Invalid backup structure - missing data section');
+          errors.push("Invalid backup structure - missing data section");
         }
 
-        const requiredTables = ['sandwich_collections', 'hosts', 'projects', 'contacts', 'users', 'drivers', 'recipients'];
+        const requiredTables = [
+          "sandwich_collections",
+          "hosts",
+          "projects",
+          "contacts",
+          "users",
+          "drivers",
+          "recipients",
+        ];
         for (const table of requiredTables) {
           if (!Array.isArray(backupData.data[table])) {
             errors.push(`Invalid backup data for table: ${table}`);
           }
         }
       } catch (error) {
-        errors.push('Failed to parse backup data');
+        errors.push("Failed to parse backup data");
       }
 
       return {
         valid: errors.length === 0,
         errors,
-        manifest
+        manifest,
       };
-
     } catch (error) {
       return {
         valid: false,
-        errors: [`Backup validation failed: ${error.message}`]
+        errors: [`Backup validation failed: ${error.message}`],
       };
     }
   }
 
-  static async deleteBackup(backupId: string, userId?: string): Promise<boolean> {
+  static async deleteBackup(
+    backupId: string,
+    userId?: string
+  ): Promise<boolean> {
     try {
       const backupDir = path.join(this.backupsPath, backupId);
       await fs.rm(backupDir, { recursive: true, force: true });
 
       await AuditLogger.log(
-        'backup_deleted',
-        'system',
+        "backup_deleted",
+        "system",
         null,
         { backupId },
-        { userId: userId || 'system' }
+        { userId: userId || "system" }
       );
 
       return true;
     } catch (error) {
-      console.error('Failed to delete backup:', error);
+      console.error("Failed to delete backup:", error);
       return false;
     }
   }
@@ -271,23 +301,32 @@ export class BackupManager {
   }> {
     try {
       const backups = await this.listBackups();
-      const totalSize = backups.reduce((sum, backup) => sum + backup.fileSize, 0);
-      
+      const totalSize = backups.reduce(
+        (sum, backup) => sum + backup.fileSize,
+        0
+      );
+
       const stats = {
         totalBackups: backups.length,
         totalSize,
-        oldestBackup: backups.length > 0 ? new Date(Math.min(...backups.map(b => b.timestamp.getTime()))) : undefined,
-        newestBackup: backups.length > 0 ? new Date(Math.max(...backups.map(b => b.timestamp.getTime()))) : undefined,
-        diskUsage: this.formatBytes(totalSize)
+        oldestBackup:
+          backups.length > 0
+            ? new Date(Math.min(...backups.map((b) => b.timestamp.getTime())))
+            : undefined,
+        newestBackup:
+          backups.length > 0
+            ? new Date(Math.max(...backups.map((b) => b.timestamp.getTime())))
+            : undefined,
+        diskUsage: this.formatBytes(totalSize),
       };
 
       return stats;
     } catch (error) {
-      console.error('Failed to get storage stats:', error);
+      console.error("Failed to get storage stats:", error);
       return {
         totalBackups: 0,
         totalSize: 0,
-        diskUsage: '0 B'
+        diskUsage: "0 B",
       };
     }
   }
@@ -297,26 +336,28 @@ export class BackupManager {
     const now = new Date();
     const nextBackup = new Date(now);
     nextBackup.setHours(2, 0, 0, 0);
-    
+
     if (nextBackup <= now) {
       nextBackup.setDate(nextBackup.getDate() + 1);
     }
 
     const timeUntilBackup = nextBackup.getTime() - now.getTime();
-    
+
     setTimeout(async () => {
       try {
-        await this.createBackup('schedule', 'system', 'Daily automated backup');
+        await this.createBackup("schedule", "system", "Daily automated backup");
         // Schedule next backup
         this.scheduleAutoBackup();
       } catch (error) {
-        console.error('Scheduled backup failed:', error);
+        console.error("Scheduled backup failed:", error);
         // Retry in 1 hour
         setTimeout(() => this.scheduleAutoBackup(), 60 * 60 * 1000);
       }
     }, timeUntilBackup);
 
-    console.log(`Next automated backup scheduled for: ${nextBackup.toISOString()}`);
+    console.log(
+      `Next automated backup scheduled for: ${nextBackup.toISOString()}`
+    );
   }
 
   private static async cleanupOldBackups(): Promise<void> {
@@ -325,29 +366,32 @@ export class BackupManager {
       if (backups.length > this.maxBackups) {
         const backupsToDelete = backups.slice(this.maxBackups);
         for (const backup of backupsToDelete) {
-          await this.deleteBackup(backup.id, 'system');
+          await this.deleteBackup(backup.id, "system");
         }
       }
     } catch (error) {
-      console.error('Failed to cleanup old backups:', error);
+      console.error("Failed to cleanup old backups:", error);
     }
   }
 
   private static async calculateChecksum(filePath: string): Promise<string> {
     try {
-      const crypto = await import('crypto');
+      const crypto = await import("crypto");
       const data = await fs.readFile(filePath);
-      return crypto.createHash('sha256').update(data).digest('hex');
+      return crypto
+        .createHash("sha256")
+        .update(data)
+        .digest("hex");
     } catch (error) {
-      console.error('Failed to calculate checksum:', error);
-      return '';
+      console.error("Failed to calculate checksum:", error);
+      return "";
     }
   }
 
   private static formatBytes(bytes: number): string {
-    if (bytes === 0) return '0 B';
+    if (bytes === 0) return "0 B";
     const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const sizes = ["B", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
   }

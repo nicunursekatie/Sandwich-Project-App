@@ -18,110 +18,129 @@ const isAuthenticated = (req: any, res: any, next: any) => {
 const router = Router();
 
 // Export data endpoints
-router.get('/export/collections', isAuthenticated, async (req, res) => {
+router.get("/export/collections", isAuthenticated, async (req, res) => {
   try {
-    const { format = 'csv', startDate, endDate } = req.query;
-    
+    const { format = "csv", startDate, endDate } = req.query;
+
     const options = {
-      format: format as 'csv' | 'json',
-      dateRange: startDate && endDate ? {
-        start: startDate as string,
-        end: endDate as string
-      } : undefined
+      format: format as "csv" | "json",
+      dateRange:
+        startDate && endDate
+          ? {
+              start: startDate as string,
+              end: endDate as string,
+            }
+          : undefined,
     };
 
     const result = await DataExporter.exportSandwichCollections(options);
-    
-    if (options.format === 'csv') {
-      res.setHeader('Content-Type', 'text/csv');
-      res.setHeader('Content-Disposition', 'attachment; filename="sandwich_collections.csv"');
+
+    if (options.format === "csv") {
+      res.setHeader("Content-Type", "text/csv");
+      res.setHeader(
+        "Content-Disposition",
+        'attachment; filename="sandwich_collections.csv"'
+      );
       res.send(result.data);
     } else {
       res.json(result);
     }
   } catch (error) {
-    console.error('Export failed:', error);
-    res.status(500).json({ error: 'Export failed' });
+    console.error("Export failed:", error);
+    res.status(500).json({ error: "Export failed" });
   }
 });
 
-router.get('/export/hosts', isAuthenticated, async (req, res) => {
+router.get("/export/hosts", isAuthenticated, async (req, res) => {
   try {
-    const { format = 'csv', includeInactive = 'false' } = req.query;
-    
+    const { format = "csv", includeInactive = "false" } = req.query;
+
     const options = {
-      format: format as 'csv' | 'json',
-      includeInactive: includeInactive === 'true'
+      format: format as "csv" | "json",
+      includeInactive: includeInactive === "true",
     };
 
     const result = await DataExporter.exportHosts(options);
-    
-    if (options.format === 'csv') {
-      res.setHeader('Content-Type', 'text/csv');
-      res.setHeader('Content-Disposition', 'attachment; filename="hosts.csv"');
+
+    if (options.format === "csv") {
+      res.setHeader("Content-Type", "text/csv");
+      res.setHeader("Content-Disposition", 'attachment; filename="hosts.csv"');
       res.send(result.data);
     } else {
       res.json(result);
     }
   } catch (error) {
-    console.error('Export failed:', error);
-    res.status(500).json({ error: 'Export failed' });
+    console.error("Export failed:", error);
+    res.status(500).json({ error: "Export failed" });
   }
 });
 
-router.get('/export/full-dataset', async (req, res) => {
+router.get("/export/full-dataset", async (req, res) => {
   try {
-    const result = await DataExporter.exportFullDataset({ format: 'json' });
-    
-    res.setHeader('Content-Type', 'application/json');
-    res.setHeader('Content-Disposition', 'attachment; filename="full_dataset.json"');
+    const result = await DataExporter.exportFullDataset({ format: "json" });
+
+    res.setHeader("Content-Type", "application/json");
+    res.setHeader(
+      "Content-Disposition",
+      'attachment; filename="full_dataset.json"'
+    );
     res.json(result.data);
   } catch (error) {
-    console.error('Full export failed:', error);
-    res.status(500).json({ error: 'Full export failed' });
+    console.error("Full export failed:", error);
+    res.status(500).json({ error: "Full export failed" });
   }
 });
 
-router.get('/summary', async (req, res) => {
+router.get("/summary", async (req, res) => {
   try {
     const summary = await DataExporter.getDataSummary();
     res.json(summary);
   } catch (error) {
-    console.error('Summary failed:', error);
-    res.status(500).json({ error: 'Summary failed' });
+    console.error("Summary failed:", error);
+    res.status(500).json({ error: "Summary failed" });
   }
 });
 
 // Bulk operations endpoints
-router.post('/bulk/deduplicate-hosts', isAuthenticated, async (req: any, res) => {
+router.post(
+  "/bulk/deduplicate-hosts",
+  isAuthenticated,
+  async (req: any, res) => {
+    // Check if user has permission for data management
+    if (!hasPermission(req.user, PERMISSIONS.MANAGE_DATA)) {
+      return res
+        .status(403)
+        .json({
+          error: "Insufficient permissions for data management operations",
+        });
+    }
+    try {
+      const context = {
+        userId: req.user?.claims?.sub,
+        ipAddress: req.ip,
+        userAgent: req.get("User-Agent"),
+        sessionId: req.sessionID,
+      };
+
+      const result = await BulkOperationsManager.deduplicateHosts(context);
+      res.json(result);
+    } catch (error) {
+      console.error("Deduplication failed:", error);
+      res.status(500).json({ error: "Deduplication failed" });
+    }
+  }
+);
+
+router.delete("/bulk/collections", isAuthenticated, async (req: any, res) => {
   // Check if user has permission for data management
   if (!hasPermission(req.user, PERMISSIONS.MANAGE_DATA)) {
-    return res.status(403).json({ error: "Insufficient permissions for data management operations" });
-  }
-  try {
-    const context = {
-      userId: req.user?.claims?.sub,
-      ipAddress: req.ip,
-      userAgent: req.get('User-Agent'),
-      sessionId: req.sessionID
-    };
-
-    const result = await BulkOperationsManager.deduplicateHosts(context);
-    res.json(result);
-  } catch (error) {
-    console.error('Deduplication failed:', error);
-    res.status(500).json({ error: 'Deduplication failed' });
-  }
-});
-
-router.delete('/bulk/collections', isAuthenticated, async (req: any, res) => {
-  // Check if user has permission for data management
-  if (!hasPermission(req.user, PERMISSIONS.MANAGE_DATA)) {
-    return res.status(403).json({ error: "Insufficient permissions for bulk deletion operations" });
+    return res
+      .status(403)
+      .json({ error: "Insufficient permissions for bulk deletion operations" });
   }
   try {
     const schema = z.object({
-      ids: z.array(z.number())
+      ids: z.array(z.number()),
     });
 
     const { ids } = schema.parse(req.body);
@@ -129,34 +148,43 @@ router.delete('/bulk/collections', isAuthenticated, async (req: any, res) => {
     const context = {
       userId: req.user?.claims?.sub,
       ipAddress: req.ip,
-      userAgent: req.get('User-Agent'),
-      sessionId: req.sessionID
+      userAgent: req.get("User-Agent"),
+      sessionId: req.sessionID,
     };
 
-    const result = await BulkOperationsManager.bulkDeleteCollections(ids, context);
+    const result = await BulkOperationsManager.bulkDeleteCollections(
+      ids,
+      context
+    );
     res.json(result);
   } catch (error) {
-    console.error('Bulk deletion failed:', error);
-    res.status(500).json({ error: 'Bulk deletion failed' });
+    console.error("Bulk deletion failed:", error);
+    res.status(500).json({ error: "Bulk deletion failed" });
   }
 });
 
 // Data integrity endpoints
-router.get('/integrity/check', async (req, res) => {
+router.get("/integrity/check", async (req, res) => {
   try {
     const result = await BulkOperationsManager.validateDataIntegrity();
     res.json(result);
   } catch (error) {
-    console.error('Integrity check failed:', error);
-    res.status(500).json({ error: 'Integrity check failed' });
+    console.error("Integrity check failed:", error);
+    res.status(500).json({ error: "Integrity check failed" });
   }
 });
 
 // Audit log endpoints
-router.get('/audit/history', async (req, res) => {
+router.get("/audit/history", async (req, res) => {
   try {
-    const { tableName, recordId, userId, limit = '100', offset = '0' } = req.query;
-    
+    const {
+      tableName,
+      recordId,
+      userId,
+      limit = "100",
+      offset = "0",
+    } = req.query;
+
     const history = await AuditLogger.getAuditHistory(
       tableName as string,
       recordId as string,
@@ -167,8 +195,8 @@ router.get('/audit/history', async (req, res) => {
 
     res.json({ history });
   } catch (error) {
-    console.error('Audit history failed:', error);
-    res.status(500).json({ error: 'Audit history failed' });
+    console.error("Audit history failed:", error);
+    res.status(500).json({ error: "Audit history failed" });
   }
 });
 

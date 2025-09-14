@@ -60,11 +60,7 @@ importCollectionsRouter.post(
             const date = parts[3];
             const totalSandwiches = parts[4].replace(/[",]/g, "");
 
-            if (
-              date &&
-              totalSandwiches &&
-              !isNaN(parseInt(totalSandwiches))
-            ) {
+            if (date && totalSandwiches && !isNaN(parseInt(totalSandwiches))) {
               records.push({
                 "Host Name": `Week ${weekNum} Total`,
                 "Sandwich Count": totalSandwiches,
@@ -163,19 +159,22 @@ importCollectionsRouter.post(
           if (!hostName) {
             const availableKeys = Object.keys(record).join(", ");
             throw new Error(
-              `Missing Host Name (available columns: ${availableKeys}) in row ${i + 1}`,
+              `Missing Host Name (available columns: ${availableKeys}) in row ${i +
+                1}`
             );
           }
           if (!sandwichCountStr) {
             const availableKeys = Object.keys(record).join(", ");
             throw new Error(
-              `Missing Individual Sandwiches (available columns: ${availableKeys}) in row ${i + 1}`,
+              `Missing Individual Sandwiches (available columns: ${availableKeys}) in row ${i +
+                1}`
             );
           }
           if (!date) {
             const availableKeys = Object.keys(record).join(", ");
             throw new Error(
-              `Missing Collection Date (available columns: ${availableKeys}) in row ${i + 1}`,
+              `Missing Collection Date (available columns: ${availableKeys}) in row ${i +
+                1}`
             );
           }
 
@@ -183,7 +182,7 @@ importCollectionsRouter.post(
           const sandwichCount = parseInt(sandwichCountStr.toString().trim());
           if (isNaN(sandwichCount)) {
             throw new Error(
-              `Invalid sandwich count "${sandwichCountStr}" in row ${i + 1}`,
+              `Invalid sandwich count "${sandwichCountStr}" in row ${i + 1}`
             );
           }
 
@@ -193,9 +192,7 @@ importCollectionsRouter.post(
 
           // Try to parse Created At if provided
           const createdAt =
-            record["Created At"] ||
-            record["created_at"] ||
-            record["CreatedAt"];
+            record["Created At"] || record["created_at"] || record["CreatedAt"];
           if (createdAt) {
             const parsedDate = new Date(createdAt);
             if (!isNaN(parsedDate.getTime())) {
@@ -228,7 +225,9 @@ importCollectionsRouter.post(
           successCount++;
         } catch (error) {
           errorCount++;
-          const errorMsg = `Row ${i + 1}: ${error instanceof Error ? error.message : "Unknown error"}`;
+          const errorMsg = `Row ${i + 1}: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`;
           errors.push(errorMsg);
           logger.error(errorMsg);
         }
@@ -245,7 +244,7 @@ importCollectionsRouter.post(
       };
 
       logger.info(
-        `CSV import completed: ${successCount}/${records.length} records imported`,
+        `CSV import completed: ${successCount}/${records.length} records imported`
       );
       res.json(result);
     } catch (error) {
@@ -264,7 +263,7 @@ importCollectionsRouter.post(
         error: error instanceof Error ? error.message : "Unknown error",
       });
     }
-  },
+  }
 );
 
 export default importCollectionsRouter;

@@ -2,8 +2,19 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Car, Phone, Mail, MapPin } from "lucide-react";
 
 interface Driver {
@@ -38,13 +49,13 @@ interface DriverFormProps {
   title: string;
 }
 
-export function DriverForm({ 
-  isOpen, 
-  onClose, 
-  onSubmit, 
-  initialData, 
-  isSubmitting, 
-  title 
+export function DriverForm({
+  isOpen,
+  onClose,
+  onSubmit,
+  initialData,
+  isSubmitting,
+  title,
 }: DriverFormProps) {
   const [formData, setFormData] = useState<DriverFormData>({
     name: "",
@@ -55,7 +66,7 @@ export function DriverForm({
     availability: "available",
     zone: "",
     area: "",
-    ...initialData
+    ...initialData,
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -64,7 +75,7 @@ export function DriverForm({
   };
 
   const handleInputChange = (field: keyof DriverFormData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   return (
@@ -76,7 +87,7 @@ export function DriverForm({
             {title}
           </DialogTitle>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Label htmlFor="name">Driver Name *</Label>
@@ -87,7 +98,7 @@ export function DriverForm({
               required
             />
           </div>
-          
+
           <div>
             <Label htmlFor="phone">Phone Number *</Label>
             <div className="relative">
@@ -102,7 +113,7 @@ export function DriverForm({
               />
             </div>
           </div>
-          
+
           <div>
             <Label htmlFor="email">Email Address *</Label>
             <div className="relative">
@@ -117,10 +128,13 @@ export function DriverForm({
               />
             </div>
           </div>
-          
+
           <div>
             <Label htmlFor="vehicleType">Vehicle Type</Label>
-            <Select value={formData.vehicleType} onValueChange={(value) => handleInputChange("vehicleType", value)}>
+            <Select
+              value={formData.vehicleType}
+              onValueChange={(value) => handleInputChange("vehicleType", value)}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select vehicle type" />
               </SelectTrigger>
@@ -133,21 +147,25 @@ export function DriverForm({
               </SelectContent>
             </Select>
           </div>
-          
+
           <div>
             <Label htmlFor="licenseNumber">License Number</Label>
             <Input
               id="licenseNumber"
               value={formData.licenseNumber}
-              onChange={(e) => handleInputChange("licenseNumber", e.target.value)}
+              onChange={(e) =>
+                handleInputChange("licenseNumber", e.target.value)
+              }
             />
           </div>
-          
+
           <div>
             <Label htmlFor="availability">Availability</Label>
-            <Select 
-              value={formData.availability} 
-              onValueChange={(value: "available" | "busy" | "off-duty") => handleInputChange("availability", value)}
+            <Select
+              value={formData.availability}
+              onValueChange={(value: "available" | "busy" | "off-duty") =>
+                handleInputChange("availability", value)
+              }
             >
               <SelectTrigger>
                 <SelectValue />
@@ -159,7 +177,7 @@ export function DriverForm({
               </SelectContent>
             </Select>
           </div>
-          
+
           <div>
             <Label htmlFor="zone">Zone</Label>
             <div className="relative">
@@ -187,12 +205,20 @@ export function DriverForm({
               />
             </div>
           </div>
-          
+
           <div className="flex justify-end gap-2 pt-4">
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting || !formData.name.trim() || !formData.phone.trim() || !formData.email.trim()}>
+            <Button
+              type="submit"
+              disabled={
+                isSubmitting ||
+                !formData.name.trim() ||
+                !formData.phone.trim() ||
+                !formData.email.trim()
+              }
+            >
               {isSubmitting ? "Saving..." : "Save Driver"}
             </Button>
           </div>

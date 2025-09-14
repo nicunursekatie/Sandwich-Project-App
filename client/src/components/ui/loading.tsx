@@ -6,20 +6,19 @@ interface LoadingSpinnerProps {
   className?: string;
 }
 
-export function LoadingSpinner({ size = "md", className }: LoadingSpinnerProps) {
+export function LoadingSpinner({
+  size = "md",
+  className,
+}: LoadingSpinnerProps) {
   const sizeClasses = {
     sm: "w-4 h-4",
-    md: "w-6 h-6", 
-    lg: "w-8 h-8"
+    md: "w-6 h-6",
+    lg: "w-8 h-8",
   };
 
   return (
-    <Loader2 
-      className={cn(
-        "animate-spin text-gray-600",
-        sizeClasses[size],
-        className
-      )} 
+    <Loader2
+      className={cn("animate-spin text-gray-600", sizeClasses[size], className)}
     />
   );
 }
@@ -30,7 +29,11 @@ interface LoadingStateProps {
   className?: string;
 }
 
-export function LoadingState({ text = "Loading...", size = "md", className }: LoadingStateProps) {
+export function LoadingState({
+  text = "Loading...",
+  size = "md",
+  className,
+}: LoadingStateProps) {
   return (
     <div className={cn("flex items-center justify-center p-8", className)}>
       <div className="flex flex-col items-center gap-3">
@@ -64,7 +67,10 @@ export function TableSkeleton({ rows = 5 }: { rows?: number }) {
   return (
     <div className="space-y-3">
       {Array.from({ length: rows }).map((_, i) => (
-        <div key={i} className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg animate-pulse">
+        <div
+          key={i}
+          className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg animate-pulse"
+        >
           <div className="h-4 bg-gray-200 rounded w-1/4"></div>
           <div className="h-4 bg-gray-200 rounded w-1/3"></div>
           <div className="h-4 bg-gray-200 rounded w-1/5"></div>
@@ -83,7 +89,7 @@ export function PageSkeleton() {
         <div className="h-8 bg-gray-200 rounded w-1/3"></div>
         <div className="h-4 bg-gray-200 rounded w-1/2"></div>
       </div>
-      
+
       {/* Stats cards skeleton */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {Array.from({ length: 4 }).map((_, i) => (
@@ -95,7 +101,7 @@ export function PageSkeleton() {
           </div>
         ))}
       </div>
-      
+
       {/* Content skeleton */}
       <div className="space-y-4">
         <CardSkeleton />
@@ -116,20 +122,21 @@ interface LoadingButtonProps {
   variant?: "default" | "outline" | "ghost";
 }
 
-export function LoadingButton({ 
-  loading = false, 
-  children, 
+export function LoadingButton({
+  loading = false,
+  children,
   className,
   onClick,
   disabled,
-  variant = "default"
+  variant = "default",
 }: LoadingButtonProps) {
-  const baseClasses = "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background px-4 py-2";
-  
+  const baseClasses =
+    "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background px-4 py-2";
+
   const variantClasses = {
     default: "bg-primary text-primary-foreground hover:bg-primary/90",
     outline: "border border-input hover:bg-accent hover:text-accent-foreground",
-    ghost: "hover:bg-accent hover:text-accent-foreground"
+    ghost: "hover:bg-accent hover:text-accent-foreground",
   };
 
   return (

@@ -1,5 +1,10 @@
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -35,12 +40,16 @@ export function VolunteerSelectionModal({
   onClose,
   onSelectVolunteers,
   selectedVolunteers,
-  eventId
+  eventId,
 }: VolunteerSelectionModalProps) {
   const [searchTerm, setSearchTerm] = useState("");
-  const [tempSelectedVolunteers, setTempSelectedVolunteers] = useState<string[]>(selectedVolunteers);
+  const [tempSelectedVolunteers, setTempSelectedVolunteers] = useState<
+    string[]
+  >(selectedVolunteers);
   const [customVolunteerName, setCustomVolunteerName] = useState("");
-  const [showCustomVolunteerInput, setShowCustomVolunteerInput] = useState(false);
+  const [showCustomVolunteerInput, setShowCustomVolunteerInput] = useState(
+    false
+  );
 
   // Reset temp selection when modal opens
   useEffect(() => {
@@ -52,32 +61,37 @@ export function VolunteerSelectionModal({
   // Fetch available users for volunteer assignments
   const { data: users = [], isLoading: usersLoading } = useQuery<User[]>({
     queryKey: ["/api/users/for-assignments"],
-    enabled: isOpen
+    enabled: isOpen,
   });
 
   // Fetch drivers for volunteer assignments (multi-faceted volunteers)
   const { data: drivers = [], isLoading: driversLoading } = useQuery<Driver[]>({
     queryKey: ["/api/drivers"],
-    enabled: isOpen
+    enabled: isOpen,
   });
 
   const isLoading = usersLoading || driversLoading;
 
   // Filter users and drivers based on search term
-  const filteredUsers = users.filter(user => {
-    const name = user.firstName && user.lastName 
-      ? `${user.firstName} ${user.lastName}` 
-      : user.displayName || user.email || "";
+  const filteredUsers = users.filter((user) => {
+    const name =
+      user.firstName && user.lastName
+        ? `${user.firstName} ${user.lastName}`
+        : user.displayName || user.email || "";
     const email = user.email || "";
-    return name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      email.toLowerCase().includes(searchTerm.toLowerCase());
+    return (
+      name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      email.toLowerCase().includes(searchTerm.toLowerCase())
+    );
   });
 
-  const filteredDrivers = drivers.filter(driver => {
+  const filteredDrivers = drivers.filter((driver) => {
     const name = driver.name || "";
     const email = driver.email || "";
-    return name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      email.toLowerCase().includes(searchTerm.toLowerCase());
+    return (
+      name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      email.toLowerCase().includes(searchTerm.toLowerCase())
+    );
   });
 
   const getUserDisplayName = (user: User) => {
@@ -87,23 +101,28 @@ export function VolunteerSelectionModal({
   };
 
   const toggleVolunteerSelection = (volunteerId: string) => {
-    setTempSelectedVolunteers(prev => 
+    setTempSelectedVolunteers((prev) =>
       prev.includes(volunteerId)
-        ? prev.filter(id => id !== volunteerId)
+        ? prev.filter((id) => id !== volunteerId)
         : [...prev, volunteerId]
     );
   };
 
   const addCustomVolunteer = () => {
     if (customVolunteerName.trim()) {
-      setTempSelectedVolunteers(prev => [...prev, customVolunteerName.trim()]);
+      setTempSelectedVolunteers((prev) => [
+        ...prev,
+        customVolunteerName.trim(),
+      ]);
       setCustomVolunteerName("");
       setShowCustomVolunteerInput(false);
     }
   };
 
   const removeVolunteer = (volunteerId: string) => {
-    setTempSelectedVolunteers(prev => prev.filter(id => id !== volunteerId));
+    setTempSelectedVolunteers((prev) =>
+      prev.filter((id) => id !== volunteerId)
+    );
   };
 
   const handleSave = () => {
@@ -143,16 +162,27 @@ export function VolunteerSelectionModal({
           {/* Selected Volunteers */}
           {tempSelectedVolunteers.length > 0 && (
             <div className="space-y-2">
-              <h3 className="text-sm font-medium text-gray-700">Selected Volunteers ({tempSelectedVolunteers.length})</h3>
+              <h3 className="text-sm font-medium text-gray-700">
+                Selected Volunteers ({tempSelectedVolunteers.length})
+              </h3>
               <div className="flex flex-wrap gap-2">
                 {tempSelectedVolunteers.map((volunteerId, index) => {
-                  const user = users.find(u => u.id === volunteerId);
-                  const driver = drivers.find(d => d.id.toString() === volunteerId);
-                  const displayName = user ? getUserDisplayName(user) : 
-                    driver ? driver.name : volunteerId;
-                  
+                  const user = users.find((u) => u.id === volunteerId);
+                  const driver = drivers.find(
+                    (d) => d.id.toString() === volunteerId
+                  );
+                  const displayName = user
+                    ? getUserDisplayName(user)
+                    : driver
+                    ? driver.name
+                    : volunteerId;
+
                   return (
-                    <Badge key={index} variant="secondary" className="bg-green-50 text-green-700 border-green-200">
+                    <Badge
+                      key={index}
+                      variant="secondary"
+                      className="bg-green-50 text-green-700 border-green-200"
+                    >
                       {displayName}
                       <button
                         onClick={() => removeVolunteer(volunteerId)}
@@ -174,16 +204,20 @@ export function VolunteerSelectionModal({
                 {/* Team Members */}
                 {filteredUsers.length > 0 && (
                   <div>
-                    <h3 className="text-sm font-medium text-gray-700 mb-2">Team Members</h3>
+                    <h3 className="text-sm font-medium text-gray-700 mb-2">
+                      Team Members
+                    </h3>
                     <div className="space-y-1">
-                      {filteredUsers.map(user => {
-                        const isSelected = tempSelectedVolunteers.includes(user.id);
+                      {filteredUsers.map((user) => {
+                        const isSelected = tempSelectedVolunteers.includes(
+                          user.id
+                        );
                         return (
                           <div
                             key={user.id}
                             className={`p-3 rounded-lg border cursor-pointer transition-colors ${
-                              isSelected 
-                                ? "bg-green-50 border-green-200 text-green-700" 
+                              isSelected
+                                ? "bg-green-50 border-green-200 text-green-700"
                                 : "bg-white border-gray-200 hover:bg-gray-50"
                             }`}
                             onClick={() => toggleVolunteerSelection(user.id)}
@@ -192,13 +226,19 @@ export function VolunteerSelectionModal({
                               <div className="flex items-center space-x-3">
                                 <User className="w-4 h-4 text-gray-400" />
                                 <div>
-                                  <div className="font-medium">{getUserDisplayName(user)}</div>
+                                  <div className="font-medium">
+                                    {getUserDisplayName(user)}
+                                  </div>
                                   {user.email && (
-                                    <div className="text-sm text-gray-500">{user.email}</div>
+                                    <div className="text-sm text-gray-500">
+                                      {user.email}
+                                    </div>
                                   )}
                                 </div>
                               </div>
-                              {isSelected && <Check className="w-4 h-4 text-green-600" />}
+                              {isSelected && (
+                                <Check className="w-4 h-4 text-green-600" />
+                              )}
                             </div>
                           </div>
                         );
@@ -210,17 +250,21 @@ export function VolunteerSelectionModal({
                 {/* Drivers */}
                 {filteredDrivers.length > 0 && (
                   <div>
-                    <h3 className="text-sm font-medium text-gray-700 mb-2">Drivers (Multi-faceted Volunteers)</h3>
+                    <h3 className="text-sm font-medium text-gray-700 mb-2">
+                      Drivers (Multi-faceted Volunteers)
+                    </h3>
                     <div className="space-y-1">
-                      {filteredDrivers.map(driver => {
+                      {filteredDrivers.map((driver) => {
                         const driverId = driver.name; // Using name as ID for drivers
-                        const isSelected = tempSelectedVolunteers.includes(driverId);
+                        const isSelected = tempSelectedVolunteers.includes(
+                          driverId
+                        );
                         return (
                           <div
                             key={driver.id}
                             className={`p-3 rounded-lg border cursor-pointer transition-colors ${
-                              isSelected 
-                                ? "bg-green-50 border-green-200 text-green-700" 
+                              isSelected
+                                ? "bg-green-50 border-green-200 text-green-700"
                                 : "bg-white border-gray-200 hover:bg-gray-50"
                             }`}
                             onClick={() => toggleVolunteerSelection(driverId)}
@@ -229,13 +273,19 @@ export function VolunteerSelectionModal({
                               <div className="flex items-center space-x-3">
                                 <User className="w-4 h-4 text-gray-400" />
                                 <div>
-                                  <div className="font-medium">{driver.name}</div>
+                                  <div className="font-medium">
+                                    {driver.name}
+                                  </div>
                                   {driver.email && (
-                                    <div className="text-sm text-gray-500">{driver.email}</div>
+                                    <div className="text-sm text-gray-500">
+                                      {driver.email}
+                                    </div>
                                   )}
                                 </div>
                               </div>
-                              {isSelected && <Check className="w-4 h-4 text-green-600" />}
+                              {isSelected && (
+                                <Check className="w-4 h-4 text-green-600" />
+                              )}
                             </div>
                           </div>
                         );
@@ -246,7 +296,9 @@ export function VolunteerSelectionModal({
 
                 {/* Custom Volunteer Input */}
                 <div>
-                  <h3 className="text-sm font-medium text-gray-700 mb-2">Add Custom Volunteer</h3>
+                  <h3 className="text-sm font-medium text-gray-700 mb-2">
+                    Add Custom Volunteer
+                  </h3>
                   {!showCustomVolunteerInput ? (
                     <Button
                       variant="outline"
@@ -262,7 +314,9 @@ export function VolunteerSelectionModal({
                         placeholder="Enter volunteer name..."
                         value={customVolunteerName}
                         onChange={(e) => setCustomVolunteerName(e.target.value)}
-                        onKeyPress={(e) => e.key === "Enter" && addCustomVolunteer()}
+                        onKeyPress={(e) =>
+                          e.key === "Enter" && addCustomVolunteer()
+                        }
                         className="flex-1"
                       />
                       <Button
@@ -295,7 +349,7 @@ export function VolunteerSelectionModal({
             <Button variant="outline" onClick={handleCancel}>
               Cancel
             </Button>
-            <Button 
+            <Button
               onClick={handleSave}
               className="bg-teal-600 hover:bg-teal-700 text-white"
             >

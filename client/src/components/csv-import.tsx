@@ -1,6 +1,12 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { Upload, FileText, CheckCircle, XCircle, AlertCircle } from "lucide-react";
+import {
+  Upload,
+  FileText,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -22,15 +28,21 @@ export default function CSVImport() {
   const importMutation = useMutation({
     mutationFn: async (file: File) => {
       const formData = new FormData();
-      formData.append('csvFile', file);
-      
-      const response = await apiRequest('POST', '/api/import-collections', formData);
+      formData.append("csvFile", file);
+
+      const response = await apiRequest(
+        "POST",
+        "/api/import-collections",
+        formData
+      );
       return response.json();
     },
     onSuccess: (result: ImportResult) => {
       setImportResult(result);
-      queryClient.invalidateQueries({ queryKey: ['/api/sandwich-collections'] });
-      
+      queryClient.invalidateQueries({
+        queryKey: ["/api/sandwich-collections"],
+      });
+
       if (result.errorCount === 0) {
         toast({
           title: "Import completed successfully",
@@ -47,16 +59,17 @@ export default function CSVImport() {
     onError: (error) => {
       toast({
         title: "Import failed",
-        description: error instanceof Error ? error.message : "Unknown error occurred",
+        description:
+          error instanceof Error ? error.message : "Unknown error occurred",
         variant: "destructive",
       });
-    }
+    },
   });
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) {
+      if (file.type !== "text/csv" && !file.name.endsWith(".csv")) {
         toast({
           title: "Invalid file type",
           description: "Please select a CSV file.",
@@ -83,8 +96,12 @@ export default function CSVImport() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-semibold text-slate-900">Import CSV Data</h2>
-        <p className="text-slate-600">Upload sandwich collection data from CSV file</p>
+        <h2 className="text-xl font-semibold text-slate-900">
+          Import CSV Data
+        </h2>
+        <p className="text-slate-600">
+          Upload sandwich collection data from CSV file
+        </p>
       </div>
 
       <Card>
@@ -99,9 +116,12 @@ export default function CSVImport() {
             <div className="border-2 border-dashed border-slate-300 rounded-lg p-8 text-center">
               <FileText className="w-12 h-12 text-slate-400 mx-auto mb-4" />
               <div className="space-y-2">
-                <p className="text-slate-600">Select a CSV file to import sandwich collection data</p>
+                <p className="text-slate-600">
+                  Select a CSV file to import sandwich collection data
+                </p>
                 <p className="text-sm text-slate-500">
-                  Expected columns: Host Name, Sandwich Count, Date, Logged By, Notes, Created At
+                  Expected columns: Host Name, Sandwich Count, Date, Logged By,
+                  Notes, Created At
                 </p>
               </div>
               <div className="mt-4">
@@ -125,7 +145,9 @@ export default function CSVImport() {
                 <div className="flex items-center gap-3">
                   <FileText className="w-5 h-5 text-blue-600" />
                   <div>
-                    <p className="font-medium text-blue-900">{selectedFile.name}</p>
+                    <p className="font-medium text-blue-900">
+                      {selectedFile.name}
+                    </p>
                     <p className="text-sm text-blue-600">
                       {(selectedFile.size / 1024).toFixed(1)} KB
                     </p>
@@ -193,11 +215,15 @@ export default function CSVImport() {
             </div>
 
             <div className="flex justify-center">
-              <Badge 
-                variant={importResult.errorCount === 0 ? "default" : "destructive"}
+              <Badge
+                variant={
+                  importResult.errorCount === 0 ? "default" : "destructive"
+                }
                 className="text-sm"
               >
-                {importResult.errorCount === 0 ? "Import Successful" : "Import Completed with Errors"}
+                {importResult.errorCount === 0
+                  ? "Import Successful"
+                  : "Import Completed with Errors"}
               </Badge>
             </div>
 

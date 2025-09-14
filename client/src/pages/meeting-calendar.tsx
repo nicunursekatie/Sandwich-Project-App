@@ -1,12 +1,35 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar, Clock, MapPin, Users, Plus, Edit, Trash2, Video, Phone, ArrowLeft } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Calendar,
+  Clock,
+  MapPin,
+  Users,
+  Plus,
+  Edit,
+  Trash2,
+  Video,
+  Phone,
+  ArrowLeft,
+} from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
@@ -32,18 +55,22 @@ interface MeetingCalendarProps {
   isEmbedded?: boolean;
 }
 
-export default function MeetingCalendar({ isEmbedded = false }: MeetingCalendarProps) {
+export default function MeetingCalendar({
+  isEmbedded = false,
+}: MeetingCalendarProps) {
   const [, setLocation] = useLocation();
   const [isCreating, setIsCreating] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState(
+    new Date().toISOString().split("T")[0]
+  );
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     meetingDate: "",
     startTime: "",
     agenda: "",
-    meetingLink: ""
+    meetingLink: "",
   });
   const { toast } = useToast();
 
@@ -63,9 +90,9 @@ export default function MeetingCalendar({ isEmbedded = false }: MeetingCalendarP
   const formatTime12Hour = (time24: string) => {
     if (!time24) return null;
     try {
-      const [hours, minutes] = time24.split(':');
+      const [hours, minutes] = time24.split(":");
       const hour = parseInt(hours);
-      const ampm = hour >= 12 ? 'PM' : 'AM';
+      const ampm = hour >= 12 ? "PM" : "AM";
       const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
       return `${hour12}:${minutes} ${ampm}`;
     } catch (error) {
@@ -77,9 +104,10 @@ export default function MeetingCalendar({ isEmbedded = false }: MeetingCalendarP
   const renderTimeInfo = (startTime: string, endTime: string) => {
     const formattedStart = formatTime12Hour(startTime);
     const formattedEnd = formatTime12Hour(endTime);
-    
+
     if (!formattedStart && !formattedEnd) return null;
-    if (formattedStart && formattedEnd) return `${formattedStart} - ${formattedEnd}`;
+    if (formattedStart && formattedEnd)
+      return `${formattedStart} - ${formattedEnd}`;
     if (formattedStart) return formattedStart;
     return null;
   };
@@ -107,7 +135,7 @@ export default function MeetingCalendar({ isEmbedded = false }: MeetingCalendarP
         meetingDate: "",
         startTime: "",
         agenda: "",
-        meetingLink: ""
+        meetingLink: "",
       });
       toast({ title: "Meeting scheduled successfully" });
     },
@@ -120,19 +148,27 @@ export default function MeetingCalendar({ isEmbedded = false }: MeetingCalendarP
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "scheduled": return "bg-blue-100 text-blue-800";
-      case "in_progress": return "bg-green-100 text-green-800";
-      case "completed": return "bg-gray-100 text-gray-800";
-      case "cancelled": return "bg-red-100 text-red-800";
-      default: return "bg-gray-100 text-gray-800";
+      case "scheduled":
+        return "bg-blue-100 text-blue-800";
+      case "in_progress":
+        return "bg-green-100 text-green-800";
+      case "completed":
+        return "bg-gray-100 text-gray-800";
+      case "cancelled":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getMeetingTypeIcon = (type: string) => {
     switch (type) {
-      case "virtual": return <Video className="w-4 h-4" />;
-      case "hybrid": return <Phone className="w-4 h-4" />;
-      default: return <MapPin className="w-4 h-4" />;
+      case "virtual":
+        return <Video className="w-4 h-4" />;
+      case "hybrid":
+        return <Phone className="w-4 h-4" />;
+      default:
+        return <MapPin className="w-4 h-4" />;
     }
   };
 
@@ -141,12 +177,16 @@ export default function MeetingCalendar({ isEmbedded = false }: MeetingCalendarP
     return meetingDateTime > new Date();
   };
 
-  const upcomingMeetings = meetings.filter((meeting: Meeting) => 
-    isUpcoming(meeting.meetingDate, meeting.startTime) && meeting.status === "scheduled"
+  const upcomingMeetings = meetings.filter(
+    (meeting: Meeting) =>
+      isUpcoming(meeting.meetingDate, meeting.startTime) &&
+      meeting.status === "scheduled"
   );
 
-  const pastMeetings = meetings.filter((meeting: Meeting) => 
-    !isUpcoming(meeting.meetingDate, meeting.startTime) || meeting.status === "completed"
+  const pastMeetings = meetings.filter(
+    (meeting: Meeting) =>
+      !isUpcoming(meeting.meetingDate, meeting.startTime) ||
+      meeting.status === "completed"
   );
 
   if (isLoading) {
@@ -164,22 +204,24 @@ export default function MeetingCalendar({ isEmbedded = false }: MeetingCalendarP
     <div className="space-y-6">
       {/* Navigation Header - only show when not embedded */}
       {!isEmbedded && (
-      <div className="flex items-center gap-3 pb-4 border-b border-gray-200">
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={() => (window as any).dashboardSetActiveSection?.("meetings")}
-          className="flex items-center gap-2"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back to Meetings Hub
-        </Button>
-        <div className="flex items-center gap-2 text-sm text-gray-500">
-          <span>Meetings</span>
-          <span>•</span>
-          <span className="text-gray-900 font-medium">Calendar</span>
+        <div className="flex items-center gap-3 pb-4 border-b border-gray-200">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              (window as any).dashboardSetActiveSection?.("meetings")
+            }
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Meetings Hub
+          </Button>
+          <div className="flex items-center gap-2 text-sm text-gray-500">
+            <span>Meetings</span>
+            <span>•</span>
+            <span className="text-gray-900 font-medium">Calendar</span>
+          </div>
         </div>
-      </div>
       )}
 
       {/* Header */}
@@ -190,7 +232,9 @@ export default function MeetingCalendar({ isEmbedded = false }: MeetingCalendarP
           </div>
           <div>
             <h1 className="text-xl font-bold text-gray-900">Calendar</h1>
-            <p className="text-gray-600">Schedule and manage team meetings and events</p>
+            <p className="text-gray-600">
+              Schedule and manage team meetings and events
+            </p>
           </div>
         </div>
         <Button onClick={() => setIsCreating(true)} className="self-start">
@@ -199,230 +243,282 @@ export default function MeetingCalendar({ isEmbedded = false }: MeetingCalendarP
         </Button>
       </div>
 
-          {/* Summary Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <Calendar className="w-8 h-8 text-blue-500" />
-                  <div>
-                    <p className="text-2xl font-bold">{upcomingMeetings.length}</p>
-                    <p className="text-sm text-gray-600">Upcoming</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <Clock className="w-8 h-8 text-green-500" />
-                  <div>
-                    <p className="text-2xl font-bold">{pastMeetings.length}</p>
-                    <p className="text-sm text-gray-600">Past</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <Users className="w-8 h-8 text-purple-500" />
-                  <div>
-                    <p className="text-2xl font-bold">{meetings.length}</p>
-                    <p className="text-sm text-gray-600">Total Meetings</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Create Form */}
-          {isCreating && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Schedule New Meeting</CardTitle>
-                <CardDescription>Create a new meeting and send invitations</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Meeting Title</label>
-                    <Input
-                      value={formData.title}
-                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Description</label>
-                    <Textarea
-                      value={formData.description}
-                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                      rows={3}
-                    />
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-2">Date</label>
-                      <Input
-                        type="date"
-                        value={formData.meetingDate}
-                        onChange={(e) => setFormData({ ...formData, meetingDate: e.target.value })}
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-2">Start Time (optional)</label>
-                      <Input
-                        type="time"
-                        value={formData.startTime}
-                        onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Meeting Link (optional)</label>
-                    <Input
-                      value={formData.meetingLink}
-                      onChange={(e) => setFormData({ ...formData, meetingLink: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Agenda (optional)</label>
-                    <Textarea
-                      value={formData.agenda}
-                      onChange={(e) => setFormData({ ...formData, agenda: e.target.value })}
-                      rows={4}
-                    />
-                  </div>
-                  <div className="flex gap-2">
-                    <Button type="submit" disabled={createMutation.isPending}>
-                      {createMutation.isPending ? "Scheduling..." : "Schedule Meeting"}
-                    </Button>
-                    <Button type="button" variant="outline" onClick={() => setIsCreating(false)}>
-                      Cancel
-                    </Button>
-                  </div>
-                </form>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Upcoming Meetings */}
-          {upcomingMeetings.length > 0 && (
-            <div>
-              <h2 className="text-base font-semibold mb-4">Upcoming Meetings</h2>
-              <div className="space-y-4">
-                {upcomingMeetings.map((meeting: Meeting) => (
-                  <Card key={meeting.id} className="border-l-4 border-l-blue-500">
-                    <CardContent className="p-4">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <h3 className="font-semibold text-base">{meeting.title}</h3>
-                            <Badge className={getStatusColor(meeting.status)}>
-                              {meeting.status.replace("_", " ")}
-                            </Badge>
-                          </div>
-                          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-2">
-                            <span className="flex items-center gap-1">
-                              <Calendar className="w-4 h-4" />
-                              {formatMeetingDate(meeting.meetingDate)}
-                            </span>
-                            {renderTimeInfo(meeting.startTime, meeting.endTime) && (
-                              <span className="flex items-center gap-1">
-                                <Clock className="w-4 h-4" />
-                                {renderTimeInfo(meeting.startTime, meeting.endTime)}
-                              </span>
-                            )}
-                            {meeting.location && (
-                              <span className="flex items-center gap-1">
-                                {getMeetingTypeIcon(meeting.meetingType)}
-                                {meeting.location}
-                              </span>
-                            )}
-                          </div>
-                          {meeting.description && (
-                            <p className="text-gray-600 mb-2">{meeting.description}</p>
-                          )}
-                          {meeting.meetingLink && (
-                            <p className="text-sm text-blue-600">
-                              Meeting Link: <a href={meeting.meetingLink} target="_blank" rel="noopener noreferrer" className="underline hover:no-underline">{meeting.meetingLink}</a>
-                            </p>
-                          )}
-                        </div>
-                        <div className="flex gap-2">
-                          <Button variant="outline" size="sm">
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <Calendar className="w-8 h-8 text-blue-500" />
+              <div>
+                <p className="text-2xl font-bold">{upcomingMeetings.length}</p>
+                <p className="text-sm text-gray-600">Upcoming</p>
               </div>
             </div>
-          )}
-
-          {/* Past Meetings */}
-          {pastMeetings.length > 0 && (
-            <div>
-              <h2 className="text-base font-semibold mb-4">Past Meetings</h2>
-              <div className="space-y-4">
-                {pastMeetings.slice(0, 5).map((meeting: Meeting) => (
-                  <Card key={meeting.id} className="opacity-75">
-                    <CardContent className="p-4">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <h3 className="font-semibold text-base">{meeting.title}</h3>
-                            <Badge className={getStatusColor(meeting.status)}>
-                              {meeting.status.replace("_", " ")}
-                            </Badge>
-                          </div>
-                          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
-                            <span className="flex items-center gap-1">
-                              <Calendar className="w-4 h-4" />
-                              {formatMeetingDate(meeting.meetingDate)}
-                            </span>
-                            {renderTimeInfo(meeting.startTime, meeting.endTime) && (
-                              <span className="flex items-center gap-1">
-                                <Clock className="w-4 h-4" />
-                                {renderTimeInfo(meeting.startTime, meeting.endTime)}
-                              </span>
-                            )}
-                            {meeting.location && (
-                              <span className="flex items-center gap-1">
-                                {getMeetingTypeIcon(meeting.meetingType)}
-                                {meeting.location}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <Clock className="w-8 h-8 text-green-500" />
+              <div>
+                <p className="text-2xl font-bold">{pastMeetings.length}</p>
+                <p className="text-sm text-gray-600">Past</p>
               </div>
             </div>
-          )}
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <Users className="w-8 h-8 text-purple-500" />
+              <div>
+                <p className="text-2xl font-bold">{meetings.length}</p>
+                <p className="text-sm text-gray-600">Total Meetings</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
-          {meetings.length === 0 && !isCreating && (
-            <Card>
-              <CardContent className="text-center py-12">
-                <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-base font-medium text-gray-900 mb-2">No meetings scheduled</h3>
-                <p className="text-gray-600 mb-4">Start by scheduling your first team meeting</p>
-                <Button onClick={() => setIsCreating(true)}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Schedule First Meeting
+      {/* Create Form */}
+      {isCreating && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Schedule New Meeting</CardTitle>
+            <CardDescription>
+              Create a new meeting and send invitations
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Meeting Title
+                </label>
+                <Input
+                  value={formData.title}
+                  onChange={(e) =>
+                    setFormData({ ...formData, title: e.target.value })
+                  }
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Description
+                </label>
+                <Textarea
+                  value={formData.description}
+                  onChange={(e) =>
+                    setFormData({ ...formData, description: e.target.value })
+                  }
+                  rows={3}
+                />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Date</label>
+                  <Input
+                    type="date"
+                    value={formData.meetingDate}
+                    onChange={(e) =>
+                      setFormData({ ...formData, meetingDate: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Start Time (optional)
+                  </label>
+                  <Input
+                    type="time"
+                    value={formData.startTime}
+                    onChange={(e) =>
+                      setFormData({ ...formData, startTime: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Meeting Link (optional)
+                </label>
+                <Input
+                  value={formData.meetingLink}
+                  onChange={(e) =>
+                    setFormData({ ...formData, meetingLink: e.target.value })
+                  }
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Agenda (optional)
+                </label>
+                <Textarea
+                  value={formData.agenda}
+                  onChange={(e) =>
+                    setFormData({ ...formData, agenda: e.target.value })
+                  }
+                  rows={4}
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button type="submit" disabled={createMutation.isPending}>
+                  {createMutation.isPending
+                    ? "Scheduling..."
+                    : "Schedule Meeting"}
                 </Button>
-              </CardContent>
-            </Card>
-          )}
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsCreating(false)}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Upcoming Meetings */}
+      {upcomingMeetings.length > 0 && (
+        <div>
+          <h2 className="text-base font-semibold mb-4">Upcoming Meetings</h2>
+          <div className="space-y-4">
+            {upcomingMeetings.map((meeting: Meeting) => (
+              <Card key={meeting.id} className="border-l-4 border-l-blue-500">
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h3 className="font-semibold text-base">
+                          {meeting.title}
+                        </h3>
+                        <Badge className={getStatusColor(meeting.status)}>
+                          {meeting.status.replace("_", " ")}
+                        </Badge>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-2">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="w-4 h-4" />
+                          {formatMeetingDate(meeting.meetingDate)}
+                        </span>
+                        {renderTimeInfo(meeting.startTime, meeting.endTime) && (
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-4 h-4" />
+                            {renderTimeInfo(meeting.startTime, meeting.endTime)}
+                          </span>
+                        )}
+                        {meeting.location && (
+                          <span className="flex items-center gap-1">
+                            {getMeetingTypeIcon(meeting.meetingType)}
+                            {meeting.location}
+                          </span>
+                        )}
+                      </div>
+                      {meeting.description && (
+                        <p className="text-gray-600 mb-2">
+                          {meeting.description}
+                        </p>
+                      )}
+                      {meeting.meetingLink && (
+                        <p className="text-sm text-blue-600">
+                          Meeting Link:{" "}
+                          <a
+                            href={meeting.meetingLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline hover:no-underline"
+                          >
+                            {meeting.meetingLink}
+                          </a>
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm">
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Past Meetings */}
+      {pastMeetings.length > 0 && (
+        <div>
+          <h2 className="text-base font-semibold mb-4">Past Meetings</h2>
+          <div className="space-y-4">
+            {pastMeetings.slice(0, 5).map((meeting: Meeting) => (
+              <Card key={meeting.id} className="opacity-75">
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h3 className="font-semibold text-base">
+                          {meeting.title}
+                        </h3>
+                        <Badge className={getStatusColor(meeting.status)}>
+                          {meeting.status.replace("_", " ")}
+                        </Badge>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="w-4 h-4" />
+                          {formatMeetingDate(meeting.meetingDate)}
+                        </span>
+                        {renderTimeInfo(meeting.startTime, meeting.endTime) && (
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-4 h-4" />
+                            {renderTimeInfo(meeting.startTime, meeting.endTime)}
+                          </span>
+                        )}
+                        {meeting.location && (
+                          <span className="flex items-center gap-1">
+                            {getMeetingTypeIcon(meeting.meetingType)}
+                            {meeting.location}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {meetings.length === 0 && !isCreating && (
+        <Card>
+          <CardContent className="text-center py-12">
+            <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-base font-medium text-gray-900 mb-2">
+              No meetings scheduled
+            </h3>
+            <p className="text-gray-600 mb-4">
+              Start by scheduling your first team meeting
+            </p>
+            <Button onClick={() => setIsCreating(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Schedule First Meeting
+            </Button>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

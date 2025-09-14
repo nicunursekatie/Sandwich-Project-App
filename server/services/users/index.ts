@@ -9,14 +9,18 @@ export interface IUserService {
   createUser(userData: CreateUserData): Promise<any>;
   updateUser(id: string, updates: UserUpdateData): Promise<any>;
   updateUserStatus(id: string, isActive: boolean): Promise<any>;
-  updateUserProfile(id: string, profileData: UserProfileData, requestUserId?: string): Promise<any>;
+  updateUserProfile(
+    id: string,
+    profileData: UserProfileData,
+    requestUserId?: string
+  ): Promise<any>;
   deleteUser(id: string): Promise<void>;
   setUserPassword(id: string, password: string): Promise<void>;
-  
+
   // User validation logic
   validateUserData(userData: any): ValidationResult;
   validatePassword(password: string): ValidationResult;
-  
+
   // User permission management
   getUserPermissions(userId: string): Promise<string[]>;
   checkUserExists(email: string): Promise<boolean>;
@@ -49,7 +53,6 @@ export interface ValidationResult {
 }
 
 export class UserService implements IUserService {
-  
   async getAllUsers(): Promise<any[]> {
     try {
       const users = await storage.getAllUsers();
@@ -64,15 +67,16 @@ export class UserService implements IUserService {
     try {
       const users = await storage.getAllUsers();
       // Return basic user info needed for assignments
-      const assignableUsers = users.map(user => ({
+      const assignableUsers = users.map((user) => ({
         id: user.id,
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
         role: user.role,
-        displayName: user.firstName && user.lastName 
-          ? `${user.firstName} ${user.lastName}`
-          : user.displayName || user.email
+        displayName:
+          user.firstName && user.lastName
+            ? `${user.firstName} ${user.lastName}`
+            : user.displayName || user.email,
       }));
       return assignableUsers;
     } catch (error) {
@@ -96,7 +100,13 @@ export class UserService implements IUserService {
       }
 
       // Generate user ID and get default permissions for role
-      const userId = "user_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9);
+      const userId =
+        "user_" +
+        Date.now() +
+        "_" +
+        Math.random()
+          .toString(36)
+          .substr(2, 9);
       const userRole = userData.role || "volunteer";
       const defaultPermissions = getDefaultPermissionsForRole(userRole);
 
@@ -109,7 +119,7 @@ export class UserService implements IUserService {
         permissions: defaultPermissions,
         isActive: true,
         profileImageUrl: null,
-        metadata: {}
+        metadata: {},
       });
 
       return newUser;
@@ -125,13 +135,15 @@ export class UserService implements IUserService {
       if (updates.permissions) {
         updates.permissions = [...new Set(updates.permissions)];
       }
-      
+
       // Build update object with only provided fields
       const updateData: any = {};
       if (updates.role !== undefined) updateData.role = updates.role;
-      if (updates.permissions !== undefined) updateData.permissions = updates.permissions;
-      if (updates.metadata !== undefined) updateData.metadata = updates.metadata;
-      
+      if (updates.permissions !== undefined)
+        updateData.permissions = updates.permissions;
+      if (updates.metadata !== undefined)
+        updateData.metadata = updates.metadata;
+
       const updatedUser = await storage.updateUser(id, updateData);
       return updatedUser;
     } catch (error) {
@@ -150,29 +162,36 @@ export class UserService implements IUserService {
     }
   }
 
-  async updateUserProfile(id: string, profileData: UserProfileData, requestUserId?: string): Promise<any> {
+  async updateUserProfile(
+    id: string,
+    profileData: UserProfileData,
+    requestUserId?: string
+  ): Promise<any> {
     try {
       // Build update object with only provided fields
       const updateData: any = {};
       if (profileData.email !== undefined) updateData.email = profileData.email;
-      if (profileData.firstName !== undefined) updateData.firstName = profileData.firstName;
-      if (profileData.lastName !== undefined) updateData.lastName = profileData.lastName;
+      if (profileData.firstName !== undefined)
+        updateData.firstName = profileData.firstName;
+      if (profileData.lastName !== undefined)
+        updateData.lastName = profileData.lastName;
       if (profileData.role !== undefined) updateData.role = profileData.role;
-      if (profileData.isActive !== undefined) updateData.isActive = profileData.isActive;
-      
+      if (profileData.isActive !== undefined)
+        updateData.isActive = profileData.isActive;
+
       const updatedUser = await storage.updateUser(id, updateData);
-      
+
       // Log the user profile update
       if (requestUserId) {
         await AuditLogger.log(
-          'user_profile_updated',
-          'user_management',
+          "user_profile_updated",
+          "user_management",
           id,
           { updatedFields: Object.keys(updateData), newValues: updateData },
           { userId: requestUserId }
         );
       }
-      
+
       return updatedUser;
     } catch (error) {
       console.error("Error updating user profile:", error);
@@ -218,7 +237,7 @@ export class UserService implements IUserService {
 
     return {
       isValid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -231,7 +250,7 @@ export class UserService implements IUserService {
 
     return {
       isValid: errors.length === 0,
-      errors
+      errors,
     };
   }
 

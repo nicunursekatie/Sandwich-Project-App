@@ -7,8 +7,21 @@ import { User, Lock, Mail, FileText, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -16,19 +29,21 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 
 const profileSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"), 
+  lastName: z.string().min(1, "Last name is required"),
   displayName: z.string().min(1, "Display name is required"),
   email: z.string().email("Invalid email address"),
 });
 
-const passwordSchema = z.object({
-  currentPassword: z.string().min(1, "Current password is required"),
-  newPassword: z.string().min(6, "Password must be at least 6 characters"),
-  confirmPassword: z.string().min(1, "Please confirm your password"),
-}).refine((data) => data.newPassword === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
+const passwordSchema = z
+  .object({
+    currentPassword: z.string().min(1, "Current password is required"),
+    newPassword: z.string().min(6, "Password must be at least 6 characters"),
+    confirmPassword: z.string().min(1, "Please confirm your password"),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
 
 type ProfileFormData = z.infer<typeof profileSchema>;
 type PasswordFormData = z.infer<typeof passwordSchema>;
@@ -65,7 +80,7 @@ export default function UserProfile() {
 
   // Update form when profile data loads
   useEffect(() => {
-    if (userProfile && typeof userProfile === 'object') {
+    if (userProfile && typeof userProfile === "object") {
       const profile = userProfile as any;
       profileForm.reset({
         firstName: profile.firstName || "",
@@ -79,7 +94,7 @@ export default function UserProfile() {
   // Update profile mutation
   const updateProfileMutation = useMutation({
     mutationFn: async (data: ProfileFormData) => {
-      return await apiRequest('PUT', '/api/auth/profile', data);
+      return await apiRequest("PUT", "/api/auth/profile", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
@@ -95,13 +110,13 @@ export default function UserProfile() {
         description: error.message || "Failed to update profile",
         variant: "destructive",
       });
-    }
+    },
   });
 
   // Change password mutation
   const changePasswordMutation = useMutation({
     mutationFn: async (data: PasswordFormData) => {
-      return await apiRequest('PUT', '/api/auth/change-password', {
+      return await apiRequest("PUT", "/api/auth/change-password", {
         currentPassword: data.currentPassword,
         newPassword: data.newPassword,
       });
@@ -119,7 +134,7 @@ export default function UserProfile() {
         description: error.message || "Failed to change password",
         variant: "destructive",
       });
-    }
+    },
   });
 
   const onSubmitProfile = (data: ProfileFormData) => {
@@ -144,7 +159,9 @@ export default function UserProfile() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-main-heading text-primary">Account Settings</h1>
+        <h1 className="text-2xl font-main-heading text-primary">
+          Account Settings
+        </h1>
         <p className="font-body text-muted-foreground">
           Manage your profile information and account security
         </p>
@@ -190,7 +207,10 @@ export default function UserProfile() {
           </CardHeader>
           <CardContent>
             <Form {...profileForm}>
-              <form onSubmit={profileForm.handleSubmit(onSubmitProfile)} className="space-y-6">
+              <form
+                onSubmit={profileForm.handleSubmit(onSubmitProfile)}
+                className="space-y-6"
+              >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={profileForm.control}
@@ -227,7 +247,10 @@ export default function UserProfile() {
                     <FormItem>
                       <FormLabel>Display Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="How you want to appear in messages and activities" {...field} />
+                        <Input
+                          placeholder="How you want to appear in messages and activities"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -241,20 +264,26 @@ export default function UserProfile() {
                     <FormItem>
                       <FormLabel>Email Address</FormLabel>
                       <FormControl>
-                        <Input type="email" placeholder="john@example.com" {...field} />
+                        <Input
+                          type="email"
+                          placeholder="john@example.com"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
 
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   disabled={updateProfileMutation.isPending}
                   className="btn-tsp-primary"
                 >
                   <Save className="w-4 h-4 mr-2" />
-                  {updateProfileMutation.isPending ? "Saving..." : "Save Changes"}
+                  {updateProfileMutation.isPending
+                    ? "Saving..."
+                    : "Save Changes"}
                 </Button>
               </form>
             </Form>
@@ -276,7 +305,10 @@ export default function UserProfile() {
           </CardHeader>
           <CardContent>
             <Form {...passwordForm}>
-              <form onSubmit={passwordForm.handleSubmit(onSubmitPassword)} className="space-y-6">
+              <form
+                onSubmit={passwordForm.handleSubmit(onSubmitPassword)}
+                className="space-y-6"
+              >
                 <FormField
                   control={passwordForm.control}
                   name="currentPassword"
@@ -284,7 +316,11 @@ export default function UserProfile() {
                     <FormItem>
                       <FormLabel>Current Password</FormLabel>
                       <FormControl>
-                        <Input type="password" placeholder="Enter your current password" {...field} />
+                        <Input
+                          type="password"
+                          placeholder="Enter your current password"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -300,7 +336,11 @@ export default function UserProfile() {
                     <FormItem>
                       <FormLabel>New Password</FormLabel>
                       <FormControl>
-                        <Input type="password" placeholder="Enter your new password" {...field} />
+                        <Input
+                          type="password"
+                          placeholder="Enter your new password"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -314,20 +354,26 @@ export default function UserProfile() {
                     <FormItem>
                       <FormLabel>Confirm New Password</FormLabel>
                       <FormControl>
-                        <Input type="password" placeholder="Confirm your new password" {...field} />
+                        <Input
+                          type="password"
+                          placeholder="Confirm your new password"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
 
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   disabled={changePasswordMutation.isPending}
                   className="btn-tsp-primary"
                 >
                   <Lock className="w-4 h-4 mr-2" />
-                  {changePasswordMutation.isPending ? "Changing..." : "Change Password"}
+                  {changePasswordMutation.isPending
+                    ? "Changing..."
+                    : "Change Password"}
                 </Button>
               </form>
             </Form>

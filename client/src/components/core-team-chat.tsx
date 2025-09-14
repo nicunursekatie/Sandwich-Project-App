@@ -121,7 +121,7 @@ export default function CoreTeamChat() {
 
   // Display all messages that have content
   const displayedMessages = rawMessages.filter(
-    (msg) => msg && msg.content && msg.content.trim() !== "",
+    (msg) => msg && msg.content && msg.content.trim() !== ""
   );
 
   console.log("🔧 DEBUG Filtering:");
@@ -138,7 +138,7 @@ export default function CoreTeamChat() {
     if (messages.length > 0 && hasCoreTeamAccess) {
       // Trigger notification refresh after marking as read
       setTimeout(() => {
-        window.dispatchEvent(new CustomEvent('refreshNotifications'));
+        window.dispatchEvent(new CustomEvent("refreshNotifications"));
       }, 500);
     }
   }, [messages.length, hasCoreTeamAccess]);
@@ -147,13 +147,9 @@ export default function CoreTeamChat() {
   const sendMessageMutation = useMutation({
     mutationFn: async (content: string) => {
       console.log("[DEBUG] Core Team Chat: Sending message via team chat API");
-      return await apiRequest(
-        "POST",
-        "/api/team-chat/core-team/messages",
-        {
-          content,
-        },
-      );
+      return await apiRequest("POST", "/api/team-chat/core-team/messages", {
+        content,
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -169,7 +165,10 @@ export default function CoreTeamChat() {
   // Delete message mutation - uses team chat system
   const deleteMessageMutation = useMutation({
     mutationFn: async (messageId: number) => {
-      return await apiRequest("DELETE", `/api/team-chat/core-team/messages/${messageId}`);
+      return await apiRequest(
+        "DELETE",
+        `/api/team-chat/core-team/messages/${messageId}`
+      );
     },
     onMutate: async (messageId: number) => {
       setOptimisticMessages((prev) => {
@@ -230,37 +229,53 @@ export default function CoreTeamChat() {
   const formatTime = (timestamp: string) => {
     const date = new Date(timestamp);
     const now = new Date();
-    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
-    
+    const diffInMinutes = Math.floor(
+      (now.getTime() - date.getTime()) / (1000 * 60)
+    );
+
     // Show "now" for very recent messages
     if (diffInMinutes < 1) return "now";
-    
+
     // Show relative time for very recent messages
     if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
-    
+
     // Check if it's today
     const isToday = date.toDateString() === now.toDateString();
     if (isToday) {
-      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      return date.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
     }
-    
+
     // Check if it's yesterday
     const yesterday = new Date(now);
     yesterday.setDate(yesterday.getDate() - 1);
     const isYesterday = date.toDateString() === yesterday.toDateString();
     if (isYesterday) {
-      return `Yesterday ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+      return `Yesterday ${date.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      })}`;
     }
-    
+
     // Check if it's this week
     const weekAgo = new Date(now);
     weekAgo.setDate(weekAgo.getDate() - 7);
     if (date > weekAgo) {
-      return `${date.toLocaleDateString([], { weekday: 'short' })} ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+      return `${date.toLocaleDateString([], {
+        weekday: "short",
+      })} ${date.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      })}`;
     }
-    
+
     // For older messages, show full date and time
-    return `${date.toLocaleDateString([], { month: 'short', day: 'numeric' })} ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+    return `${date.toLocaleDateString([], {
+      month: "short",
+      day: "numeric",
+    })} ${date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
   };
 
   const getRelativeTimeLabel = (timestamp: string) => {
@@ -270,29 +285,29 @@ export default function CoreTeamChat() {
     const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
     const diffInHours = Math.floor(diffInMinutes / 60);
     const diffInDays = Math.floor(diffInHours / 24);
-    
+
     // Less than 1 minute
     if (diffInMinutes < 1) return "now";
-    
+
     // Less than 1 hour - show minutes
     if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
-    
+
     // Less than 24 hours - show hours
     if (diffInHours < 24) return `${diffInHours}h ago`;
-    
+
     // Yesterday
     if (diffInDays === 1) return "Yesterday";
-    
+
     // Today (should not happen given the logic above, but safety check)
     if (date.toDateString() === now.toDateString()) return "Today";
-    
+
     // Less than a week - show day name
     if (diffInDays < 7) {
-      return date.toLocaleDateString('en-US', { weekday: 'long' });
+      return date.toLocaleDateString("en-US", { weekday: "long" });
     }
-    
+
     // More than a week - show date
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   };
 
   // Group messages by relative time periods using filtered displayedMessages
@@ -306,7 +321,7 @@ export default function CoreTeamChat() {
       groups[timeLabel].push(message);
       return groups;
     },
-    {},
+    {}
   );
 
   return (
@@ -359,14 +374,17 @@ export default function CoreTeamChat() {
                       <div className="flex items-center justify-between mb-1">
                         <div className="flex items-center space-x-2">
                           <span className="font-medium text-sm text-slate-900">
-                            {msg.userName || getUserDisplayName(msg.userId || "")}
+                            {msg.userName ||
+                              getUserDisplayName(msg.userId || "")}
                           </span>
                           <Badge variant="secondary" className="text-xs">
                             <Crown className="w-3 h-3 mr-1" />
                             Admin
                           </Badge>
                           <span className="text-xs text-slate-500">
-                            {new Date(msg.createdAt || new Date()).toLocaleTimeString("en-US", {
+                            {new Date(
+                              msg.createdAt || new Date()
+                            ).toLocaleTimeString("en-US", {
                               hour: "numeric",
                               minute: "2-digit",
                               hour12: true,
@@ -443,7 +461,10 @@ export default function CoreTeamChat() {
         </div>
         <p className="text-xs text-slate-500 mt-2 flex items-center">
           <Shield className="w-3 h-3 mr-1" />
-          <span className="hidden sm:inline">Messages in this channel are only visible to core team administrators</span>
+          <span className="hidden sm:inline">
+            Messages in this channel are only visible to core team
+            administrators
+          </span>
           <span className="sm:hidden">Core team only</span>
         </p>
       </div>

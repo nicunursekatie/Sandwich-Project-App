@@ -5,7 +5,7 @@ const scheduledEvents = [
   {
     date: "2025-09-14",
     eventStartTime: "2:30:00 PM",
-    eventEndTime: "5:00:00 PM", 
+    eventEndTime: "5:00:00 PM",
     pickupTime: "5:00:00 PM",
     details: "Rina + Marcy +",
     groupName: "Interfaith Festival",
@@ -16,7 +16,7 @@ const scheduledEvents = [
     contactPhone: "",
     tspContact: "",
     address: "701 S. Columbia Drive Decatur, GA",
-    notes: ""
+    notes: "",
   },
   {
     date: "2025-09-23",
@@ -32,14 +32,15 @@ const scheduledEvents = [
     contactPhone: "",
     tspContact: "Lisa Hiles",
     address: "",
-    notes: ""
+    notes: "",
   },
   {
     date: "2025-09-23",
     eventStartTime: "",
     eventEndTime: "",
     pickupTime: "11:00:00 AM",
-    details: "driver to pull up in the front will have cart to bring down sandwiches",
+    details:
+      "driver to pull up in the front will have cart to bring down sandwiches",
     groupName: "The National Christian Foundation",
     estimatedSandwiches: 200,
     dayOfWeek: "Tuesday",
@@ -48,7 +49,7 @@ const scheduledEvents = [
     contactPhone: "(646) 808-4581",
     tspContact: "Stephanie Luis",
     address: "1150 Sanctuary Pkwy Suite 350",
-    notes: ""
+    notes: "",
   },
   {
     date: "2025-09-24",
@@ -64,14 +65,15 @@ const scheduledEvents = [
     contactPhone: "404-457-8843",
     tspContact: "Stephanie Luis",
     address: "4001 Peachtree Rd NE 30319",
-    notes: ""
+    notes: "",
   },
   {
     date: "2025-09-25",
     eventStartTime: "10:00:00 AM",
     eventEndTime: "",
     pickupTime: "",
-    details: "Lisa + Andy Hiles, Barbra Bancroft, Kim Ross + friend to attend need van driver",
+    details:
+      "Lisa + Andy Hiles, Barbra Bancroft, Kim Ross + friend to attend need van driver",
     groupName: "Georgia Lions Lighthouse Foundation",
     estimatedSandwiches: 1000,
     dayOfWeek: "Thursday",
@@ -80,7 +82,7 @@ const scheduledEvents = [
     contactPhone: "404-713-6934",
     tspContact: "Lisa Hiles",
     address: "5582 Peachtree Road, Chamblee, GA 30341",
-    notes: ""
+    notes: "",
   },
   {
     date: "2025-09-26",
@@ -96,7 +98,7 @@ const scheduledEvents = [
     contactPhone: "770-457-7201",
     tspContact: "Lisa Hiles",
     address: "3790 Ashford Dunwoody Road Atlanta, GA 30319",
-    notes: ""
+    notes: "",
   },
   {
     date: "2025-09-26",
@@ -112,7 +114,7 @@ const scheduledEvents = [
     contactPhone: "(401) 573-6300",
     tspContact: "Stephanie Luis",
     address: "4009 Regency Lake Trail Marietta",
-    notes: ""
+    notes: "",
   },
   {
     date: "2025-09-26",
@@ -128,7 +130,7 @@ const scheduledEvents = [
     contactPhone: "(678) 770-4597",
     tspContact: "Stephanie Luis",
     address: "804 Crow View Ct, Woodstock, GA 30189",
-    notes: ""
+    notes: "",
   },
   {
     date: "2025-09-30",
@@ -144,7 +146,7 @@ const scheduledEvents = [
     contactPhone: "404-697-3433",
     tspContact: "Stephanie Luis",
     address: "",
-    notes: ""
+    notes: "",
   },
   {
     date: "2025-10-01",
@@ -160,7 +162,7 @@ const scheduledEvents = [
     contactPhone: "617-921-0988",
     tspContact: "Stephanie Luis",
     address: "",
-    notes: ""
+    notes: "",
   },
   {
     date: "2025-10-04",
@@ -176,32 +178,41 @@ const scheduledEvents = [
     contactPhone: "678-642-7230",
     tspContact: "Stephanie",
     address: "",
-    notes: ""
-  }
+    notes: "",
+  },
 ];
 
 // Function to check if an event already exists
-async function eventExists(organizationName: string, eventDate: string): Promise<boolean> {
+async function eventExists(
+  organizationName: string,
+  eventDate: string
+): Promise<boolean> {
   try {
     const allEvents = await storage.getAllEventRequests();
     // Parse date in local timezone to avoid UTC shifts
-    const [year, month, day] = eventDate.split('-').map(Number);
+    const [year, month, day] = eventDate.split("-").map(Number);
     const targetDate = new Date(year, month - 1, day); // month is 0-indexed
-    
+
     return allEvents.some((event: any) => {
       if (!event.desired_event_date || !event.organization_name) return false;
-      
+
       const existingDate = new Date(event.desired_event_date);
       // Compare year, month, day directly to avoid timezone issues
-      const sameDate = existingDate.getFullYear() === targetDate.getFullYear() &&
-                      existingDate.getMonth() === targetDate.getMonth() &&
-                      existingDate.getDate() === targetDate.getDate();
-      const sameOrg = event.organization_name.toLowerCase() === organizationName.toLowerCase();
-      
+      const sameDate =
+        existingDate.getFullYear() === targetDate.getFullYear() &&
+        existingDate.getMonth() === targetDate.getMonth() &&
+        existingDate.getDate() === targetDate.getDate();
+      const sameOrg =
+        event.organization_name.toLowerCase() ===
+        organizationName.toLowerCase();
+
       return sameDate && sameOrg;
     });
   } catch (error) {
-    console.error('Error checking event existence:', error instanceof Error ? error.message : String(error));
+    console.error(
+      "Error checking event existence:",
+      error instanceof Error ? error.message : String(error)
+    );
     return false;
   }
 }
@@ -215,82 +226,97 @@ export async function importScheduledEvents(): Promise<{
   const results = {
     imported: 0,
     skipped: 0,
-    errors: [] as string[]
+    errors: [] as string[],
   };
 
-  console.log(`🔄 Starting import of ${scheduledEvents.length} scheduled events...`);
+  console.log(
+    `🔄 Starting import of ${scheduledEvents.length} scheduled events...`
+  );
 
   for (const event of scheduledEvents) {
     try {
       // Check if event already exists
       const exists = await eventExists(event.groupName, event.date);
-      
+
       if (exists) {
-        console.log(`⏭️ Skipping existing event: ${event.groupName} on ${event.date}`);
+        console.log(
+          `⏭️ Skipping existing event: ${event.groupName} on ${event.date}`
+        );
         results.skipped++;
         continue;
       }
 
       // Parse contact name with robust fallbacks for empty/null values
       const contactName = event.contactName?.trim();
-      let firstName = 'Contact';
-      let lastName = 'Person';
-      
+      let firstName = "Contact";
+      let lastName = "Person";
+
       if (contactName && contactName.length > 0) {
-        const nameParts = contactName.split(' ');
-        firstName = nameParts[0] || 'Contact';
-        lastName = nameParts.slice(1).join(' ') || 'Person';
+        const nameParts = contactName.split(" ");
+        firstName = nameParts[0] || "Contact";
+        lastName = nameParts.slice(1).join(" ") || "Person";
       }
-      
+
       // Extra safety check to ensure we never have null/empty names
-      if (!firstName || firstName.trim() === '') firstName = 'Contact';
-      if (!lastName || lastName.trim() === '') lastName = 'Person';
+      if (!firstName || firstName.trim() === "") firstName = "Contact";
+      if (!lastName || lastName.trim() === "") lastName = "Person";
 
       // Create new event request
       const newEvent = {
         first_name: firstName,
         last_name: lastName,
-        email: event.contactEmail || '',
-        phone: event.contactPhone || '',
+        email: event.contactEmail || "",
+        phone: event.contactPhone || "",
         organization_name: event.groupName,
         desired_event_date: (() => {
-          const [year, month, day] = event.date.split('-').map(Number);
+          const [year, month, day] = event.date.split("-").map(Number);
           return new Date(year, month - 1, day, 16, 0, 0); // 4 PM local time, month is 0-indexed
         })(),
         message: event.details,
-        status: 'scheduled',
-        event_address: event.address || '',
+        status: "scheduled",
+        event_address: event.address || "",
         estimated_sandwich_count: event.estimatedSandwiches || 0,
-        event_start_time: event.eventStartTime || '',
-        event_end_time: event.eventEndTime || '',
-        pickup_time: event.pickupTime === 'flexible' ? 'Flexible timing' : (event.pickupTime || ''),
-        planning_notes: event.notes || '',
+        event_start_time: event.eventStartTime || "",
+        event_end_time: event.eventEndTime || "",
+        pickup_time:
+          event.pickupTime === "flexible"
+            ? "Flexible timing"
+            : event.pickupTime || "",
+        planning_notes: event.notes || "",
         toolkit_sent: true, // Marked as sent in spreadsheet
-        toolkit_status: 'sent',
-        tsp_contact: event.tspContact || '',
+        toolkit_status: "sent",
+        tsp_contact: event.tspContact || "",
         created_at: new Date(),
-        updated_at: new Date()
+        updated_at: new Date(),
       };
 
-      console.log(`🔍 About to create event request:`, JSON.stringify(newEvent, null, 2));
-      
+      console.log(
+        `🔍 About to create event request:`,
+        JSON.stringify(newEvent, null, 2)
+      );
+
       try {
         const createdEvent = await storage.createEventRequest(newEvent);
-        console.log(`✅ Successfully created event with ID: ${createdEvent.id} for ${event.groupName}`);
+        console.log(
+          `✅ Successfully created event with ID: ${createdEvent.id} for ${event.groupName}`
+        );
         results.imported++;
       } catch (createError) {
         console.error(`❌ Failed to create event request:`, createError);
         throw createError;
       }
-
     } catch (error) {
-      const errorMsg = `Failed to import ${event.groupName}: ${error instanceof Error ? error.message : String(error)}`;
+      const errorMsg = `Failed to import ${event.groupName}: ${
+        error instanceof Error ? error.message : String(error)
+      }`;
       console.error(`❌ ${errorMsg}`);
-      console.error('Full error details:', error);
+      console.error("Full error details:", error);
       results.errors.push(errorMsg);
     }
   }
 
-  console.log(`📊 Import complete: ${results.imported} imported, ${results.skipped} skipped, ${results.errors.length} errors`);
+  console.log(
+    `📊 Import complete: ${results.imported} imported, ${results.skipped} skipped, ${results.errors.length} errors`
+  );
   return results;
 }

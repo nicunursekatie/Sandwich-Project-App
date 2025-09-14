@@ -1,23 +1,23 @@
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { 
-  FeatureTooltip, 
-  TipTooltip, 
-  InfoTooltip 
-} from './IntelligentGuideSystem';
-import { 
-  FileText, 
-  Users, 
-  BarChart3, 
-  MessageSquare, 
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  FeatureTooltip,
+  TipTooltip,
+  InfoTooltip,
+} from "./IntelligentGuideSystem";
+import {
+  FileText,
+  Users,
+  BarChart3,
+  MessageSquare,
   Settings,
   HelpCircle,
   Sparkles,
   Target,
-  Lightbulb 
-} from 'lucide-react';
+  Lightbulb,
+} from "lucide-react";
 
 // Demo component to showcase the Smart Contextual Tooltip Guide System
 export function SmartGuideDemo() {
@@ -34,16 +34,15 @@ export function SmartGuideDemo() {
                 Smart Contextual Tooltip Guide System
               </CardTitle>
               <p className="text-sm text-slate-600 mt-1">
-                Interactive help system with role-based guidance and contextual tips
+                Interactive help system with role-based guidance and contextual
+                tips
               </p>
             </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          
           {/* Feature Demonstration Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            
             {/* Collection Management */}
             <FeatureTooltip
               title="Record Collection Data"
@@ -51,12 +50,14 @@ export function SmartGuideDemo() {
               trigger="hover"
               placement="top"
             >
-              <div 
+              <div
                 className="p-4 border-2 border-dashed border-teal-200 hover:border-teal-400 rounded-lg cursor-pointer transition-all hover:bg-teal-50"
                 data-guide="add-collection"
               >
                 <FileText className="w-6 h-6 text-teal-600 mb-2" />
-                <h3 className="font-semibold text-slate-900 mb-1">Collections</h3>
+                <h3 className="font-semibold text-slate-900 mb-1">
+                  Collections
+                </h3>
                 <p className="text-sm text-slate-600">Record sandwich data</p>
                 <Badge variant="outline" className="mt-2 text-xs">
                   Feature Tooltip
@@ -71,7 +72,7 @@ export function SmartGuideDemo() {
               trigger="hover"
               placement="top"
             >
-              <div 
+              <div
                 className="p-4 border-2 border-dashed border-blue-200 hover:border-blue-400 rounded-lg cursor-pointer transition-all hover:bg-blue-50"
                 data-guide="user-management"
               >
@@ -91,7 +92,7 @@ export function SmartGuideDemo() {
               trigger="hover"
               placement="top"
             >
-              <div 
+              <div
                 className="p-4 border-2 border-dashed border-yellow-200 hover:border-yellow-400 rounded-lg cursor-pointer transition-all hover:bg-yellow-50"
                 data-guide="analytics"
               >
@@ -111,7 +112,7 @@ export function SmartGuideDemo() {
               trigger="hover"
               placement="bottom"
             >
-              <div 
+              <div
                 className="p-4 border-2 border-dashed border-purple-200 hover:border-purple-400 rounded-lg cursor-pointer transition-all hover:bg-purple-50"
                 data-guide="team-chat"
               >
@@ -150,14 +151,15 @@ export function SmartGuideDemo() {
             >
               <div className="p-4 border-2 border-dashed border-green-200 hover:border-green-400 rounded-lg cursor-pointer transition-all hover:bg-green-50">
                 <HelpCircle className="w-6 h-6 text-green-600 mb-2" />
-                <h3 className="font-semibold text-slate-900 mb-1">Smart Help</h3>
+                <h3 className="font-semibold text-slate-900 mb-1">
+                  Smart Help
+                </h3>
                 <p className="text-sm text-slate-600">Contextual guidance</p>
                 <Badge variant="outline" className="mt-2 text-xs">
                   Tip Tooltip
                 </Badge>
               </div>
             </TipTooltip>
-            
           </div>
 
           {/* Interactive Buttons */}
@@ -167,14 +169,13 @@ export function SmartGuideDemo() {
               Interactive Examples
             </h4>
             <div className="flex flex-wrap gap-3">
-              
               <FeatureTooltip
                 title="New Collection Entry"
                 description="Click to start recording a new sandwich collection. The system will guide you through the process step by step."
                 trigger="hover"
                 placement="top"
               >
-                <Button 
+                <Button
                   className="bg-teal-600 hover:bg-teal-700 text-white"
                   data-guide="new-collection-btn"
                 >
@@ -189,7 +190,7 @@ export function SmartGuideDemo() {
                 trigger="hover"
                 placement="top"
               >
-                <Button 
+                <Button
                   variant="outline"
                   className="border-yellow-200 text-yellow-700 hover:bg-yellow-50"
                 >
@@ -204,7 +205,7 @@ export function SmartGuideDemo() {
                 trigger="hover"
                 placement="top"
               >
-                <Button 
+                <Button
                   variant="outline"
                   className="border-blue-200 text-blue-700 hover:bg-blue-50"
                 >
@@ -212,7 +213,6 @@ export function SmartGuideDemo() {
                   Generate Report
                 </Button>
               </InfoTooltip>
-              
             </div>
           </div>
 
@@ -224,7 +224,9 @@ export function SmartGuideDemo() {
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
               <div className="space-y-2">
-                <h5 className="font-medium text-slate-800">Contextual Intelligence</h5>
+                <h5 className="font-medium text-slate-800">
+                  Contextual Intelligence
+                </h5>
                 <ul className="space-y-1 text-slate-600">
                   <li>• Role-based guidance and tips</li>
                   <li>• Activity pattern recognition</li>
@@ -233,7 +235,9 @@ export function SmartGuideDemo() {
                 </ul>
               </div>
               <div className="space-y-2">
-                <h5 className="font-medium text-slate-800">Interactive Features</h5>
+                <h5 className="font-medium text-slate-800">
+                  Interactive Features
+                </h5>
                 <ul className="space-y-1 text-slate-600">
                   <li>• Hover, click, and focus triggers</li>
                   <li>• Dismissible tooltips with memory</li>
@@ -243,7 +247,6 @@ export function SmartGuideDemo() {
               </div>
             </div>
           </div>
-          
         </CardContent>
       </Card>
     </div>

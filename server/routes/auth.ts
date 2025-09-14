@@ -33,7 +33,7 @@ export function createAuthRoutes(deps: AuthDependencies = {}) {
               profileImageUrl: dbUser.profileImageUrl,
               role: dbUser.role,
               permissions: dbUser.permissions,
-              isActive: dbUser.isActive
+              isActive: dbUser.isActive,
             });
             return;
           }

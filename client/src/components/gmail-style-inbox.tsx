@@ -14,7 +14,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { hasPermission, PERMISSIONS } from "@shared/auth-utils";
 import { formatDistanceToNow } from "date-fns";
-import { 
+import {
   Inbox as InboxIcon,
   Send,
   Edit3,
@@ -36,7 +36,7 @@ import {
   ChevronRight,
   RefreshCw,
   Trophy,
-  Heart
+  Heart,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -109,13 +109,13 @@ interface Draft {
 }
 
 export default function GmailStyleInbox() {
-  console.log('🔍 GmailStyleInbox component is rendering');
+  console.log("🔍 GmailStyleInbox component is rendering");
   const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
-  
+
   // Add early return for loading state
   if (authLoading) {
-    console.log('🔄 Auth is loading, showing loading state');
+    console.log("🔄 Auth is loading, showing loading state");
     return (
       <div className="flex h-full items-center justify-center bg-white">
         <div className="text-center">
@@ -125,9 +125,9 @@ export default function GmailStyleInbox() {
       </div>
     );
   }
-  
+
   if (!user) {
-    console.log('❌ No user found, showing error');
+    console.log("❌ No user found, showing error");
     return (
       <div className="flex h-full items-center justify-center bg-white">
         <div className="text-center">
@@ -136,65 +136,72 @@ export default function GmailStyleInbox() {
       </div>
     );
   }
-  
-  console.log('✅ User authenticated, rendering inbox for:', (user as any)?.email);
-  
+
+  console.log(
+    "✅ User authenticated, rendering inbox for:",
+    (user as any)?.email
+  );
+
   // UI State
   const [activeFolder, setActiveFolder] = useState("inbox");
-  const [selectedMessages, setSelectedMessages] = useState<Set<number>>(new Set());
+  const [selectedMessages, setSelectedMessages] = useState<Set<number>>(
+    new Set()
+  );
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [showCompose, setShowCompose] = useState(false);
   const [showReply, setShowReply] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMessageListCollapsed, setIsMessageListCollapsed] = useState(false);
-  const [screenSize, setScreenSize] = useState('desktop');
+  const [screenSize, setScreenSize] = useState("desktop");
   const [showOldKudos, setShowOldKudos] = useState(false);
 
   // Responsive behavior with comprehensive breakpoint strategy
   useEffect(() => {
     const checkScreenSize = () => {
       const width = window.innerWidth;
-      
+
       if (width < 768) {
         // Mobile (< 768px): Keep sidebar visible by default, allow manual collapse
-        setScreenSize('mobile');
+        setScreenSize("mobile");
         // Don't auto-collapse sidebar on mobile - let users see it exists
         setIsMessageListCollapsed(true);
       } else if (width < 900) {
         // Small tablet (768-899px): Show message list + body, collapse sidebar
-        setScreenSize('small-tablet');
+        setScreenSize("small-tablet");
         setIsSidebarCollapsed(true);
         setIsMessageListCollapsed(false);
       } else if (width < 1200) {
         // Large tablet/small laptop (900-1199px): Show compact sidebar + message list + body
-        setScreenSize('large-tablet');
+        setScreenSize("large-tablet");
         setIsSidebarCollapsed(false);
         setIsMessageListCollapsed(false);
       } else {
         // Desktop (≥ 1200px): Show full sidebar + message list + body
-        setScreenSize('desktop');
+        setScreenSize("desktop");
         setIsSidebarCollapsed(false);
         setIsMessageListCollapsed(false);
       }
     };
 
     checkScreenSize();
-    window.addEventListener('resize', checkScreenSize);
-    return () => window.removeEventListener('resize', checkScreenSize);
+    window.addEventListener("resize", checkScreenSize);
+    return () => window.removeEventListener("resize", checkScreenSize);
   }, []);
-  
+
   // Compose State
   const [composeRecipient, setComposeRecipient] = useState("");
   const [composeSubject, setComposeSubject] = useState("");
   const [composeContent, setComposeContent] = useState("");
-  
+
   // Reply State
   const [replyContent, setReplyContent] = useState("");
-  
+
   // Draft State
   const [currentDraft, setCurrentDraft] = useState<Draft | null>(null);
-  const [autoSaveTimer, setAutoSaveTimer] = useState<NodeJS.Timeout | null>(null);
+  const [autoSaveTimer, setAutoSaveTimer] = useState<NodeJS.Timeout | null>(
+    null
+  );
 
   // Fetch users for compose
   const { data: users = [] } = useQuery<User[]>({
@@ -209,10 +216,17 @@ export default function GmailStyleInbox() {
     queryKey: [apiBase, activeFolder],
     queryFn: async () => {
       // Get flat email list for simple inbox view
-      const response = await apiRequest('GET', `/api/emails?folder=${activeFolder}`);
-      const messages = Array.isArray(response) ? response : response.messages || [];
-      
-      console.log(`Fetched ${messages.length} emails from ${activeFolder} folder`);
+      const response = await apiRequest(
+        "GET",
+        `/api/emails?folder=${activeFolder}`
+      );
+      const messages = Array.isArray(response)
+        ? response
+        : response.messages || [];
+
+      console.log(
+        `Fetched ${messages.length} emails from ${activeFolder} folder`
+      );
       return messages;
     },
   });
@@ -228,10 +242,13 @@ export default function GmailStyleInbox() {
     queryKey: ["/api/messaging/kudos/received"],
     queryFn: async () => {
       try {
-        const response = await apiRequest('GET', '/api/messaging/kudos/received');
+        const response = await apiRequest(
+          "GET",
+          "/api/messaging/kudos/received"
+        );
         return response || [];
       } catch (error) {
-        console.error('Error fetching kudos:', error);
+        console.error("Error fetching kudos:", error);
         return [];
       }
     },
@@ -245,13 +262,17 @@ export default function GmailStyleInbox() {
     },
     onSuccess: () => {
       refetchKudos();
-      queryClient.invalidateQueries({ queryKey: ["/api/messaging/kudos/received"] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/messaging/kudos/received"],
+      });
       queryClient.invalidateQueries({ queryKey: ["/api/emails"] });
       queryClient.invalidateQueries({ queryKey: ["/api/emails/unread-count"] });
-      queryClient.invalidateQueries({ queryKey: ['/api/message-notifications/unread-counts'] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/message-notifications/unread-counts"],
+      });
     },
     onError: (error) => {
-      console.error('Failed to mark kudos as read:', error);
+      console.error("Failed to mark kudos as read:", error);
     },
   });
 
@@ -263,14 +284,14 @@ export default function GmailStyleInbox() {
   const saveDraftMutation = useMutation({
     mutationFn: async (draft: Partial<Draft>) => {
       if (draft.id) {
-        return await apiRequest('PUT', `/api/drafts/${draft.id}`, draft);
+        return await apiRequest("PUT", `/api/drafts/${draft.id}`, draft);
       } else {
-        return await apiRequest('POST', '/api/drafts', draft);
+        return await apiRequest("POST", "/api/drafts", draft);
       }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/drafts"] });
-    }
+    },
   });
 
   // Send message mutation - use email endpoint for Gmail
@@ -281,28 +302,28 @@ export default function GmailStyleInbox() {
         recipientId: messageData.recipientId,
         recipientName: messageData.recipientName,
         recipientEmail: messageData.recipientEmail,
-        subject: messageData.subject || 'Project Discussion',
+        subject: messageData.subject || "Project Discussion",
         content: messageData.content,
-        isDraft: messageData.isDraft || false
+        isDraft: messageData.isDraft || false,
       };
-      console.log('Sending email with data:', emailData);
-      return await apiRequest('POST', '/api/emails', emailData);
+      console.log("Sending email with data:", emailData);
+      return await apiRequest("POST", "/api/emails", emailData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [apiBase] });
       // Also invalidate Gmail unread count to update navigation indicator
-      queryClient.invalidateQueries({ queryKey: ['/api/emails/unread-count'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/emails/unread-count"] });
       setShowCompose(false);
       resetCompose();
       toast({ description: "Message sent successfully" });
     },
     onError: (error) => {
-      console.error('Send email error:', error);
-      toast({ 
-        description: "Failed to send message", 
-        variant: "destructive" 
+      console.error("Send email error:", error);
+      toast({
+        description: "Failed to send message",
+        variant: "destructive",
       });
-    }
+    },
   });
 
   // Reply mutation - simple email reply without threading
@@ -311,128 +332,140 @@ export default function GmailStyleInbox() {
       if (!selectedMessage) {
         throw new Error("No message selected for reply");
       }
-      
+
       // Create simple reply email
       const replyEmailData = {
         recipientId: selectedMessage.senderId,
         recipientName: selectedMessage.senderName,
         recipientEmail: selectedMessage.senderEmail,
-        subject: selectedMessage.subject?.startsWith('Re: ') ? selectedMessage.subject : `Re: ${selectedMessage.subject || 'No Subject'}`,
+        subject: selectedMessage.subject?.startsWith("Re: ")
+          ? selectedMessage.subject
+          : `Re: ${selectedMessage.subject || "No Subject"}`,
         content: replyData.content,
-        isDraft: false
+        isDraft: false,
       };
-      
-      console.log('Sending reply:', replyEmailData);
-      return await apiRequest('POST', '/api/emails', replyEmailData);
+
+      console.log("Sending reply:", replyEmailData);
+      return await apiRequest("POST", "/api/emails", replyEmailData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [apiBase] });
       // Also invalidate Gmail unread count to update navigation indicator
-      queryClient.invalidateQueries({ queryKey: ['/api/emails/unread-count'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/emails/unread-count"] });
       setShowReply(false);
       setReplyContent("");
       toast({ description: "Reply sent successfully" });
     },
     onError: (error) => {
-      console.error('Reply error:', error);
-      toast({ 
-        description: "Failed to send reply", 
-        variant: "destructive" 
+      console.error("Reply error:", error);
+      toast({
+        description: "Failed to send reply",
+        variant: "destructive",
       });
-    }
+    },
   });
 
   // Mark as read mutation - use email PATCH endpoint
   const markAsReadMutation = useMutation({
     mutationFn: async (messageIds: number[]) => {
       // Mark each message as read using the email PATCH endpoint
-      const promises = messageIds.map(id => 
-        apiRequest('PATCH', `/api/emails/${id}`, { isRead: true })
+      const promises = messageIds.map((id) =>
+        apiRequest("PATCH", `/api/emails/${id}`, { isRead: true })
       );
       return await Promise.all(promises);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [apiBase] });
       // Also invalidate Gmail unread count to update navigation indicator
-      queryClient.invalidateQueries({ queryKey: ['/api/emails/unread-count'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/emails/unread-count"] });
       toast({ description: "Marked as read" });
     },
     onError: (error) => {
-      console.error('Mark as read error:', error);
-      toast({ 
-        description: "Failed to mark as read", 
-        variant: "destructive" 
+      console.error("Mark as read error:", error);
+      toast({
+        description: "Failed to mark as read",
+        variant: "destructive",
       });
-    }
+    },
   });
 
   // Star/unstar mutation - disabled for conversation messages
   const toggleStarMutation = useMutation({
-    mutationFn: async ({ messageId, isStarred }: { messageId: number; isStarred: boolean }) => {
-      console.log('Star not implemented for conversation messages:', messageId, isStarred);
+    mutationFn: async ({
+      messageId,
+      isStarred,
+    }: {
+      messageId: number;
+      isStarred: boolean;
+    }) => {
+      console.log(
+        "Star not implemented for conversation messages:",
+        messageId,
+        isStarred
+      );
       return Promise.resolve();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [apiBase] });
-    }
+    },
   });
 
   // Archive mutation - mark messages as archived
   const archiveMutation = useMutation({
     mutationFn: async (messageIds: number[]) => {
       // Mark each message as archived using the email PATCH endpoint
-      const promises = messageIds.map(id => 
-        apiRequest('PATCH', `/api/emails/${id}`, { isArchived: true })
+      const promises = messageIds.map((id) =>
+        apiRequest("PATCH", `/api/emails/${id}`, { isArchived: true })
       );
       return await Promise.all(promises);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [apiBase] });
       // Also invalidate Gmail unread count to update navigation indicator
-      queryClient.invalidateQueries({ queryKey: ['/api/emails/unread-count'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/emails/unread-count"] });
       setSelectedMessages(new Set());
       toast({ description: "Messages archived successfully" });
     },
     onError: (error) => {
-      console.error('Archive error:', error);
-      toast({ 
-        description: "Failed to archive messages", 
-        variant: "destructive" 
+      console.error("Archive error:", error);
+      toast({
+        description: "Failed to archive messages",
+        variant: "destructive",
       });
-    }
+    },
   });
 
   // Trash mutation - mark messages as trashed
   const trashMutation = useMutation({
     mutationFn: async (messageIds: number[]) => {
       // Mark each message as trashed using the email PATCH endpoint
-      const promises = messageIds.map(id => 
-        apiRequest('PATCH', `/api/emails/${id}`, { isTrashed: true })
+      const promises = messageIds.map((id) =>
+        apiRequest("PATCH", `/api/emails/${id}`, { isTrashed: true })
       );
       return await Promise.all(promises);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [apiBase] });
       // Also invalidate Gmail unread count to update navigation indicator
-      queryClient.invalidateQueries({ queryKey: ['/api/emails/unread-count'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/emails/unread-count"] });
       setSelectedMessages(new Set());
       toast({ description: "Messages moved to trash" });
     },
     onError: (error) => {
-      console.error('Trash error:', error);
-      toast({ 
-        description: "Failed to move messages to trash", 
-        variant: "destructive" 
+      console.error("Trash error:", error);
+      toast({
+        description: "Failed to move messages to trash",
+        variant: "destructive",
       });
-    }
+    },
   });
 
   // Delete permanently mutation - use conversation delete
   const deleteMutation = useMutation({
     mutationFn: async (messageIds: number[]) => {
       // Delete conversation messages one by one
-      const deletePromises = messageIds.map(id => 
-        apiRequest('DELETE', `/api/messages/${id}`)
+      const deletePromises = messageIds.map((id) =>
+        apiRequest("DELETE", `/api/messages/${id}`)
       );
       return Promise.all(deletePromises);
     },
@@ -440,7 +473,7 @@ export default function GmailStyleInbox() {
       queryClient.invalidateQueries({ queryKey: [apiBase] });
       setSelectedMessages(new Set());
       toast({ description: "Messages deleted permanently" });
-    }
+    },
   });
 
   // Auto-save draft effect
@@ -449,24 +482,27 @@ export default function GmailStyleInbox() {
       if (autoSaveTimer) {
         clearTimeout(autoSaveTimer);
       }
-      
+
       const timer = setTimeout(() => {
         const draft = {
           id: currentDraft?.id,
           recipientId: composeRecipient,
-          recipientName: users.find(u => u.id === composeRecipient)?.firstName + ' ' + users.find(u => u.id === composeRecipient)?.lastName || '',
+          recipientName:
+            users.find((u) => u.id === composeRecipient)?.firstName +
+              " " +
+              users.find((u) => u.id === composeRecipient)?.lastName || "",
           subject: composeSubject,
           content: composeContent,
-          lastSaved: new Date().toISOString()
+          lastSaved: new Date().toISOString(),
         };
-        
+
         saveDraftMutation.mutate(draft);
         setCurrentDraft(draft as Draft);
       }, 2000); // Auto-save after 2 seconds of inactivity
-      
+
       setAutoSaveTimer(timer);
     }
-    
+
     return () => {
       if (autoSaveTimer) {
         clearTimeout(autoSaveTimer);
@@ -484,7 +520,7 @@ export default function GmailStyleInbox() {
 
   const handleSelectMessage = (message: Message) => {
     setSelectedMessage(message);
-    
+
     // Mark as read if not already read
     if (!message.isRead) {
       markAsReadMutation.mutate([message.id]);
@@ -495,7 +531,7 @@ export default function GmailStyleInbox() {
     if (selectedMessages.size === messages.length) {
       setSelectedMessages(new Set());
     } else {
-      setSelectedMessages(new Set(messages.map(m => m.id)));
+      setSelectedMessages(new Set(messages.map((m) => m.id)));
     }
   };
 
@@ -511,41 +547,43 @@ export default function GmailStyleInbox() {
 
   const handleSendMessage = () => {
     if (!composeRecipient || !composeContent) {
-      toast({ 
-        description: "Please select a recipient and enter a message", 
-        variant: "destructive" 
+      toast({
+        description: "Please select a recipient and enter a message",
+        variant: "destructive",
       });
       return;
     }
 
-    const recipient = users.find(u => u.id === composeRecipient);
-    
+    const recipient = users.find((u) => u.id === composeRecipient);
+
     // Always use conversation format now
     sendMessageMutation.mutate({
       recipientId: composeRecipient,
-      recipientName: recipient ? `${recipient.firstName} ${recipient.lastName}`.trim() : '',
-      recipientEmail: recipient?.email || '',
-      subject: composeSubject || 'Project Discussion',
+      recipientName: recipient
+        ? `${recipient.firstName} ${recipient.lastName}`.trim()
+        : "",
+      recipientEmail: recipient?.email || "",
+      subject: composeSubject || "Project Discussion",
       content: composeContent,
-      isDraft: false
+      isDraft: false,
     });
   };
 
   const handleReply = () => {
     if (!selectedMessage || !replyContent.trim()) {
-      toast({ 
-        description: "Please enter a reply message", 
-        variant: "destructive" 
+      toast({
+        description: "Please enter a reply message",
+        variant: "destructive",
       });
       return;
     }
 
-    console.log('Sending reply with data:', {
+    console.log("Sending reply with data:", {
       content: replyContent,
       sender: null, // Let backend use authenticated user info
       recipientId: selectedMessage.userId,
       conversationName: null, // Reply to existing conversation
-      conversationId: selectedMessage.conversationId
+      conversationId: selectedMessage.conversationId,
     });
 
     const replyData = {
@@ -553,17 +591,17 @@ export default function GmailStyleInbox() {
       sender: null, // Let backend use authenticated user info
       recipientId: selectedMessage.userId,
       conversationName: null, // Reply to existing conversation
-      conversationId: selectedMessage.conversationId
+      conversationId: selectedMessage.conversationId,
     };
 
     replyMutation.mutate(replyData);
-    
+
     // Clear the reply content after sending
     setReplyContent("");
   };
 
   // Filter messages based on search
-  const filteredMessages = messages.filter(message => {
+  const filteredMessages = messages.filter((message) => {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
     return (
@@ -574,14 +612,20 @@ export default function GmailStyleInbox() {
 
   // Get folder counts
   const getUnreadCount = (folder: string) => {
-    return messages.filter(m => {
+    return messages.filter((m) => {
       switch (folder) {
-        case "inbox": return !m.isRead; // Count unread messages in inbox
-        case "starred": return false; // No starred functionality yet
-        case "archived": return false; // No archived functionality yet  
-        case "trash": return false; // No trash functionality yet
-        case "kudos": return false; // Kudos uses separate count system
-        default: return false;
+        case "inbox":
+          return !m.isRead; // Count unread messages in inbox
+        case "starred":
+          return false; // No starred functionality yet
+        case "archived":
+          return false; // No archived functionality yet
+        case "trash":
+          return false; // No trash functionality yet
+        case "kudos":
+          return false; // Kudos uses separate count system
+        default:
+          return false;
       }
     }).length;
   };
@@ -591,39 +635,88 @@ export default function GmailStyleInbox() {
   };
 
   const folders = [
-    { id: "inbox", label: "Inbox", icon: InboxIcon, count: getUnreadCount("inbox") },
-    { id: "starred", label: "Starred", icon: Star, count: getUnreadCount("starred") },
+    {
+      id: "inbox",
+      label: "Inbox",
+      icon: InboxIcon,
+      count: getUnreadCount("inbox"),
+    },
+    {
+      id: "starred",
+      label: "Starred",
+      icon: Star,
+      count: getUnreadCount("starred"),
+    },
     { id: "sent", label: "Sent", icon: Send, count: 0 },
     { id: "drafts", label: "Drafts", icon: Edit3, count: drafts.length },
     { id: "kudos", label: "Kudos", icon: Heart, count: getKudosUnreadCount() },
-    { id: "archived", label: "Archived", icon: Archive, count: getUnreadCount("archived") },
-    { id: "trash", label: "Trash", icon: Trash2, count: getUnreadCount("trash") },
+    {
+      id: "archived",
+      label: "Archived",
+      icon: Archive,
+      count: getUnreadCount("archived"),
+    },
+    {
+      id: "trash",
+      label: "Trash",
+      icon: Trash2,
+      count: getUnreadCount("trash"),
+    },
   ];
 
-  console.log('🎨 About to render GmailStyleInbox main UI');
-  console.log('📊 Component state:', { activeFolder, selectedMessage: !!selectedMessage, messageCount: messages.length });
+  console.log("🎨 About to render GmailStyleInbox main UI");
+  console.log("📊 Component state:", {
+    activeFolder,
+    selectedMessage: !!selectedMessage,
+    messageCount: messages.length,
+  });
 
   return (
     <div className="flex h-full bg-white relative min-w-0 max-w-full overflow-hidden">
       {/* Mobile/Tablet Overlay for Sidebar - when sidebar is open as overlay */}
-      {!isSidebarCollapsed && (screenSize === 'mobile' || screenSize === 'small-tablet') && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-40"
-          onClick={() => setIsSidebarCollapsed(true)}
-        />
-      )}
-      
+      {!isSidebarCollapsed &&
+        (screenSize === "mobile" || screenSize === "small-tablet") && (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 z-40"
+            onClick={() => setIsSidebarCollapsed(true)}
+          />
+        )}
+
       {/* Sidebar - Folders (Inbox, Drafts, etc.) - Only show if not collapsed OR if we're not on mobile */}
-      <div className={`
-        ${isSidebarCollapsed && (screenSize === 'mobile' || screenSize === 'small-tablet') ? 'hidden' : 'flex'} 
-        ${screenSize === 'large-tablet' ? 'w-48' : screenSize === 'desktop' ? 'w-56' : 'w-64'} 
+      <div
+        className={`
+        ${
+          isSidebarCollapsed &&
+          (screenSize === "mobile" || screenSize === "small-tablet")
+            ? "hidden"
+            : "flex"
+        } 
+        ${
+          screenSize === "large-tablet"
+            ? "w-48"
+            : screenSize === "desktop"
+            ? "w-56"
+            : "w-64"
+        } 
         border-r bg-white flex-col flex-shrink-0
         transition-all duration-300 ease-in-out
-        ${(screenSize === 'mobile' || screenSize === 'small-tablet') && !isSidebarCollapsed ? 'fixed left-0 top-0 h-full w-64 z-50' : 'relative'}
-      `}>
+        ${
+          (screenSize === "mobile" || screenSize === "small-tablet") &&
+          !isSidebarCollapsed
+            ? "fixed left-0 top-0 h-full w-64 z-50"
+            : "relative"
+        }
+      `}
+      >
         <div className="p-4">
-          <div className={`flex items-center justify-between mb-4 ${screenSize === 'desktop' ? 'hidden' : 'flex'}`}>
-            <span className="text-sm font-medium text-gray-700">Navigation</span>
+          <div
+            className={`flex items-center justify-between mb-4 ${
+              screenSize === "desktop" ? "hidden" : "flex"
+            }`}
+          >
+            <span className="text-sm font-medium text-gray-700">
+              Navigation
+            </span>
             <Button
               variant="ghost"
               size="sm"
@@ -634,8 +727,8 @@ export default function GmailStyleInbox() {
             </Button>
           </div>
           <ButtonTooltip explanation="Write a new message to send to team members. You can choose who to send it to and what it's about.">
-            <Button 
-              onClick={() => setShowCompose(true)} 
+            <Button
+              onClick={() => setShowCompose(true)}
               className="w-full gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-['Roboto'] font-medium shadow-lg hover:shadow-xl transition-all duration-200"
             >
               <Plus className="h-4 w-4" />
@@ -643,7 +736,7 @@ export default function GmailStyleInbox() {
             </Button>
           </ButtonTooltip>
         </div>
-        
+
         <ScrollArea className="flex-1">
           <div className="px-2">
             {folders.map((folder) => (
@@ -652,15 +745,16 @@ export default function GmailStyleInbox() {
                 onClick={() => {
                   setActiveFolder(folder.id);
                   // On mobile, collapse sidebar when selecting a folder to show content
-                  if (screenSize === 'mobile') {
+                  if (screenSize === "mobile") {
                     setIsSidebarCollapsed(true);
                   }
                 }}
                 className={`
                   w-full flex items-center justify-between px-3 py-2 mb-1 rounded-lg text-left transition-colors font-['Roboto']
-                  ${activeFolder === folder.id 
-                    ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-md' 
-                    : 'hover:bg-amber-50 hover:border-amber-200 text-gray-700'
+                  ${
+                    activeFolder === folder.id
+                      ? "bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-md"
+                      : "hover:bg-amber-50 hover:border-amber-200 text-gray-700"
                   }
                 `}
               >
@@ -669,13 +763,14 @@ export default function GmailStyleInbox() {
                   <span className="font-medium">{folder.label}</span>
                 </div>
                 {folder.count > 0 && (
-                  <Badge 
-                    variant="secondary" 
+                  <Badge
+                    variant="secondary"
                     className={`
                       h-5 px-2 text-xs
-                      ${activeFolder === folder.id 
-                        ? 'bg-white/20 text-white' 
-                        : 'bg-gray-200 text-gray-800'
+                      ${
+                        activeFolder === folder.id
+                          ? "bg-white/20 text-white"
+                          : "bg-gray-200 text-gray-800"
                       }
                     `}
                   >
@@ -691,7 +786,10 @@ export default function GmailStyleInbox() {
       {/* Main Content Area - Message List + Details + Kudos */}
       <div className="flex-1 flex bg-white min-w-0 overflow-hidden">
         {/* Message List Panel - Simplified for mobile */}
-        <div className="flex-1 flex-col bg-white min-w-0 overflow-hidden border-r" style={{ display: 'flex' }}>
+        <div
+          className="flex-1 flex-col bg-white min-w-0 overflow-hidden border-r"
+          style={{ display: "flex" }}
+        >
           {/* Toolbar */}
           <div className="border-b p-4 space-y-3 bg-white">
             <div className="flex items-center justify-between">
@@ -708,7 +806,7 @@ export default function GmailStyleInbox() {
                   </Button>
                 )}
                 {/* Close message list button - only on mobile when message is selected */}
-                {screenSize === 'mobile' && selectedMessage && (
+                {screenSize === "mobile" && selectedMessage && (
                   <Button
                     variant="ghost"
                     size="sm"
@@ -718,13 +816,19 @@ export default function GmailStyleInbox() {
                     <X className="h-4 w-4" />
                   </Button>
                 )}
-                <h2 className="text-lg font-semibold capitalize">{activeFolder}</h2>
+                <h2 className="text-lg font-semibold capitalize">
+                  {activeFolder}
+                </h2>
               </div>
-              <Button variant="ghost" size="sm" onClick={() => refetchMessages()}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => refetchMessages()}
+              >
                 <RefreshCw className="h-4 w-4" />
               </Button>
             </div>
-            
+
             {/* Search */}
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -735,7 +839,7 @@ export default function GmailStyleInbox() {
                 className="pl-9 bg-white border-gray-300 text-gray-900 placeholder-gray-500"
               />
             </div>
-            
+
             {/* Bulk Actions */}
             {selectedMessages.size > 0 && (
               <div className="flex flex-wrap items-center gap-1 lg:gap-2">
@@ -745,12 +849,18 @@ export default function GmailStyleInbox() {
                   onClick={handleSelectAll}
                   className="text-xs lg:text-sm px-2 lg:px-3"
                 >
-                  {selectedMessages.size === messages.length ? "Deselect" : "Select All"}
+                  {selectedMessages.size === messages.length
+                    ? "Deselect"
+                    : "Select All"}
                 </Button>
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => console.log('Mark Read not implemented for conversation messages')}
+                  onClick={() =>
+                    console.log(
+                      "Mark Read not implemented for conversation messages"
+                    )
+                  }
                   className="text-xs lg:text-sm px-2 lg:px-3"
                 >
                   Mark Read
@@ -763,7 +873,9 @@ export default function GmailStyleInbox() {
                       archiveMutation.mutate(Array.from(selectedMessages));
                     }
                   }}
-                  disabled={selectedMessages.size === 0 || archiveMutation.isPending}
+                  disabled={
+                    selectedMessages.size === 0 || archiveMutation.isPending
+                  }
                   className="text-xs lg:text-sm px-2 lg:px-3"
                 >
                   Archive
@@ -776,7 +888,9 @@ export default function GmailStyleInbox() {
                       trashMutation.mutate(Array.from(selectedMessages));
                     }
                   }}
-                  disabled={selectedMessages.size === 0 || trashMutation.isPending}
+                  disabled={
+                    selectedMessages.size === 0 || trashMutation.isPending
+                  }
                   className="text-xs lg:text-sm px-2 lg:px-3"
                 >
                   Trash
@@ -786,138 +900,194 @@ export default function GmailStyleInbox() {
           </div>
 
           {/* Kudos Section - Only show in inbox when user has permission */}
-          {activeFolder === "inbox" && hasPermission(user, PERMISSIONS.VIEW_KUDOS) && (
-            <>
-              {/* Unread Kudos Section - Improved Responsiveness */}
-              {kudos && kudos.filter((k: any) => !k.isRead).length > 0 && (
-                <div className="border-b bg-gradient-to-r from-yellow-50 to-orange-50 p-3 lg:p-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Trophy className="h-4 w-4 lg:h-5 lg:w-5 text-yellow-600 flex-shrink-0" />
-                    <h3 className="text-base lg:text-lg font-bold text-yellow-800">🎉 New Kudos!</h3>
-                    <Badge className="bg-yellow-500 text-white text-xs">
-                      {kudos.filter((k: any) => !k.isRead).length}
-                    </Badge>
-                  </div>
-                  <div className="space-y-2 max-h-32 lg:max-h-40 overflow-y-auto">
-                    {kudos.filter((k: any) => !k.isRead).slice(0, 3).map((kudo: any) => (
-                      <div 
-                        key={kudo.id} 
-                        onClick={() => {
-                          // Mark as read when clicked
-                          markKudosAsRead(kudo.id);
-                          
-                          // Create a message object that matches the expected format
-                          const kudosMessage = {
-                            id: kudo?.id,
-                            userId: kudo?.userId || (user as any)?.id || 'unknown',
-                            sender: kudo.sender,
-                            senderName: kudo.senderName,
-                            conversationId: kudo.conversationId || kudo.id,
-                            subject: `Kudos ${kudo.projectTitle ? `for ${kudo.projectTitle}` : ''}`,
-                            content: kudo.message || kudo.content,
-                            createdAt: kudo.createdAt,
-                            isRead: true, // Mark as read immediately
-                            recipients: [],
-                            isKudos: true,
-                            contextType: kudo.contextType,
-                            projectTitle: kudo.projectTitle,
-                            entityName: kudo.entityName
-                          };
-                          setSelectedMessage(kudosMessage);
-                          setActiveFolder("inbox");
-                        }}
-                        className="flex items-center gap-3 p-3 bg-white rounded-lg shadow-sm border-2 border-yellow-300 cursor-pointer hover:bg-yellow-50 hover:border-yellow-400 transition-colors animate-pulse"
-                      >
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          <Heart className="h-4 w-4 lg:h-5 lg:w-5 text-red-500" />
-                          <div className="w-1.5 h-1.5 lg:w-2 lg:h-2 bg-yellow-500 rounded-full animate-pulse"></div>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs lg:text-sm font-bold text-gray-900">
-                            <span className="text-yellow-700 font-bold">{kudo.senderName}</span> sent you kudos
-                            {kudo.projectTitle && <span className="text-gray-600"> for "{kudo.projectTitle}"</span>}
-                          </p>
-                          <p className="text-xs text-gray-700 font-medium break-words">{kudo.message}</p>
-                        </div>
-                        <span className="text-xs text-yellow-600 flex-shrink-0 font-medium hidden sm:block">
-                          {formatDistanceToNow(new Date(kudo.createdAt), { addSuffix: true })}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                  {kudos.filter((k: any) => !k.isRead).length > 3 && (
-                    <p className="text-xs text-yellow-700 mt-2 font-medium">
-                      + {kudos.filter((k: any) => !k.isRead).length - 3} more new kudos
-                    </p>
-                  )}
-                </div>
-              )}
-
-              {/* Old Kudos Section - Collapsible */}
-              {kudos && kudos.filter((k: any) => k.isRead).length > 0 && (
-                <div className="border-b bg-gray-50 p-4">
-                  <button
-                    onClick={() => setShowOldKudos(!showOldKudos)}
-                    className="flex items-center gap-2 w-full text-left hover:bg-gray-100 p-2 rounded-lg transition-colors"
-                  >
-                    <Trophy className="h-4 w-4 text-gray-500" />
-                    <h4 className="text-sm font-medium text-gray-700">Old Kudos</h4>
-                    <Badge variant="outline" className="text-xs text-gray-500 border-gray-300">
-                      {kudos.filter((k: any) => k.isRead).length}
-                    </Badge>
-                    <ChevronRight className={`h-4 w-4 text-gray-500 ml-auto transition-transform ${showOldKudos ? 'rotate-90' : ''}`} />
-                  </button>
-                  
-                  {showOldKudos && (
-                    <div className="mt-3 space-y-1 max-h-32 overflow-y-auto">
-                      {kudos.filter((k: any) => k.isRead).slice(0, 5).map((kudo: any) => (
-                        <div 
-                          key={kudo.id} 
-                          onClick={() => {
-                            const kudosMessage = {
-                              id: kudo?.id,
-                              userId: kudo?.userId || (user as any)?.id || 'unknown',
-                              sender: kudo.sender,
-                              senderName: kudo.senderName,
-                              conversationId: kudo.conversationId || kudo.id,
-                              subject: `Kudos ${kudo.projectTitle ? `for ${kudo.projectTitle}` : ''}`,
-                              content: kudo.message || kudo.content,
-                              createdAt: kudo.createdAt,
-                              isRead: kudo.isRead,
-                              recipients: [],
-                              isKudos: true,
-                              contextType: kudo.contextType,
-                              projectTitle: kudo.projectTitle,
-                              entityName: kudo.entityName
-                            };
-                            setSelectedMessage(kudosMessage);
-                            setActiveFolder("inbox");
-                          }}
-                          className="flex items-center gap-2 p-2 bg-white rounded border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors"
-                        >
-                          <Heart className="h-3 w-3 text-gray-400 flex-shrink-0" />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs text-gray-600 break-words">
-                              <span className="font-medium">{kudo.senderName}</span>
-                              {kudo.projectTitle && <span className="text-gray-500"> • {kudo.projectTitle}</span>}
-                            </p>
-                          </div>
-                          <span className="text-xs text-gray-400 flex-shrink-0">
-                            {formatDistanceToNow(new Date(kudo.createdAt), { addSuffix: true })}
-                          </span>
-                        </div>
-                      ))}
-                      {kudos.filter((k: any) => k.isRead).length > 5 && (
-                        <p className="text-xs text-gray-500 mt-2 text-center">
-                          + {kudos.filter((k: any) => k.isRead).length - 5} more
-                        </p>
-                      )}
+          {activeFolder === "inbox" &&
+            hasPermission(user, PERMISSIONS.VIEW_KUDOS) && (
+              <>
+                {/* Unread Kudos Section - Improved Responsiveness */}
+                {kudos && kudos.filter((k: any) => !k.isRead).length > 0 && (
+                  <div className="border-b bg-gradient-to-r from-yellow-50 to-orange-50 p-3 lg:p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Trophy className="h-4 w-4 lg:h-5 lg:w-5 text-yellow-600 flex-shrink-0" />
+                      <h3 className="text-base lg:text-lg font-bold text-yellow-800">
+                        🎉 New Kudos!
+                      </h3>
+                      <Badge className="bg-yellow-500 text-white text-xs">
+                        {kudos.filter((k: any) => !k.isRead).length}
+                      </Badge>
                     </div>
-                  )}
-                </div>
-              )}
-            </>
-          )}
+                    <div className="space-y-2 max-h-32 lg:max-h-40 overflow-y-auto">
+                      {kudos
+                        .filter((k: any) => !k.isRead)
+                        .slice(0, 3)
+                        .map((kudo: any) => (
+                          <div
+                            key={kudo.id}
+                            onClick={() => {
+                              // Mark as read when clicked
+                              markKudosAsRead(kudo.id);
+
+                              // Create a message object that matches the expected format
+                              const kudosMessage = {
+                                id: kudo?.id,
+                                userId:
+                                  kudo?.userId ||
+                                  (user as any)?.id ||
+                                  "unknown",
+                                sender: kudo.sender,
+                                senderName: kudo.senderName,
+                                conversationId: kudo.conversationId || kudo.id,
+                                subject: `Kudos ${
+                                  kudo.projectTitle
+                                    ? `for ${kudo.projectTitle}`
+                                    : ""
+                                }`,
+                                content: kudo.message || kudo.content,
+                                createdAt: kudo.createdAt,
+                                isRead: true, // Mark as read immediately
+                                recipients: [],
+                                isKudos: true,
+                                contextType: kudo.contextType,
+                                projectTitle: kudo.projectTitle,
+                                entityName: kudo.entityName,
+                              };
+                              setSelectedMessage(kudosMessage);
+                              setActiveFolder("inbox");
+                            }}
+                            className="flex items-center gap-3 p-3 bg-white rounded-lg shadow-sm border-2 border-yellow-300 cursor-pointer hover:bg-yellow-50 hover:border-yellow-400 transition-colors animate-pulse"
+                          >
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                              <Heart className="h-4 w-4 lg:h-5 lg:w-5 text-red-500" />
+                              <div className="w-1.5 h-1.5 lg:w-2 lg:h-2 bg-yellow-500 rounded-full animate-pulse"></div>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs lg:text-sm font-bold text-gray-900">
+                                <span className="text-yellow-700 font-bold">
+                                  {kudo.senderName}
+                                </span>{" "}
+                                sent you kudos
+                                {kudo.projectTitle && (
+                                  <span className="text-gray-600">
+                                    {" "}
+                                    for "{kudo.projectTitle}"
+                                  </span>
+                                )}
+                              </p>
+                              <p className="text-xs text-gray-700 font-medium break-words">
+                                {kudo.message}
+                              </p>
+                            </div>
+                            <span className="text-xs text-yellow-600 flex-shrink-0 font-medium hidden sm:block">
+                              {formatDistanceToNow(new Date(kudo.createdAt), {
+                                addSuffix: true,
+                              })}
+                            </span>
+                          </div>
+                        ))}
+                    </div>
+                    {kudos.filter((k: any) => !k.isRead).length > 3 && (
+                      <p className="text-xs text-yellow-700 mt-2 font-medium">
+                        + {kudos.filter((k: any) => !k.isRead).length - 3} more
+                        new kudos
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* Old Kudos Section - Collapsible */}
+                {kudos && kudos.filter((k: any) => k.isRead).length > 0 && (
+                  <div className="border-b bg-gray-50 p-4">
+                    <button
+                      onClick={() => setShowOldKudos(!showOldKudos)}
+                      className="flex items-center gap-2 w-full text-left hover:bg-gray-100 p-2 rounded-lg transition-colors"
+                    >
+                      <Trophy className="h-4 w-4 text-gray-500" />
+                      <h4 className="text-sm font-medium text-gray-700">
+                        Old Kudos
+                      </h4>
+                      <Badge
+                        variant="outline"
+                        className="text-xs text-gray-500 border-gray-300"
+                      >
+                        {kudos.filter((k: any) => k.isRead).length}
+                      </Badge>
+                      <ChevronRight
+                        className={`h-4 w-4 text-gray-500 ml-auto transition-transform ${
+                          showOldKudos ? "rotate-90" : ""
+                        }`}
+                      />
+                    </button>
+
+                    {showOldKudos && (
+                      <div className="mt-3 space-y-1 max-h-32 overflow-y-auto">
+                        {kudos
+                          .filter((k: any) => k.isRead)
+                          .slice(0, 5)
+                          .map((kudo: any) => (
+                            <div
+                              key={kudo.id}
+                              onClick={() => {
+                                const kudosMessage = {
+                                  id: kudo?.id,
+                                  userId:
+                                    kudo?.userId ||
+                                    (user as any)?.id ||
+                                    "unknown",
+                                  sender: kudo.sender,
+                                  senderName: kudo.senderName,
+                                  conversationId:
+                                    kudo.conversationId || kudo.id,
+                                  subject: `Kudos ${
+                                    kudo.projectTitle
+                                      ? `for ${kudo.projectTitle}`
+                                      : ""
+                                  }`,
+                                  content: kudo.message || kudo.content,
+                                  createdAt: kudo.createdAt,
+                                  isRead: kudo.isRead,
+                                  recipients: [],
+                                  isKudos: true,
+                                  contextType: kudo.contextType,
+                                  projectTitle: kudo.projectTitle,
+                                  entityName: kudo.entityName,
+                                };
+                                setSelectedMessage(kudosMessage);
+                                setActiveFolder("inbox");
+                              }}
+                              className="flex items-center gap-2 p-2 bg-white rounded border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors"
+                            >
+                              <Heart className="h-3 w-3 text-gray-400 flex-shrink-0" />
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs text-gray-600 break-words">
+                                  <span className="font-medium">
+                                    {kudo.senderName}
+                                  </span>
+                                  {kudo.projectTitle && (
+                                    <span className="text-gray-500">
+                                      {" "}
+                                      • {kudo.projectTitle}
+                                    </span>
+                                  )}
+                                </p>
+                              </div>
+                              <span className="text-xs text-gray-400 flex-shrink-0">
+                                {formatDistanceToNow(new Date(kudo.createdAt), {
+                                  addSuffix: true,
+                                })}
+                              </span>
+                            </div>
+                          ))}
+                        {kudos.filter((k: any) => k.isRead).length > 5 && (
+                          <p className="text-xs text-gray-500 mt-2 text-center">
+                            + {kudos.filter((k: any) => k.isRead).length - 5}{" "}
+                            more
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </>
+            )}
 
           {/* Message List - Show KudosInbox for kudos folder */}
           {activeFolder === "kudos" ? (
@@ -928,73 +1098,108 @@ export default function GmailStyleInbox() {
             <ScrollArea className="flex-1">
               <div className="divide-y">
                 {filteredMessages.map((message) => (
-                <div
-                  key={message.id}
-                  onClick={() => handleSelectMessage(message)}
-                  className={`
+                  <div
+                    key={message.id}
+                    onClick={() => handleSelectMessage(message)}
+                    className={`
                     p-3 lg:p-5 cursor-pointer transition-colors hover:bg-amber-50 font-['Roboto'] border-b border-gray-100
-                    ${selectedMessage?.id === message.id ? 'bg-amber-100 border-r-4 border-amber-500 shadow-sm' : ''}
-                    ${!message.isRead ? 'bg-blue-50 font-bold border-l-4 border-blue-500' : 'bg-white font-normal'}
+                    ${
+                      selectedMessage?.id === message.id
+                        ? "bg-amber-100 border-r-4 border-amber-500 shadow-sm"
+                        : ""
+                    }
+                    ${
+                      !message.isRead
+                        ? "bg-blue-50 font-bold border-l-4 border-blue-500"
+                        : "bg-white font-normal"
+                    }
                   `}
-                >
-                  <div className="flex items-start gap-2 lg:gap-3">
-                    <input
-                      type="checkbox"
-                      checked={selectedMessages.has(message.id)}
-                      onChange={(e) => {
-                        e.stopPropagation();
-                        handleToggleSelect(message.id);
-                      }}
-                      className="mt-1 h-4 w-4 text-blue-600 bg-white border-gray-300 rounded focus:ring-blue-500"
-                    />
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        console.log('Star clicked for message', message.id);
-                      }}
-                      className="mt-1"
-                    >
-                      <Star 
-                        className="h-4 w-4 text-gray-300"
+                  >
+                    <div className="flex items-start gap-2 lg:gap-3">
+                      <input
+                        type="checkbox"
+                        checked={selectedMessages.has(message.id)}
+                        onChange={(e) => {
+                          e.stopPropagation();
+                          handleToggleSelect(message.id);
+                        }}
+                        className="mt-1 h-4 w-4 text-blue-600 bg-white border-gray-300 rounded focus:ring-blue-500"
                       />
-                    </button>
-                    <Avatar className="h-7 w-7 lg:h-8 lg:w-8 flex-shrink-0">
-                      <AvatarFallback className="text-xs bg-gray-200 text-gray-800">
-                        {activeFolder === 'sent' 
-                          ? (message.recipientName || 'U')?.split(' ').map((n: string) => n[0]).join('').toUpperCase() || 'U'
-                          : (message.senderName || 'U')?.split(' ').map((n: string) => n[0]).join('').toUpperCase() || 'U'
-                        }
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0 overflow-hidden">
-                      <div className="flex items-start justify-between mb-2 gap-2">
-                        <p className={`text-sm flex-1 break-words ${!message.isRead ? 'font-bold text-gray-900' : 'font-medium text-gray-700'}`}>
-                          {activeFolder === 'sent' ? (message.recipientName || 'Unknown') : (message.senderName || 'Unknown')}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          console.log("Star clicked for message", message.id);
+                        }}
+                        className="mt-1"
+                      >
+                        <Star className="h-4 w-4 text-gray-300" />
+                      </button>
+                      <Avatar className="h-7 w-7 lg:h-8 lg:w-8 flex-shrink-0">
+                        <AvatarFallback className="text-xs bg-gray-200 text-gray-800">
+                          {activeFolder === "sent"
+                            ? (message.recipientName || "U")
+                                ?.split(" ")
+                                .map((n: string) => n[0])
+                                .join("")
+                                .toUpperCase() || "U"
+                            : (message.senderName || "U")
+                                ?.split(" ")
+                                .map((n: string) => n[0])
+                                .join("")
+                                .toUpperCase() || "U"}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0 overflow-hidden">
+                        <div className="flex items-start justify-between mb-2 gap-2">
+                          <p
+                            className={`text-sm flex-1 break-words ${
+                              !message.isRead
+                                ? "font-bold text-gray-900"
+                                : "font-medium text-gray-700"
+                            }`}
+                          >
+                            {activeFolder === "sent"
+                              ? message.recipientName || "Unknown"
+                              : message.senderName || "Unknown"}
+                          </p>
+                          <span className="text-xs text-gray-500 whitespace-nowrap">
+                            {(() => {
+                              try {
+                                return message.createdAt
+                                  ? formatDistanceToNow(
+                                      new Date(message.createdAt),
+                                      { addSuffix: true }
+                                    )
+                                  : "No date";
+                              } catch (error) {
+                                return "Invalid date";
+                              }
+                            })()}
+                          </span>
+                        </div>
+                        <p
+                          className={`text-sm leading-relaxed ${
+                            !message.isRead
+                              ? "font-bold text-gray-900"
+                              : "font-normal text-gray-600"
+                          }`}
+                          style={{
+                            wordBreak: "break-word",
+                            whiteSpace: "pre-wrap",
+                          }}
+                        >
+                          {message.content}
                         </p>
-                        <span className="text-xs text-gray-500 whitespace-nowrap">
-                          {(() => {
-                            try {
-                              return message.createdAt ? formatDistanceToNow(new Date(message.createdAt), { addSuffix: true }) : 'No date';
-                            } catch (error) {
-                              return 'Invalid date';
-                            }
-                          })()}
-                        </span>
                       </div>
-                      <p className={`text-sm leading-relaxed ${!message.isRead ? 'font-bold text-gray-900' : 'font-normal text-gray-600'}`} style={{
-                        wordBreak: 'break-word',
-                        whiteSpace: 'pre-wrap'
-                      }}>
-                        {message.content}
-                      </p>
                     </div>
                   </div>
-                </div>
-              ))}
-              
+                ))}
+
                 {filteredMessages.length === 0 && (
                   <div className="p-8 text-center text-gray-500">
-                    {searchQuery ? "No messages found matching your search" : `No ${activeFolder} messages`}
+                    {searchQuery
+                      ? "No messages found matching your search"
+                      : `No ${activeFolder} messages`}
                   </div>
                 )}
               </div>
@@ -1003,13 +1208,15 @@ export default function GmailStyleInbox() {
         </div>
 
         {/* Message Detail Panel */}
-        <div className={`
-          ${selectedMessage ? 'flex-1 min-w-0 max-w-none' : ''} 
-          ${!selectedMessage && screenSize === 'desktop' ? 'flex flex-1' : ''}
-          ${!selectedMessage && screenSize !== 'desktop' ? 'hidden' : ''}
-          ${selectedMessage ? 'flex' : ''}
+        <div
+          className={`
+          ${selectedMessage ? "flex-1 min-w-0 max-w-none" : ""} 
+          ${!selectedMessage && screenSize === "desktop" ? "flex flex-1" : ""}
+          ${!selectedMessage && screenSize !== "desktop" ? "hidden" : ""}
+          ${selectedMessage ? "flex" : ""}
           flex-col bg-white overflow-hidden
-        `}>
+        `}
+        >
           {selectedMessage ? (
             <>
               {/* Message Header */}
@@ -1027,9 +1234,9 @@ export default function GmailStyleInbox() {
                         <Menu className="h-4 w-4" />
                       </Button>
                     )}
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       className="md:hidden"
                       onClick={() => setSelectedMessage(null)}
                     >
@@ -1039,27 +1246,31 @@ export default function GmailStyleInbox() {
                       {(selectedMessage as any).isKudos ? (
                         <span className="flex items-center gap-2">
                           <Trophy className="h-5 w-5 text-yellow-600" />
-                          {selectedMessage.subject || 'Kudos Message'}
+                          {selectedMessage.subject || "Kudos Message"}
                         </span>
+                      ) : selectedMessage.content.length > 40 ? (
+                        `${selectedMessage.content.substring(0, 40)}...`
                       ) : (
-                        selectedMessage.content.length > 40 
-                          ? `${selectedMessage.content.substring(0, 40)}...`
-                          : selectedMessage.content
+                        selectedMessage.content
                       )}
                     </h3>
                   </div>
                   <div className="flex items-center gap-2">
                     {/* Quick scroll to reply for non-Kudos messages */}
                     {!(selectedMessage as any).isKudos && (
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
+                      <Button
+                        variant="outline"
+                        size="sm"
                         onClick={() => {
-                          const replySection = document.querySelector('.reply-section');
-                          replySection?.scrollIntoView({ behavior: 'smooth' });
+                          const replySection = document.querySelector(
+                            ".reply-section"
+                          );
+                          replySection?.scrollIntoView({ behavior: "smooth" });
                           // Focus the textarea after a short delay to allow for scrolling
                           setTimeout(() => {
-                            const textarea = document.querySelector('.reply-section textarea') as HTMLTextAreaElement;
+                            const textarea = document.querySelector(
+                              ".reply-section textarea"
+                            ) as HTMLTextAreaElement;
                             textarea?.focus();
                           }, 300);
                         }}
@@ -1072,11 +1283,14 @@ export default function GmailStyleInbox() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => console.log('Star clicked for message', selectedMessage.id)}
+                      onClick={() =>
+                        console.log(
+                          "Star clicked for message",
+                          selectedMessage.id
+                        )
+                      }
                     >
-                      <Star 
-                        className="h-4 w-4 text-gray-300"
-                      />
+                      <Star className="h-4 w-4 text-gray-300" />
                     </Button>
                     <Button
                       variant="ghost"
@@ -1106,23 +1320,33 @@ export default function GmailStyleInbox() {
                     </Button>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center gap-3">
                   <Avatar className="h-10 w-10">
                     <AvatarFallback className="bg-gray-200 text-gray-800">
-                      {selectedMessage.senderName?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
+                      {selectedMessage.senderName
+                        ?.split(" ")
+                        .map((n) => n[0])
+                        .join("")
+                        .toUpperCase() || "U"}
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <p className="font-medium">From: {selectedMessage.senderName}</p>
-                    <p className="text-sm text-gray-600">{selectedMessage.senderEmail}</p>
+                    <p className="font-medium">
+                      From: {selectedMessage.senderName}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      {selectedMessage.senderEmail}
+                    </p>
                   </div>
                   <div className="ml-auto text-sm text-gray-500">
                     {(() => {
                       try {
-                        return selectedMessage.createdAt ? new Date(selectedMessage.createdAt).toLocaleString() : 'No date';
+                        return selectedMessage.createdAt
+                          ? new Date(selectedMessage.createdAt).toLocaleString()
+                          : "No date";
                       } catch (error) {
-                        return 'Invalid date';
+                        return "Invalid date";
                       }
                     })()}
                   </div>
@@ -1130,7 +1354,13 @@ export default function GmailStyleInbox() {
               </div>
 
               {/* Message Content */}
-              <div className={`p-4 ${selectedMessage.content.length > 500 ? 'flex-1 overflow-y-auto' : 'flex-shrink-0'}`}>
+              <div
+                className={`p-4 ${
+                  selectedMessage.content.length > 500
+                    ? "flex-1 overflow-y-auto"
+                    : "flex-shrink-0"
+                }`}
+              >
                 <div className="prose max-w-none">
                   {/* Special formatting for Kudos messages */}
                   {(selectedMessage as any).isKudos ? (
@@ -1140,11 +1370,15 @@ export default function GmailStyleInbox() {
                           <Trophy className="h-6 w-6 text-yellow-600" />
                         </div>
                         <div>
-                          <h3 className="text-lg font-bold text-yellow-800">Kudos Received!</h3>
+                          <h3 className="text-lg font-bold text-yellow-800">
+                            Kudos Received!
+                          </h3>
                           <p className="text-sm text-yellow-700">
                             From {selectedMessage.senderName}
                             {(selectedMessage as any).projectTitle && (
-                              <span className="ml-1">for "{(selectedMessage as any).projectTitle}"</span>
+                              <span className="ml-1">
+                                for "{(selectedMessage as any).projectTitle}"
+                              </span>
                             )}
                           </p>
                         </div>
@@ -1156,12 +1390,20 @@ export default function GmailStyleInbox() {
                       </div>
                       {(selectedMessage as any).contextType && (
                         <div className="mt-4 text-xs text-yellow-600">
-                          <span className="font-medium">Context:</span> {(selectedMessage as any).contextType === 'project' ? 'Project' : 'Task'} - {(selectedMessage as any).entityName || (selectedMessage as any).projectTitle}
+                          <span className="font-medium">Context:</span>{" "}
+                          {(selectedMessage as any).contextType === "project"
+                            ? "Project"
+                            : "Task"}{" "}
+                          -{" "}
+                          {(selectedMessage as any).entityName ||
+                            (selectedMessage as any).projectTitle}
                         </div>
                       )}
                     </div>
                   ) : (
-                    <div className="whitespace-pre-wrap">{selectedMessage.content}</div>
+                    <div className="whitespace-pre-wrap">
+                      {selectedMessage.content}
+                    </div>
                   )}
                 </div>
               </div>
@@ -1184,7 +1426,7 @@ export default function GmailStyleInbox() {
                       value={replyContent}
                       onChange={(e) => setReplyContent(e.target.value)}
                       onKeyDown={(e) => {
-                        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                        if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
                           e.preventDefault();
                           if (replyContent.trim()) {
                             handleReply();
@@ -1193,10 +1435,10 @@ export default function GmailStyleInbox() {
                       }}
                       rows={6}
                       className="w-full bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 resize-none"
-                      style={{ 
-                        minHeight: '150px',
-                        fontSize: '14px',
-                        lineHeight: '1.5'
+                      style={{
+                        minHeight: "150px",
+                        fontSize: "14px",
+                        lineHeight: "1.5",
                       }}
                     />
                     <div className="flex justify-between items-center">
@@ -1204,17 +1446,19 @@ export default function GmailStyleInbox() {
                         Press Ctrl+Enter to send quickly
                       </div>
                       <div className="flex gap-2">
-                        <Button 
-                          variant="outline" 
+                        <Button
+                          variant="outline"
                           size="sm"
                           onClick={() => setReplyContent("")}
                           disabled={!replyContent.trim()}
                         >
                           Clear
                         </Button>
-                        <Button 
+                        <Button
                           onClick={handleReply}
-                          disabled={replyMutation.isPending || !replyContent.trim()}
+                          disabled={
+                            replyMutation.isPending || !replyContent.trim()
+                          }
                           className="bg-blue-600 hover:bg-blue-700 text-white px-6"
                         >
                           {replyMutation.isPending ? (
@@ -1240,7 +1484,7 @@ export default function GmailStyleInbox() {
               <div className="text-center space-y-4">
                 <InboxIcon className="h-12 w-12 mx-auto mb-4 text-gray-300" />
                 <p className="text-lg">Select a message to read</p>
-                
+
                 {/* Show toggle buttons for collapsed panels */}
                 <div className="flex justify-center gap-3 mt-6">
                   {isSidebarCollapsed && (
@@ -1288,52 +1532,68 @@ export default function GmailStyleInbox() {
               </div>
             </div>
           </DialogHeader>
-          
+
           <div className="space-y-5 py-6">
             <div className="space-y-2">
-              <Label htmlFor="recipient" className="text-sm font-semibold text-gray-700 font-['Roboto']">
+              <Label
+                htmlFor="recipient"
+                className="text-sm font-semibold text-gray-700 font-['Roboto']"
+              >
                 To
               </Label>
-              <Select value={composeRecipient} onValueChange={setComposeRecipient}>
+              <Select
+                value={composeRecipient}
+                onValueChange={setComposeRecipient}
+              >
                 <SelectTrigger className="rounded-lg border border-gray-300 bg-white focus:border-amber-400 focus:ring-2 focus:ring-amber-200 h-11 transition-colors">
                   <SelectValue placeholder="Choose team member..." />
                 </SelectTrigger>
                 <SelectContent className="rounded-lg border border-gray-200 bg-white shadow-lg z-50">
                   {users
-                    .filter(u => u.id !== (user as any)?.id)
+                    .filter((u) => u.id !== (user as any)?.id)
                     .sort((a, b) => {
-                      const nameA = `${a.firstName} ${a.lastName}`.trim().toLowerCase();
-                      const nameB = `${b.firstName} ${b.lastName}`.trim().toLowerCase();
+                      const nameA = `${a.firstName} ${a.lastName}`
+                        .trim()
+                        .toLowerCase();
+                      const nameB = `${b.firstName} ${b.lastName}`
+                        .trim()
+                        .toLowerCase();
                       return nameA.localeCompare(nameB);
                     })
                     .map((teamUser) => (
-                    <SelectItem 
-                      key={teamUser.id} 
-                      value={teamUser.id} 
-                      className="py-2 px-3 hover:bg-amber-50 focus:bg-amber-50 data-[highlighted]:bg-amber-50"
-                      style={{ 
-                        color: '#1f2937', 
-                        fontWeight: '500',
-                        fontSize: '14px'
-                      }}
-                    >
-                      <div className="flex items-center gap-2" style={{ color: '#1f2937' }}>
-                        <div className="w-2 h-2 bg-teal-500 rounded-full"></div>
-                        <span style={{ color: '#1f2937', fontWeight: '600' }}>
-                          {teamUser.firstName} {teamUser.lastName}
-                        </span>
-                        <span style={{ color: '#6b7280', fontSize: '12px' }}>
-                          ({teamUser.email})
-                        </span>
-                      </div>
-                    </SelectItem>
-                  ))}
+                      <SelectItem
+                        key={teamUser.id}
+                        value={teamUser.id}
+                        className="py-2 px-3 hover:bg-amber-50 focus:bg-amber-50 data-[highlighted]:bg-amber-50"
+                        style={{
+                          color: "#1f2937",
+                          fontWeight: "500",
+                          fontSize: "14px",
+                        }}
+                      >
+                        <div
+                          className="flex items-center gap-2"
+                          style={{ color: "#1f2937" }}
+                        >
+                          <div className="w-2 h-2 bg-teal-500 rounded-full"></div>
+                          <span style={{ color: "#1f2937", fontWeight: "600" }}>
+                            {teamUser.firstName} {teamUser.lastName}
+                          </span>
+                          <span style={{ color: "#6b7280", fontSize: "12px" }}>
+                            ({teamUser.email})
+                          </span>
+                        </div>
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div className="space-y-2">
-              <Label htmlFor="subject" className="text-sm font-semibold text-gray-700 font-['Roboto'] flex items-center gap-2">
+              <Label
+                htmlFor="subject"
+                className="text-sm font-semibold text-gray-700 font-['Roboto'] flex items-center gap-2"
+              >
                 <span className="w-2 h-2 bg-amber-400 rounded-full"></span>
                 Project/Task name (optional)
               </Label>
@@ -1343,15 +1603,18 @@ export default function GmailStyleInbox() {
                 onChange={(e) => setComposeSubject(e.target.value)}
                 placeholder="Budget Review, Website Updates, Event Planning..."
                 className="rounded-lg border border-gray-300 bg-white focus:border-amber-400 focus:ring-2 focus:ring-amber-200 h-11 font-['Roboto'] placeholder:text-gray-500 transition-colors text-gray-900"
-                style={{ color: '#1f2937' }}
+                style={{ color: "#1f2937" }}
               />
               <p className="text-xs text-gray-500 font-['Roboto'] italic">
                 Leave blank for general conversation
               </p>
             </div>
-            
+
             <div className="space-y-2">
-              <Label htmlFor="content" className="text-sm font-semibold text-gray-700 font-['Roboto']">
+              <Label
+                htmlFor="content"
+                className="text-sm font-semibold text-gray-700 font-['Roboto']"
+              >
                 Message
               </Label>
               <Textarea
@@ -1361,10 +1624,10 @@ export default function GmailStyleInbox() {
                 placeholder="Type your message here..."
                 rows={6}
                 className="rounded-lg border border-gray-300 bg-white focus:border-amber-400 focus:ring-2 focus:ring-amber-200 font-['Roboto'] placeholder:text-gray-500 resize-none transition-colors text-gray-900"
-                style={{ color: '#1f2937' }}
+                style={{ color: "#1f2937" }}
               />
             </div>
-            
+
             {saveDraftMutation.isPending && (
               <div className="flex items-center gap-2 text-sm text-amber-700 bg-amber-50 border border-amber-200 p-3 rounded-lg">
                 <div className="w-2 h-2 bg-amber-400 rounded-full animate-pulse"></div>
@@ -1372,17 +1635,17 @@ export default function GmailStyleInbox() {
               </div>
             )}
           </div>
-          
+
           <DialogFooter className="pt-4 border-t border-gray-100 gap-3">
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               onClick={() => setShowCompose(false)}
               className="rounded-lg px-6 py-2 text-gray-600 hover:bg-gray-100 font-['Roboto'] font-medium transition-colors"
             >
               Cancel
             </Button>
             <ButtonTooltip explanation="Send your message to the selected recipients. Make sure you've filled in all the required fields.">
-              <Button 
+              <Button
                 onClick={handleSendMessage}
                 disabled={sendMessageMutation.isPending}
                 className="rounded-lg px-8 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-['Roboto'] font-semibold shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50"

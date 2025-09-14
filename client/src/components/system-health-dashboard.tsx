@@ -1,22 +1,22 @@
-import React, { useState } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { Progress } from '@/components/ui/progress';
-import { 
-  Shield, 
-  CheckCircle2, 
-  AlertTriangle, 
-  XCircle, 
+import React, { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Progress } from "@/components/ui/progress";
+import {
+  Shield,
+  CheckCircle2,
+  AlertTriangle,
+  XCircle,
   Play,
   RefreshCw,
   Users,
   Settings,
-  Activity
-} from 'lucide-react';
+  Activity,
+} from "lucide-react";
 
 interface TestResult {
   user: string;
@@ -30,61 +30,76 @@ interface TestResult {
 
 interface TestSuite {
   name: string;
-  status: 'pending' | 'running' | 'passed' | 'failed';
+  status: "pending" | "running" | "passed" | "failed";
   results: TestResult[];
   error?: string;
 }
 
 const TEST_USERS = [
   {
-    email: 'admin@sandwich.project',
-    role: 'super_admin',
-    description: 'Full system access'
+    email: "admin@sandwich.project",
+    role: "super_admin",
+    description: "Full system access",
   },
   {
-    email: 'christine@thesandwichproject.org',
-    role: 'core_team', 
-    description: 'Meeting management + project oversight'
+    email: "christine@thesandwichproject.org",
+    role: "core_team",
+    description: "Meeting management + project oversight",
   },
   {
-    email: 'juliet@thesandwichproject.org',
-    role: 'volunteer',
-    description: 'Limited volunteer access'
+    email: "juliet@thesandwichproject.org",
+    role: "volunteer",
+    description: "Limited volunteer access",
   },
   {
-    email: 'test2@testing.com',
-    role: 'viewer',
-    description: 'View-only access'
-  }
+    email: "test2@testing.com",
+    role: "viewer",
+    description: "View-only access",
+  },
 ];
 
 const CRITICAL_TESTS = [
   {
-    name: 'Send to Agenda Permission',
-    description: 'Verify meeting management permissions work correctly',
-    endpoint: 'PATCH /api/projects/49',
+    name: "Send to Agenda Permission",
+    description: "Verify meeting management permissions work correctly",
+    endpoint: "PATCH /api/projects/49",
     body: { reviewInNextMeeting: true },
-    expected_users: ['admin@sandwich.project', 'christine@thesandwichproject.org']
+    expected_users: [
+      "admin@sandwich.project",
+      "christine@thesandwichproject.org",
+    ],
   },
   {
-    name: 'Project Edit Permission',
-    description: 'Verify project editing permissions are separate from agenda',
-    endpoint: 'PATCH /api/projects/49',
-    body: { title: 'Test Update' },
-    expected_users: ['admin@sandwich.project', 'christine@thesandwichproject.org']
+    name: "Project Edit Permission",
+    description: "Verify project editing permissions are separate from agenda",
+    endpoint: "PATCH /api/projects/49",
+    body: { title: "Test Update" },
+    expected_users: [
+      "admin@sandwich.project",
+      "christine@thesandwichproject.org",
+    ],
   },
   {
-    name: 'View Projects',
-    description: 'Verify project viewing permissions',
-    endpoint: 'GET /api/projects',
-    expected_users: ['admin@sandwich.project', 'christine@thesandwichproject.org', 'juliet@thesandwichproject.org', 'test2@testing.com']
+    name: "View Projects",
+    description: "Verify project viewing permissions",
+    endpoint: "GET /api/projects",
+    expected_users: [
+      "admin@sandwich.project",
+      "christine@thesandwichproject.org",
+      "juliet@thesandwichproject.org",
+      "test2@testing.com",
+    ],
   },
   {
-    name: 'View Meetings',
-    description: 'Verify meeting viewing permissions',
-    endpoint: 'GET /api/meetings',
-    expected_users: ['admin@sandwich.project', 'christine@thesandwichproject.org', 'juliet@thesandwichproject.org']
-  }
+    name: "View Meetings",
+    description: "Verify meeting viewing permissions",
+    endpoint: "GET /api/meetings",
+    expected_users: [
+      "admin@sandwich.project",
+      "christine@thesandwichproject.org",
+      "juliet@thesandwichproject.org",
+    ],
+  },
 ];
 
 export function SystemHealthDashboard() {
@@ -92,10 +107,10 @@ export function SystemHealthDashboard() {
   const { toast } = useToast();
   const [testSuites, setTestSuites] = useState<TestSuite[]>([]);
   const [isRunning, setIsRunning] = useState(false);
-  const [currentTest, setCurrentTest] = useState<string>('');
+  const [currentTest, setCurrentTest] = useState<string>("");
 
   // Check if user has permission to run tests
-  const canRunTests = user?.role === 'super_admin' || user?.role === 'admin';
+  const canRunTests = user?.role === "super_admin" || user?.role === "admin";
 
   // Old broken test function removed - now using working permission test API
 
@@ -104,52 +119,53 @@ export function SystemHealthDashboard() {
       toast({
         title: "Permission Denied",
         description: "Only admins can run system health tests",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
 
     setIsRunning(true);
     setTestSuites([]);
-    
+
     try {
       const suite: TestSuite = {
-        name: 'Permission Matrix Test',
-        status: 'running',
-        results: []
+        name: "Permission Matrix Test",
+        status: "running",
+        results: [],
       };
-      
+
       setTestSuites([suite]);
-      setCurrentTest('Running comprehensive permission matrix test...');
-      
+      setCurrentTest("Running comprehensive permission matrix test...");
+
       // Use the new working permission test API
-      const response = await fetch('/api/working-permission-test/matrix');
+      const response = await fetch("/api/working-permission-test/matrix");
       if (!response.ok) {
-        throw new Error('Permission test API failed');
+        throw new Error("Permission test API failed");
       }
-      
+
       const testData = await response.json();
-      
+
       // Convert results to our format
       const convertedResults = testData.results.map((result: any) => ({
         user: result.user,
         endpoint: `${result.permission} Check`,
         name: result.permission,
-        expected: result.expected ? 'ALLOW' : 'DENY',
-        actual: result.actual ? 'ALLOW' : 'DENY',
-        status_code: result.status === 'PASS' ? 200 : (result.status === 'FAIL' ? 403 : 500),
-        match: result.passed
+        expected: result.expected ? "ALLOW" : "DENY",
+        actual: result.actual ? "ALLOW" : "DENY",
+        status_code:
+          result.status === "PASS" ? 200 : result.status === "FAIL" ? 403 : 500,
+        match: result.passed,
       }));
-      
+
       suite.results = convertedResults;
-      
+
       // Determine final status
-      const failures = suite.results.filter(r => !r.match);
-      suite.status = failures.length === 0 ? 'passed' : 'failed';
-      
+      const failures = suite.results.filter((r) => !r.match);
+      suite.status = failures.length === 0 ? "passed" : "failed";
+
       setTestSuites([suite]);
-      setCurrentTest('');
-      
+      setCurrentTest("");
+
       if (failures.length === 0) {
         toast({
           title: "All Tests Passed!",
@@ -159,15 +175,14 @@ export function SystemHealthDashboard() {
         toast({
           title: `${failures.length} Test Failures`,
           description: `${testData.summary.successRate}% success rate - Check the results below for permission issues`,
-          variant: "destructive"
+          variant: "destructive",
         });
       }
-      
     } catch (error) {
       toast({
         title: "Test Suite Failed",
         description: error.message || "Failed to run tests",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setIsRunning(false);
@@ -186,7 +201,9 @@ export function SystemHealthDashboard() {
         <CardContent>
           <div className="text-center py-8">
             <Shield className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-            <p className="text-gray-600">Only administrators can access system health tests.</p>
+            <p className="text-gray-600">
+              Only administrators can access system health tests.
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -202,12 +219,13 @@ export function SystemHealthDashboard() {
             System Health Tests
           </CardTitle>
           <p className="text-gray-600">
-            Run comprehensive tests to verify authentication, permissions, and critical functionality
+            Run comprehensive tests to verify authentication, permissions, and
+            critical functionality
           </p>
         </CardHeader>
         <CardContent>
           <div className="flex gap-4 mb-6">
-            <Button 
+            <Button
               onClick={runAllTests}
               disabled={isRunning}
               className="flex items-center gap-2"
@@ -240,7 +258,7 @@ export function SystemHealthDashboard() {
               Test Users
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {TEST_USERS.map(user => (
+              {TEST_USERS.map((user) => (
                 <Card key={user.email} className="p-4">
                   <div className="space-y-2">
                     <div className="font-medium">{user.email}</div>
@@ -259,17 +277,26 @@ export function SystemHealthDashboard() {
             <div key={index} className="mt-6">
               <div className="flex items-center gap-2 mb-4">
                 <h3 className="text-lg font-semibold">{suite.name}</h3>
-                <Badge 
+                <Badge
                   className={
-                    suite.status === 'passed' ? 'bg-green-100 text-green-800' :
-                    suite.status === 'failed' ? 'bg-red-100 text-red-800' :
-                    suite.status === 'running' ? 'bg-blue-100 text-blue-800' :
-                    'bg-gray-100 text-gray-800'
+                    suite.status === "passed"
+                      ? "bg-green-100 text-green-800"
+                      : suite.status === "failed"
+                      ? "bg-red-100 text-red-800"
+                      : suite.status === "running"
+                      ? "bg-blue-100 text-blue-800"
+                      : "bg-gray-100 text-gray-800"
                   }
                 >
-                  {suite.status === 'passed' && <CheckCircle2 className="w-3 h-3 mr-1" />}
-                  {suite.status === 'failed' && <XCircle className="w-3 h-3 mr-1" />}
-                  {suite.status === 'running' && <RefreshCw className="w-3 h-3 mr-1 animate-spin" />}
+                  {suite.status === "passed" && (
+                    <CheckCircle2 className="w-3 h-3 mr-1" />
+                  )}
+                  {suite.status === "failed" && (
+                    <XCircle className="w-3 h-3 mr-1" />
+                  )}
+                  {suite.status === "running" && (
+                    <RefreshCw className="w-3 h-3 mr-1 animate-spin" />
+                  )}
                   {suite.status.toUpperCase()}
                 </Badge>
               </div>
@@ -277,9 +304,14 @@ export function SystemHealthDashboard() {
               {suite.results.length > 0 && (
                 <div className="space-y-2">
                   {suite.results.map((result, idx) => (
-                    <Card key={idx} className={`p-3 ${
-                      result.match ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'
-                    }`}>
+                    <Card
+                      key={idx}
+                      className={`p-3 ${
+                        result.match
+                          ? "border-green-200 bg-green-50"
+                          : "border-red-200 bg-red-50"
+                      }`}
+                    >
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
@@ -296,10 +328,14 @@ export function SystemHealthDashboard() {
                         </div>
                         <div className="text-right">
                           <div className="text-sm">
-                            Expected: <span className="font-medium">{result.expected}</span>
+                            Expected:{" "}
+                            <span className="font-medium">
+                              {result.expected}
+                            </span>
                           </div>
                           <div className="text-sm">
-                            Actual: <span className="font-medium">{result.actual}</span>
+                            Actual:{" "}
+                            <span className="font-medium">{result.actual}</span>
                           </div>
                         </div>
                       </div>
@@ -308,26 +344,32 @@ export function SystemHealthDashboard() {
                 </div>
               )}
 
-              {suite.status === 'failed' && (
+              {suite.status === "failed" && (
                 <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
                   <div className="flex items-center gap-2 text-red-800">
                     <AlertTriangle className="w-4 h-4" />
-                    <span className="font-medium">Permission Issues Detected</span>
+                    <span className="font-medium">
+                      Permission Issues Detected
+                    </span>
                   </div>
                   <p className="text-red-700 mt-2">
-                    Some users have incorrect permissions. Review the failed tests above and check user roles.
+                    Some users have incorrect permissions. Review the failed
+                    tests above and check user roles.
                   </p>
                 </div>
               )}
 
-              {suite.status === 'passed' && (
+              {suite.status === "passed" && (
                 <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
                   <div className="flex items-center gap-2 text-green-800">
                     <CheckCircle2 className="w-4 h-4" />
-                    <span className="font-medium">All Permission Tests Passed</span>
+                    <span className="font-medium">
+                      All Permission Tests Passed
+                    </span>
                   </div>
                   <p className="text-green-700 mt-2">
-                    Authentication and authorization are working correctly across all user types.
+                    Authentication and authorization are working correctly
+                    across all user types.
                   </p>
                 </div>
               )}

@@ -4,28 +4,46 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
-import { 
-  Truck, 
-  Plus, 
-  Edit3, 
-  Trash2, 
+import {
+  Truck,
+  Plus,
+  Edit3,
+  Trash2,
   Calendar,
   MapPin,
   Building2,
   Package,
   Filter,
   Download,
-  Search
+  Search,
 } from "lucide-react";
-import { format, startOfWeek, endOfWeek, isWithinInterval, parseISO } from "date-fns";
+import {
+  format,
+  startOfWeek,
+  endOfWeek,
+  isWithinInterval,
+  parseISO,
+} from "date-fns";
 
 interface Distribution {
   id: number;
@@ -65,26 +83,32 @@ export default function DonationTracking() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  
+
   // State for filters and search
   const [selectedWeek, setSelectedWeek] = useState<string>("all");
   const [selectedHost, setSelectedHost] = useState<string>("all");
   const [selectedRecipient, setSelectedRecipient] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState("");
-  
+
   // State for the form dialog
   const [showAddDialog, setShowAddDialog] = useState(false);
-  const [editingDistribution, setEditingDistribution] = useState<Distribution | null>(null);
+  const [
+    editingDistribution,
+    setEditingDistribution,
+  ] = useState<Distribution | null>(null);
   const [formData, setFormData] = useState({
-    distributionDate: format(new Date(), 'yyyy-MM-dd'),
+    distributionDate: format(new Date(), "yyyy-MM-dd"),
     hostId: "",
     recipientId: "",
     sandwichCount: "",
-    notes: ""
+    notes: "",
   });
 
   // Fetch distributions
-  const { data: distributions = [], isLoading: loadingDistributions } = useQuery<Distribution[]>({
+  const {
+    data: distributions = [],
+    isLoading: loadingDistributions,
+  } = useQuery<Distribution[]>({
     queryKey: ["/api/sandwich-distributions"],
     queryFn: () => apiRequest("GET", "/api/sandwich-distributions"),
   });
@@ -103,84 +127,92 @@ export default function DonationTracking() {
 
   // Create distribution mutation
   const createDistributionMutation = useMutation({
-    mutationFn: (distributionData: any) => 
+    mutationFn: (distributionData: any) =>
       apiRequest("POST", "/api/sandwich-distributions", distributionData),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/sandwich-distributions"] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/sandwich-distributions"],
+      });
       toast({ description: "Distribution logged successfully" });
       setShowAddDialog(false);
       setEditingDistribution(null);
       resetForm();
     },
     onError: (error: any) => {
-      toast({ 
-        description: error.message || "Failed to log distribution", 
-        variant: "destructive" 
+      toast({
+        description: error.message || "Failed to log distribution",
+        variant: "destructive",
       });
-    }
+    },
   });
 
   // Update distribution mutation
   const updateDistributionMutation = useMutation({
-    mutationFn: ({ id, ...data }: any) => 
+    mutationFn: ({ id, ...data }: any) =>
       apiRequest("PUT", `/api/sandwich-distributions/${id}`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/sandwich-distributions"] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/sandwich-distributions"],
+      });
       toast({ description: "Distribution updated successfully" });
       setShowAddDialog(false);
       setEditingDistribution(null);
       resetForm();
     },
     onError: (error: any) => {
-      toast({ 
-        description: error.message || "Failed to update distribution", 
-        variant: "destructive" 
+      toast({
+        description: error.message || "Failed to update distribution",
+        variant: "destructive",
       });
-    }
+    },
   });
 
   // Delete distribution mutation
   const deleteDistributionMutation = useMutation({
-    mutationFn: (id: number) => 
+    mutationFn: (id: number) =>
       apiRequest("DELETE", `/api/sandwich-distributions/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/sandwich-distributions"] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/sandwich-distributions"],
+      });
       toast({ description: "Distribution deleted successfully" });
     },
     onError: (error: any) => {
-      toast({ 
-        description: error.message || "Failed to delete distribution", 
-        variant: "destructive" 
+      toast({
+        description: error.message || "Failed to delete distribution",
+        variant: "destructive",
       });
-    }
+    },
   });
 
   const resetForm = () => {
     setFormData({
-      distributionDate: format(new Date(), 'yyyy-MM-dd'),
+      distributionDate: format(new Date(), "yyyy-MM-dd"),
       hostId: "",
       recipientId: "",
       sandwichCount: "",
-      notes: ""
+      notes: "",
     });
   };
 
   const handleSubmit = () => {
     if (!formData.hostId || !formData.recipientId || !formData.sandwichCount) {
-      toast({ 
-        description: "Please fill in all required fields", 
-        variant: "destructive" 
+      toast({
+        description: "Please fill in all required fields",
+        variant: "destructive",
       });
       return;
     }
 
-    const host = hosts.find(h => h.id === parseInt(formData.hostId));
-    const recipient = recipients.find(r => r.id === parseInt(formData.recipientId));
-    
+    const host = hosts.find((h) => h.id === parseInt(formData.hostId));
+    const recipient = recipients.find(
+      (r) => r.id === parseInt(formData.recipientId)
+    );
+
     if (!host || !recipient) {
-      toast({ 
-        description: "Invalid host or recipient selection", 
-        variant: "destructive" 
+      toast({
+        description: "Invalid host or recipient selection",
+        variant: "destructive",
       });
       return;
     }
@@ -188,22 +220,29 @@ export default function DonationTracking() {
     // Calculate week ending date (Sunday of the week containing the distribution date)
     const distDate = new Date(formData.distributionDate);
     const weekEnd = endOfWeek(distDate, { weekStartsOn: 1 }); // Week starts on Monday
-    
+
     const distributionData = {
       distributionDate: formData.distributionDate,
-      weekEnding: format(weekEnd, 'yyyy-MM-dd'),
+      weekEnding: format(weekEnd, "yyyy-MM-dd"),
       hostId: parseInt(formData.hostId),
       hostName: host.name,
       recipientId: parseInt(formData.recipientId),
       recipientName: recipient.name,
       sandwichCount: parseInt(formData.sandwichCount),
       notes: formData.notes || null,
-      createdBy: user?.id || '',
-      createdByName: user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email || 'Unknown User' : 'Unknown User'
+      createdBy: user?.id || "",
+      createdByName: user
+        ? `${user.firstName || ""} ${user.lastName || ""}`.trim() ||
+          user.email ||
+          "Unknown User"
+        : "Unknown User",
     };
 
     if (editingDistribution) {
-      updateDistributionMutation.mutate({ id: editingDistribution.id, ...distributionData });
+      updateDistributionMutation.mutate({
+        id: editingDistribution.id,
+        ...distributionData,
+      });
     } else {
       createDistributionMutation.mutate(distributionData);
     }
@@ -216,7 +255,7 @@ export default function DonationTracking() {
       hostId: distribution.hostId.toString(),
       recipientId: distribution.recipientId.toString(),
       sandwichCount: distribution.sandwichCount.toString(),
-      notes: distribution.notes || ""
+      notes: distribution.notes || "",
     });
     setShowAddDialog(true);
   };
@@ -228,27 +267,44 @@ export default function DonationTracking() {
   };
 
   // Filter distributions based on selected filters and search
-  const filteredDistributions = distributions.filter(dist => {
-    const matchesWeek = !selectedWeek || selectedWeek === "all" || dist.weekEnding === selectedWeek;
-    const matchesHost = !selectedHost || selectedHost === "all" || dist.hostId.toString() === selectedHost;
-    const matchesRecipient = !selectedRecipient || selectedRecipient === "all" || dist.recipientId.toString() === selectedRecipient;
-    const matchesSearch = !searchTerm || 
+  const filteredDistributions = distributions.filter((dist) => {
+    const matchesWeek =
+      !selectedWeek ||
+      selectedWeek === "all" ||
+      dist.weekEnding === selectedWeek;
+    const matchesHost =
+      !selectedHost ||
+      selectedHost === "all" ||
+      dist.hostId.toString() === selectedHost;
+    const matchesRecipient =
+      !selectedRecipient ||
+      selectedRecipient === "all" ||
+      dist.recipientId.toString() === selectedRecipient;
+    const matchesSearch =
+      !searchTerm ||
       dist.hostName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       dist.recipientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       dist.notes?.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     return matchesWeek && matchesHost && matchesRecipient && matchesSearch;
   });
 
   // Get unique weeks from distributions for filter dropdown
-  const availableWeeks = Array.from(new Set(distributions.map(d => d.weekEnding)))
+  const availableWeeks = Array.from(
+    new Set(distributions.map((d) => d.weekEnding))
+  )
     .sort()
     .reverse(); // Most recent first
 
   // Calculate totals
-  const totalSandwiches = filteredDistributions.reduce((sum, dist) => sum + dist.sandwichCount, 0);
-  const uniqueHosts = new Set(filteredDistributions.map(d => d.hostId)).size;
-  const uniqueRecipients = new Set(filteredDistributions.map(d => d.recipientId)).size;
+  const totalSandwiches = filteredDistributions.reduce(
+    (sum, dist) => sum + dist.sandwichCount,
+    0
+  );
+  const uniqueHosts = new Set(filteredDistributions.map((d) => d.hostId)).size;
+  const uniqueRecipients = new Set(
+    filteredDistributions.map((d) => d.recipientId)
+  ).size;
 
   return (
     <div className="max-w-7xl mx-auto p-4 space-y-6">
@@ -260,11 +316,12 @@ export default function DonationTracking() {
             Distribution Tracking
           </h1>
           <p className="text-gray-600 mt-1">
-            Record sandwich distributions from host locations to recipient organizations
+            Record sandwich distributions from host locations to recipient
+            organizations
           </p>
         </div>
-        
-        <Button 
+
+        <Button
           onClick={openAddDialog}
           className="bg-[#236383] hover:bg-[#1d5470]"
         >
@@ -281,43 +338,51 @@ export default function DonationTracking() {
               <Package className="h-5 w-5 text-[#236383]" />
               <div>
                 <p className="text-sm text-gray-600">Total Sandwiches</p>
-                <p className="text-2xl font-bold text-gray-900">{totalSandwiches.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {totalSandwiches.toLocaleString()}
+                </p>
               </div>
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
               <MapPin className="h-5 w-5 text-[#236383]" />
               <div>
                 <p className="text-sm text-gray-600">Host Locations</p>
-                <p className="text-2xl font-bold text-gray-900">{uniqueHosts}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {uniqueHosts}
+                </p>
               </div>
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
               <Building2 className="h-5 w-5 text-[#236383]" />
               <div>
                 <p className="text-sm text-gray-600">Recipients</p>
-                <p className="text-2xl font-bold text-gray-900">{uniqueRecipients}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {uniqueRecipients}
+                </p>
               </div>
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
               <Calendar className="h-5 w-5 text-[#236383]" />
               <div>
                 <p className="text-sm text-gray-600">Total Records</p>
-                <p className="text-2xl font-bold text-gray-900">{filteredDistributions.length}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {filteredDistributions.length}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -346,7 +411,7 @@ export default function DonationTracking() {
                 />
               </div>
             </div>
-            
+
             <div className="space-y-2">
               <Label>Week Ending</Label>
               <Select value={selectedWeek} onValueChange={setSelectedWeek}>
@@ -355,15 +420,15 @@ export default function DonationTracking() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All weeks</SelectItem>
-                  {availableWeeks.map(week => (
+                  {availableWeeks.map((week) => (
                     <SelectItem key={week} value={week}>
-                      Week ending {format(new Date(week), 'MMM d, yyyy')}
+                      Week ending {format(new Date(week), "MMM d, yyyy")}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div className="space-y-2">
               <Label>Host Location</Label>
               <Select value={selectedHost} onValueChange={setSelectedHost}>
@@ -372,37 +437,50 @@ export default function DonationTracking() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All hosts</SelectItem>
-                  {hosts.filter(h => h.status === 'active').map(host => (
-                    <SelectItem key={host.id} value={host.id.toString()}>
-                      {host.name}
-                    </SelectItem>
-                  ))}
+                  {hosts
+                    .filter((h) => h.status === "active")
+                    .map((host) => (
+                      <SelectItem key={host.id} value={host.id.toString()}>
+                        {host.name}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div className="space-y-2">
               <Label>Recipient</Label>
-              <Select value={selectedRecipient} onValueChange={setSelectedRecipient}>
+              <Select
+                value={selectedRecipient}
+                onValueChange={setSelectedRecipient}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="All recipients" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All recipients</SelectItem>
-                  {recipients.filter(r => r.status === 'active').map(recipient => (
-                    <SelectItem key={recipient.id} value={recipient.id.toString()}>
-                      {recipient.name}
-                    </SelectItem>
-                  ))}
+                  {recipients
+                    .filter((r) => r.status === "active")
+                    .map((recipient) => (
+                      <SelectItem
+                        key={recipient.id}
+                        value={recipient.id.toString()}
+                      >
+                        {recipient.name}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>
           </div>
-          
-          {(selectedWeek || selectedHost || selectedRecipient || searchTerm) && (
+
+          {(selectedWeek ||
+            selectedHost ||
+            selectedRecipient ||
+            searchTerm) && (
             <div className="mt-4 flex gap-2">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="sm"
                 onClick={() => {
                   setSelectedWeek("all");
@@ -432,15 +510,19 @@ export default function DonationTracking() {
           ) : filteredDistributions.length === 0 ? (
             <div className="text-center py-8">
               <Truck className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-lg font-medium text-gray-900 mb-2">No distributions found</p>
+              <p className="text-lg font-medium text-gray-900 mb-2">
+                No distributions found
+              </p>
               <p className="text-gray-600 mb-4">
-                {distributions.length === 0 
-                  ? "Start by logging your first distribution" 
-                  : "Try adjusting your filters to see more results"
-                }
+                {distributions.length === 0
+                  ? "Start by logging your first distribution"
+                  : "Try adjusting your filters to see more results"}
               </p>
               {distributions.length === 0 && (
-                <Button onClick={openAddDialog} className="bg-[#236383] hover:bg-[#1d5470]">
+                <Button
+                  onClick={openAddDialog}
+                  className="bg-[#236383] hover:bg-[#1d5470]"
+                >
                   <Plus className="h-4 w-4 mr-2" />
                   Log First Distribution
                 </Button>
@@ -449,46 +531,62 @@ export default function DonationTracking() {
           ) : (
             <ScrollArea className="h-[400px]">
               <div className="space-y-3">
-                {filteredDistributions.map(distribution => (
-                  <div 
+                {filteredDistributions.map((distribution) => (
+                  <div
                     key={distribution.id}
                     className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex-1 space-y-2">
                         <div className="flex items-center gap-4">
-                          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                            {format(new Date(distribution.distributionDate), 'MMM d, yyyy')}
+                          <Badge
+                            variant="outline"
+                            className="bg-blue-50 text-blue-700 border-blue-200"
+                          >
+                            {format(
+                              new Date(distribution.distributionDate),
+                              "MMM d, yyyy"
+                            )}
                           </Badge>
                           <div className="flex items-center gap-2 text-sm text-gray-600">
                             <MapPin className="h-4 w-4" />
-                            <span className="font-medium">{distribution.hostName}</span>
+                            <span className="font-medium">
+                              {distribution.hostName}
+                            </span>
                             <span>→</span>
                             <Building2 className="h-4 w-4" />
-                            <span className="font-medium">{distribution.recipientName}</span>
+                            <span className="font-medium">
+                              {distribution.recipientName}
+                            </span>
                           </div>
                         </div>
-                        
+
                         <div className="flex items-center gap-4">
                           <div className="flex items-center gap-2">
                             <Package className="h-4 w-4 text-[#236383]" />
                             <span className="font-bold text-lg text-[#236383]">
-                              {distribution.sandwichCount.toLocaleString()} sandwiches
+                              {distribution.sandwichCount.toLocaleString()}{" "}
+                              sandwiches
                             </span>
                           </div>
-                          
+
                           {distribution.notes && (
                             <div className="text-sm text-gray-600 flex-1">
-                              <span className="font-medium">Note:</span> {distribution.notes}
+                              <span className="font-medium">Note:</span>{" "}
+                              {distribution.notes}
                             </div>
                           )}
                         </div>
-                        
+
                         <div className="text-xs text-gray-500">
-                          Logged by {distribution.createdByName} on {format(new Date(distribution.createdAt), 'MMM d, yyyy h:mm a')}
+                          Logged by {distribution.createdByName} on{" "}
+                          {format(
+                            new Date(distribution.createdAt),
+                            "MMM d, yyyy h:mm a"
+                          )}
                         </div>
                       </div>
-                      
+
                       <div className="flex items-center gap-2 ml-4">
                         <Button
                           variant="ghost"
@@ -501,8 +599,14 @@ export default function DonationTracking() {
                           variant="ghost"
                           size="sm"
                           onClick={() => {
-                            if (window.confirm('Are you sure you want to delete this distribution record?')) {
-                              deleteDistributionMutation.mutate(distribution.id);
+                            if (
+                              window.confirm(
+                                "Are you sure you want to delete this distribution record?"
+                              )
+                            ) {
+                              deleteDistributionMutation.mutate(
+                                distribution.id
+                              );
                             }
                           }}
                           className="text-red-600 hover:text-red-700 hover:bg-red-50"
@@ -524,10 +628,12 @@ export default function DonationTracking() {
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>
-              {editingDistribution ? 'Edit Distribution' : 'Log New Distribution'}
+              {editingDistribution
+                ? "Edit Distribution"
+                : "Log New Distribution"}
             </DialogTitle>
           </DialogHeader>
-          
+
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="date">Distribution Date *</Label>
@@ -535,42 +641,64 @@ export default function DonationTracking() {
                 id="date"
                 type="date"
                 value={formData.distributionDate}
-                onChange={(e) => setFormData(prev => ({ ...prev, distributionDate: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    distributionDate: e.target.value,
+                  }))
+                }
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="host">Host Location *</Label>
-              <Select value={formData.hostId} onValueChange={(value) => setFormData(prev => ({ ...prev, hostId: value }))}>
+              <Select
+                value={formData.hostId}
+                onValueChange={(value) =>
+                  setFormData((prev) => ({ ...prev, hostId: value }))
+                }
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select host location" />
                 </SelectTrigger>
                 <SelectContent>
-                  {hosts.filter(h => h.status === 'active').map(host => (
-                    <SelectItem key={host.id} value={host.id.toString()}>
-                      {host.name}
-                    </SelectItem>
-                  ))}
+                  {hosts
+                    .filter((h) => h.status === "active")
+                    .map((host) => (
+                      <SelectItem key={host.id} value={host.id.toString()}>
+                        {host.name}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="recipient">Recipient Organization *</Label>
-              <Select value={formData.recipientId} onValueChange={(value) => setFormData(prev => ({ ...prev, recipientId: value }))}>
+              <Select
+                value={formData.recipientId}
+                onValueChange={(value) =>
+                  setFormData((prev) => ({ ...prev, recipientId: value }))
+                }
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select recipient organization" />
                 </SelectTrigger>
                 <SelectContent>
-                  {recipients.filter(r => r.status === 'active').map(recipient => (
-                    <SelectItem key={recipient.id} value={recipient.id.toString()}>
-                      {recipient.name}
-                    </SelectItem>
-                  ))}
+                  {recipients
+                    .filter((r) => r.status === "active")
+                    .map((recipient) => (
+                      <SelectItem
+                        key={recipient.id}
+                        value={recipient.id.toString()}
+                      >
+                        {recipient.name}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="count">Number of Sandwiches *</Label>
               <Input
@@ -578,41 +706,51 @@ export default function DonationTracking() {
                 type="number"
                 placeholder="Enter sandwich count"
                 value={formData.sandwichCount}
-                onChange={(e) => setFormData(prev => ({ ...prev, sandwichCount: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    sandwichCount: e.target.value,
+                  }))
+                }
                 min="1"
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="notes">Notes (optional)</Label>
               <Textarea
                 id="notes"
                 placeholder="Any additional notes about this distribution..."
                 value={formData.notes}
-                onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, notes: e.target.value }))
+                }
                 rows={3}
               />
             </div>
-            
+
             <div className="flex justify-end gap-2 pt-4">
-              <Button 
-                variant="ghost" 
-                onClick={() => setShowAddDialog(false)}
-              >
+              <Button variant="ghost" onClick={() => setShowAddDialog(false)}>
                 Cancel
               </Button>
-              <Button 
+              <Button
                 onClick={handleSubmit}
-                disabled={createDistributionMutation.isPending || updateDistributionMutation.isPending}
+                disabled={
+                  createDistributionMutation.isPending ||
+                  updateDistributionMutation.isPending
+                }
                 className="bg-[#236383] hover:bg-[#1d5470]"
               >
-                {(createDistributionMutation.isPending || updateDistributionMutation.isPending) ? (
+                {createDistributionMutation.isPending ||
+                updateDistributionMutation.isPending ? (
                   <div className="flex items-center gap-2">
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    {editingDistribution ? 'Updating...' : 'Logging...'}
+                    {editingDistribution ? "Updating..." : "Logging..."}
                   </div>
+                ) : editingDistribution ? (
+                  "Update Distribution"
                 ) : (
-                  editingDistribution ? 'Update Distribution' : 'Log Distribution'
+                  "Log Distribution"
                 )}
               </Button>
             </div>

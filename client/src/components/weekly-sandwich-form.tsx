@@ -15,10 +15,14 @@ export default function WeeklySandwichForm() {
   const [notes, setNotes] = useState("");
 
   const submitReportMutation = useMutation({
-    mutationFn: async (data: { weekEnding: string; sandwichCount: number; notes?: string }) => {
+    mutationFn: async (data: {
+      weekEnding: string;
+      sandwichCount: number;
+      notes?: string;
+    }) => {
       const response = await apiRequest("POST", "/api/weekly-reports", {
         ...data,
-        submittedBy: "John Doe"
+        submittedBy: "John Doe",
       });
       return response.json();
     },
@@ -36,19 +40,19 @@ export default function WeeklySandwichForm() {
       toast({
         title: "Failed to submit report",
         description: "Please check your input and try again.",
-        variant: "destructive"
+        variant: "destructive",
       });
-    }
+    },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!weekEnding || !sandwichCount) {
       toast({
         title: "Missing information",
         description: "Please fill in the week ending date and sandwich count.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
@@ -58,7 +62,7 @@ export default function WeeklySandwichForm() {
       toast({
         title: "Invalid sandwich count",
         description: "Please enter a valid number.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
@@ -66,7 +70,7 @@ export default function WeeklySandwichForm() {
     submitReportMutation.mutate({
       weekEnding,
       sandwichCount: count,
-      notes: notes || undefined
+      notes: notes || undefined,
     });
   };
 
@@ -81,7 +85,10 @@ export default function WeeklySandwichForm() {
       <div className="p-6">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="week-ending" className="block text-sm font-medium text-slate-700 mb-1">
+            <Label
+              htmlFor="week-ending"
+              className="block text-sm font-medium text-slate-700 mb-1"
+            >
               Week Ending
             </Label>
             <Input
@@ -93,7 +100,10 @@ export default function WeeklySandwichForm() {
             />
           </div>
           <div>
-            <Label htmlFor="sandwich-count" className="block text-sm font-medium text-slate-700 mb-1">
+            <Label
+              htmlFor="sandwich-count"
+              className="block text-sm font-medium text-slate-700 mb-1"
+            >
               Sandwiches Sold
             </Label>
             <Input
@@ -107,7 +117,10 @@ export default function WeeklySandwichForm() {
             />
           </div>
           <div>
-            <Label htmlFor="notes" className="block text-sm font-medium text-slate-700 mb-1">
+            <Label
+              htmlFor="notes"
+              className="block text-sm font-medium text-slate-700 mb-1"
+            >
               Notes
             </Label>
             <Textarea
@@ -124,7 +137,9 @@ export default function WeeklySandwichForm() {
             className="w-full bg-green-600 text-white hover:bg-green-700 focus:ring-green-500"
             disabled={submitReportMutation.isPending}
           >
-            {submitReportMutation.isPending ? "Submitting..." : "Submit Weekly Total"}
+            {submitReportMutation.isPending
+              ? "Submitting..."
+              : "Submit Weekly Total"}
           </Button>
         </form>
       </div>

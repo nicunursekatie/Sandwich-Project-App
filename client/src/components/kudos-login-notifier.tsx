@@ -30,30 +30,42 @@ export function KudosLoginNotifier() {
   const [hasShownNotifications, setHasShownNotifications] = useState(false);
   const [activeToasts, setActiveToasts] = useState<KudosToast[]>([]);
 
-  const { data: unnotifiedKudos = [], isLoading } = useQuery<UnnotifiedKudos[]>({
-    queryKey: ['/api/messaging/kudos/unnotified'],
-    enabled: !!user && !hasShownNotifications,
-    staleTime: 0, // Always fetch fresh data
-    cacheTime: 0, // Don't cache the results
-  });
+  const { data: unnotifiedKudos = [], isLoading } = useQuery<UnnotifiedKudos[]>(
+    {
+      queryKey: ["/api/messaging/kudos/unnotified"],
+      enabled: !!user && !hasShownNotifications,
+      staleTime: 0, // Always fetch fresh data
+      cacheTime: 0, // Don't cache the results
+    }
+  );
 
   // Mutation to mark kudos as initially notified
   const markInitiallyNotifiedMutation = useMutation({
     mutationFn: async (kudosIds: number[]) => {
-      return apiRequest('POST', '/api/messaging/kudos/mark-initial-notified', { kudosIds });
+      return apiRequest("POST", "/api/messaging/kudos/mark-initial-notified", {
+        kudosIds,
+      });
     },
     onSuccess: () => {
       // Invalidate notification count queries to update the bell icon
-      queryClient.invalidateQueries({ queryKey: ['/api/message-notifications/unread-counts'] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/message-notifications/unread-counts"],
+      });
     },
     onError: (error) => {
-      console.error('Failed to mark kudos as initially notified:', error);
-    }
+      console.error("Failed to mark kudos as initially notified:", error);
+    },
   });
 
   // Handle showing notifications when unnotified kudos are fetched
   useEffect(() => {
-    if (!user || !unnotifiedKudos || unnotifiedKudos.length === 0 || hasShownNotifications || isLoading) {
+    if (
+      !user ||
+      !unnotifiedKudos ||
+      unnotifiedKudos.length === 0 ||
+      hasShownNotifications ||
+      isLoading
+    ) {
       return;
     }
 
@@ -74,7 +86,7 @@ export function KudosLoginNotifier() {
           createdAt: kudos.createdAt,
         };
 
-        setActiveToasts(prev => [...prev, toastKudos]);
+        setActiveToasts((prev) => [...prev, toastKudos]);
         showKudosToast(toastKudos);
       }, index * 800); // Stagger toasts by 800ms
     });
@@ -88,7 +100,7 @@ export function KudosLoginNotifier() {
 
     // Mark all kudos as initially notified
     if (unnotifiedKudos.length > 0) {
-      const kudosIds = unnotifiedKudos.map(k => k.id);
+      const kudosIds = unnotifiedKudos.map((k) => k.id);
       setTimeout(() => {
         markInitiallyNotifiedMutation.mutate(kudosIds);
       }, 1000); // Wait 1 second before marking as notified
@@ -98,8 +110,10 @@ export function KudosLoginNotifier() {
   }, [unnotifiedKudos, user, hasShownNotifications, isLoading]);
 
   const showKudosToast = (kudos: KudosToast) => {
-    const timeAgo = formatDistanceToNow(new Date(kudos.createdAt), { addSuffix: true });
-    
+    const timeAgo = formatDistanceToNow(new Date(kudos.createdAt), {
+      addSuffix: true,
+    });
+
     toast({
       title: (
         <div className="flex items-center gap-2">
@@ -149,11 +163,10 @@ export function KudosLoginNotifier() {
       description: (
         <div className="space-y-2">
           <p className="text-sm">
-            You have <strong>{remainingCount}</strong> more kudos waiting for you!
+            You have <strong>{remainingCount}</strong> more kudos waiting for
+            you!
           </p>
-          <p className="text-xs text-gray-500">
-            Total: {totalCount} new kudos
-          </p>
+          <p className="text-xs text-gray-500">Total: {totalCount} new kudos</p>
           <div className="flex gap-2 mt-3">
             <button
               data-testid="kudos-toast-summary-view-inbox"
@@ -180,11 +193,11 @@ export function KudosLoginNotifier() {
 
   const handleViewInInbox = () => {
     // Navigate to dashboard with messaging section and kudos tab
-    window.location.hash = '#/dashboard?section=messaging&tab=kudos';
+    window.location.hash = "#/dashboard?section=messaging&tab=kudos";
   };
 
   const handleDismissToast = (kudosId: number) => {
-    setActiveToasts(prev => prev.filter(t => t.id !== kudosId));
+    setActiveToasts((prev) => prev.filter((t) => t.id !== kudosId));
     // Toast will auto-dismiss, no additional action needed
   };
 

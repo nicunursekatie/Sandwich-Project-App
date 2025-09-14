@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { 
-  HelpCircle, 
-  Lightbulb, 
-  Target, 
-  TrendingUp, 
-  Users, 
+import React, { useState, useEffect, useRef } from "react";
+import {
+  HelpCircle,
+  Lightbulb,
+  Target,
+  TrendingUp,
+  Users,
   Calendar,
   FileText,
   Settings,
@@ -14,13 +14,13 @@ import {
   CheckCircle,
   Info,
   AlertTriangle,
-  Sparkles
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { UserContext } from './useSmartGuide';
+  Sparkles,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { UserContext } from "./useSmartGuide";
 
 // Define comprehensive guide content based on user context
 export interface GuideStep {
@@ -28,15 +28,15 @@ export interface GuideStep {
   title: string;
   description: string;
   element?: string; // CSS selector or data attribute
-  position: 'top' | 'bottom' | 'left' | 'right' | 'center';
-  type: 'tip' | 'feature' | 'warning' | 'success' | 'onboarding';
+  position: "top" | "bottom" | "left" | "right" | "center";
+  type: "tip" | "feature" | "warning" | "success" | "onboarding";
   icon: React.ReactNode;
   actions?: {
     primary?: { label: string; action: () => void };
     secondary?: { label: string; action: () => void };
   };
   condition?: (context: UserContext) => boolean;
-  priority: 'low' | 'medium' | 'high' | 'critical';
+  priority: "low" | "medium" | "high" | "critical";
 }
 
 // UserContext is now imported from useSmartGuide
@@ -46,9 +46,13 @@ export interface GuideSequence {
   name: string;
   description: string;
   steps: GuideStep[];
-  trigger: 'manual' | 'auto' | 'contextual';
+  trigger: "manual" | "auto" | "contextual";
   targetRoles: string[];
-  category: 'onboarding' | 'feature-discovery' | 'productivity' | 'troubleshooting';
+  category:
+    | "onboarding"
+    | "feature-discovery"
+    | "productivity"
+    | "troubleshooting";
 }
 
 interface SmartTooltipGuideProps {
@@ -62,15 +66,15 @@ const stepTypeIcons = {
   feature: <Sparkles className="w-4 h-4 text-blue-500" />,
   warning: <AlertTriangle className="w-4 h-4 text-orange-500" />,
   success: <CheckCircle className="w-4 h-4 text-green-500" />,
-  onboarding: <Target className="w-4 h-4 text-purple-500" />
+  onboarding: <Target className="w-4 h-4 text-purple-500" />,
 };
 
 const stepTypeStyles = {
-  tip: 'bg-yellow-50 border-yellow-200 text-yellow-900',
-  feature: 'bg-blue-50 border-blue-200 text-blue-900',
-  warning: 'bg-orange-50 border-orange-200 text-orange-900',
-  success: 'bg-green-50 border-green-200 text-green-900',
-  onboarding: 'bg-purple-50 border-purple-200 text-purple-900'
+  tip: "bg-yellow-50 border-yellow-200 text-yellow-900",
+  feature: "bg-blue-50 border-blue-200 text-blue-900",
+  warning: "bg-orange-50 border-orange-200 text-orange-900",
+  success: "bg-green-50 border-green-200 text-green-900",
+  onboarding: "bg-purple-50 border-purple-200 text-purple-900",
 };
 
 // Smart contextual guide sequences based on user role and activity
@@ -80,163 +84,183 @@ const createGuideSequences = (context: UserContext): GuideSequence[] => {
   // New User Onboarding
   if (context.firstTimeUser || !context.hasCompletedOnboarding) {
     sequences.push({
-      id: 'new-user-onboarding',
-      name: 'Welcome to The Sandwich Project',
-      description: 'Get started with the basics of managing sandwich collections',
-      trigger: 'auto',
-      targetRoles: ['volunteer', 'host', 'core_team', 'admin'],
-      category: 'onboarding',
+      id: "new-user-onboarding",
+      name: "Welcome to The Sandwich Project",
+      description:
+        "Get started with the basics of managing sandwich collections",
+      trigger: "auto",
+      targetRoles: ["volunteer", "host", "core_team", "admin"],
+      category: "onboarding",
       steps: [
         {
-          id: 'welcome',
-          title: 'Welcome to The Sandwich Project!',
-          description: 'This platform helps you track sandwich collections and make a real impact in your community. Let\'s get you started!',
-          position: 'center',
-          type: 'onboarding',
+          id: "welcome",
+          title: "Welcome to The Sandwich Project!",
+          description:
+            "This platform helps you track sandwich collections and make a real impact in your community. Let's get you started!",
+          position: "center",
+          type: "onboarding",
           icon: <Target className="w-5 h-5" />,
-          priority: 'high'
+          priority: "high",
         },
         {
-          id: 'navigation',
-          title: 'Navigate the Dashboard',
-          description: 'Use the sidebar to access different sections. Collections, Reports, and Messaging are your main areas.',
+          id: "navigation",
+          title: "Navigate the Dashboard",
+          description:
+            "Use the sidebar to access different sections. Collections, Reports, and Messaging are your main areas.",
           element: '[data-guide="main-navigation"]',
-          position: 'right',
-          type: 'tip',
+          position: "right",
+          type: "tip",
           icon: <Target className="w-5 h-5" />,
-          priority: 'high'
-        }
-      ]
+          priority: "high",
+        },
+      ],
     });
   }
 
   // Role-specific guides
-  if (context.role === 'volunteer' || context.role === 'host') {
+  if (context.role === "volunteer" || context.role === "host") {
     sequences.push({
-      id: 'collection-basics',
-      name: 'Recording Collections',
-      description: 'Learn how to record sandwich collections efficiently',
-      trigger: 'contextual',
-      targetRoles: ['volunteer', 'host'],
-      category: 'feature-discovery',
+      id: "collection-basics",
+      name: "Recording Collections",
+      description: "Learn how to record sandwich collections efficiently",
+      trigger: "contextual",
+      targetRoles: ["volunteer", "host"],
+      category: "feature-discovery",
       steps: [
         {
-          id: 'add-collection',
-          title: 'Add Collection Data',
-          description: 'Click "Record New Collection" to start entering sandwich numbers. You can use either the quick form or step-by-step walkthrough.',
+          id: "add-collection",
+          title: "Add Collection Data",
+          description:
+            'Click "Record New Collection" to start entering sandwich numbers. You can use either the quick form or step-by-step walkthrough.',
           element: '[data-guide="add-collection"]',
-          position: 'bottom',
-          type: 'feature',
+          position: "bottom",
+          type: "feature",
           icon: <FileText className="w-5 h-5" />,
-          priority: 'medium',
+          priority: "medium",
           actions: {
-            primary: { label: 'Try It Now', action: () => console.log('Navigate to collections') }
-          }
+            primary: {
+              label: "Try It Now",
+              action: () => console.log("Navigate to collections"),
+            },
+          },
         },
         {
-          id: 'walkthrough-vs-quick',
-          title: 'Choose Your Entry Method',
-          description: 'New to collections? Use the step-by-step walkthrough. Experienced? The quick form is perfect for fast data entry.',
+          id: "walkthrough-vs-quick",
+          title: "Choose Your Entry Method",
+          description:
+            "New to collections? Use the step-by-step walkthrough. Experienced? The quick form is perfect for fast data entry.",
           element: '[data-guide="entry-method"]',
-          position: 'top',
-          type: 'tip',
+          position: "top",
+          type: "tip",
           icon: <TrendingUp className="w-5 h-5" />,
-          priority: 'medium'
-        }
-      ]
+          priority: "medium",
+        },
+      ],
     });
   }
 
   // Admin/Core Team guides
-  if (context.role === 'admin' || context.role === 'core_team') {
+  if (context.role === "admin" || context.role === "core_team") {
     sequences.push({
-      id: 'admin-features',
-      name: 'Administrative Tools',
-      description: 'Discover powerful tools for managing the organization',
-      trigger: 'manual',
-      targetRoles: ['admin', 'core_team'],
-      category: 'feature-discovery',
+      id: "admin-features",
+      name: "Administrative Tools",
+      description: "Discover powerful tools for managing the organization",
+      trigger: "manual",
+      targetRoles: ["admin", "core_team"],
+      category: "feature-discovery",
       steps: [
         {
-          id: 'user-management',
-          title: 'Manage Team Members',
-          description: 'Add new users, assign roles, and manage permissions from the User Management section.',
+          id: "user-management",
+          title: "Manage Team Members",
+          description:
+            "Add new users, assign roles, and manage permissions from the User Management section.",
           element: '[data-guide="user-management"]',
-          position: 'left',
-          type: 'feature',
+          position: "left",
+          type: "feature",
           icon: <Users className="w-5 h-5" />,
-          priority: 'medium'
+          priority: "medium",
         },
         {
-          id: 'reports-analytics',
-          title: 'Analytics Dashboard',
-          description: 'Generate comprehensive reports and track community impact with detailed analytics.',
+          id: "reports-analytics",
+          title: "Analytics Dashboard",
+          description:
+            "Generate comprehensive reports and track community impact with detailed analytics.",
           element: '[data-guide="analytics"]',
-          position: 'bottom',
-          type: 'feature',
+          position: "bottom",
+          type: "feature",
           icon: <TrendingUp className="w-5 h-5" />,
-          priority: 'medium'
-        }
-      ]
+          priority: "medium",
+        },
+      ],
     });
   }
 
   // Productivity tips for experienced users
   if (!context.firstTimeUser && context.recentActivity.length > 10) {
     sequences.push({
-      id: 'productivity-tips',
-      name: 'Pro Tips',
-      description: 'Advanced features to boost your productivity',
-      trigger: 'contextual',
-      targetRoles: ['volunteer', 'host', 'core_team', 'admin'],
-      category: 'productivity',
+      id: "productivity-tips",
+      name: "Pro Tips",
+      description: "Advanced features to boost your productivity",
+      trigger: "contextual",
+      targetRoles: ["volunteer", "host", "core_team", "admin"],
+      category: "productivity",
       steps: [
         {
-          id: 'keyboard-shortcuts',
-          title: 'Keyboard Shortcuts',
-          description: 'Use Ctrl+K to quickly search, Ctrl+N for new collection, and Ctrl+R for reports.',
-          position: 'center',
-          type: 'tip',
+          id: "keyboard-shortcuts",
+          title: "Keyboard Shortcuts",
+          description:
+            "Use Ctrl+K to quickly search, Ctrl+N for new collection, and Ctrl+R for reports.",
+          position: "center",
+          type: "tip",
           icon: <Sparkles className="w-5 h-5" />,
-          priority: 'low'
+          priority: "low",
         },
         {
-          id: 'bulk-operations',
-          title: 'Bulk Data Entry',
-          description: 'Upload CSV files or use copy-paste for multiple collections at once.',
+          id: "bulk-operations",
+          title: "Bulk Data Entry",
+          description:
+            "Upload CSV files or use copy-paste for multiple collections at once.",
           element: '[data-guide="bulk-entry"]',
-          position: 'top',
-          type: 'feature',
+          position: "top",
+          type: "feature",
           icon: <FileText className="w-5 h-5" />,
-          priority: 'medium'
-        }
-      ]
+          priority: "medium",
+        },
+      ],
     });
   }
 
-  return sequences.filter(seq => 
-    seq.targetRoles.includes(context.role) &&
-    seq.steps.every(step => !step.condition || step.condition(context))
+  return sequences.filter(
+    (seq) =>
+      seq.targetRoles.includes(context.role) &&
+      seq.steps.every((step) => !step.condition || step.condition(context))
   );
 };
 
-export function SmartTooltipGuide({ userContext, className = '', showGlobalGuide = false }: SmartTooltipGuideProps) {
+export function SmartTooltipGuide({
+  userContext,
+  className = "",
+  showGlobalGuide = false,
+}: SmartTooltipGuideProps) {
   // Help system completely disabled - return null to prevent any rendering
   return null;
   const [isVisible, setIsVisible] = useState(false);
-  const [activeSequence, setActiveSequence] = useState<GuideSequence | null>(null);
+  const [activeSequence, setActiveSequence] = useState<GuideSequence | null>(
+    null
+  );
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [completedSequences, setCompletedSequences] = useState<string[]>([]);
   const guideRef = useRef<HTMLDivElement>(null);
 
   const sequences = createGuideSequences(userContext);
-  const availableSequences = sequences.filter(seq => !completedSequences.includes(seq.id));
+  const availableSequences = sequences.filter(
+    (seq) => !completedSequences.includes(seq.id)
+  );
 
   useEffect(() => {
     // Auto-trigger sequences based on context
-    const autoSequence = sequences.find(seq => 
-      seq.trigger === 'auto' && 
-      !completedSequences.includes(seq.id)
+    const autoSequence = sequences.find(
+      (seq) => seq.trigger === "auto" && !completedSequences.includes(seq.id)
     );
 
     if (autoSequence && userContext.firstTimeUser) {
@@ -249,12 +273,12 @@ export function SmartTooltipGuide({ userContext, className = '', showGlobalGuide
 
   const handleNextStep = () => {
     if (!activeSequence) return;
-    
+
     if (currentStepIndex < activeSequence.steps.length - 1) {
       setCurrentStepIndex(currentStepIndex + 1);
     } else {
       // Sequence completed
-      setCompletedSequences(prev => [...prev, activeSequence.id]);
+      setCompletedSequences((prev) => [...prev, activeSequence.id]);
       setActiveSequence(null);
       setCurrentStepIndex(0);
       setIsVisible(false);
@@ -269,7 +293,7 @@ export function SmartTooltipGuide({ userContext, className = '', showGlobalGuide
 
   const handleSkipSequence = () => {
     if (!activeSequence) return;
-    setCompletedSequences(prev => [...prev, activeSequence.id]);
+    setCompletedSequences((prev) => [...prev, activeSequence.id]);
     setActiveSequence(null);
     setCurrentStepIndex(0);
     setIsVisible(false);
@@ -302,7 +326,7 @@ export function SmartTooltipGuide({ userContext, className = '', showGlobalGuide
       {/* Main Guide Interface */}
       {isVisible && (
         <div className="fixed inset-0 z-50 bg-black/20 flex items-center justify-center p-4">
-          <Card 
+          <Card
             ref={guideRef}
             className="w-full max-w-lg bg-white shadow-2xl border-0"
           >
@@ -314,7 +338,7 @@ export function SmartTooltipGuide({ userContext, className = '', showGlobalGuide
                   </div>
                   <div>
                     <CardTitle className="text-lg text-slate-900">
-                      {activeSequence ? activeSequence.name : 'Smart Guide'}
+                      {activeSequence ? activeSequence.name : "Smart Guide"}
                     </CardTitle>
                     {activeSequence && (
                       <p className="text-sm text-slate-600 mt-1">
@@ -338,14 +362,18 @@ export function SmartTooltipGuide({ userContext, className = '', showGlobalGuide
                 <div className="mt-4">
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-xs text-slate-600">
-                      Step {currentStepIndex + 1} of {activeSequence.steps.length}
+                      Step {currentStepIndex + 1} of{" "}
+                      {activeSequence.steps.length}
                     </span>
                     <Badge variant="outline" className="text-xs">
                       {activeSequence.category}
                     </Badge>
                   </div>
-                  <Progress 
-                    value={((currentStepIndex + 1) / activeSequence.steps.length) * 100} 
+                  <Progress
+                    value={
+                      ((currentStepIndex + 1) / activeSequence.steps.length) *
+                      100
+                    }
                     className="h-2"
                   />
                 </div>
@@ -359,12 +387,13 @@ export function SmartTooltipGuide({ userContext, className = '', showGlobalGuide
                   <div className="text-center text-slate-600 mb-4">
                     <Info className="w-8 h-8 mx-auto mb-2 text-teal-600" />
                     <p className="text-sm">
-                      Choose a guide to get started, or explore features at your own pace.
+                      Choose a guide to get started, or explore features at your
+                      own pace.
                     </p>
                   </div>
 
                   <div className="space-y-2 max-h-64 overflow-y-auto">
-                    {availableSequences.map(sequence => (
+                    {availableSequences.map((sequence) => (
                       <div
                         key={sequence.id}
                         className="p-3 border rounded-lg hover:bg-slate-50 cursor-pointer transition-colors"
@@ -382,13 +411,16 @@ export function SmartTooltipGuide({ userContext, className = '', showGlobalGuide
                               <Badge variant="secondary" className="text-xs">
                                 {sequence.steps.length} steps
                               </Badge>
-                              <Badge 
-                                variant="outline" 
+                              <Badge
+                                variant="outline"
                                 className={`text-xs ${
-                                  sequence.category === 'onboarding' ? 'border-purple-200 text-purple-700' :
-                                  sequence.category === 'feature-discovery' ? 'border-blue-200 text-blue-700' :
-                                  sequence.category === 'productivity' ? 'border-green-200 text-green-700' :
-                                  'border-orange-200 text-orange-700'
+                                  sequence.category === "onboarding"
+                                    ? "border-purple-200 text-purple-700"
+                                    : sequence.category === "feature-discovery"
+                                    ? "border-blue-200 text-blue-700"
+                                    : sequence.category === "productivity"
+                                    ? "border-green-200 text-green-700"
+                                    : "border-orange-200 text-orange-700"
                                 }`}
                               >
                                 {sequence.category}
@@ -404,7 +436,9 @@ export function SmartTooltipGuide({ userContext, className = '', showGlobalGuide
                       <div className="text-center py-8 text-slate-500">
                         <CheckCircle className="w-8 h-8 mx-auto mb-2" />
                         <p className="text-sm">All guides completed!</p>
-                        <p className="text-xs mt-1">You're all set. Keep up the great work!</p>
+                        <p className="text-xs mt-1">
+                          You're all set. Keep up the great work!
+                        </p>
                       </div>
                     )}
                   </div>
@@ -414,7 +448,11 @@ export function SmartTooltipGuide({ userContext, className = '', showGlobalGuide
               {/* Show current step if sequence is active */}
               {currentStep && (
                 <div className="space-y-4">
-                  <div className={`p-4 rounded-lg border ${stepTypeStyles[currentStep.type]}`}>
+                  <div
+                    className={`p-4 rounded-lg border ${
+                      stepTypeStyles[currentStep.type]
+                    }`}
+                  >
                     <div className="flex items-start gap-3">
                       {stepTypeIcons[currentStep.type]}
                       <div className="flex-1">
@@ -482,7 +520,9 @@ export function SmartTooltipGuide({ userContext, className = '', showGlobalGuide
                         onClick={handleNextStep}
                         className="bg-teal-600 hover:bg-teal-700"
                       >
-                        {currentStepIndex === activeSequence.steps.length - 1 ? 'Complete' : 'Next'}
+                        {currentStepIndex === activeSequence.steps.length - 1
+                          ? "Complete"
+                          : "Next"}
                         {currentStepIndex < activeSequence.steps.length - 1 && (
                           <ChevronRight className="w-4 h-4 ml-1" />
                         )}

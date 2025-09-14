@@ -1,4 +1,18 @@
-import { Sandwich, LogOut, LayoutDashboard, ListTodo, MessageCircle, ClipboardList, FolderOpen, BarChart3, Users, Car, Building2, FileText, Phone } from "lucide-react";
+import {
+  Sandwich,
+  LogOut,
+  LayoutDashboard,
+  ListTodo,
+  MessageCircle,
+  ClipboardList,
+  FolderOpen,
+  BarChart3,
+  Users,
+  Car,
+  Building2,
+  FileText,
+  Phone,
+} from "lucide-react";
 import PhoneDirectoryFixed from "@/components/phone-directory-fixed";
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
@@ -11,14 +25,29 @@ export default function PhoneDirectoryPage() {
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, path: "/" },
     { id: "projects", label: "Projects", icon: ListTodo, path: "/" },
     { id: "messages", label: "Messages", icon: MessageCircle, path: "/" },
-    { id: "meetings", label: "Meetings", icon: ClipboardList, path: "/meetings" },
+    {
+      id: "meetings",
+      label: "Meetings",
+      icon: ClipboardList,
+      path: "/meetings",
+    },
     { id: "toolkit", label: "Toolkit", icon: FileText, path: "/" },
     { id: "collections", label: "Collections", icon: BarChart3, path: "/" },
     { id: "hosts", label: "Hosts", icon: Building2, path: "/" },
     { id: "recipients", label: "Recipients", icon: Users, path: "/" },
-    { id: "directory", label: "Phone Directory", icon: Phone, path: "/phone-directory" },
+    {
+      id: "directory",
+      label: "Phone Directory",
+      icon: Phone,
+      path: "/phone-directory",
+    },
     { id: "drivers", label: "Drivers", icon: Car, path: "/" },
-    { id: "development", label: "Development", icon: FileText, path: "/development" },
+    {
+      id: "development",
+      label: "Development",
+      icon: FileText,
+      path: "/development",
+    },
   ];
 
   return (
@@ -29,7 +58,9 @@ export default function PhoneDirectoryPage() {
         <div className="p-4 border-b border-slate-200">
           <div className="flex items-center space-x-3">
             <Sandwich className="text-amber-500 w-6 h-6" />
-            <h1 className="text-lg font-semibold text-slate-900">The Sandwich Project</h1>
+            <h1 className="text-lg font-semibold text-slate-900">
+              The Sandwich Project
+            </h1>
           </div>
         </div>
 
@@ -41,7 +72,7 @@ export default function PhoneDirectoryPage() {
               const isActive = location === item.path;
               return (
                 <li key={item.id}>
-                  <Link 
+                  <Link
                     href={item.path}
                     className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
                       isActive
@@ -62,22 +93,26 @@ export default function PhoneDirectoryPage() {
         <div className="p-4 border-t border-slate-200">
           <div className="flex items-center justify-between">
             <span className="text-sm text-slate-600">Welcome, Team</span>
-            <button 
+            <button
               onClick={async () => {
                 try {
-                  await fetch('/api/logout', { 
-                    method: 'POST',
-                    credentials: 'include'
+                  await fetch("/api/logout", {
+                    method: "POST",
+                    credentials: "include",
                   });
                   queryClient.clear();
-                  queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
-                  queryClient.removeQueries({ queryKey: ['/api/auth/user'] });
-                  window.location.href = '/api/login';
+                  queryClient.invalidateQueries({
+                    queryKey: ["/api/auth/user"],
+                  });
+                  queryClient.removeQueries({ queryKey: ["/api/auth/user"] });
+                  window.location.href = "/api/login";
                 } catch (error) {
                   queryClient.clear();
-                  queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
-                  queryClient.removeQueries({ queryKey: ['/api/auth/user'] });
-                  window.location.href = '/api/login';
+                  queryClient.invalidateQueries({
+                    queryKey: ["/api/auth/user"],
+                  });
+                  queryClient.removeQueries({ queryKey: ["/api/auth/user"] });
+                  window.location.href = "/api/login";
                 }
               }}
               className="text-slate-400 hover:text-slate-600"

@@ -1,6 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -8,7 +14,14 @@ import { useAuth } from "@/hooks/useAuth";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
-import { CheckCircle2, Truck, User, Trash2, MoreVertical, Edit } from "lucide-react";
+import {
+  CheckCircle2,
+  Truck,
+  User,
+  Trash2,
+  MoreVertical,
+  Edit,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,10 +54,11 @@ export default function DriverChat() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Check if user has Driver Chat access
-  const hasDriverChatAccess = user?.permissions?.includes('driver_chat') ||
-    user?.role === 'admin' || 
-    user?.role === 'admin_coordinator' ||
-    user?.role === 'super_admin';
+  const hasDriverChatAccess =
+    user?.permissions?.includes("driver_chat") ||
+    user?.role === "admin" ||
+    user?.role === "admin_coordinator" ||
+    user?.role === "super_admin";
 
   // Get all conversations to find Driver Chat
   const { data: conversations = [] } = useQuery<Conversation[]>({
@@ -61,22 +75,28 @@ export default function DriverChat() {
   });
 
   // Find Driver Chat conversation from the list
-  const driverConversation = conversations.find((c) => 
-    c.type === 'channel' && c.name === 'Driver Chat'
+  const driverConversation = conversations.find(
+    (c) => c.type === "channel" && c.name === "Driver Chat"
   );
 
   // Fetch driver messages from the conversation system
-  const { data: messages = [], isLoading: messagesLoading, error: messagesError } = useQuery<Message[]>({
+  const {
+    data: messages = [],
+    isLoading: messagesLoading,
+    error: messagesError,
+  } = useQuery<Message[]>({
     queryKey: ["/api/conversations", driverConversation?.id, "messages"],
     queryFn: async () => {
       if (!driverConversation?.id) {
         return [];
       }
-      
-      const response = await fetch(`/api/conversations/${driverConversation.id}/messages`);
+
+      const response = await fetch(
+        `/api/conversations/${driverConversation.id}/messages`
+      );
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Failed to fetch Driver messages:', errorText);
+        console.error("Failed to fetch Driver messages:", errorText);
         throw new Error(`Failed to fetch messages: ${response.statusText}`);
       }
       const data = await response.json();
@@ -92,22 +112,29 @@ export default function DriverChat() {
       if (!driverConversation?.id) {
         throw new Error("Driver conversation not found");
       }
-      
-      const response = await apiRequest("POST", `/api/conversations/${driverConversation.id}/messages`, {
-        content
-      });
-      
+
+      const response = await apiRequest(
+        "POST",
+        `/api/conversations/${driverConversation.id}/messages`,
+        {
+          content,
+        }
+      );
+
       return response;
     },
     onSuccess: () => {
       setMessage("");
-      queryClient.invalidateQueries({ queryKey: ["/api/conversations", driverConversation?.id, "messages"] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/conversations", driverConversation?.id, "messages"],
+      });
     },
     onError: (error) => {
       console.error("Failed to post message:", error);
       toast({
         title: "Failed to send message",
-        description: error instanceof Error ? error.message : "An error occurred",
+        description:
+          error instanceof Error ? error.message : "An error occurred",
         variant: "destructive",
       });
     },
@@ -115,14 +142,24 @@ export default function DriverChat() {
 
   // Edit message mutation
   const editMessageMutation = useMutation({
-    mutationFn: async ({ messageId, content }: { messageId: number; content: string }) => {
-      const response = await apiRequest("PATCH", `/api/messages/${messageId}`, { content });
+    mutationFn: async ({
+      messageId,
+      content,
+    }: {
+      messageId: number;
+      content: string;
+    }) => {
+      const response = await apiRequest("PATCH", `/api/messages/${messageId}`, {
+        content,
+      });
       return response;
     },
     onSuccess: () => {
       setEditingMessageId(null);
       setEditContent("");
-      queryClient.invalidateQueries({ queryKey: ["/api/conversations", driverConversation?.id, "messages"] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/conversations", driverConversation?.id, "messages"],
+      });
       toast({
         title: "Message updated",
         description: "Your message has been edited successfully.",
@@ -131,7 +168,8 @@ export default function DriverChat() {
     onError: (error) => {
       toast({
         title: "Failed to edit message",
-        description: error instanceof Error ? error.message : "An error occurred",
+        description:
+          error instanceof Error ? error.message : "An error occurred",
         variant: "destructive",
       });
     },
@@ -144,7 +182,9 @@ export default function DriverChat() {
       return response;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/conversations", driverConversation?.id, "messages"] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/conversations", driverConversation?.id, "messages"],
+      });
       toast({
         title: "Message deleted",
         description: "Your message has been removed.",
@@ -153,7 +193,8 @@ export default function DriverChat() {
     onError: (error) => {
       toast({
         title: "Failed to delete message",
-        description: error instanceof Error ? error.message : "An error occurred",
+        description:
+          error instanceof Error ? error.message : "An error occurred",
         variant: "destructive",
       });
     },
@@ -161,7 +202,7 @@ export default function DriverChat() {
 
   // Filter out null/undefined messages and ensure we have valid data
   const displayedMessages = (messages || []).filter((msg): msg is Message => {
-    return msg && typeof msg === 'object' && 'content' in msg;
+    return msg && typeof msg === "object" && "content" in msg;
   });
 
   // Scroll to bottom when messages change
@@ -233,25 +274,41 @@ export default function DriverChat() {
       </CardHeader>
       <CardContent className="flex-1 flex flex-col overflow-hidden">
         <div className="flex-1 overflow-y-auto space-y-4 mb-4">
-          {messagesLoading && <div className="text-center text-muted-foreground">Loading messages...</div>}
+          {messagesLoading && (
+            <div className="text-center text-muted-foreground">
+              Loading messages...
+            </div>
+          )}
           {messagesError && (
             <div className="text-center text-destructive">
-              Error loading messages: {messagesError instanceof Error ? messagesError.message : 'Unknown error'}
+              Error loading messages:{" "}
+              {messagesError instanceof Error
+                ? messagesError.message
+                : "Unknown error"}
             </div>
           )}
-          {!messagesLoading && !messagesError && displayedMessages.length === 0 && (
-            <div className="text-center text-muted-foreground">
-              No messages yet. Start the conversation!
-            </div>
-          )}
+          {!messagesLoading &&
+            !messagesError &&
+            displayedMessages.length === 0 && (
+              <div className="text-center text-muted-foreground">
+                No messages yet. Start the conversation!
+              </div>
+            )}
           {displayedMessages.map((msg) => {
             const msgUserId = msg.userId || msg.user_id;
             const msgCreatedAt = msg.createdAt || msg.created_at;
             const isOwnMessage = msgUserId === user?.id;
-            
+
             return (
-              <div key={msg.id} className={`flex gap-3 ${isOwnMessage ? 'justify-end' : ''}`}>
-                <div className={`flex gap-3 max-w-[85%] xs:max-w-[80%] sm:max-w-[75%] ${isOwnMessage ? 'flex-row-reverse' : ''}`}>
+              <div
+                key={msg.id}
+                className={`flex gap-3 ${isOwnMessage ? "justify-end" : ""}`}
+              >
+                <div
+                  className={`flex gap-3 max-w-[85%] xs:max-w-[80%] sm:max-w-[75%] ${
+                    isOwnMessage ? "flex-row-reverse" : ""
+                  }`}
+                >
                   <div className="flex-shrink-0">
                     <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center">
                       {isOwnMessage ? (
@@ -261,18 +318,32 @@ export default function DriverChat() {
                       )}
                     </div>
                   </div>
-                  <div className={`space-y-1 ${isOwnMessage ? 'items-end' : ''}`}>
-                    <div className={`flex items-center gap-2 ${isOwnMessage ? 'flex-row-reverse' : ''}`}>
+                  <div
+                    className={`space-y-1 ${isOwnMessage ? "items-end" : ""}`}
+                  >
+                    <div
+                      className={`flex items-center gap-2 ${
+                        isOwnMessage ? "flex-row-reverse" : ""
+                      }`}
+                    >
                       <span className="text-sm font-medium">
                         {msg.sender || "Driver"}
                       </span>
                       <span className="text-xs text-muted-foreground">
-                        {msgCreatedAt ? formatDistanceToNow(new Date(msgCreatedAt), { addSuffix: true }) : 'just now'}
+                        {msgCreatedAt
+                          ? formatDistanceToNow(new Date(msgCreatedAt), {
+                              addSuffix: true,
+                            })
+                          : "just now"}
                       </span>
                       {isOwnMessage && (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 w-6 p-0"
+                            >
                               <MoreVertical className="h-3 w-3" />
                             </Button>
                           </DropdownMenuTrigger>
@@ -317,12 +388,14 @@ export default function DriverChat() {
                         </div>
                       </div>
                     ) : (
-                      <div className={`rounded-lg px-3 py-2 ${
-                        isOwnMessage 
-                          ? 'bg-orange-500 text-white' 
-                          : 'bg-muted'
-                      }`}>
-                        <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                      <div
+                        className={`rounded-lg px-3 py-2 ${
+                          isOwnMessage ? "bg-orange-500 text-white" : "bg-muted"
+                        }`}
+                      >
+                        <p className="text-sm whitespace-pre-wrap">
+                          {msg.content}
+                        </p>
                       </div>
                     )}
                   </div>

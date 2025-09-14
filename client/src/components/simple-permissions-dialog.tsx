@@ -341,7 +341,8 @@ const PERMISSION_GROUPS = [
   {
     id: "kudos_system",
     label: "Kudos & Recognition",
-    description: "Controls access to the kudos system for recognizing achievements and contributions",
+    description:
+      "Controls access to the kudos system for recognizing achievements and contributions",
     type: "kudos",
     permissions: [
       {
@@ -557,7 +558,7 @@ export function SimplePermissionsDialog({
       setSelectedPermissions([...selectedPermissions, permission]);
     } else {
       setSelectedPermissions(
-        selectedPermissions.filter((p) => p !== permission),
+        selectedPermissions.filter((p) => p !== permission)
       );
     }
   };
@@ -577,7 +578,7 @@ export function SimplePermissionsDialog({
   const getCategoryStatus = (category: any) => {
     const categoryPermissions = category.permissions.map((p: any) => p.key);
     const checkedCount = categoryPermissions.filter((p: string) =>
-      selectedPermissions.includes(p),
+      selectedPermissions.includes(p)
     ).length;
 
     if (checkedCount === 0) return "none";
@@ -592,7 +593,7 @@ export function SimplePermissionsDialog({
     if (status === "all") {
       // Remove all category permissions
       setSelectedPermissions(
-        selectedPermissions.filter((p) => !categoryPermissions.includes(p)),
+        selectedPermissions.filter((p) => !categoryPermissions.includes(p))
       );
     } else {
       // Add all category permissions
@@ -728,7 +729,7 @@ export function SimplePermissionsDialog({
                             onCheckedChange={(checked) =>
                               handlePermissionChange(
                                 permission.key,
-                                checked as boolean,
+                                checked as boolean
                               )
                             }
                             className="mt-1"
@@ -780,7 +781,7 @@ export function SimplePermissionsDialog({
                 size="sm"
                 onClick={() => {
                   const allPermissions = PERMISSION_GROUPS.flatMap((group) =>
-                    group.permissions.map((p) => p.key),
+                    group.permissions.map((p) => p.key)
                   );
                   setSelectedPermissions(allPermissions);
                 }}

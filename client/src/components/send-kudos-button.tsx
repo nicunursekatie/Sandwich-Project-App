@@ -29,21 +29,24 @@ export default function SendKudosButton({
   className = "",
   size = "sm",
   variant = "outline",
-  iconOnly = false
+  iconOnly = false,
 }: SendKudosButtonProps) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [hasSentKudos, setHasSentKudos] = useState(false);
-  
+
   // Check if kudos already sent when component mounts
   useEffect(() => {
     const checkKudosStatus = async () => {
       if (!user || !recipientId || !contextType || !contextId) return;
-      
+
       try {
-        const response = await fetch(`/api/messaging/kudos/check?recipientId=${recipientId}&contextType=${contextType}&contextId=${contextId}`, {
-          credentials: 'include'
-        });
+        const response = await fetch(
+          `/api/messaging/kudos/check?recipientId=${recipientId}&contextType=${contextType}&contextId=${contextId}`,
+          {
+            credentials: "include",
+          }
+        );
         if (response.ok) {
           const data = await response.json();
           if (data.sent) {
@@ -54,18 +57,18 @@ export default function SendKudosButton({
         // Silently fail - worst case user gets a 409 error when clicking
       }
     };
-    
+
     checkKudosStatus();
   }, [user, recipientId, contextType, contextId]);
 
   // Don't render if recipientId is empty or invalid
   if (!recipientId || !recipientId.trim()) {
-    console.warn('SendKudosButton: Not rendering due to empty recipientId', {
+    console.warn("SendKudosButton: Not rendering due to empty recipientId", {
       recipientId,
       recipientName,
       contextType,
       contextId,
-      contextTitle
+      contextTitle,
     });
     return null;
   }
@@ -77,55 +80,63 @@ export default function SendKudosButton({
 
   // Don't render if user doesn't have permission to send kudos
   if (!hasPermission(user, PERMISSIONS.SEND_KUDOS)) {
-    console.warn('SendKudosButton: User lacks SEND_KUDOS permission', {
+    console.warn("SendKudosButton: User lacks SEND_KUDOS permission", {
       user: user ? { id: (user as any).id, email: (user as any).email } : null,
       hasPermission: hasPermission(user, PERMISSIONS.SEND_KUDOS),
-      SEND_KUDOS: PERMISSIONS.SEND_KUDOS
+      SEND_KUDOS: PERMISSIONS.SEND_KUDOS,
     });
     return null;
   }
 
   const sendKudosMutation = useMutation({
     mutationFn: async () => {
-      const kudosMessage = generateKudosMessage(recipientName, contextType, contextTitle);
-      
+      const kudosMessage = generateKudosMessage(
+        recipientName,
+        contextType,
+        contextTitle
+      );
+
       // Debug logging
-      console.log('SendKudosButton mutation data:', {
+      console.log("SendKudosButton mutation data:", {
         recipientId,
         recipientName,
         contextType,
         contextId,
         entityName: contextTitle,
-        content: kudosMessage
+        content: kudosMessage,
       });
 
       if (!recipientId || !recipientId.trim()) {
-        console.error('SendKudosButton: Empty recipientId detected', {
+        console.error("SendKudosButton: Empty recipientId detected", {
           recipientId,
           recipientName,
           contextType,
           contextId,
-          contextTitle
+          contextTitle,
         });
         throw new Error(`Cannot send kudos: recipient ID is empty`);
       }
-      
-      return await apiRequest('POST', '/api/messaging/kudos', {
+
+      return await apiRequest("POST", "/api/messaging/kudos", {
         recipientId,
         contextType,
         contextId,
         entityName: contextTitle,
-        content: kudosMessage
+        content: kudosMessage,
       });
     },
     onSuccess: () => {
       setHasSentKudos(true);
       queryClient.invalidateQueries({ queryKey: ["/api/messaging/kudos"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/messaging/kudos/received"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/message-notifications/unread-counts"] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/messaging/kudos/received"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/message-notifications/unread-counts"],
+      });
       toast({
         description: `Kudos sent to ${recipientName}!`,
-        duration: 3000
+        duration: 3000,
       });
     },
     onError: (error: any) => {
@@ -134,13 +145,16 @@ export default function SendKudosButton({
         setHasSentKudos(true);
         // Don't show error toast for duplicate kudos - just silently update the UI
       } else {
-        const errorMessage = error?.response?.data?.error || error?.message || "Failed to send kudos";
+        const errorMessage =
+          error?.response?.data?.error ||
+          error?.message ||
+          "Failed to send kudos";
         toast({
           description: errorMessage,
-          variant: "destructive"
+          variant: "destructive",
         });
       }
-    }
+    },
   });
 
   const generateKudosMessage = (name: string, type: string, title: string) => {
@@ -152,9 +166,9 @@ export default function SendKudosButton({
       `🎯 Awesome job with ${title}, ${name}! Thanks for being such a valuable team member.`,
       `🌟 Brilliant work on ${title}! Your contribution is truly appreciated.`,
       `🚀 Amazing job completing ${title}, ${name}! Your effort doesn't go unnoticed.`,
-      `💫 Wonderful work on ${title}! Thanks for your commitment to excellence.`
+      `💫 Wonderful work on ${title}! Thanks for your commitment to excellence.`,
     ];
-    
+
     return messages[Math.floor(Math.random() * messages.length)];
   };
 

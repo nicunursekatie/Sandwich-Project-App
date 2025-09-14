@@ -62,40 +62,52 @@ const RESOURCE_PERMISSIONS = [
       { action: "VIEW", label: "View host information", key: "HOSTS_VIEW" },
       { action: "ADD", label: "Add new hosts", key: "HOSTS_ADD" },
       { action: "EDIT", label: "Edit host details", key: "HOSTS_EDIT" },
-      { action: "DELETE", label: "Delete hosts", key: "HOSTS_DELETE" }
-    ]
+      { action: "DELETE", label: "Delete hosts", key: "HOSTS_DELETE" },
+    ],
   },
   {
-    resource: "RECIPIENTS", 
+    resource: "RECIPIENTS",
     label: "Recipient Organizations",
     description: "Manage receiving organization information",
     icon: Users,
     color: "bg-green-50 border-green-200",
     iconColor: "text-green-600",
     actions: [
-      { action: "VIEW", label: "View recipient information", key: "RECIPIENTS_VIEW" },
+      {
+        action: "VIEW",
+        label: "View recipient information",
+        key: "RECIPIENTS_VIEW",
+      },
       { action: "ADD", label: "Add new recipients", key: "RECIPIENTS_ADD" },
-      { action: "EDIT", label: "Edit recipient details", key: "RECIPIENTS_EDIT" },
-      { action: "DELETE", label: "Delete recipients", key: "RECIPIENTS_DELETE" }
-    ]
+      {
+        action: "EDIT",
+        label: "Edit recipient details",
+        key: "RECIPIENTS_EDIT",
+      },
+      {
+        action: "DELETE",
+        label: "Delete recipients",
+        key: "RECIPIENTS_DELETE",
+      },
+    ],
   },
   {
     resource: "DRIVERS",
     label: "Drivers",
     description: "Manage volunteer drivers and vehicles",
     icon: Truck,
-    color: "bg-blue-50 border-blue-200", 
+    color: "bg-blue-50 border-blue-200",
     iconColor: "text-blue-600",
     actions: [
       { action: "VIEW", label: "View driver information", key: "DRIVERS_VIEW" },
       { action: "ADD", label: "Add new drivers", key: "DRIVERS_ADD" },
       { action: "EDIT", label: "Edit driver details", key: "DRIVERS_EDIT" },
-      { action: "DELETE", label: "Delete drivers", key: "DRIVERS_DELETE" }
-    ]
+      { action: "DELETE", label: "Delete drivers", key: "DRIVERS_DELETE" },
+    ],
   },
   {
     resource: "USERS",
-    label: "User Management", 
+    label: "User Management",
     description: "Manage user accounts and permissions",
     icon: UserCheck,
     color: "bg-purple-50 border-purple-200",
@@ -104,55 +116,115 @@ const RESOURCE_PERMISSIONS = [
       { action: "VIEW", label: "View user accounts", key: "USERS_VIEW" },
       { action: "ADD", label: "Create new users", key: "USERS_ADD" },
       { action: "EDIT", label: "Edit user accounts", key: "USERS_EDIT" },
-      { action: "DELETE", label: "Delete user accounts", key: "USERS_DELETE" }
-    ]
+      { action: "DELETE", label: "Delete user accounts", key: "USERS_DELETE" },
+    ],
   },
   {
     resource: "COLLECTIONS",
     label: "Sandwich Collections",
     description: "Log and track sandwich collection data",
     icon: Database,
-    color: "bg-yellow-50 border-yellow-200", 
+    color: "bg-yellow-50 border-yellow-200",
     iconColor: "text-yellow-600",
     actions: [
-      { action: "VIEW", label: "View collection data", key: "COLLECTIONS_VIEW" },
-      { action: "ADD", label: "Submit new collections", key: "COLLECTIONS_ADD" },
-      { action: "EDIT_OWN", label: "Edit own collection entries", key: "COLLECTIONS_EDIT_OWN" },
-      { action: "EDIT_ALL", label: "Edit any collection entries", key: "COLLECTIONS_EDIT_ALL" },
-      { action: "DELETE_OWN", label: "Delete own collection data", key: "COLLECTIONS_DELETE_OWN" },
-      { action: "DELETE_ALL", label: "Delete any collection data", key: "COLLECTIONS_DELETE_ALL" },
-      { action: "WALKTHROUGH", label: "Use collection walkthrough tool", key: "COLLECTIONS_WALKTHROUGH" }
-    ]
+      {
+        action: "VIEW",
+        label: "View collection data",
+        key: "COLLECTIONS_VIEW",
+      },
+      {
+        action: "ADD",
+        label: "Submit new collections",
+        key: "COLLECTIONS_ADD",
+      },
+      {
+        action: "EDIT_OWN",
+        label: "Edit own collection entries",
+        key: "COLLECTIONS_EDIT_OWN",
+      },
+      {
+        action: "EDIT_ALL",
+        label: "Edit any collection entries",
+        key: "COLLECTIONS_EDIT_ALL",
+      },
+      {
+        action: "DELETE_OWN",
+        label: "Delete own collection data",
+        key: "COLLECTIONS_DELETE_OWN",
+      },
+      {
+        action: "DELETE_ALL",
+        label: "Delete any collection data",
+        key: "COLLECTIONS_DELETE_ALL",
+      },
+      {
+        action: "WALKTHROUGH",
+        label: "Use collection walkthrough tool",
+        key: "COLLECTIONS_WALKTHROUGH",
+      },
+    ],
   },
   {
     resource: "PROJECTS",
     label: "Projects",
-    description: "Manage organizational projects and initiatives", 
+    description: "Manage organizational projects and initiatives",
     icon: FileText,
     color: "bg-indigo-50 border-indigo-200",
-    iconColor: "text-indigo-600", 
+    iconColor: "text-indigo-600",
     actions: [
       { action: "VIEW", label: "View projects", key: "PROJECTS_VIEW" },
       { action: "ADD", label: "Create new projects", key: "PROJECTS_ADD" },
-      { action: "EDIT_OWN", label: "Edit assigned projects", key: "PROJECTS_EDIT_OWN" },
-      { action: "EDIT_ALL", label: "Edit any projects", key: "PROJECTS_EDIT_ALL" },
-      { action: "DELETE_OWN", label: "Delete assigned projects", key: "PROJECTS_DELETE_OWN" },
-      { action: "DELETE_ALL", label: "Delete any projects", key: "PROJECTS_DELETE_ALL" }
-    ]
+      {
+        action: "EDIT_OWN",
+        label: "Edit assigned projects",
+        key: "PROJECTS_EDIT_OWN",
+      },
+      {
+        action: "EDIT_ALL",
+        label: "Edit any projects",
+        key: "PROJECTS_EDIT_ALL",
+      },
+      {
+        action: "DELETE_OWN",
+        label: "Delete assigned projects",
+        key: "PROJECTS_DELETE_OWN",
+      },
+      {
+        action: "DELETE_ALL",
+        label: "Delete any projects",
+        key: "PROJECTS_DELETE_ALL",
+      },
+    ],
   },
   {
     resource: "DISTRIBUTIONS",
-    label: "Distribution Tracking", 
+    label: "Distribution Tracking",
     description: "Track sandwich deliveries and distributions",
     icon: MapPin,
     color: "bg-red-50 border-red-200",
     iconColor: "text-red-600",
     actions: [
-      { action: "VIEW", label: "View distribution data", key: "DISTRIBUTIONS_VIEW" },
-      { action: "ADD", label: "Log new distributions", key: "DISTRIBUTIONS_ADD" },
-      { action: "EDIT", label: "Edit distribution records", key: "DISTRIBUTIONS_EDIT" },
-      { action: "DELETE", label: "Delete distribution data", key: "DISTRIBUTIONS_DELETE" }
-    ]
+      {
+        action: "VIEW",
+        label: "View distribution data",
+        key: "DISTRIBUTIONS_VIEW",
+      },
+      {
+        action: "ADD",
+        label: "Log new distributions",
+        key: "DISTRIBUTIONS_ADD",
+      },
+      {
+        action: "EDIT",
+        label: "Edit distribution records",
+        key: "DISTRIBUTIONS_EDIT",
+      },
+      {
+        action: "DELETE",
+        label: "Delete distribution data",
+        key: "DISTRIBUTIONS_DELETE",
+      },
+    ],
   },
   {
     resource: "EVENT_REQUESTS",
@@ -162,12 +234,32 @@ const RESOURCE_PERMISSIONS = [
     color: "bg-pink-50 border-pink-200",
     iconColor: "text-pink-600",
     actions: [
-      { action: "VIEW", label: "View event requests", key: "EVENT_REQUESTS_VIEW" },
-      { action: "ADD", label: "Submit new requests", key: "EVENT_REQUESTS_ADD" },
-      { action: "EDIT", label: "Update event details", key: "EVENT_REQUESTS_EDIT" },
-      { action: "DELETE", label: "Delete event requests", key: "EVENT_REQUESTS_DELETE" },
-      { action: "COMPLETE_CONTACT", label: "Mark primary contact completed", key: "EVENT_REQUESTS_COMPLETE_CONTACT" }
-    ]
+      {
+        action: "VIEW",
+        label: "View event requests",
+        key: "EVENT_REQUESTS_VIEW",
+      },
+      {
+        action: "ADD",
+        label: "Submit new requests",
+        key: "EVENT_REQUESTS_ADD",
+      },
+      {
+        action: "EDIT",
+        label: "Update event details",
+        key: "EVENT_REQUESTS_EDIT",
+      },
+      {
+        action: "DELETE",
+        label: "Delete event requests",
+        key: "EVENT_REQUESTS_DELETE",
+      },
+      {
+        action: "COMPLETE_CONTACT",
+        label: "Mark primary contact completed",
+        key: "EVENT_REQUESTS_COMPLETE_CONTACT",
+      },
+    ],
   },
   {
     resource: "MESSAGES",
@@ -175,12 +267,16 @@ const RESOURCE_PERMISSIONS = [
     description: "Send and manage organizational communications",
     icon: Mail,
     color: "bg-cyan-50 border-cyan-200",
-    iconColor: "text-cyan-600", 
+    iconColor: "text-cyan-600",
     actions: [
       { action: "VIEW", label: "Access email system", key: "MESSAGES_VIEW" },
       { action: "SEND", label: "Send emails", key: "MESSAGES_SEND" },
-      { action: "MODERATE", label: "Moderate communications", key: "MESSAGES_MODERATE" }
-    ]
+      {
+        action: "MODERATE",
+        label: "Moderate communications",
+        key: "MESSAGES_MODERATE",
+      },
+    ],
   },
   {
     resource: "WORK_LOGS",
@@ -191,74 +287,158 @@ const RESOURCE_PERMISSIONS = [
     iconColor: "text-slate-600",
     actions: [
       { action: "VIEW", label: "View own work logs", key: "WORK_LOGS_VIEW" },
-      { action: "VIEW_ALL", label: "View all volunteer logs", key: "WORK_LOGS_VIEW_ALL" },
+      {
+        action: "VIEW_ALL",
+        label: "View all volunteer logs",
+        key: "WORK_LOGS_VIEW_ALL",
+      },
       { action: "ADD", label: "Create work logs", key: "WORK_LOGS_ADD" },
-      { action: "EDIT_OWN", label: "Edit own work logs", key: "WORK_LOGS_EDIT_OWN" },
-      { action: "EDIT_ALL", label: "Edit any work logs", key: "WORK_LOGS_EDIT_ALL" },
-      { action: "DELETE_OWN", label: "Delete own work logs", key: "WORK_LOGS_DELETE_OWN" },
-      { action: "DELETE_ALL", label: "Delete any work logs", key: "WORK_LOGS_DELETE_ALL" }
-    ]
+      {
+        action: "EDIT_OWN",
+        label: "Edit own work logs",
+        key: "WORK_LOGS_EDIT_OWN",
+      },
+      {
+        action: "EDIT_ALL",
+        label: "Edit any work logs",
+        key: "WORK_LOGS_EDIT_ALL",
+      },
+      {
+        action: "DELETE_OWN",
+        label: "Delete own work logs",
+        key: "WORK_LOGS_DELETE_OWN",
+      },
+      {
+        action: "DELETE_ALL",
+        label: "Delete any work logs",
+        key: "WORK_LOGS_DELETE_ALL",
+      },
+    ],
   },
   {
     resource: "CHAT",
-    label: "Chat System", 
+    label: "Chat System",
     description: "Access real-time messaging channels",
     icon: MessageCircle,
     color: "bg-emerald-50 border-emerald-200",
     iconColor: "text-emerald-600",
     actions: [
       { action: "GENERAL", label: "General chat channel", key: "CHAT_GENERAL" },
-      { action: "GRANTS_COMMITTEE", label: "Grants committee chat", key: "CHAT_GRANTS_COMMITTEE" },
-      { action: "EVENTS_COMMITTEE", label: "Events committee chat", key: "CHAT_EVENTS_COMMITTEE" },
+      {
+        action: "GRANTS_COMMITTEE",
+        label: "Grants committee chat",
+        key: "CHAT_GRANTS_COMMITTEE",
+      },
+      {
+        action: "EVENTS_COMMITTEE",
+        label: "Events committee chat",
+        key: "CHAT_EVENTS_COMMITTEE",
+      },
       { action: "BOARD", label: "Board chat access", key: "CHAT_BOARD" },
-      { action: "WEB_COMMITTEE", label: "Web committee chat", key: "CHAT_WEB_COMMITTEE" },
-      { action: "VOLUNTEER_MANAGEMENT", label: "Volunteer management chat", key: "CHAT_VOLUNTEER_MANAGEMENT" },
+      {
+        action: "WEB_COMMITTEE",
+        label: "Web committee chat",
+        key: "CHAT_WEB_COMMITTEE",
+      },
+      {
+        action: "VOLUNTEER_MANAGEMENT",
+        label: "Volunteer management chat",
+        key: "CHAT_VOLUNTEER_MANAGEMENT",
+      },
       { action: "HOST", label: "Host organization channel", key: "CHAT_HOST" },
-      { action: "DRIVER", label: "Driver coordination channel", key: "CHAT_DRIVER" },
-      { action: "RECIPIENT", label: "Recipient organization channel", key: "CHAT_RECIPIENT" },
-      { action: "CORE_TEAM", label: "Core team channel", key: "CHAT_CORE_TEAM" },
-      { action: "DIRECT", label: "Direct messaging", key: "CHAT_DIRECT" }
-    ]
+      {
+        action: "DRIVER",
+        label: "Driver coordination channel",
+        key: "CHAT_DRIVER",
+      },
+      {
+        action: "RECIPIENT",
+        label: "Recipient organization channel",
+        key: "CHAT_RECIPIENT",
+      },
+      {
+        action: "CORE_TEAM",
+        label: "Core team channel",
+        key: "CHAT_CORE_TEAM",
+      },
+      { action: "DIRECT", label: "Direct messaging", key: "CHAT_DIRECT" },
+    ],
   },
   {
     resource: "ANALYTICS",
     label: "Analytics Dashboard",
-    description: "View organizational metrics and reports", 
+    description: "View organizational metrics and reports",
     icon: TrendingUp,
     color: "bg-violet-50 border-violet-200",
     iconColor: "text-violet-600",
     actions: [
-      { action: "VIEW", label: "Access analytics dashboard", key: "ANALYTICS_VIEW" }
-    ]
+      {
+        action: "VIEW",
+        label: "Access analytics dashboard",
+        key: "ANALYTICS_VIEW",
+      },
+    ],
   },
   {
     resource: "MEETINGS",
     label: "Meeting Management",
     description: "Schedule and manage organizational meetings",
     icon: Calendar,
-    color: "bg-rose-50 border-rose-200", 
+    color: "bg-rose-50 border-rose-200",
     iconColor: "text-rose-600",
     actions: [
-      { action: "VIEW", label: "View meeting information", key: "MEETINGS_VIEW" },
-      { action: "MANAGE", label: "Manage meetings and agendas", key: "MEETINGS_MANAGE" }
-    ]
+      {
+        action: "VIEW",
+        label: "View meeting information",
+        key: "MEETINGS_VIEW",
+      },
+      {
+        action: "MANAGE",
+        label: "Manage meetings and agendas",
+        key: "MEETINGS_MANAGE",
+      },
+    ],
   },
   {
     resource: "SUGGESTIONS",
     label: "Suggestion System",
-    description: "Submit and manage organizational suggestions", 
+    description: "Submit and manage organizational suggestions",
     icon: Lightbulb,
     color: "bg-amber-50 border-amber-200",
     iconColor: "text-amber-600",
     actions: [
       { action: "VIEW", label: "View suggestions", key: "SUGGESTIONS_VIEW" },
-      { action: "ADD", label: "Submit new suggestions", key: "SUGGESTIONS_ADD" },
-      { action: "EDIT_OWN", label: "Edit own suggestions", key: "SUGGESTIONS_EDIT_OWN" },
-      { action: "EDIT_ALL", label: "Edit any suggestions", key: "SUGGESTIONS_EDIT_ALL" },
-      { action: "DELETE_OWN", label: "Delete own suggestions", key: "SUGGESTIONS_DELETE_OWN" },
-      { action: "DELETE_ALL", label: "Delete any suggestions", key: "SUGGESTIONS_DELETE_ALL" },
-      { action: "MANAGE", label: "Manage suggestion workflows", key: "SUGGESTIONS_MANAGE" }
-    ]
+      {
+        action: "ADD",
+        label: "Submit new suggestions",
+        key: "SUGGESTIONS_ADD",
+      },
+      {
+        action: "EDIT_OWN",
+        label: "Edit own suggestions",
+        key: "SUGGESTIONS_EDIT_OWN",
+      },
+      {
+        action: "EDIT_ALL",
+        label: "Edit any suggestions",
+        key: "SUGGESTIONS_EDIT_ALL",
+      },
+      {
+        action: "DELETE_OWN",
+        label: "Delete own suggestions",
+        key: "SUGGESTIONS_DELETE_OWN",
+      },
+      {
+        action: "DELETE_ALL",
+        label: "Delete any suggestions",
+        key: "SUGGESTIONS_DELETE_ALL",
+      },
+      {
+        action: "MANAGE",
+        label: "Manage suggestion workflows",
+        key: "SUGGESTIONS_MANAGE",
+      },
+    ],
   },
   {
     resource: "DOCUMENTS",
@@ -266,11 +446,15 @@ const RESOURCE_PERMISSIONS = [
     description: "Access organizational documents and tools",
     icon: FileText,
     color: "bg-stone-50 border-stone-200",
-    iconColor: "text-stone-600", 
+    iconColor: "text-stone-600",
     actions: [
-      { action: "VIEW", label: "View documents and toolkit", key: "DOCUMENTS_VIEW" },
-      { action: "MANAGE", label: "Manage documents", key: "DOCUMENTS_MANAGE" }
-    ]
+      {
+        action: "VIEW",
+        label: "View documents and toolkit",
+        key: "DOCUMENTS_VIEW",
+      },
+      { action: "MANAGE", label: "Manage documents", key: "DOCUMENTS_MANAGE" },
+    ],
   },
   {
     resource: "DATA",
@@ -280,129 +464,137 @@ const RESOURCE_PERMISSIONS = [
     color: "bg-gray-50 border-gray-200",
     iconColor: "text-gray-600",
     actions: [
-      { action: "EXPORT", label: "Export organizational data", key: "DATA_EXPORT" },
-      { action: "IMPORT", label: "Import data into system", key: "DATA_IMPORT" }
-    ]
-  }
+      {
+        action: "EXPORT",
+        label: "Export organizational data",
+        key: "DATA_EXPORT",
+      },
+      {
+        action: "IMPORT",
+        label: "Import data into system",
+        key: "DATA_IMPORT",
+      },
+    ],
+  },
 ];
 
 // Permission mapping for migration from old format to new RESOURCE_ACTION format
 const PERMISSION_MIGRATION_MAP: Record<string, string> = {
   // Host management
-  "access_hosts": "HOSTS_VIEW",
-  "manage_hosts": "HOSTS_EDIT", 
-  "view_hosts": "HOSTS_VIEW",
-  "add_hosts": "HOSTS_ADD",
-  "edit_hosts": "HOSTS_EDIT",
-  "delete_hosts": "HOSTS_DELETE",
+  access_hosts: "HOSTS_VIEW",
+  manage_hosts: "HOSTS_EDIT",
+  view_hosts: "HOSTS_VIEW",
+  add_hosts: "HOSTS_ADD",
+  edit_hosts: "HOSTS_EDIT",
+  delete_hosts: "HOSTS_DELETE",
 
-  // Recipient management  
-  "access_recipients": "RECIPIENTS_VIEW",
-  "manage_recipients": "RECIPIENTS_EDIT",
-  "view_recipients": "RECIPIENTS_VIEW", 
-  "add_recipients": "RECIPIENTS_ADD",
-  "edit_recipients": "RECIPIENTS_EDIT",
-  "delete_recipients": "RECIPIENTS_DELETE",
+  // Recipient management
+  access_recipients: "RECIPIENTS_VIEW",
+  manage_recipients: "RECIPIENTS_EDIT",
+  view_recipients: "RECIPIENTS_VIEW",
+  add_recipients: "RECIPIENTS_ADD",
+  edit_recipients: "RECIPIENTS_EDIT",
+  delete_recipients: "RECIPIENTS_DELETE",
 
   // Driver management
-  "access_drivers": "DRIVERS_VIEW", 
-  "manage_drivers": "DRIVERS_EDIT",
-  "view_drivers": "DRIVERS_VIEW",
-  "add_drivers": "DRIVERS_ADD",
-  "edit_drivers": "DRIVERS_EDIT",
-  "delete_drivers": "DRIVERS_DELETE",
+  access_drivers: "DRIVERS_VIEW",
+  manage_drivers: "DRIVERS_EDIT",
+  view_drivers: "DRIVERS_VIEW",
+  add_drivers: "DRIVERS_ADD",
+  edit_drivers: "DRIVERS_EDIT",
+  delete_drivers: "DRIVERS_DELETE",
 
   // User management
-  "manage_users": "USERS_EDIT",
-  "view_users": "USERS_VIEW",
+  manage_users: "USERS_EDIT",
+  view_users: "USERS_VIEW",
 
-  // Collections  
-  "access_collections": "COLLECTIONS_VIEW",
-  "manage_collections": "COLLECTIONS_EDIT",
-  "create_collections": "COLLECTIONS_ADD",
-  "edit_all_collections": "COLLECTIONS_EDIT_ALL", 
-  "delete_all_collections": "COLLECTIONS_DELETE_ALL",
-  "use_collection_walkthrough": "COLLECTIONS_WALKTHROUGH",
+  // Collections
+  access_collections: "COLLECTIONS_VIEW",
+  manage_collections: "COLLECTIONS_EDIT",
+  create_collections: "COLLECTIONS_ADD",
+  edit_all_collections: "COLLECTIONS_EDIT_ALL",
+  delete_all_collections: "COLLECTIONS_DELETE_ALL",
+  use_collection_walkthrough: "COLLECTIONS_WALKTHROUGH",
 
   // Projects
-  "access_projects": "PROJECTS_VIEW",
-  "manage_projects": "PROJECTS_EDIT",
-  "create_projects": "PROJECTS_ADD",
-  "edit_all_projects": "PROJECTS_EDIT_ALL",
-  "delete_all_projects": "PROJECTS_DELETE_ALL",
+  access_projects: "PROJECTS_VIEW",
+  manage_projects: "PROJECTS_EDIT",
+  create_projects: "PROJECTS_ADD",
+  edit_all_projects: "PROJECTS_EDIT_ALL",
+  delete_all_projects: "PROJECTS_DELETE_ALL",
 
   // Distributions (donation tracking)
-  "access_donation_tracking": "DISTRIBUTIONS_VIEW",
-  "manage_donation_tracking": "DISTRIBUTIONS_EDIT",
-  "view_donation_tracking": "DISTRIBUTIONS_VIEW", 
-  "add_donation_tracking": "DISTRIBUTIONS_ADD",
-  "edit_donation_tracking": "DISTRIBUTIONS_EDIT",
-  "delete_donation_tracking": "DISTRIBUTIONS_DELETE",
+  access_donation_tracking: "DISTRIBUTIONS_VIEW",
+  manage_donation_tracking: "DISTRIBUTIONS_EDIT",
+  view_donation_tracking: "DISTRIBUTIONS_VIEW",
+  add_donation_tracking: "DISTRIBUTIONS_ADD",
+  edit_donation_tracking: "DISTRIBUTIONS_EDIT",
+  delete_donation_tracking: "DISTRIBUTIONS_DELETE",
 
   // Event requests
-  "access_event_requests": "EVENT_REQUESTS_VIEW",
-  "manage_event_requests": "EVENT_REQUESTS_EDIT",
-  "view_event_requests": "EVENT_REQUESTS_VIEW",
-  "add_event_requests": "EVENT_REQUESTS_ADD", 
-  "edit_event_requests": "EVENT_REQUESTS_EDIT",
-  "delete_event_requests": "EVENT_REQUESTS_DELETE",
+  access_event_requests: "EVENT_REQUESTS_VIEW",
+  manage_event_requests: "EVENT_REQUESTS_EDIT",
+  view_event_requests: "EVENT_REQUESTS_VIEW",
+  add_event_requests: "EVENT_REQUESTS_ADD",
+  edit_event_requests: "EVENT_REQUESTS_EDIT",
+  delete_event_requests: "EVENT_REQUESTS_DELETE",
 
-  // Messages  
-  "access_messages": "MESSAGES_VIEW",
-  "send_messages": "MESSAGES_SEND",
-  "moderate_messages": "MESSAGES_MODERATE",
+  // Messages
+  access_messages: "MESSAGES_VIEW",
+  send_messages: "MESSAGES_SEND",
+  moderate_messages: "MESSAGES_MODERATE",
 
   // Work logs
-  "access_work_logs": "WORK_LOGS_VIEW",
-  "create_work_logs": "WORK_LOGS_ADD",
-  "view_all_work_logs": "WORK_LOGS_VIEW_ALL",
-  "edit_all_work_logs": "WORK_LOGS_EDIT_ALL", 
-  "delete_all_work_logs": "WORK_LOGS_DELETE_ALL",
+  access_work_logs: "WORK_LOGS_VIEW",
+  create_work_logs: "WORK_LOGS_ADD",
+  view_all_work_logs: "WORK_LOGS_VIEW_ALL",
+  edit_all_work_logs: "WORK_LOGS_EDIT_ALL",
+  delete_all_work_logs: "WORK_LOGS_DELETE_ALL",
 
   // Chat permissions
-  "access_chat": "CHAT_GENERAL",
-  "general_chat": "CHAT_GENERAL",
-  "committee_chat": "CHAT_COMMITTEE",
-  "host_chat": "CHAT_HOST", 
-  "driver_chat": "CHAT_DRIVER",
-  "recipient_chat": "CHAT_RECIPIENT",
-  "core_team_chat": "CHAT_CORE_TEAM",
-  "direct_messages": "CHAT_DIRECT",
-  "GENERAL_CHAT": "CHAT_GENERAL",
-  "COMMITTEE_CHAT": "CHAT_COMMITTEE",
-  "HOST_CHAT": "CHAT_HOST",
-  "DRIVER_CHAT": "CHAT_DRIVER", 
-  "RECIPIENT_CHAT": "CHAT_RECIPIENT",
-  "CORE_TEAM_CHAT": "CHAT_CORE_TEAM",
+  access_chat: "CHAT_GENERAL",
+  general_chat: "CHAT_GENERAL",
+  committee_chat: "CHAT_COMMITTEE",
+  host_chat: "CHAT_HOST",
+  driver_chat: "CHAT_DRIVER",
+  recipient_chat: "CHAT_RECIPIENT",
+  core_team_chat: "CHAT_CORE_TEAM",
+  direct_messages: "CHAT_DIRECT",
+  GENERAL_CHAT: "CHAT_GENERAL",
+  COMMITTEE_CHAT: "CHAT_COMMITTEE",
+  HOST_CHAT: "CHAT_HOST",
+  DRIVER_CHAT: "CHAT_DRIVER",
+  RECIPIENT_CHAT: "CHAT_RECIPIENT",
+  CORE_TEAM_CHAT: "CHAT_CORE_TEAM",
 
   // Analytics and other features
-  "access_analytics": "ANALYTICS_VIEW",
-  "access_meetings": "MEETINGS_VIEW", 
-  "manage_meetings": "MEETINGS_MANAGE",
-  "access_suggestions": "SUGGESTIONS_VIEW",
-  "create_suggestions": "SUGGESTIONS_ADD",
-  "manage_suggestions": "SUGGESTIONS_MANAGE",
-  "access_toolkit": "DOCUMENTS_VIEW",
-  "access_documents": "DOCUMENTS_VIEW",
-  "manage_documents": "DOCUMENTS_MANAGE",
-  "export_data": "DATA_EXPORT",
-  "import_data": "DATA_IMPORT",
-  "edit_data": "DATA_EXPORT"
+  access_analytics: "ANALYTICS_VIEW",
+  access_meetings: "MEETINGS_VIEW",
+  manage_meetings: "MEETINGS_MANAGE",
+  access_suggestions: "SUGGESTIONS_VIEW",
+  create_suggestions: "SUGGESTIONS_ADD",
+  manage_suggestions: "SUGGESTIONS_MANAGE",
+  access_toolkit: "DOCUMENTS_VIEW",
+  access_documents: "DOCUMENTS_VIEW",
+  manage_documents: "DOCUMENTS_MANAGE",
+  export_data: "DATA_EXPORT",
+  import_data: "DATA_IMPORT",
+  edit_data: "DATA_EXPORT",
 };
 
 function migrateUserPermissions(oldPermissions: string[]): string[] {
   const newPermissions = new Set<string>();
-  
+
   for (const oldPerm of oldPermissions) {
     const newPerm = PERMISSION_MIGRATION_MAP[oldPerm.toLowerCase()];
     if (newPerm) {
       newPermissions.add(newPerm);
-    } else if (oldPerm.includes('_')) {
+    } else if (oldPerm.includes("_")) {
       // Already in new format or unknown - keep as is
       newPermissions.add(oldPerm);
     }
   }
-  
+
   return Array.from(newPermissions);
 }
 
@@ -426,13 +618,17 @@ export default function EnhancedPermissionsDialog({
     if (checked) {
       setSelectedPermissions([...selectedPermissions, permissionKey]);
     } else {
-      setSelectedPermissions(selectedPermissions.filter(p => p !== permissionKey));
+      setSelectedPermissions(
+        selectedPermissions.filter((p) => p !== permissionKey)
+      );
     }
   };
 
   const handleResourceToggle = (resource: any, checked: boolean) => {
-    const resourcePermissions = resource.actions.map((action: any) => action.key);
-    
+    const resourcePermissions = resource.actions.map(
+      (action: any) => action.key
+    );
+
     if (checked) {
       // Add all permissions for this resource
       const updatedPermissions = [...selectedPermissions];
@@ -444,16 +640,22 @@ export default function EnhancedPermissionsDialog({
       setSelectedPermissions(updatedPermissions);
     } else {
       // Remove all permissions for this resource
-      setSelectedPermissions(selectedPermissions.filter(p => !resourcePermissions.includes(p)));
+      setSelectedPermissions(
+        selectedPermissions.filter((p) => !resourcePermissions.includes(p))
+      );
     }
   };
 
   const getResourceState = (resource: any) => {
-    const resourcePermissions = resource.actions.map((action: any) => action.key);
-    const selectedCount = resourcePermissions.filter((perm: string) => selectedPermissions.includes(perm)).length;
-    
+    const resourcePermissions = resource.actions.map(
+      (action: any) => action.key
+    );
+    const selectedCount = resourcePermissions.filter((perm: string) =>
+      selectedPermissions.includes(perm)
+    ).length;
+
     if (selectedCount === 0) return "none";
-    if (selectedCount === resourcePermissions.length) return "all"; 
+    if (selectedCount === resourcePermissions.length) return "all";
     return "partial";
   };
 
@@ -470,9 +672,12 @@ export default function EnhancedPermissionsDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl h-[90vh] flex flex-col">
         <DialogHeader className="flex-shrink-0">
-          <DialogTitle>Manage Permissions for {user.firstName} {user.lastName}</DialogTitle>
+          <DialogTitle>
+            Manage Permissions for {user.firstName} {user.lastName}
+          </DialogTitle>
           <DialogDescription>
-            Configure granular permissions for {user.email}. Select specific actions for each resource.
+            Configure granular permissions for {user.email}. Select specific
+            actions for each resource.
           </DialogDescription>
         </DialogHeader>
 
@@ -481,51 +686,74 @@ export default function EnhancedPermissionsDialog({
             {RESOURCE_PERMISSIONS.map((resource) => {
               const Icon = resource.icon;
               const resourceState = getResourceState(resource);
-              
+
               return (
-                <Card key={resource.resource} className={`${resource.color} transition-colors`}>
+                <Card
+                  key={resource.resource}
+                  className={`${resource.color} transition-colors`}
+                >
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
                         <Icon className={`h-5 w-5 ${resource.iconColor}`} />
                         <div>
-                          <CardTitle className="text-lg">{resource.label}</CardTitle>
+                          <CardTitle className="text-lg">
+                            {resource.label}
+                          </CardTitle>
                           <CardDescription className="text-sm">
                             {resource.description}
                           </CardDescription>
                         </div>
                       </div>
-                      
+
                       <div className="flex items-center space-x-2">
                         <Checkbox
                           id={`resource-${resource.resource}`}
                           checked={resourceState === "all"}
-                          ref={resourceState === "partial" ? (el) => {
-                            if (el) el.indeterminate = true;
-                          } : undefined}
-                          onCheckedChange={(checked) => handleResourceToggle(resource, checked as boolean)}
+                          ref={
+                            resourceState === "partial"
+                              ? (el) => {
+                                  if (el) el.indeterminate = true;
+                                }
+                              : undefined
+                          }
+                          onCheckedChange={(checked) =>
+                            handleResourceToggle(resource, checked as boolean)
+                          }
                         />
-                        <label 
+                        <label
                           htmlFor={`resource-${resource.resource}`}
                           className="text-sm font-medium cursor-pointer"
                         >
-                          {resourceState === "all" ? "All" : resourceState === "partial" ? "Some" : "None"}
+                          {resourceState === "all"
+                            ? "All"
+                            : resourceState === "partial"
+                            ? "Some"
+                            : "None"}
                         </label>
                       </div>
                     </div>
                   </CardHeader>
-                  
+
                   <CardContent className="pt-0">
                     <div className="grid grid-cols-2 gap-3">
                       {resource.actions.map((action) => (
-                        <div key={action.key} className="flex items-center space-x-2">
+                        <div
+                          key={action.key}
+                          className="flex items-center space-x-2"
+                        >
                           <Checkbox
                             id={action.key}
                             checked={selectedPermissions.includes(action.key)}
-                            onCheckedChange={(checked) => handlePermissionToggle(action.key, checked as boolean)}
+                            onCheckedChange={(checked) =>
+                              handlePermissionToggle(
+                                action.key,
+                                checked as boolean
+                              )
+                            }
                           />
-                          <label 
-                            htmlFor={action.key} 
+                          <label
+                            htmlFor={action.key}
                             className="text-sm cursor-pointer flex-1"
                           >
                             {action.label}
@@ -544,7 +772,10 @@ export default function EnhancedPermissionsDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button onClick={handleSave} className="bg-teal-600 hover:bg-teal-700">
+          <Button
+            onClick={handleSave}
+            className="bg-teal-600 hover:bg-teal-700"
+          >
             Save Permissions
           </Button>
         </DialogFooter>

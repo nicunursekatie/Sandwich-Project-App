@@ -1,12 +1,34 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar, Clock, ListTodo, Plus, Edit, Trash2, CheckCircle2, Circle, ArrowLeft } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Calendar,
+  Clock,
+  ListTodo,
+  Plus,
+  Edit,
+  Trash2,
+  CheckCircle2,
+  Circle,
+  ArrowLeft,
+} from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -27,17 +49,19 @@ interface MeetingAgendaProps {
   isEmbedded?: boolean;
 }
 
-export default function MeetingAgenda({ isEmbedded = false }: MeetingAgendaProps) {
+export default function MeetingAgenda({
+  isEmbedded = false,
+}: MeetingAgendaProps) {
   const { user } = useAuth();
-  const canModifyAgenda = (user as any)?.role !== 'committee_member';
+  const canModifyAgenda = (user as any)?.role !== "committee_member";
   const [, setLocation] = useLocation();
-  
+
   const [isCreating, setIsCreating] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    submittedBy: (user as any)?.firstName || "User"
+    submittedBy: (user as any)?.firstName || "User",
   });
   const { toast } = useToast();
 
@@ -52,7 +76,7 @@ export default function MeetingAgenda({ isEmbedded = false }: MeetingAgendaProps
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...data,
-          meetingId: 1
+          meetingId: 1,
         }),
       });
       if (!response.ok) throw new Error("Failed to create agenda item");
@@ -61,7 +85,11 @@ export default function MeetingAgenda({ isEmbedded = false }: MeetingAgendaProps
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/agenda-items"] });
       setIsCreating(false);
-      setFormData({ title: "", description: "", submittedBy: (user as any)?.firstName || "User" });
+      setFormData({
+        title: "",
+        description: "",
+        submittedBy: (user as any)?.firstName || "User",
+      });
       toast({ title: "Agenda item created successfully" });
     },
   });
@@ -105,21 +133,31 @@ export default function MeetingAgenda({ isEmbedded = false }: MeetingAgendaProps
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "approved": return "bg-green-100 text-green-800";
-      case "rejected": return "bg-red-100 text-red-800";
-      case "postponed": return "bg-orange-100 text-orange-800";
-      case "pending": return "bg-yellow-100 text-yellow-800";
-      default: return "bg-gray-100 text-gray-800";
+      case "approved":
+        return "bg-green-100 text-green-800";
+      case "rejected":
+        return "bg-red-100 text-red-800";
+      case "postponed":
+        return "bg-orange-100 text-orange-800";
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case "approved": return <CheckCircle2 className="w-4 h-4 text-green-600" />;
-      case "rejected": return <Circle className="w-4 h-4 text-red-600" />;
-      case "postponed": return <Clock className="w-4 h-4 text-orange-600" />;
-      case "pending": return <Circle className="w-4 h-4 text-yellow-600" />;
-      default: return <Circle className="w-4 h-4 text-gray-600" />;
+      case "approved":
+        return <CheckCircle2 className="w-4 h-4 text-green-600" />;
+      case "rejected":
+        return <Circle className="w-4 h-4 text-red-600" />;
+      case "postponed":
+        return <Clock className="w-4 h-4 text-orange-600" />;
+      case "pending":
+        return <Circle className="w-4 h-4 text-yellow-600" />;
+      default:
+        return <Circle className="w-4 h-4 text-gray-600" />;
     }
   };
 
@@ -134,18 +172,24 @@ export default function MeetingAgenda({ isEmbedded = false }: MeetingAgendaProps
     );
   }
 
-  const approvedItems = (agendaItems as AgendaItem[]).filter(item => item.status === "approved").length;
-  const pendingItems = (agendaItems as AgendaItem[]).filter(item => item.status === "pending").length;
+  const approvedItems = (agendaItems as AgendaItem[]).filter(
+    (item) => item.status === "approved"
+  ).length;
+  const pendingItems = (agendaItems as AgendaItem[]).filter(
+    (item) => item.status === "pending"
+  ).length;
 
   return (
     <div className="space-y-6">
       {/* Navigation Header - only show when not embedded */}
       {!isEmbedded && (
         <div className="flex items-center gap-3 pb-4 border-b border-gray-200">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             size="sm"
-            onClick={() => (window as any).dashboardSetActiveSection?.("meetings")}
+            onClick={() =>
+              (window as any).dashboardSetActiveSection?.("meetings")
+            }
             className="flex items-center gap-2"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -166,11 +210,18 @@ export default function MeetingAgenda({ isEmbedded = false }: MeetingAgendaProps
             <ListTodo className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
           </div>
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Meeting Agenda</h1>
-            <p className="text-sm sm:text-base text-gray-600">Submit and organize meeting topics and discussions</p>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
+              Meeting Agenda
+            </h1>
+            <p className="text-sm sm:text-base text-gray-600">
+              Submit and organize meeting topics and discussions
+            </p>
           </div>
         </div>
-        <Button onClick={() => setIsCreating(true)} className="self-start h-10 text-sm">
+        <Button
+          onClick={() => setIsCreating(true)}
+          className="self-start h-10 text-sm"
+        >
           <Plus className="w-4 h-4 mr-2" />
           <span className="hidden sm:inline">New Agenda Item</span>
           <span className="sm:hidden">New Item</span>
@@ -184,7 +235,9 @@ export default function MeetingAgenda({ isEmbedded = false }: MeetingAgendaProps
             <div className="flex items-center gap-3">
               <ListTodo className="w-8 h-8 text-blue-500" />
               <div>
-                <p className="text-2xl font-bold">{(agendaItems as AgendaItem[]).length}</p>
+                <p className="text-2xl font-bold">
+                  {(agendaItems as AgendaItem[]).length}
+                </p>
                 <p className="text-sm text-gray-600">Total Items</p>
               </div>
             </div>
@@ -219,7 +272,9 @@ export default function MeetingAgenda({ isEmbedded = false }: MeetingAgendaProps
         <Card>
           <CardHeader>
             <CardTitle>New Agenda Item</CardTitle>
-            <CardDescription>Submit a topic for the upcoming meeting</CardDescription>
+            <CardDescription>
+              Submit a topic for the upcoming meeting
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -227,25 +282,35 @@ export default function MeetingAgenda({ isEmbedded = false }: MeetingAgendaProps
                 <label className="block text-sm font-medium mb-2">Title</label>
                 <Input
                   value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, title: e.target.value })
+                  }
                   placeholder="Brief title for the agenda item"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Description</label>
+                <label className="block text-sm font-medium mb-2">
+                  Description
+                </label>
                 <Textarea
                   value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, description: e.target.value })
+                  }
                   placeholder="Detailed description of the agenda item"
                   rows={3}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Submitted By</label>
+                <label className="block text-sm font-medium mb-2">
+                  Submitted By
+                </label>
                 <Input
                   value={formData.submittedBy}
-                  onChange={(e) => setFormData({ ...formData, submittedBy: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, submittedBy: e.target.value })
+                  }
                   placeholder="Your name"
                   required
                 />
@@ -254,7 +319,11 @@ export default function MeetingAgenda({ isEmbedded = false }: MeetingAgendaProps
                 <Button type="submit" disabled={createMutation.isPending}>
                   {createMutation.isPending ? "Creating..." : "Create Item"}
                 </Button>
-                <Button type="button" variant="outline" onClick={() => setIsCreating(false)}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsCreating(false)}
+                >
                   Cancel
                 </Button>
               </div>
@@ -265,110 +334,125 @@ export default function MeetingAgenda({ isEmbedded = false }: MeetingAgendaProps
 
       {/* Agenda Items */}
       <div className="space-y-4">
-        {(agendaItems as AgendaItem[]).map((item: AgendaItem, index: number) => (
-          <Card 
-            key={item.id} 
-            className={
-              item.status === "approved" ? "border-green-200 bg-green-50" :
-              item.status === "rejected" ? "border-red-200 bg-red-50" :
-              item.status === "postponed" ? "border-orange-200 bg-orange-50" : ""
-            }
-          >
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between">
-                <div className="flex items-start gap-4 flex-1">
-                  <div className="flex-shrink-0">
-                    {getStatusIcon(item.status)}
+        {(agendaItems as AgendaItem[]).map(
+          (item: AgendaItem, index: number) => (
+            <Card
+              key={item.id}
+              className={
+                item.status === "approved"
+                  ? "border-green-200 bg-green-50"
+                  : item.status === "rejected"
+                  ? "border-red-200 bg-red-50"
+                  : item.status === "postponed"
+                  ? "border-orange-200 bg-orange-50"
+                  : ""
+              }
+            >
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start gap-4 flex-1">
+                    <div className="flex-shrink-0">
+                      {getStatusIcon(item.status)}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-sm font-medium text-gray-500">
+                          #{index + 1}
+                        </span>
+                        <Badge className={getStatusColor(item.status)}>
+                          {item.status.charAt(0).toUpperCase() +
+                            item.status.slice(1)}
+                        </Badge>
+                      </div>
+                      <h3 className="font-semibold text-lg text-gray-900 mb-2">
+                        {item.title}
+                      </h3>
+                      {item.description && (
+                        <p className="text-gray-600 mb-3">{item.description}</p>
+                      )}
+                      <div className="flex items-center gap-4 text-sm text-gray-500">
+                        <span>Submitted by: {item.submittedBy}</span>
+                        <span>•</span>
+                        <span>
+                          {new Date(item.submittedAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-sm font-medium text-gray-500">#{index + 1}</span>
-                      <Badge className={getStatusColor(item.status)}>
-                        {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
-                      </Badge>
-                    </div>
-                    <h3 className="font-semibold text-lg text-gray-900 mb-2">
-                      {item.title}
-                    </h3>
-                    {item.description && (
-                      <p className="text-gray-600 mb-3">{item.description}</p>
-                    )}
-                    <div className="flex items-center gap-4 text-sm text-gray-500">
-                      <span>Submitted by: {item.submittedBy}</span>
-                      <span>•</span>
-                      <span>{new Date(item.submittedAt).toLocaleDateString()}</span>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Action Buttons */}
-                <div className="flex flex-col gap-2 ml-4">
-                  {item.status === "pending" && canModifyAgenda && (
-                    <div className="flex gap-2">
-                      <Button 
-                        size="sm" 
-                        className="bg-green-600 hover:bg-green-700 text-white"
-                        onClick={() => handleStatusChange(item, "approved")}
-                        disabled={updateStatusMutation.isPending}
-                      >
-                        Approve
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        className="border-red-300 text-red-600 hover:bg-red-50"
-                        onClick={() => handleStatusChange(item, "rejected")}
-                        disabled={updateStatusMutation.isPending}
-                      >
-                        Reject
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        className="border-orange-300 text-orange-600 hover:bg-orange-50"
-                        onClick={() => handleStatusChange(item, "postponed")}
-                        disabled={updateStatusMutation.isPending}
-                      >
-                        Postpone
-                      </Button>
-                    </div>
-                  )}
-                  
-                  {item.status !== "pending" && canModifyAgenda && (
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      onClick={() => handleStatusChange(item, "pending")}
-                      disabled={updateStatusMutation.isPending}
-                    >
-                      Reset to Pending
-                    </Button>
-                  )}
 
-                  {canModifyAgenda && (
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      className="text-red-600 hover:bg-red-50"
-                      onClick={() => deleteMutation.mutate(item.id)}
-                      disabled={deleteMutation.isPending}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  )}
+                  {/* Action Buttons */}
+                  <div className="flex flex-col gap-2 ml-4">
+                    {item.status === "pending" && canModifyAgenda && (
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          className="bg-green-600 hover:bg-green-700 text-white"
+                          onClick={() => handleStatusChange(item, "approved")}
+                          disabled={updateStatusMutation.isPending}
+                        >
+                          Approve
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="border-red-300 text-red-600 hover:bg-red-50"
+                          onClick={() => handleStatusChange(item, "rejected")}
+                          disabled={updateStatusMutation.isPending}
+                        >
+                          Reject
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="border-orange-300 text-orange-600 hover:bg-orange-50"
+                          onClick={() => handleStatusChange(item, "postponed")}
+                          disabled={updateStatusMutation.isPending}
+                        >
+                          Postpone
+                        </Button>
+                      </div>
+                    )}
+
+                    {item.status !== "pending" && canModifyAgenda && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleStatusChange(item, "pending")}
+                        disabled={updateStatusMutation.isPending}
+                      >
+                        Reset to Pending
+                      </Button>
+                    )}
+
+                    {canModifyAgenda && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-red-600 hover:bg-red-50"
+                        onClick={() => deleteMutation.mutate(item.id)}
+                        disabled={deleteMutation.isPending}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardContent>
+            </Card>
+          )
+        )}
       </div>
 
       {(agendaItems as AgendaItem[]).length === 0 && !isCreating && (
         <Card>
           <CardContent className="text-center py-12">
             <ListTodo className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-base font-medium text-gray-900 mb-2">No agenda items yet</h3>
-            <p className="text-gray-600 mb-4">Create the first agenda item to get started</p>
+            <h3 className="text-base font-medium text-gray-900 mb-2">
+              No agenda items yet
+            </h3>
+            <p className="text-gray-600 mb-4">
+              Create the first agenda item to get started
+            </p>
             <Button onClick={() => setIsCreating(true)}>
               <Plus className="w-4 h-4 mr-2" />
               Create First Item

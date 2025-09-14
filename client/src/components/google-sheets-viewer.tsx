@@ -2,9 +2,23 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ExternalLink, Eye, FileSpreadsheet, AlertCircle, RefreshCw, Upload, Download } from "lucide-react";
+import {
+  ExternalLink,
+  Eye,
+  FileSpreadsheet,
+  AlertCircle,
+  RefreshCw,
+  Upload,
+  Download,
+} from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { hasPermission } from "@shared/auth-utils";
@@ -15,11 +29,17 @@ interface GoogleSheetsViewerProps {
   height?: number;
 }
 
-export function GoogleSheetsViewer({ initialUrl = "", title = "Google Sheets Viewer", height = 600 }: GoogleSheetsViewerProps) {
+export function GoogleSheetsViewer({
+  initialUrl = "",
+  title = "Google Sheets Viewer",
+  height = 600,
+}: GoogleSheetsViewerProps) {
   // Fixed URL for the specific spreadsheet
-  const FIXED_SHEET_URL = "https://docs.google.com/spreadsheets/d/1mjx5o6boluo8mNx8tzAV76NBGS6tF0um2Rq9bIdxPo8/edit?gid=1218710353#gid=1218710353";
-  const FIXED_VIEWER_URL = "https://docs.google.com/spreadsheets/d/1mjx5o6boluo8mNx8tzAV76NBGS6tF0um2Rq9bIdxPo8/edit?usp=sharing&embedded=true";
-  
+  const FIXED_SHEET_URL =
+    "https://docs.google.com/spreadsheets/d/1mjx5o6boluo8mNx8tzAV76NBGS6tF0um2Rq9bIdxPo8/edit?gid=1218710353#gid=1218710353";
+  const FIXED_VIEWER_URL =
+    "https://docs.google.com/spreadsheets/d/1mjx5o6boluo8mNx8tzAV76NBGS6tF0um2Rq9bIdxPo8/edit?usp=sharing&embedded=true";
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [showFallback, setShowFallback] = useState(false);
@@ -35,10 +55,10 @@ export function GoogleSheetsViewer({ initialUrl = "", title = "Google Sheets Vie
 
   const checkFallbackStatus = async () => {
     try {
-      const response = await apiRequest('GET', '/api/project-data/status');
+      const response = await apiRequest("GET", "/api/project-data/status");
       setFallbackFileStatus(response);
     } catch (error) {
-      console.error('Failed to check fallback status:', error);
+      console.error("Failed to check fallback status:", error);
     }
   };
 
@@ -50,39 +70,45 @@ export function GoogleSheetsViewer({ initialUrl = "", title = "Google Sheets Vie
   };
 
   const openInNewTab = () => {
-    window.open(FIXED_SHEET_URL, '_blank');
+    window.open(FIXED_SHEET_URL, "_blank");
   };
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
     setUploading(true);
     try {
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append("file", file);
 
-      await apiRequest('POST', '/api/project-data/upload', formData);
+      await apiRequest("POST", "/api/project-data/upload", formData);
       await checkFallbackStatus(); // Refresh status
       setError("");
     } catch (error) {
-      setError('Failed to upload file. Please try again.');
+      setError("Failed to upload file. Please try again.");
     } finally {
       setUploading(false);
     }
   };
 
   const downloadFallbackFile = () => {
-    window.open('/api/project-data/current', '_blank');
+    window.open("/api/project-data/current", "_blank");
   };
 
   const handleSheetError = () => {
     setSheetLoadError(true);
     if (fallbackFileStatus?.hasFile) {
       setShowFallback(true);
-      setError("Google Sheets access restricted. Showing static version instead.");
+      setError(
+        "Google Sheets access restricted. Showing static version instead."
+      );
     } else {
-      setError("Unable to load Google Sheet and no fallback file is available.");
+      setError(
+        "Unable to load Google Sheet and no fallback file is available."
+      );
     }
   };
 
@@ -95,17 +121,22 @@ export function GoogleSheetsViewer({ initialUrl = "", title = "Google Sheets Vie
             {title}
           </CardTitle>
           <CardDescription>
-            Displays the most recent copy of our sandwich totals spreadsheet. This is a static file that shows our complete collection data.
+            Displays the most recent copy of our sandwich totals spreadsheet.
+            This is a static file that shows our complete collection data.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex justify-between items-center">
             <div className="flex-1">
-              <p className="text-sm font-medium text-gray-700">Sandwich Totals Spreadsheet</p>
-              <p className="text-xs text-gray-500">Complete collection data from 2023-2025</p>
+              <p className="text-sm font-medium text-gray-700">
+                Sandwich Totals Spreadsheet
+              </p>
+              <p className="text-xs text-gray-500">
+                Complete collection data from 2023-2025
+              </p>
             </div>
             <div className="flex items-center gap-2">
-              <Button 
+              <Button
                 variant="outline"
                 onClick={downloadFallbackFile}
                 title="Download spreadsheet"
@@ -113,7 +144,7 @@ export function GoogleSheetsViewer({ initialUrl = "", title = "Google Sheets Vie
                 <Download className="h-4 w-4" />
                 Download
               </Button>
-              <Button 
+              <Button
                 variant="outline"
                 onClick={downloadFallbackFile}
                 title="Open in new tab"
@@ -128,25 +159,28 @@ export function GoogleSheetsViewer({ initialUrl = "", title = "Google Sheets Vie
             <Alert variant="default">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                No sandwich data file is currently available. Please contact an administrator to upload the latest spreadsheet.
+                No sandwich data file is currently available. Please contact an
+                administrator to upload the latest spreadsheet.
               </AlertDescription>
             </Alert>
           )}
 
           {/* File upload section - only for admins */}
-          {hasPermission(user, 'manage_files') && (
+          {hasPermission(user, "manage_files") && (
             <div className="border-t pt-4">
               <div className="flex items-center justify-between mb-2">
                 <div>
                   <p className="text-sm font-medium">Update Sandwich Data</p>
-                  <p className="text-xs text-gray-500">Upload the latest sandwich totals spreadsheet</p>
+                  <p className="text-xs text-gray-500">
+                    Upload the latest sandwich totals spreadsheet
+                  </p>
                 </div>
               </div>
-              
+
               <div className="flex items-center gap-2">
                 <Label htmlFor="file-upload" className="cursor-pointer">
                   <Button
-                    variant="outline" 
+                    variant="outline"
                     size="sm"
                     disabled={uploading}
                     className="flex items-center gap-2"
@@ -154,7 +188,7 @@ export function GoogleSheetsViewer({ initialUrl = "", title = "Google Sheets Vie
                   >
                     <span>
                       <Upload className="h-4 w-4" />
-                      {uploading ? 'Uploading...' : 'Upload New File'}
+                      {uploading ? "Uploading..." : "Upload New File"}
                     </span>
                   </Button>
                 </Label>
@@ -171,7 +205,7 @@ export function GoogleSheetsViewer({ initialUrl = "", title = "Google Sheets Vie
                   </span>
                 )}
               </div>
-              
+
               {error && uploading && (
                 <Alert variant="destructive" className="mt-3">
                   <AlertCircle className="h-4 w-4" />
@@ -196,7 +230,7 @@ export function GoogleSheetsViewer({ initialUrl = "", title = "Google Sheets Vie
         <CardContent>
           {fallbackFileStatus?.hasFile ? (
             <>
-              <div 
+              <div
                 className="border rounded-lg overflow-hidden relative"
                 onWheel={(e) => {
                   // Prevent parent scrolling when scrolling within the iframe container
@@ -206,27 +240,27 @@ export function GoogleSheetsViewer({ initialUrl = "", title = "Google Sheets Vie
                   // Prevent parent scrolling on mobile
                   e.stopPropagation();
                 }}
-                style={{ 
+                style={{
                   height: `${height}px`,
-                  overflow: 'hidden',
-                  isolation: 'isolate'
+                  overflow: "hidden",
+                  isolation: "isolate",
                 }}
               >
                 <iframe
                   src="/api/project-data/current"
                   width="100%"
                   height={height}
-                  style={{ 
-                    border: 'none',
-                    display: 'block',
-                    overflow: 'hidden'
+                  style={{
+                    border: "none",
+                    display: "block",
+                    overflow: "hidden",
                   }}
                   title="Sandwich Totals Data Sheet"
                   onLoad={() => setIsLoading(false)}
                   sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
                 />
               </div>
-              
+
               <div className="mt-2 text-center">
                 <p className="text-sm text-blue-600">
                   File: {fallbackFileStatus.fileName}
@@ -238,7 +272,9 @@ export function GoogleSheetsViewer({ initialUrl = "", title = "Google Sheets Vie
               <div className="text-center">
                 <FileSpreadsheet className="h-12 w-12 text-gray-400 mx-auto mb-3" />
                 <p className="text-gray-500">No sandwich data file available</p>
-                <p className="text-sm text-gray-400 mt-1">Contact an administrator to upload the spreadsheet</p>
+                <p className="text-sm text-gray-400 mt-1">
+                  Contact an administrator to upload the spreadsheet
+                </p>
               </div>
             </div>
           )}

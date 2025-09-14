@@ -22,8 +22,10 @@ interface KudosMessage {
 export function KudosInbox() {
   const { user } = useAuth();
 
-  const { data: kudosMessages = [], isLoading, refetch } = useQuery<KudosMessage[]>({
-    queryKey: ['/api/messaging/kudos/received'],
+  const { data: kudosMessages = [], isLoading, refetch } = useQuery<
+    KudosMessage[]
+  >({
+    queryKey: ["/api/messaging/kudos/received"],
     enabled: !!user,
     refetchInterval: 30000, // Refresh every 30 seconds for new kudos
   });
@@ -31,18 +33,22 @@ export function KudosInbox() {
   // Mutation to mark kudos as read
   const markKudosAsReadMutation = useMutation({
     mutationFn: async (kudosIds: number[]) => {
-      return apiRequest('POST', '/api/messaging/kudos/mark-read', { kudosIds });
+      return apiRequest("POST", "/api/messaging/kudos/mark-read", { kudosIds });
     },
     onSuccess: () => {
       // Invalidate and refetch kudos to update read status
-      queryClient.invalidateQueries({ queryKey: ['/api/messaging/kudos/received'] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/messaging/kudos/received"],
+      });
       // Also invalidate notification counts to update the bell icon
-      queryClient.invalidateQueries({ queryKey: ['/api/message-notifications/unread-counts'] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/message-notifications/unread-counts"],
+      });
       refetch();
     },
     onError: (error) => {
-      console.error('Failed to mark kudos as read:', error);
-    }
+      console.error("Failed to mark kudos as read:", error);
+    },
   });
 
   // Auto-mark unread kudos as read when component is viewed
@@ -77,7 +83,8 @@ export function KudosInbox() {
         <Heart className="w-12 h-12 text-gray-300 mx-auto mb-4" />
         <h3 className="text-lg font-medium text-gray-900 mb-2">No kudos yet</h3>
         <p className="text-gray-500">
-          When team members send you appreciation for your work, it will appear here!
+          When team members send you appreciation for your work, it will appear
+          here!
         </p>
       </div>
     );
@@ -103,21 +110,23 @@ export function KudosInbox() {
       {/* Kudos list */}
       <div className="space-y-3">
         {kudosMessages.map((kudos) => (
-          <Card 
-            key={kudos.id} 
+          <Card
+            key={kudos.id}
             className={`transition-all duration-200 ${
-              !kudos.read 
-                ? 'bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200 shadow-md' 
-                : 'bg-white hover:bg-gray-50'
+              !kudos.read
+                ? "bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200 shadow-md"
+                : "bg-white hover:bg-gray-50"
             }`}
           >
             <CardContent className="p-4">
               <div className="flex items-start gap-3">
                 {/* Icon based on context */}
-                <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
-                  !kudos.read ? 'bg-yellow-100' : 'bg-gray-100'
-                }`}>
-                  {kudos.contextType === 'task' ? (
+                <div
+                  className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
+                    !kudos.read ? "bg-yellow-100" : "bg-gray-100"
+                  }`}
+                >
+                  {kudos.contextType === "task" ? (
                     <CheckCircle className="w-5 h-5 text-green-600" />
                   ) : (
                     <Trophy className="w-5 h-5 text-yellow-600" />
@@ -132,11 +141,11 @@ export function KudosInbox() {
                         From {kudos.senderName}
                       </p>
                       <p className="text-gray-700 mb-2">{kudos.content}</p>
-                      
+
                       {/* Context info */}
                       <div className="flex items-center gap-2 text-xs text-gray-500">
                         <Badge variant="outline" className="text-xs">
-                          {kudos.contextType === 'task' ? 'Task' : 'Project'}
+                          {kudos.contextType === "task" ? "Task" : "Project"}
                         </Badge>
                         <span>"{kudos.entityName}"</span>
                       </div>
@@ -146,7 +155,9 @@ export function KudosInbox() {
                     <div className="flex flex-col items-end gap-1 ml-4">
                       <div className="flex items-center gap-1 text-xs text-gray-500">
                         <Clock className="w-3 h-3" />
-                        {formatDistanceToNow(new Date(kudos.createdAt), { addSuffix: true })}
+                        {formatDistanceToNow(new Date(kudos.createdAt), {
+                          addSuffix: true,
+                        })}
                       </div>
                       {!kudos.read && (
                         <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>

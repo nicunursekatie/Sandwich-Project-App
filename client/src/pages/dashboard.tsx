@@ -1,4 +1,31 @@
-import { Sandwich, LogOut, LayoutDashboard, ListTodo, MessageCircle, ClipboardList, FolderOpen, BarChart3, TrendingUp, Users, Car, Building2, FileText, ChevronDown, ChevronRight, Menu, X, UserCog, Lightbulb, AlertCircle, Trophy, Calculator, Calendar, Clock, Truck, FileImage } from "lucide-react";
+import {
+  Sandwich,
+  LogOut,
+  LayoutDashboard,
+  ListTodo,
+  MessageCircle,
+  ClipboardList,
+  FolderOpen,
+  BarChart3,
+  TrendingUp,
+  Users,
+  Car,
+  Building2,
+  FileText,
+  ChevronDown,
+  ChevronRight,
+  Menu,
+  X,
+  UserCog,
+  Lightbulb,
+  AlertCircle,
+  Trophy,
+  Calculator,
+  Calendar,
+  Clock,
+  Truck,
+  FileImage,
+} from "lucide-react";
 import { useLocation } from "wouter";
 // Using optimized SVG for faster loading
 const sandwichLogo = "/sandwich-icon-optimized.svg";
@@ -49,7 +76,6 @@ import MessagingSystem from "@/components/messaging-system";
 import RealTimeMessages from "@/pages/real-time-messages";
 import Governance from "@/pages/governance";
 
-
 import GmailStyleInbox from "@/components/gmail-style-inbox";
 import { ToolkitTabs } from "@/components/toolkit-tabs";
 import { KudosInbox } from "@/components/kudos-inbox";
@@ -71,42 +97,49 @@ import sandwich_logo from "@assets/CMYK_PRINT_TSP-01_1749585167435.png";
 
 import sandwich_20logo from "@assets/LOGOS/sandwich logo.png";
 
-export default function Dashboard({ initialSection = "dashboard" }: { initialSection?: string }) {
+export default function Dashboard({
+  initialSection = "dashboard",
+}: {
+  initialSection?: string;
+}) {
   const [location] = useLocation();
   const [activeSection, setActiveSection] = useState(initialSection);
   const [selectedHost, setSelectedHost] = useState<string>("");
-  
+
   // Listen to URL changes to update activeSection
   React.useEffect(() => {
-    console.log('Current URL location:', location);
-    
+    console.log("Current URL location:", location);
+
     // Extract section from URL path
-    if (location.startsWith('/projects/')) {
-      const parts = location.split('/projects/');
+    if (location.startsWith("/projects/")) {
+      const parts = location.split("/projects/");
       const projectId = parts.length > 1 ? parts[1] : null;
       if (projectId) {
         const newSection = `project-${projectId}`;
-        console.log('Setting activeSection to project ID:', newSection);
+        console.log("Setting activeSection to project ID:", newSection);
         setActiveSection(newSection);
       }
     } else {
       // Handle other sections if needed
-      const pathSection = location.substring(1) || 'dashboard';
-      if (pathSection !== activeSection && pathSection !== location.substring(1)) {
-        console.log('Setting activeSection to:', pathSection);
+      const pathSection = location.substring(1) || "dashboard";
+      if (
+        pathSection !== activeSection &&
+        pathSection !== location.substring(1)
+      ) {
+        console.log("Setting activeSection to:", pathSection);
         setActiveSection(pathSection);
       }
     }
   }, [location]);
-  
+
   // Debug logging
   React.useEffect(() => {
-    console.log('Dashboard activeSection changed to:', activeSection);
+    console.log("Dashboard activeSection changed to:", activeSection);
   }, [activeSection]);
 
   // Enhanced setActiveSection with debugging
   const enhancedSetActiveSection = (section: string) => {
-    console.log('📍 Dashboard setActiveSection called with:', section);
+    console.log("📍 Dashboard setActiveSection called with:", section);
     setActiveSection(section);
   };
   const [expandedSections, setExpandedSections] = useState<string[]>([]);
@@ -117,16 +150,16 @@ export default function Dashboard({ initialSection = "dashboard" }: { initialSec
   // Make setActiveSection available globally for project detail navigation
   React.useEffect(() => {
     (window as any).dashboardSetActiveSection = enhancedSetActiveSection;
-    
+
     return () => {
       delete (window as any).dashboardSetActiveSection;
     };
   }, []);
 
   const toggleSection = (sectionId: string) => {
-    setExpandedSections(prev => 
-      prev.includes(sectionId) 
-        ? prev.filter(id => id !== sectionId)
+    setExpandedSections((prev) =>
+      prev.includes(sectionId)
+        ? prev.filter((id) => id !== sectionId)
         : [...prev, sectionId]
     );
   };
@@ -136,43 +169,90 @@ export default function Dashboard({ initialSection = "dashboard" }: { initialSec
     // Core section
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
     { id: "collections", label: "Collections", icon: Sandwich },
-    ...(hasPermission(user, PERMISSIONS.EVENT_REQUESTS_VIEW) ? [{ id: "events", label: "Events", icon: Calendar }] : []),
-    { id: "inventory-calculator", label: "Inventory Calculator", icon: Calculator },
+    ...(hasPermission(user, PERMISSIONS.EVENT_REQUESTS_VIEW)
+      ? [{ id: "events", label: "Events", icon: Calendar }]
+      : []),
+    {
+      id: "inventory-calculator",
+      label: "Inventory Calculator",
+      icon: Calculator,
+    },
     { id: "important-documents", label: "Important Documents", icon: FileText },
 
-    
     // Data section (filtered by permissions)
-    ...(hasPermission(user, PERMISSIONS.HOSTS_VIEW) ? [{ id: "hosts", label: "Host Location", icon: Building2 }] : []),
-    ...(hasPermission(user, PERMISSIONS.DRIVERS_VIEW) ? [{ id: "drivers", label: "Drivers", icon: Car }] : []),
-    ...(hasPermission(user, PERMISSIONS.RECIPIENTS_VIEW) ? [{ id: "recipients", label: "Recipients", icon: Users }] : []),
-    ...(hasPermission(user, PERMISSIONS.VIEW_VOLUNTEERS) ? [{ id: "volunteers", label: "Volunteers", icon: Users }] : []),
-    ...(hasPermission(user, PERMISSIONS.VIEW_DONATION_TRACKING) ? [{ id: "donation-tracking", label: "Distribution Tracking", icon: Truck }] : []),
-    
-    // Event Planning section
-    ...(hasPermission(user, PERMISSIONS.EVENT_REQUESTS_VIEW) ? [{ id: "event-requests", label: "Event Planning", icon: Calendar }] : []),
-    ...(hasPermission(user, PERMISSIONS.EVENT_REQUESTS_VIEW) ? [{ id: "event-reminders", label: "Event Reminders", icon: Clock }] : []),
-    ...(hasPermission(user, PERMISSIONS.ORGANIZATIONS_VIEW) ? [{ id: "groups-catalog", label: "Groups Catalog", icon: Building2 }] : []),
-    
-    // Operations section
-    ...(hasPermission(user, PERMISSIONS.MEETINGS_VIEW) ? [{ id: "meetings", label: "Meetings", icon: ClipboardList }] : []),
-    ...(hasPermission(user, PERMISSIONS.ANALYTICS_VIEW) ? [{ id: "analytics", label: "Analytics", icon: BarChart3 }] : []),
-    ...(hasPermission(user, PERMISSIONS.ACCESS_WEEKLY_MONITORING) ? [{ id: "weekly-monitoring", label: "Weekly Monitoring", icon: Clock }] : []),
+    ...(hasPermission(user, PERMISSIONS.HOSTS_VIEW)
+      ? [{ id: "hosts", label: "Host Location", icon: Building2 }]
+      : []),
+    ...(hasPermission(user, PERMISSIONS.DRIVERS_VIEW)
+      ? [{ id: "drivers", label: "Drivers", icon: Car }]
+      : []),
+    ...(hasPermission(user, PERMISSIONS.RECIPIENTS_VIEW)
+      ? [{ id: "recipients", label: "Recipients", icon: Users }]
+      : []),
+    ...(hasPermission(user, PERMISSIONS.VIEW_VOLUNTEERS)
+      ? [{ id: "volunteers", label: "Volunteers", icon: Users }]
+      : []),
+    ...(hasPermission(user, PERMISSIONS.VIEW_DONATION_TRACKING)
+      ? [
+          {
+            id: "donation-tracking",
+            label: "Distribution Tracking",
+            icon: Truck,
+          },
+        ]
+      : []),
 
-    ...(hasPermission(user, PERMISSIONS.PROJECTS_VIEW) ? [{ id: "projects", label: "Projects", icon: ListTodo }] : []),
-    
+    // Event Planning section
+    ...(hasPermission(user, PERMISSIONS.EVENT_REQUESTS_VIEW)
+      ? [{ id: "event-requests", label: "Event Planning", icon: Calendar }]
+      : []),
+    ...(hasPermission(user, PERMISSIONS.EVENT_REQUESTS_VIEW)
+      ? [{ id: "event-reminders", label: "Event Reminders", icon: Clock }]
+      : []),
+    ...(hasPermission(user, PERMISSIONS.ORGANIZATIONS_VIEW)
+      ? [{ id: "groups-catalog", label: "Groups Catalog", icon: Building2 }]
+      : []),
+
+    // Operations section
+    ...(hasPermission(user, PERMISSIONS.MEETINGS_VIEW)
+      ? [{ id: "meetings", label: "Meetings", icon: ClipboardList }]
+      : []),
+    ...(hasPermission(user, PERMISSIONS.ANALYTICS_VIEW)
+      ? [{ id: "analytics", label: "Analytics", icon: BarChart3 }]
+      : []),
+    ...(hasPermission(user, PERMISSIONS.ACCESS_WEEKLY_MONITORING)
+      ? [{ id: "weekly-monitoring", label: "Weekly Monitoring", icon: Clock }]
+      : []),
+
+    ...(hasPermission(user, PERMISSIONS.PROJECTS_VIEW)
+      ? [{ id: "projects", label: "Projects", icon: ListTodo }]
+      : []),
+
     // Communication section
     { id: "chat", label: "Chat", icon: MessageCircle },
-    ...(hasPermission(user, PERMISSIONS.CHAT_GENERAL) ? [{ id: "committee", label: "Committee", icon: MessageCircle }] : []),
+    ...(hasPermission(user, PERMISSIONS.CHAT_GENERAL)
+      ? [{ id: "committee", label: "Committee", icon: MessageCircle }]
+      : []),
 
-    ...(hasPermission(user, PERMISSIONS.SUGGESTIONS_VIEW) ? [{ id: "suggestions", label: "Suggestions", icon: Lightbulb }] : []),
-    
+    ...(hasPermission(user, PERMISSIONS.SUGGESTIONS_VIEW)
+      ? [{ id: "suggestions", label: "Suggestions", icon: Lightbulb }]
+      : []),
+
     // Resources section
-    ...(hasPermission(user, PERMISSIONS.ACCESS_TOOLKIT) ? [{ id: "toolkit", label: "Toolkit", icon: FolderOpen }] : []),
-    ...(hasPermission(user, PERMISSIONS.ADMIN_ACCESS) ? [{ id: "development", label: "Development", icon: FileText }] : []),
-    ...(hasPermission(user, PERMISSIONS.ACCESS_WORK_LOGS) ? [{ id: "work-log", label: "Work Log", icon: ClipboardList }] : []),
-    
+    ...(hasPermission(user, PERMISSIONS.ACCESS_TOOLKIT)
+      ? [{ id: "toolkit", label: "Toolkit", icon: FolderOpen }]
+      : []),
+    ...(hasPermission(user, PERMISSIONS.ADMIN_ACCESS)
+      ? [{ id: "development", label: "Development", icon: FileText }]
+      : []),
+    ...(hasPermission(user, PERMISSIONS.ACCESS_WORK_LOGS)
+      ? [{ id: "work-log", label: "Work Log", icon: ClipboardList }]
+      : []),
+
     // Admin section
-    ...(hasPermission(user, PERMISSIONS.MANAGE_USERS) ? [{ id: "user-management", label: "Admin", icon: UserCog }] : []),
+    ...(hasPermission(user, PERMISSIONS.MANAGE_USERS)
+      ? [{ id: "user-management", label: "Admin", icon: UserCog }]
+      : []),
   ];
 
   // Navigation is already filtered by permissions above
@@ -180,7 +260,8 @@ export default function Dashboard({ initialSection = "dashboard" }: { initialSec
   const renderContent = () => {
     // Extract project ID from activeSection if it's a project detail page
     const projectIdMatch = activeSection.match(/^project-(\d+)$/);
-    const projectId = projectIdMatch && projectIdMatch[1] ? parseInt(projectIdMatch[1]) : null;
+    const projectId =
+      projectIdMatch && projectIdMatch[1] ? parseInt(projectIdMatch[1]) : null;
 
     // Handle project detail pages
     if (projectId) {
@@ -206,8 +287,13 @@ export default function Dashboard({ initialSection = "dashboard" }: { initialSec
                 <Clock className="w-6 h-6 text-primary" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Weekly Monitoring</h1>
-                <p className="text-gray-600">Track weekly submission status and send email notifications for missing data</p>
+                <h1 className="text-2xl font-bold text-gray-900">
+                  Weekly Monitoring
+                </h1>
+                <p className="text-gray-600">
+                  Track weekly submission status and send email notifications
+                  for missing data
+                </p>
               </div>
             </div>
             <WeeklyMonitoringDashboard />
@@ -215,7 +301,10 @@ export default function Dashboard({ initialSection = "dashboard" }: { initialSec
         );
       case "inventory-calculator":
         // Open the inventory calculator in a new tab and return to dashboard
-        window.open('https://nicunursekatie.github.io/sandwichinventory/inventorycalculator.html', '_blank');
+        window.open(
+          "https://nicunursekatie.github.io/sandwichinventory/inventorycalculator.html",
+          "_blank"
+        );
         setActiveSection("dashboard");
         return <DashboardOverview onSectionChange={setActiveSection} />;
       case "important-documents":
@@ -242,7 +331,10 @@ export default function Dashboard({ initialSection = "dashboard" }: { initialSec
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Team Chat</h1>
-                <p className="text-gray-600">Real-time communication with your team across different channels</p>
+                <p className="text-gray-600">
+                  Real-time communication with your team across different
+                  channels
+                </p>
               </div>
             </div>
             <div className="flex-1 min-h-0">
@@ -259,7 +351,9 @@ export default function Dashboard({ initialSection = "dashboard" }: { initialSec
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Your Kudos</h1>
-                <p className="text-gray-600">Recognition received for your great work</p>
+                <p className="text-gray-600">
+                  Recognition received for your great work
+                </p>
               </div>
             </div>
             <KudosInbox />
@@ -269,7 +363,6 @@ export default function Dashboard({ initialSection = "dashboard" }: { initialSec
         return <UserProfile />;
       case "meetings":
         return <EnhancedMeetingDashboard />;
-
 
       case "toolkit":
         return <ToolkitTabs />;
@@ -291,7 +384,11 @@ export default function Dashboard({ initialSection = "dashboard" }: { initialSec
       case "event-reminders":
         return <EventRemindersManagement />;
       case "groups-catalog":
-        return <GroupCatalog onNavigateToEventPlanning={() => setActiveSection("event-requests")} />;
+        return (
+          <GroupCatalog
+            onNavigateToEventPlanning={() => setActiveSection("event-requests")}
+          />
+        );
       case "action-tracking":
         return <ActionTracking />;
 
@@ -303,22 +400,41 @@ export default function Dashboard({ initialSection = "dashboard" }: { initialSec
         return (
           <div className="p-6">
             <div className="mb-6">
-              <h1 className="text-2xl font-main-heading text-primary">Analytics Dashboard</h1>
-              <p className="font-body text-muted-foreground">Data insights and impact visualization</p>
+              <h1 className="text-2xl font-main-heading text-primary">
+                Analytics Dashboard
+              </h1>
+              <p className="font-body text-muted-foreground">
+                Data insights and impact visualization
+              </p>
             </div>
             <Tabs defaultValue="data" className="w-full">
               <TabsList className="grid w-full grid-cols-3 h-9 sm:h-10 bg-[#236383]/10 border-[#236383]/20">
-                <TabsTrigger value="data" className="text-xs sm:text-sm data-[state=active]:bg-[#236383] data-[state=active]:text-white text-[#236383]">Data Analytics</TabsTrigger>
-                <TabsTrigger value="hosts" className="text-xs sm:text-sm data-[state=active]:bg-[#236383] data-[state=active]:text-white text-[#646464]">Host Analytics</TabsTrigger>
-                <TabsTrigger value="impact" className="text-xs sm:text-sm data-[state=active]:bg-[#236383] data-[state=active]:text-white text-[#646464]">Impact Dashboard</TabsTrigger>
+                <TabsTrigger
+                  value="data"
+                  className="text-xs sm:text-sm data-[state=active]:bg-[#236383] data-[state=active]:text-white text-[#236383]"
+                >
+                  Data Analytics
+                </TabsTrigger>
+                <TabsTrigger
+                  value="hosts"
+                  className="text-xs sm:text-sm data-[state=active]:bg-[#236383] data-[state=active]:text-white text-[#646464]"
+                >
+                  Host Analytics
+                </TabsTrigger>
+                <TabsTrigger
+                  value="impact"
+                  className="text-xs sm:text-sm data-[state=active]:bg-[#236383] data-[state=active]:text-white text-[#646464]"
+                >
+                  Impact Dashboard
+                </TabsTrigger>
               </TabsList>
               <TabsContent value="data" className="mt-6">
                 <AnalyticsDashboard />
               </TabsContent>
               <TabsContent value="hosts" className="mt-6">
-                <HostAnalytics 
-                  selectedHost={selectedHost} 
-                  onHostChange={setSelectedHost} 
+                <HostAnalytics
+                  selectedHost={selectedHost}
+                  onHostChange={setSelectedHost}
                 />
               </TabsContent>
               <TabsContent value="impact" className="mt-6">
@@ -342,12 +458,22 @@ export default function Dashboard({ initialSection = "dashboard" }: { initialSec
         return (
           <div className="space-y-6">
             <div className="flex items-center gap-4 mb-6">
-              <div className="flex items-center justify-center w-12 h-12 rounded-xl" style={{backgroundColor: 'var(--tsp-teal-light)'}}>
-                <MessageCircle className="w-6 h-6" style={{color: 'var(--tsp-teal)'}} />
+              <div
+                className="flex items-center justify-center w-12 h-12 rounded-xl"
+                style={{ backgroundColor: "var(--tsp-teal-light)" }}
+              >
+                <MessageCircle
+                  className="w-6 h-6"
+                  style={{ color: "var(--tsp-teal)" }}
+                />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Committee Communications</h1>
-                <p className="text-gray-600">Internal committee discussions and collaboration</p>
+                <h1 className="text-2xl font-bold text-gray-900">
+                  Committee Communications
+                </h1>
+                <p className="text-gray-600">
+                  Internal committee discussions and collaboration
+                </p>
               </div>
             </div>
             <CommitteeChat />
@@ -366,7 +492,9 @@ export default function Dashboard({ initialSection = "dashboard" }: { initialSec
         }
         // Handle legacy project routes
         if (activeSection.startsWith("project-")) {
-          const legacyProjectId = parseInt(activeSection.replace("project-", ""));
+          const legacyProjectId = parseInt(
+            activeSection.replace("project-", "")
+          );
           if (!isNaN(legacyProjectId)) {
             return <ProjectDetailClean projectId={legacyProjectId} />;
           }
@@ -389,7 +517,7 @@ export default function Dashboard({ initialSection = "dashboard" }: { initialSec
 
   // If not authenticated after loading, redirect or show error
   if (!user) {
-    window.location.href = '/';
+    window.location.href = "/";
     return null;
   }
 
@@ -397,205 +525,253 @@ export default function Dashboard({ initialSection = "dashboard" }: { initialSec
     <>
       {/* Login Kudos Notifier */}
       <KudosLoginNotifier />
-      
+
       <div className="bg-gray-50 min-h-screen flex flex-col overflow-x-hidden safe-area-inset">
         {/* Announcement Banner */}
         <AnnouncementBanner />
         {/* Top Header */}
         <div className="bg-gradient-to-r from-white to-orange-50/30 border-b-2 border-amber-200 shadow-sm px-2 sm:px-4 md:px-6 py-2 sm:py-3 flex items-center mobile-header-fix min-h-[60px] sm:min-h-[70px] overflow-hidden">
-        <div className="flex items-center space-x-2 min-w-0 flex-shrink-0">
-          {/* Mobile menu button - positioned first for easy access */}
-          <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden p-2 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors touch-manipulation relative z-60"
-            aria-label="Toggle navigation menu"
-          >
-            {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
-          <img src={sandwich_20logo} alt="Sandwich Logo" className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" width="24" height="24" />
-          <h1 className="text-base sm:text-lg font-semibold text-teal-800 hidden lg:block truncate">The Sandwich Project</h1>
-          <h1 className="text-sm font-semibold text-teal-800 lg:hidden truncate">TSP</h1>
-        </div>
-        
-        {/* Flexible spacer - min width to ensure buttons don't get pushed off */}
-        <div className="flex-1 min-w-0" />
-        
-        {/* Right side container - optimized for tablets/mobile */}
-        <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-          {/* Compact user indicator for tablets */}
-          {user && (
-            <div className="flex items-center gap-1 sm:gap-2 px-2 py-1.5 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200 shadow-sm max-w-[120px] xs:max-w-[150px] sm:max-w-[180px] md:max-w-none">
-              <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gradient-to-r from-teal-100 to-teal-200 rounded-full flex items-center justify-center shadow-sm flex-shrink-0">
-                <span className="text-xs font-medium text-teal-800">
-                  {(user as any)?.firstName?.charAt(0) || (user as any)?.email?.charAt(0) || 'U'}
-                </span>
-              </div>
-              <div className="hidden lg:flex flex-col min-w-0">
-                <span className="text-xs font-medium text-teal-800 truncate">
-                  {(user as any)?.firstName ? `${(user as any).firstName} ${(user as any)?.lastName || ''}`.trim() : (user as any)?.email}
-                </span>
-                <span className="text-xs text-amber-600 truncate">
-                  {(user as any)?.email}
-                </span>
-              </div>
-              <div className="lg:hidden min-w-0 flex-1">
-                <span className="text-xs font-medium text-teal-800 truncate block">
-                  {(user as any)?.firstName ? `${(user as any).firstName}` : (user as any)?.email?.split('@')[0] || 'User'}
-                </span>
-              </div>
-            </div>
-          )}
-          
-          {/* Essential buttons - always visible */}
-          <div className="flex items-center gap-0.5 xs:gap-1 relative z-50 flex-shrink-0">
+          <div className="flex items-center space-x-2 min-w-0 flex-shrink-0">
+            {/* Mobile menu button - positioned first for easy access */}
             <button
-              onClick={() => {
-                console.log('Messages button clicked');
-                setActiveSection("messages");
-                setIsMobileMenuOpen(false);
-              }}
-              className={`p-2 rounded-lg transition-colors relative z-50 pointer-events-auto touch-manipulation min-w-[44px] ${
-                activeSection === "messages"
-                  ? "bg-[#236383] hover:bg-[#1d5470] text-white border border-[#236383] shadow-sm"
-                  : "text-teal-600 hover:bg-teal-50 hover:text-teal-800"
-              }`}
-              title="Messages"
-              aria-label="Messages"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="md:hidden p-2 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors touch-manipulation relative z-60"
+              aria-label="Toggle navigation menu"
             >
-              <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5" />
-            </button>
-            
-            {/* MessageNotifications component */}
-            {typeof window !== 'undefined' && <MessageNotifications user={user} />}
-            
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('Profile button clicked, current section:', activeSection);
-                setActiveSection("profile");
-                window.history.pushState({}, '', '/dashboard?section=profile');
-                setIsMobileMenuOpen(false);
-              }}
-              className={`p-2 rounded-lg transition-colors relative z-50 pointer-events-auto touch-manipulation min-w-[44px] ${
-                activeSection === "profile"
-                  ? "bg-[#236383] hover:bg-[#1d5470] text-white border border-[#236383] shadow-sm"
-                  : "text-teal-600 hover:bg-teal-50 hover:text-teal-800"
-              }`}
-              title="Account Settings"
-              aria-label="Account Settings"
-            >
-              <UserCog className="w-4 h-4 sm:w-5 sm:h-5" />
-            </button>
-            
-            {/* Logout button - ALWAYS visible and accessible */}
-            <button 
-              onClick={async () => {
-                try {
-                  await fetch('/api/logout', {
-                    method: 'POST',
-                    credentials: 'include'
-                  });
-                  // Clear all cached data and force auth state refresh
-                  queryClient.clear();
-                  queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
-                  queryClient.removeQueries({ queryKey: ['/api/auth/user'] });
-                  // Force immediate redirect to login
-                  window.location.href = "/api/login";
-                } catch (error) {
-                  console.error('Logout error:', error);
-                  queryClient.clear();
-                  queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
-                  queryClient.removeQueries({ queryKey: ['/api/auth/user'] });
-                  window.location.href = "/api/login";
-                }
-              }}
-              className="flex items-center gap-1 px-2 py-2 text-amber-700 hover:text-amber-900 rounded-lg hover:bg-amber-50 transition-colors touch-manipulation border border-amber-200 hover:border-amber-300 flex-shrink-0 min-w-[44px]"
-              aria-label="Logout"
-              title="Logout"
-            >
-              <LogOut className="w-4 h-4 flex-shrink-0" />
-              <span className="text-xs hidden md:block whitespace-nowrap">Logout</span>
-            </button>
-          </div>
-        </div>
-      </div>
-      <div className="flex flex-1 relative pt-[60px] md:pt-0">
-        {/* Mobile overlay */}
-        {isMobileMenuOpen && (
-          <div 
-            className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
-            onClick={() => setIsMobileMenuOpen(false)}
-          />
-        )}
-        
-        {/* Sidebar */}
-        <div className={`${
-          isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
-        } md:translate-x-0 fixed md:relative z-50 ${
-          isSidebarCollapsed ? 'w-16' : 'w-56 xs:w-64 sm:w-72'
-        } bg-gradient-to-b from-white to-orange-50/30 border-r-2 border-amber-200 shadow-lg flex flex-col transition-all duration-300 ease-in-out h-full`}>
-          {/* Collapse Toggle Button */}
-          <div className="hidden md:flex justify-end p-2 border-b border-amber-200">
-            <button
-              onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-              className="p-1.5 rounded-lg hover:bg-amber-100 transition-colors"
-              aria-label={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-            >
-              {isSidebarCollapsed ? (
-                <img src={sandwichLogo} alt="Expand" className="w-5 h-5" />
+              {isMobileMenuOpen ? (
+                <X className="w-5 h-5" />
               ) : (
-                <ChevronDown className="w-4 h-4 text-amber-700 rotate-90" />
+                <Menu className="w-5 h-5" />
               )}
             </button>
+            <img
+              src={sandwich_20logo}
+              alt="Sandwich Logo"
+              className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0"
+              width="24"
+              height="24"
+            />
+            <h1 className="text-base sm:text-lg font-semibold text-teal-800 hidden lg:block truncate">
+              The Sandwich Project
+            </h1>
+            <h1 className="text-sm font-semibold text-teal-800 lg:hidden truncate">
+              TSP
+            </h1>
           </div>
 
-          {/* Simple Navigation with enhanced mobile scrolling */}
-          <div className="flex-1 overflow-y-auto pb-6 touch-pan-y overscroll-contain">
-            <SimpleNav 
-              activeSection={activeSection} 
-              onSectionChange={(section) => {
-                console.log('Dashboard setActiveSection called with:', section);
-                setActiveSection(section);
-                // Close mobile menu when navigation item is clicked
-                setIsMobileMenuOpen(false);
-                // Also update URL for back button support
-                const newUrl = section === 'dashboard' ? '/dashboard' : `/dashboard?section=${section}`;
-                window.history.pushState({}, '', newUrl);
-              }}
-              isCollapsed={isSidebarCollapsed}
+          {/* Flexible spacer - min width to ensure buttons don't get pushed off */}
+          <div className="flex-1 min-w-0" />
+
+          {/* Right side container - optimized for tablets/mobile */}
+          <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+            {/* Compact user indicator for tablets */}
+            {user && (
+              <div className="flex items-center gap-1 sm:gap-2 px-2 py-1.5 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200 shadow-sm max-w-[120px] xs:max-w-[150px] sm:max-w-[180px] md:max-w-none">
+                <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gradient-to-r from-teal-100 to-teal-200 rounded-full flex items-center justify-center shadow-sm flex-shrink-0">
+                  <span className="text-xs font-medium text-teal-800">
+                    {(user as any)?.firstName?.charAt(0) ||
+                      (user as any)?.email?.charAt(0) ||
+                      "U"}
+                  </span>
+                </div>
+                <div className="hidden lg:flex flex-col min-w-0">
+                  <span className="text-xs font-medium text-teal-800 truncate">
+                    {(user as any)?.firstName
+                      ? `${(user as any).firstName} ${(user as any)?.lastName ||
+                          ""}`.trim()
+                      : (user as any)?.email}
+                  </span>
+                  <span className="text-xs text-amber-600 truncate">
+                    {(user as any)?.email}
+                  </span>
+                </div>
+                <div className="lg:hidden min-w-0 flex-1">
+                  <span className="text-xs font-medium text-teal-800 truncate block">
+                    {(user as any)?.firstName
+                      ? `${(user as any).firstName}`
+                      : (user as any)?.email?.split("@")[0] || "User"}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Essential buttons - always visible */}
+            <div className="flex items-center gap-0.5 xs:gap-1 relative z-50 flex-shrink-0">
+              <button
+                onClick={() => {
+                  console.log("Messages button clicked");
+                  setActiveSection("messages");
+                  setIsMobileMenuOpen(false);
+                }}
+                className={`p-2 rounded-lg transition-colors relative z-50 pointer-events-auto touch-manipulation min-w-[44px] ${
+                  activeSection === "messages"
+                    ? "bg-[#236383] hover:bg-[#1d5470] text-white border border-[#236383] shadow-sm"
+                    : "text-teal-600 hover:bg-teal-50 hover:text-teal-800"
+                }`}
+                title="Messages"
+                aria-label="Messages"
+              >
+                <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5" />
+              </button>
+
+              {/* MessageNotifications component */}
+              {typeof window !== "undefined" && (
+                <MessageNotifications user={user} />
+              )}
+
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.log(
+                    "Profile button clicked, current section:",
+                    activeSection
+                  );
+                  setActiveSection("profile");
+                  window.history.pushState(
+                    {},
+                    "",
+                    "/dashboard?section=profile"
+                  );
+                  setIsMobileMenuOpen(false);
+                }}
+                className={`p-2 rounded-lg transition-colors relative z-50 pointer-events-auto touch-manipulation min-w-[44px] ${
+                  activeSection === "profile"
+                    ? "bg-[#236383] hover:bg-[#1d5470] text-white border border-[#236383] shadow-sm"
+                    : "text-teal-600 hover:bg-teal-50 hover:text-teal-800"
+                }`}
+                title="Account Settings"
+                aria-label="Account Settings"
+              >
+                <UserCog className="w-4 h-4 sm:w-5 sm:h-5" />
+              </button>
+
+              {/* Logout button - ALWAYS visible and accessible */}
+              <button
+                onClick={async () => {
+                  try {
+                    await fetch("/api/logout", {
+                      method: "POST",
+                      credentials: "include",
+                    });
+                    // Clear all cached data and force auth state refresh
+                    queryClient.clear();
+                    queryClient.invalidateQueries({
+                      queryKey: ["/api/auth/user"],
+                    });
+                    queryClient.removeQueries({ queryKey: ["/api/auth/user"] });
+                    // Force immediate redirect to login
+                    window.location.href = "/api/login";
+                  } catch (error) {
+                    console.error("Logout error:", error);
+                    queryClient.clear();
+                    queryClient.invalidateQueries({
+                      queryKey: ["/api/auth/user"],
+                    });
+                    queryClient.removeQueries({ queryKey: ["/api/auth/user"] });
+                    window.location.href = "/api/login";
+                  }
+                }}
+                className="flex items-center gap-1 px-2 py-2 text-amber-700 hover:text-amber-900 rounded-lg hover:bg-amber-50 transition-colors touch-manipulation border border-amber-200 hover:border-amber-300 flex-shrink-0 min-w-[44px]"
+                aria-label="Logout"
+                title="Logout"
+              >
+                <LogOut className="w-4 h-4 flex-shrink-0" />
+                <span className="text-xs hidden md:block whitespace-nowrap">
+                  Logout
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div className="flex flex-1 relative pt-[60px] md:pt-0">
+          {/* Mobile overlay */}
+          {isMobileMenuOpen && (
+            <div
+              className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+              onClick={() => setIsMobileMenuOpen(false)}
             />
-            
-            {/* EIN Information - Always visible at bottom */}
-            {!isSidebarCollapsed && (
-              <div className="px-4 mt-6 pt-4 border-t border-amber-200">
-                <div className="bg-gradient-to-r from-teal-50 to-teal-100 border border-teal-200 rounded-lg px-3 py-2">
-                  <div className="text-xs text-teal-700 font-medium uppercase tracking-wide">Organization EIN</div>
-                  <div className="text-sm font-bold text-teal-900 font-mono">87-0939484</div>
+          )}
+
+          {/* Sidebar */}
+          <div
+            className={`${
+              isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+            } md:translate-x-0 fixed md:relative z-50 ${
+              isSidebarCollapsed ? "w-16" : "w-56 xs:w-64 sm:w-72"
+            } bg-gradient-to-b from-white to-orange-50/30 border-r-2 border-amber-200 shadow-lg flex flex-col transition-all duration-300 ease-in-out h-full`}
+          >
+            {/* Collapse Toggle Button */}
+            <div className="hidden md:flex justify-end p-2 border-b border-amber-200">
+              <button
+                onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+                className="p-1.5 rounded-lg hover:bg-amber-100 transition-colors"
+                aria-label={
+                  isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"
+                }
+              >
+                {isSidebarCollapsed ? (
+                  <img src={sandwichLogo} alt="Expand" className="w-5 h-5" />
+                ) : (
+                  <ChevronDown className="w-4 h-4 text-amber-700 rotate-90" />
+                )}
+              </button>
+            </div>
+
+            {/* Simple Navigation with enhanced mobile scrolling */}
+            <div className="flex-1 overflow-y-auto pb-6 touch-pan-y overscroll-contain">
+              <SimpleNav
+                activeSection={activeSection}
+                onSectionChange={(section) => {
+                  console.log(
+                    "Dashboard setActiveSection called with:",
+                    section
+                  );
+                  setActiveSection(section);
+                  // Close mobile menu when navigation item is clicked
+                  setIsMobileMenuOpen(false);
+                  // Also update URL for back button support
+                  const newUrl =
+                    section === "dashboard"
+                      ? "/dashboard"
+                      : `/dashboard?section=${section}`;
+                  window.history.pushState({}, "", newUrl);
+                }}
+                isCollapsed={isSidebarCollapsed}
+              />
+
+              {/* EIN Information - Always visible at bottom */}
+              {!isSidebarCollapsed && (
+                <div className="px-4 mt-6 pt-4 border-t border-amber-200">
+                  <div className="bg-gradient-to-r from-teal-50 to-teal-100 border border-teal-200 rounded-lg px-3 py-2">
+                    <div className="text-xs text-teal-700 font-medium uppercase tracking-wide">
+                      Organization EIN
+                    </div>
+                    <div className="text-sm font-bold text-teal-900 font-mono">
+                      87-0939484
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Main Content */}
+          <div className="flex-1 overflow-hidden w-full md:w-auto relative z-10 bg-amber-50/30 min-w-0">
+            {activeSection === "gmail-inbox" || activeSection === "chat" ? (
+              // Special full-height layout for inbox and chat
+              <div className="h-full">{renderContent()}</div>
+            ) : (
+              // Normal layout for other content
+              <div className="h-full overflow-y-auto overflow-x-hidden">
+                <div className="p-0 sm:p-4 md:p-6 pb-20 min-h-full">
+                  <div className="max-w-full overflow-x-hidden">
+                    {renderContent()}
+                  </div>
                 </div>
               </div>
             )}
           </div>
-        </div>
-
-        {/* Main Content */}
-        <div className="flex-1 overflow-hidden w-full md:w-auto relative z-10 bg-amber-50/30 min-w-0">
-          {(activeSection === 'gmail-inbox' || activeSection === 'chat') ? (
-            // Special full-height layout for inbox and chat
-            (<div className="h-full">
-              {renderContent()}
-            </div>)
-          ) : (
-            // Normal layout for other content
-            (<div className="h-full overflow-y-auto overflow-x-hidden">
-              <div className="p-0 sm:p-4 md:p-6 pb-20 min-h-full">
-                <div className="max-w-full overflow-x-hidden">
-                  {renderContent()}
-                </div>
-              </div>
-            </div>)
-          )}
-        </div>
         </div>
       </div>
     </>

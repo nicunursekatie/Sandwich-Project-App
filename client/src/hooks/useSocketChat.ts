@@ -29,7 +29,9 @@ export function useSocketChat() {
   const [connected, setConnected] = useState(false);
   const [rooms, setRooms] = useState<ChatRoom[]>([]);
   const [messages, setMessages] = useState<Record<string, ChatMessage[]>>({});
-  const [activeUsers, setActiveUsers] = useState<Record<string, ChatUser[]>>({});
+  const [activeUsers, setActiveUsers] = useState<Record<string, ChatUser[]>>(
+    {}
+  );
   const [currentRoom, setCurrentRoom] = useState<string>("");
 
   // Initialize socket connection
@@ -46,13 +48,13 @@ export function useSocketChat() {
       upgrade: true,
       timeout: 30000,
       forceNew: true,
-      autoConnect: true
+      autoConnect: true,
     });
 
     newSocket.on("connect", () => {
       setConnected(true);
       console.log("Socket.io connected");
-      
+
       // Get available rooms first
       newSocket.emit("get-rooms");
     });
@@ -65,12 +67,12 @@ export function useSocketChat() {
     newSocket.on("rooms", ({ available }) => {
       setRooms(available || []);
       console.log("Received rooms:", available);
-      
+
       // Request message history for all rooms to populate "no messages yet" correctly
       (available || []).forEach((room: ChatRoom) => {
         newSocket.emit("get-history", room.id);
       });
-      
+
       // Auto-select first room if none selected
       if ((available || []).length > 0 && !currentRoom) {
         setCurrentRoom((available || [])[0]?.id);
@@ -78,40 +80,50 @@ export function useSocketChat() {
     });
 
     newSocket.on("new-message", (message: ChatMessage) => {
-      setMessages(prev => ({
+      setMessages((prev) => ({
         ...prev,
-        [message.room]: [...(prev[message.room] || []), message]
+        [message.room]: [...(prev[message.room] || []), message],
       }));
-      
+
       // Trigger notification refresh for new messages
-      window.dispatchEvent(new CustomEvent('refreshNotifications'));
-      console.log('New message received, triggering notification refresh');
+      window.dispatchEvent(new CustomEvent("refreshNotifications"));
+      console.log("New message received, triggering notification refresh");
     });
 
-    newSocket.on("message-history", (data: { room: string; messages: ChatMessage[] }) => {
-      const { room, messages: roomMessages } = data;
-      setMessages(prev => ({
-        ...prev,
-        [room]: roomMessages || []
-      }));
-      console.log(`Received message history for ${room}:`, roomMessages?.length || 0, 'messages');
-    });
+    newSocket.on(
+      "message-history",
+      (data: { room: string; messages: ChatMessage[] }) => {
+        const { room, messages: roomMessages } = data;
+        setMessages((prev) => ({
+          ...prev,
+          [room]: roomMessages || [],
+        }));
+        console.log(
+          `Received message history for ${room}:`,
+          roomMessages?.length || 0,
+          "messages"
+        );
+      }
+    );
 
     newSocket.on("joined-channel", ({ channel }) => {
       console.log(`Successfully joined channel: ${channel}`);
     });
 
     newSocket.on("user_joined", ({ userId, username, room }) => {
-      setActiveUsers(prev => ({
+      setActiveUsers((prev) => ({
         ...prev,
-        [room]: [...(prev[room] || []).filter(u => u.userId !== userId), { userId, username, room }]
+        [room]: [
+          ...(prev[room] || []).filter((u) => u.userId !== userId),
+          { userId, username, room },
+        ],
       }));
     });
 
     newSocket.on("user_left", ({ userId, room }) => {
-      setActiveUsers(prev => ({
+      setActiveUsers((prev) => ({
         ...prev,
-        [room]: (prev[room] || []).filter(u => u.userId !== userId)
+        [room]: (prev[room] || []).filter((u) => u.userId !== userId),
       }));
     });
 
@@ -127,28 +139,35 @@ export function useSocketChat() {
   }, [user]);
 
   // Send message
-  const sendMessage = useCallback((room: string, content: string) => {
-    if (socket && connected && user) {
-      socket.emit("send-message", { 
-        channel: room, 
-        content 
-      });
-    }
-  }, [socket, connected, user]);
+  const sendMessage = useCallback(
+    (room: string, content: string) => {
+      if (socket && connected && user) {
+        socket.emit("send-message", {
+          channel: room,
+          content,
+        });
+      }
+    },
+    [socket, connected, user]
+  );
 
   // Join room and get history
-  const joinRoom = useCallback((roomId: string) => {
-    if (socket && connected && user) {
-      setCurrentRoom(roomId);
-      const userName = (user as any)?.firstName || (user as any)?.email || 'Anonymous';
-      const userId = (user as any)?.id || 'anonymous';
-      socket.emit("join-channel", { 
-        channel: roomId, 
-        userId: userId,
-        userName: userName
-      });
-    }
-  }, [socket, connected, user]);
+  const joinRoom = useCallback(
+    (roomId: string) => {
+      if (socket && connected && user) {
+        setCurrentRoom(roomId);
+        const userName =
+          (user as any)?.firstName || (user as any)?.email || "Anonymous";
+        const userId = (user as any)?.id || "anonymous";
+        socket.emit("join-channel", {
+          channel: roomId,
+          userId: userId,
+          userName: userName,
+        });
+      }
+    },
+    [socket, connected, user]
+  );
 
   return {
     connected,
@@ -158,6 +177,6 @@ export function useSocketChat() {
     currentRoom,
     sendMessage,
     joinRoom,
-    setCurrentRoom
+    setCurrentRoom,
   };
 }

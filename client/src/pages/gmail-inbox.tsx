@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Inbox, 
-  Send, 
-  FileText, 
-  Star, 
-  Archive, 
-  Trash2, 
+import {
+  Inbox,
+  Send,
+  FileText,
+  Star,
+  Archive,
+  Trash2,
   Search,
   Plus,
   MoreVertical,
@@ -18,7 +18,7 @@ import {
   Forward,
   Heart,
   Clock,
-  User
+  User,
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -33,7 +33,14 @@ interface EmailMessage {
   timestamp: string;
   isRead: boolean;
   isStarred: boolean;
-  folder: 'inbox' | 'sent' | 'drafts' | 'starred' | 'archived' | 'trash' | 'kudos';
+  folder:
+    | "inbox"
+    | "sent"
+    | "drafts"
+    | "starred"
+    | "archived"
+    | "trash"
+    | "kudos";
   threadId?: number;
   isKudos?: boolean;
 }
@@ -48,25 +55,27 @@ interface EmailThread {
 }
 
 const FOLDERS = [
-  { id: 'inbox', name: 'Inbox', icon: Inbox, color: 'text-blue-600' },
-  { id: 'sent', name: 'Sent', icon: Send, color: 'text-green-600' },
-  { id: 'drafts', name: 'Drafts', icon: FileText, color: 'text-yellow-600' },
-  { id: 'starred', name: 'Starred', icon: Star, color: 'text-amber-500' },
-  { id: 'kudos', name: 'Kudos', icon: Heart, color: 'text-red-500' },
-  { id: 'archived', name: 'Archived', icon: Archive, color: 'text-gray-500' },
-  { id: 'trash', name: 'Trash', icon: Trash2, color: 'text-red-600' },
+  { id: "inbox", name: "Inbox", icon: Inbox, color: "text-blue-600" },
+  { id: "sent", name: "Sent", icon: Send, color: "text-green-600" },
+  { id: "drafts", name: "Drafts", icon: FileText, color: "text-yellow-600" },
+  { id: "starred", name: "Starred", icon: Star, color: "text-amber-500" },
+  { id: "kudos", name: "Kudos", icon: Heart, color: "text-red-500" },
+  { id: "archived", name: "Archived", icon: Archive, color: "text-gray-500" },
+  { id: "trash", name: "Trash", icon: Trash2, color: "text-red-600" },
 ];
 
 export default function GmailInbox() {
-  const [selectedFolder, setSelectedFolder] = useState('inbox');
-  const [selectedMessage, setSelectedMessage] = useState<EmailMessage | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedFolder, setSelectedFolder] = useState("inbox");
+  const [selectedMessage, setSelectedMessage] = useState<EmailMessage | null>(
+    null
+  );
+  const [searchQuery, setSearchQuery] = useState("");
   const [isComposing, setIsComposing] = useState(false);
   const [composeData, setComposeData] = useState({
-    to: '',
-    subject: '',
-    content: '',
-    isKudos: false
+    to: "",
+    subject: "",
+    content: "",
+    isKudos: false,
   });
 
   const queryClient = useQueryClient();
@@ -74,69 +83,90 @@ export default function GmailInbox() {
 
   // Fetch messages for current folder
   const { data: messages = [], isLoading: messagesLoading } = useQuery({
-    queryKey: ['/api/email-messages', selectedFolder, searchQuery],
+    queryKey: ["/api/email-messages", selectedFolder, searchQuery],
     queryFn: async () => {
       const params = new URLSearchParams({
         folder: selectedFolder,
-        ...(searchQuery && { search: searchQuery })
+        ...(searchQuery && { search: searchQuery }),
       });
-      return await apiRequest('GET', `/api/email-messages?${params}`);
-    }
+      return await apiRequest("GET", `/api/email-messages?${params}`);
+    },
   });
 
   // Fetch message threads
   const { data: threads = [] } = useQuery({
-    queryKey: ['/api/email-threads', selectedFolder],
+    queryKey: ["/api/email-threads", selectedFolder],
     queryFn: async () => {
-      return await apiRequest('GET', `/api/email-threads?folder=${selectedFolder}`);
-    }
+      return await apiRequest(
+        "GET",
+        `/api/email-threads?folder=${selectedFolder}`
+      );
+    },
   });
 
   // Send message mutation
   const sendMessageMutation = useMutation({
     mutationFn: async (messageData: any) => {
-      return await apiRequest('POST', '/api/email-messages', messageData);
+      return await apiRequest("POST", "/api/email-messages", messageData);
     },
     onSuccess: () => {
       toast({ title: "Message sent successfully!" });
       setIsComposing(false);
-      setComposeData({ to: '', subject: '', content: '', isKudos: false });
-      queryClient.invalidateQueries({ queryKey: ['/api/email-messages'] });
+      setComposeData({ to: "", subject: "", content: "", isKudos: false });
+      queryClient.invalidateQueries({ queryKey: ["/api/email-messages"] });
     },
     onError: () => {
       toast({ title: "Failed to send message", variant: "destructive" });
-    }
+    },
   });
 
   // Mark as read mutation
   const markAsReadMutation = useMutation({
     mutationFn: async (messageId: number) => {
-      return await apiRequest('PATCH', `/api/email-messages/${messageId}`, { isRead: true });
+      return await apiRequest("PATCH", `/api/email-messages/${messageId}`, {
+        isRead: true,
+      });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/email-messages'] });
-    }
+      queryClient.invalidateQueries({ queryKey: ["/api/email-messages"] });
+    },
   });
 
   // Move to folder mutation
   const moveToFolderMutation = useMutation({
-    mutationFn: async ({ messageId, folder }: { messageId: number; folder: string }) => {
-      return await apiRequest('PATCH', `/api/email-messages/${messageId}`, { folder });
+    mutationFn: async ({
+      messageId,
+      folder,
+    }: {
+      messageId: number;
+      folder: string;
+    }) => {
+      return await apiRequest("PATCH", `/api/email-messages/${messageId}`, {
+        folder,
+      });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/email-messages'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/email-messages"] });
       toast({ title: "Message moved successfully!" });
-    }
+    },
   });
 
   // Star/unstar mutation
   const toggleStarMutation = useMutation({
-    mutationFn: async ({ messageId, isStarred }: { messageId: number; isStarred: boolean }) => {
-      return await apiRequest('PATCH', `/api/email-messages/${messageId}`, { isStarred });
+    mutationFn: async ({
+      messageId,
+      isStarred,
+    }: {
+      messageId: number;
+      isStarred: boolean;
+    }) => {
+      return await apiRequest("PATCH", `/api/email-messages/${messageId}`, {
+        isStarred,
+      });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/email-messages'] });
-    }
+      queryClient.invalidateQueries({ queryKey: ["/api/email-messages"] });
+    },
   });
 
   const handleSelectMessage = (message: EmailMessage) => {
@@ -154,7 +184,7 @@ export default function GmailInbox() {
 
     sendMessageMutation.mutate({
       ...composeData,
-      folder: composeData.isKudos ? 'kudos' : 'sent'
+      folder: composeData.isKudos ? "kudos" : "sent",
     });
   };
 
@@ -165,22 +195,22 @@ export default function GmailInbox() {
     const hours = diff / (1000 * 60 * 60);
 
     if (hours < 24) {
-      return date.toLocaleTimeString('en-US', { 
-        hour: 'numeric', 
-        minute: '2-digit',
-        hour12: true 
+      return date.toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
       });
     } else {
-      return date.toLocaleDateString('en-US', { 
-        month: 'short', 
-        day: 'numeric' 
+      return date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
       });
     }
   };
 
   const getUnreadCount = (folderId: string) => {
-    return messages.filter((msg: EmailMessage) => 
-      msg.folder === folderId && !msg.isRead
+    return messages.filter(
+      (msg: EmailMessage) => msg.folder === folderId && !msg.isRead
     ).length;
   };
 
@@ -190,7 +220,7 @@ export default function GmailInbox() {
       <div className="w-64 bg-white border-r border-gray-200 flex flex-col">
         {/* Compose Button */}
         <div className="p-4">
-          <Button 
+          <Button
             onClick={() => setIsComposing(true)}
             className="w-full bg-blue-600 hover:bg-blue-700 text-white"
           >
@@ -204,13 +234,15 @@ export default function GmailInbox() {
           {FOLDERS.map((folder) => {
             const Icon = folder.icon;
             const unreadCount = getUnreadCount(folder.id);
-            
+
             return (
               <button
                 key={folder.id}
                 onClick={() => setSelectedFolder(folder.id)}
                 className={`w-full flex items-center px-4 py-2 text-left hover:bg-gray-100 transition-colors ${
-                  selectedFolder === folder.id ? 'bg-blue-50 border-r-2 border-blue-600' : ''
+                  selectedFolder === folder.id
+                    ? "bg-blue-50 border-r-2 border-blue-600"
+                    : ""
                 }`}
               >
                 <Icon className={`w-4 h-4 mr-3 ${folder.color}`} />
@@ -247,11 +279,16 @@ export default function GmailInbox() {
           {/* Message List */}
           <div className="w-1/3 bg-white border-r border-gray-200 overflow-y-auto">
             {messagesLoading ? (
-              <div className="p-4 text-center text-gray-500">Loading messages...</div>
+              <div className="p-4 text-center text-gray-500">
+                Loading messages...
+              </div>
             ) : messages.length === 0 ? (
               <div className="p-4 text-center text-gray-500">
                 <div className="text-4xl mb-2">📭</div>
-                <div>No messages in {FOLDERS.find(f => f.id === selectedFolder)?.name}</div>
+                <div>
+                  No messages in{" "}
+                  {FOLDERS.find((f) => f.id === selectedFolder)?.name}
+                </div>
               </div>
             ) : (
               messages.map((message: EmailMessage) => (
@@ -259,14 +296,22 @@ export default function GmailInbox() {
                   key={message.id}
                   onClick={() => handleSelectMessage(message)}
                   className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors ${
-                    selectedMessage?.id === message.id ? 'bg-blue-50' : ''
-                  } ${!message.isRead ? 'bg-blue-25' : ''}`}
+                    selectedMessage?.id === message.id ? "bg-blue-50" : ""
+                  } ${!message.isRead ? "bg-blue-25" : ""}`}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center mb-1">
-                        <span className={`text-sm ${!message.isRead ? 'font-semibold text-gray-900' : 'text-gray-700'}`}>
-                          {selectedFolder === 'sent' ? `To: ${message.recipient}` : `From: ${message.sender}`}
+                        <span
+                          className={`text-sm ${
+                            !message.isRead
+                              ? "font-semibold text-gray-900"
+                              : "text-gray-700"
+                          }`}
+                        >
+                          {selectedFolder === "sent"
+                            ? `To: ${message.recipient}`
+                            : `From: ${message.sender}`}
                         </span>
                         {message.isKudos && (
                           <Heart className="w-3 h-3 ml-2 text-red-500 fill-current" />
@@ -275,7 +320,13 @@ export default function GmailInbox() {
                           <Star className="w-3 h-3 ml-2 text-amber-500 fill-current" />
                         )}
                       </div>
-                      <div className={`text-sm mb-1 ${!message.isRead ? 'font-semibold text-gray-900' : 'text-gray-600'}`}>
+                      <div
+                        className={`text-sm mb-1 ${
+                          !message.isRead
+                            ? "font-semibold text-gray-900"
+                            : "text-gray-600"
+                        }`}
+                      >
                         {message.subject}
                       </div>
                       <div className="text-xs text-gray-500 truncate">
@@ -308,42 +359,58 @@ export default function GmailInbox() {
                       <div className="flex items-center text-sm text-gray-600">
                         <User className="w-4 h-4 mr-2" />
                         <span className="font-medium mr-2">
-                          {selectedFolder === 'sent' ? selectedMessage.recipient : selectedMessage.sender}
+                          {selectedFolder === "sent"
+                            ? selectedMessage.recipient
+                            : selectedMessage.sender}
                         </span>
                         <Clock className="w-4 h-4 mr-1 ml-4" />
-                        <span>{new Date(selectedMessage.timestamp).toLocaleString()}</span>
+                        <span>
+                          {new Date(selectedMessage.timestamp).toLocaleString()}
+                        </span>
                       </div>
                     </div>
-                    
+
                     {/* Action Buttons */}
                     <div className="flex space-x-2">
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => toggleStarMutation.mutate({
-                          messageId: selectedMessage.id,
-                          isStarred: !selectedMessage.isStarred
-                        })}
+                        onClick={() =>
+                          toggleStarMutation.mutate({
+                            messageId: selectedMessage.id,
+                            isStarred: !selectedMessage.isStarred,
+                          })
+                        }
                       >
-                        <Star className={`w-4 h-4 ${selectedMessage.isStarred ? 'fill-current text-amber-500' : ''}`} />
+                        <Star
+                          className={`w-4 h-4 ${
+                            selectedMessage.isStarred
+                              ? "fill-current text-amber-500"
+                              : ""
+                          }`}
+                        />
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => moveToFolderMutation.mutate({
-                          messageId: selectedMessage.id,
-                          folder: 'archived'
-                        })}
+                        onClick={() =>
+                          moveToFolderMutation.mutate({
+                            messageId: selectedMessage.id,
+                            folder: "archived",
+                          })
+                        }
                       >
                         <Archive className="w-4 h-4" />
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => moveToFolderMutation.mutate({
-                          messageId: selectedMessage.id,
-                          folder: 'trash'
-                        })}
+                        onClick={() =>
+                          moveToFolderMutation.mutate({
+                            messageId: selectedMessage.id,
+                            folder: "trash",
+                          })
+                        }
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -370,7 +437,7 @@ export default function GmailInbox() {
                           to: selectedMessage.sender,
                           subject: `Re: ${selectedMessage.subject}`,
                           content: `\n\n--- Original Message ---\nFrom: ${selectedMessage.sender}\nDate: ${selectedMessage.timestamp}\nSubject: ${selectedMessage.subject}\n\n${selectedMessage.content}`,
-                          isKudos: false
+                          isKudos: false,
                         });
                       }}
                     >
@@ -418,15 +485,21 @@ export default function GmailInbox() {
                 <label className="block text-sm font-medium mb-1">To:</label>
                 <Input
                   value={composeData.to}
-                  onChange={(e) => setComposeData({ ...composeData, to: e.target.value })}
+                  onChange={(e) =>
+                    setComposeData({ ...composeData, to: e.target.value })
+                  }
                   placeholder="recipient@example.com"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Subject:</label>
+                <label className="block text-sm font-medium mb-1">
+                  Subject:
+                </label>
                 <Input
                   value={composeData.subject}
-                  onChange={(e) => setComposeData({ ...composeData, subject: e.target.value })}
+                  onChange={(e) =>
+                    setComposeData({ ...composeData, subject: e.target.value })
+                  }
                   placeholder="Enter subject"
                 />
               </div>
@@ -435,18 +508,30 @@ export default function GmailInbox() {
                   type="checkbox"
                   id="isKudos"
                   checked={composeData.isKudos}
-                  onChange={(e) => setComposeData({ ...composeData, isKudos: e.target.checked })}
+                  onChange={(e) =>
+                    setComposeData({
+                      ...composeData,
+                      isKudos: e.target.checked,
+                    })
+                  }
                 />
-                <label htmlFor="isKudos" className="text-sm font-medium flex items-center">
+                <label
+                  htmlFor="isKudos"
+                  className="text-sm font-medium flex items-center"
+                >
                   <Heart className="w-4 h-4 mr-1 text-red-500" />
                   Send as Kudos
                 </label>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Message:</label>
+                <label className="block text-sm font-medium mb-1">
+                  Message:
+                </label>
                 <Textarea
                   value={composeData.content}
-                  onChange={(e) => setComposeData({ ...composeData, content: e.target.value })}
+                  onChange={(e) =>
+                    setComposeData({ ...composeData, content: e.target.value })
+                  }
                   placeholder="Write your message..."
                   rows={8}
                 />
@@ -456,12 +541,9 @@ export default function GmailInbox() {
                   onClick={handleSendMessage}
                   disabled={sendMessageMutation.isPending}
                 >
-                  {sendMessageMutation.isPending ? 'Sending...' : 'Send'}
+                  {sendMessageMutation.isPending ? "Sending..." : "Send"}
                 </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => setIsComposing(false)}
-                >
+                <Button variant="outline" onClick={() => setIsComposing(false)}>
                   Cancel
                 </Button>
               </div>

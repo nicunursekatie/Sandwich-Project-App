@@ -1,4 +1,4 @@
-import { MailService } from '@sendgrid/mail';
+import { MailService } from "@sendgrid/mail";
 
 if (!process.env.SENDGRID_API_KEY) {
   throw new Error("SENDGRID_API_KEY environment variable must be set");
@@ -17,20 +17,25 @@ interface EmailParams {
 
 export async function sendEmail(params: EmailParams): Promise<boolean> {
   try {
-    console.log(`Attempting to send email to ${params.to} from ${params.from} with subject: ${params.subject}`);
+    console.log(
+      `Attempting to send email to ${params.to} from ${params.from} with subject: ${params.subject}`
+    );
     await mailService.send({
       to: params.to,
       from: params.from,
       subject: params.subject,
-      text: params.text || '',
-      html: params.html || '',
+      text: params.text || "",
+      html: params.html || "",
     });
     console.log(`Email sent successfully to ${params.to}`);
     return true;
-  } catch (error: any) {
-    console.error('SendGrid email error:', error);
+  } catch (error) {
+    console.error("SendGrid email error:", error);
     if (error.response && error.response.body) {
-      console.error('SendGrid error details:', JSON.stringify(error.response.body, null, 2));
+      console.error(
+        "SendGrid error details:",
+        JSON.stringify(error.response.body, null, 2)
+      );
     }
     return false;
   }
@@ -75,7 +80,9 @@ This is an automated notification from The Sandwich Project suggestions portal.
       
       <div style="margin: 20px 0;">
         <h4>Description:</h4>
-        <p style="white-space: pre-wrap; background-color: #f9f9f9; padding: 15px; border-radius: 4px;">${suggestion.description}</p>
+        <p style="white-space: pre-wrap; background-color: #f9f9f9; padding: 15px; border-radius: 4px;">${
+          suggestion.description
+        }</p>
       </div>
       
       <hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;">
@@ -84,8 +91,8 @@ This is an automated notification from The Sandwich Project suggestions portal.
   `;
 
   return sendEmail({
-    to: 'katielong2316@gmail.com', // Your email for development notifications
-    from: 'katielong2316@gmail.com', // Using your verified email as sender
+    to: "katielong2316@gmail.com", // Your email for development notifications
+    from: "katielong2316@gmail.com", // Using your verified email as sender
     subject: `New Suggestion: ${suggestion.title}`,
     text: emailContent,
     html: htmlContent,

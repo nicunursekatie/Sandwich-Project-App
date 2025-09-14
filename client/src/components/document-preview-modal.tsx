@@ -1,7 +1,12 @@
-import { useState } from 'react';
-import { X, Download, ExternalLink, FileText } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useState } from "react";
+import { X, Download, ExternalLink, FileText } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface DocumentPreviewModalProps {
   isOpen: boolean;
@@ -11,17 +16,17 @@ interface DocumentPreviewModalProps {
   documentType: string;
 }
 
-export function DocumentPreviewModal({ 
-  isOpen, 
-  onClose, 
-  documentPath, 
-  documentName, 
-  documentType 
+export function DocumentPreviewModal({
+  isOpen,
+  onClose,
+  documentPath,
+  documentName,
+  documentType,
 }: DocumentPreviewModalProps) {
   const [isLoading, setIsLoading] = useState(true);
 
   const handleDownload = () => {
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = documentPath;
     link.download = documentName;
     document.body.appendChild(link);
@@ -30,38 +35,42 @@ export function DocumentPreviewModal({
   };
 
   const handleOpenInNewTab = () => {
-    window.open(documentPath, '_blank');
+    window.open(documentPath, "_blank");
   };
 
   const renderPreview = () => {
     switch (documentType?.toLowerCase()) {
-      case 'pdf':
+      case "pdf":
         return (
           <iframe
             src={documentPath}
             className="w-full h-full border-0 rounded-lg"
             onLoad={() => setIsLoading(false)}
             title={documentName}
-            style={{ minHeight: '600px' }}
+            style={{ minHeight: "600px" }}
           />
         );
-      case 'docx':
+      case "docx":
         return (
           <div className="flex flex-col items-center justify-center h-96 p-8 text-center">
             <div className="mb-4">
               <FileText className="w-16 h-16 text-blue-500 mx-auto mb-4" />
               <h3 className="text-lg font-semibold mb-2">{documentName}</h3>
               <p className="text-gray-600 mb-6">
-                Word documents require download to view. Click the download button to save the file to your device.
+                Word documents require download to view. Click the download
+                button to save the file to your device.
               </p>
             </div>
             <div className="flex gap-4">
-              <Button onClick={handleDownload} className="flex items-center gap-2">
+              <Button
+                onClick={handleDownload}
+                className="flex items-center gap-2"
+              >
                 <Download className="w-4 h-4" />
                 Download Document
               </Button>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={handleOpenInNewTab}
                 className="flex items-center gap-2"
               >
@@ -71,23 +80,27 @@ export function DocumentPreviewModal({
             </div>
           </div>
         );
-      case 'xlsx':
+      case "xlsx":
         return (
           <div className="flex flex-col items-center justify-center h-96 p-8 text-center">
             <div className="mb-4">
               <FileText className="w-16 h-16 text-green-500 mx-auto mb-4" />
               <h3 className="text-lg font-semibold mb-2">{documentName}</h3>
               <p className="text-gray-600 mb-6">
-                Excel files require download to view. Click the download button to save the file to your device.
+                Excel files require download to view. Click the download button
+                to save the file to your device.
               </p>
             </div>
             <div className="flex gap-4">
-              <Button onClick={handleDownload} className="flex items-center gap-2">
+              <Button
+                onClick={handleDownload}
+                className="flex items-center gap-2"
+              >
                 <Download className="w-4 h-4" />
                 Download Document
               </Button>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={handleOpenInNewTab}
                 className="flex items-center gap-2"
               >
@@ -104,7 +117,7 @@ export function DocumentPreviewModal({
             className="w-full h-full border-0 rounded-lg"
             onLoad={() => setIsLoading(false)}
             title={documentName}
-            style={{ minHeight: '600px' }}
+            style={{ minHeight: "600px" }}
           />
         );
     }
@@ -151,8 +164,11 @@ export function DocumentPreviewModal({
             </div>
           </div>
         </DialogHeader>
-        <div className="px-6 py-4 overflow-auto" style={{ maxHeight: 'calc(90vh - 100px)' }}>
-          {isLoading && documentType?.toLowerCase() === 'pdf' && (
+        <div
+          className="px-6 py-4 overflow-auto"
+          style={{ maxHeight: "calc(90vh - 100px)" }}
+        >
+          {isLoading && documentType?.toLowerCase() === "pdf" && (
             <div className="flex items-center justify-center h-96">
               <div className="text-center">
                 <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4 animate-pulse" />

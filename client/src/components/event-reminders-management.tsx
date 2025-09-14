@@ -1,15 +1,51 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Clock, Plus, Calendar, User, AlertCircle, CheckCircle, Filter, Search, ChevronDown } from "lucide-react";
+import {
+  Clock,
+  Plus,
+  Calendar,
+  User,
+  AlertCircle,
+  CheckCircle,
+  Filter,
+  Search,
+  ChevronDown,
+} from "lucide-react";
 import { format, isToday, isTomorrow, isThisWeek, isPast } from "date-fns";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
@@ -44,9 +80,18 @@ type EventReminder = {
 // Form schemas
 const createReminderSchema = z.object({
   eventRequestId: z.number().optional(),
-  title: z.string().min(1, "Title is required").max(100, "Title must be under 100 characters"),
+  title: z
+    .string()
+    .min(1, "Title is required")
+    .max(100, "Title must be under 100 characters"),
   description: z.string().optional(),
-  reminderType: z.enum(["follow_up", "deadline", "check_in", "postponed", "custom"]),
+  reminderType: z.enum([
+    "follow_up",
+    "deadline",
+    "check_in",
+    "postponed",
+    "custom",
+  ]),
   dueDate: z.string().min(1, "Due date is required"),
   assignedToUserId: z.string().optional(),
   assignedToName: z.string().optional(),
@@ -66,7 +111,10 @@ export default function EventRemindersManagement() {
   const [selectedPriority, setSelectedPriority] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [selectedReminder, setSelectedReminder] = useState<EventReminder | null>(null);
+  const [
+    selectedReminder,
+    setSelectedReminder,
+  ] = useState<EventReminder | null>(null);
   const [isCompleteDialogOpen, setIsCompleteDialogOpen] = useState(false);
 
   const { toast } = useToast();
@@ -91,7 +139,9 @@ export default function EventRemindersManagement() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/event-reminders"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/event-reminders/count"] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/event-reminders/count"],
+      });
       toast({ title: "Reminder created successfully" });
       setIsCreateDialogOpen(false);
     },
@@ -99,14 +149,20 @@ export default function EventRemindersManagement() {
       toast({
         title: "Failed to create reminder",
         description: error.message || "An error occurred",
-        variant: "destructive"
+        variant: "destructive",
       });
     },
   });
 
   // Complete reminder mutation
   const completeReminderMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: CompleteReminderInput }) => {
+    mutationFn: async ({
+      id,
+      data,
+    }: {
+      id: number;
+      data: CompleteReminderInput;
+    }) => {
       return apiRequest(`/api/event-reminders/${id}`, {
         method: "PUT",
         body: JSON.stringify({
@@ -118,7 +174,9 @@ export default function EventRemindersManagement() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/event-reminders"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/event-reminders/count"] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/event-reminders/count"],
+      });
       toast({ title: "Reminder marked as completed" });
       setIsCompleteDialogOpen(false);
       setSelectedReminder(null);
@@ -127,7 +185,7 @@ export default function EventRemindersManagement() {
       toast({
         title: "Failed to complete reminder",
         description: error.message || "An error occurred",
-        variant: "destructive"
+        variant: "destructive",
       });
     },
   });
@@ -156,37 +214,55 @@ export default function EventRemindersManagement() {
 
   // Filter reminders
   const filteredReminders = reminders.filter((reminder) => {
-    const matchesSearch = reminder.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (reminder.description && reminder.description.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesStatus = selectedStatus === "all" || reminder.status === selectedStatus;
-    const matchesPriority = selectedPriority === "all" || reminder.priority === selectedPriority;
-    
+    const matchesSearch =
+      reminder.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (reminder.description &&
+        reminder.description.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchesStatus =
+      selectedStatus === "all" || reminder.status === selectedStatus;
+    const matchesPriority =
+      selectedPriority === "all" || reminder.priority === selectedPriority;
+
     return matchesSearch && matchesStatus && matchesPriority;
   });
 
   // Group reminders by status
-  const pendingReminders = filteredReminders.filter(r => r.status === "pending");
-  const completedReminders = filteredReminders.filter(r => r.status === "completed");
+  const pendingReminders = filteredReminders.filter(
+    (r) => r.status === "pending"
+  );
+  const completedReminders = filteredReminders.filter(
+    (r) => r.status === "completed"
+  );
 
   // Get priority color
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case "high": return "bg-red-100 text-red-800 border-red-200";
-      case "medium": return "bg-yellow-100 text-yellow-800 border-yellow-200";
-      case "low": return "bg-green-100 text-green-800 border-green-200";
-      default: return "bg-gray-100 text-gray-800 border-gray-200";
+      case "high":
+        return "bg-red-100 text-red-800 border-red-200";
+      case "medium":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      case "low":
+        return "bg-green-100 text-green-800 border-green-200";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200";
     }
   };
 
   // Get reminder type label
   const getReminderTypeLabel = (type: string) => {
     switch (type) {
-      case "follow_up": return "Follow Up";
-      case "deadline": return "Deadline";
-      case "check_in": return "Check In";
-      case "postponed": return "Postponed";
-      case "custom": return "Custom";
-      default: return type;
+      case "follow_up":
+        return "Follow Up";
+      case "deadline":
+        return "Deadline";
+      case "check_in":
+        return "Check In";
+      case "postponed":
+        return "Postponed";
+      case "custom":
+        return "Custom";
+      default:
+        return type;
     }
   };
 
@@ -203,14 +279,24 @@ export default function EventRemindersManagement() {
   const getDueDateBadge = (dueDate: string) => {
     const status = getDueDateStatus(dueDate);
     const date = new Date(dueDate);
-    
+
     switch (status) {
       case "overdue":
-        return <Badge variant="destructive">Overdue ({format(date, "MMM d")})</Badge>;
+        return (
+          <Badge variant="destructive">Overdue ({format(date, "MMM d")})</Badge>
+        );
       case "today":
-        return <Badge className="bg-orange-100 text-orange-800 border-orange-200">Today</Badge>;
+        return (
+          <Badge className="bg-orange-100 text-orange-800 border-orange-200">
+            Today
+          </Badge>
+        );
       case "tomorrow":
-        return <Badge className="bg-blue-100 text-blue-800 border-blue-200">Tomorrow</Badge>;
+        return (
+          <Badge className="bg-blue-100 text-blue-800 border-blue-200">
+            Tomorrow
+          </Badge>
+        );
       case "this-week":
         return <Badge variant="secondary">{format(date, "EEE, MMM d")}</Badge>;
       default:
@@ -284,7 +370,10 @@ export default function EventRemindersManagement() {
               </DialogDescription>
             </DialogHeader>
             <Form {...createForm}>
-              <form onSubmit={createForm.handleSubmit(onCreateSubmit)} className="space-y-4">
+              <form
+                onSubmit={createForm.handleSubmit(onCreateSubmit)}
+                className="space-y-4"
+              >
                 <FormField
                   control={createForm.control}
                   name="title"
@@ -292,13 +381,16 @@ export default function EventRemindersManagement() {
                     <FormItem>
                       <FormLabel>Title</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., Follow up with AT&T about December event" {...field} />
+                        <Input
+                          placeholder="e.g., Follow up with AT&T about December event"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={createForm.control}
                   name="description"
@@ -306,7 +398,7 @@ export default function EventRemindersManagement() {
                     <FormItem>
                       <FormLabel>Description (Optional)</FormLabel>
                       <FormControl>
-                        <Textarea 
+                        <Textarea
                           placeholder="Additional details about this reminder..."
                           rows={3}
                           {...field}
@@ -324,7 +416,10 @@ export default function EventRemindersManagement() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Type</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select type" />
@@ -349,7 +444,10 @@ export default function EventRemindersManagement() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Priority</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select priority" />
@@ -388,7 +486,10 @@ export default function EventRemindersManagement() {
                     <FormItem>
                       <FormLabel>Assigned To (Optional)</FormLabel>
                       <FormControl>
-                        <Input placeholder="Person responsible for this reminder" {...field} />
+                        <Input
+                          placeholder="Person responsible for this reminder"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -396,19 +497,21 @@ export default function EventRemindersManagement() {
                 />
 
                 <div className="flex justify-end gap-2 pt-4">
-                  <Button 
-                    type="button" 
-                    variant="outline" 
+                  <Button
+                    type="button"
+                    variant="outline"
                     onClick={() => setIsCreateDialogOpen(false)}
                   >
                     Cancel
                   </Button>
-                  <Button 
-                    type="submit" 
+                  <Button
+                    type="submit"
                     disabled={createReminderMutation.isPending}
                     className="bg-[#236383] hover:bg-[#1e5a75]"
                   >
-                    {createReminderMutation.isPending ? "Creating..." : "Create Reminder"}
+                    {createReminderMutation.isPending
+                      ? "Creating..."
+                      : "Create Reminder"}
                   </Button>
                 </div>
               </form>
@@ -432,7 +535,7 @@ export default function EventRemindersManagement() {
                 />
               </div>
             </div>
-            
+
             <Select value={selectedStatus} onValueChange={setSelectedStatus}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Status" />
@@ -445,7 +548,10 @@ export default function EventRemindersManagement() {
               </SelectContent>
             </Select>
 
-            <Select value={selectedPriority} onValueChange={setSelectedPriority}>
+            <Select
+              value={selectedPriority}
+              onValueChange={setSelectedPriority}
+            >
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Priority" />
               </SelectTrigger>
@@ -466,7 +572,9 @@ export default function EventRemindersManagement() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-2xl font-bold text-gray-900">{pendingReminders.length}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {pendingReminders.length}
+                </p>
                 <p className="text-sm text-gray-600">Pending Reminders</p>
               </div>
               <Clock className="h-8 w-8 text-orange-500" />
@@ -479,7 +587,11 @@ export default function EventRemindersManagement() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-2xl font-bold text-gray-900">
-                  {pendingReminders.filter(r => getDueDateStatus(r.dueDate) === "overdue").length}
+                  {
+                    pendingReminders.filter(
+                      (r) => getDueDateStatus(r.dueDate) === "overdue"
+                    ).length
+                  }
                 </p>
                 <p className="text-sm text-gray-600">Overdue</p>
               </div>
@@ -492,7 +604,9 @@ export default function EventRemindersManagement() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-2xl font-bold text-gray-900">{completedReminders.length}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {completedReminders.length}
+                </p>
                 <p className="text-sm text-gray-600">Completed</p>
               </div>
               <CheckCircle className="h-8 w-8 text-green-500" />
@@ -518,11 +632,14 @@ export default function EventRemindersManagement() {
               <CardContent className="pt-6">
                 <div className="text-center py-12">
                   <Clock className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No pending reminders</h3>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    No pending reminders
+                  </h3>
                   <p className="text-gray-600 mb-4">
-                    You're all caught up! Create a new reminder to track follow-ups and deadlines.
+                    You're all caught up! Create a new reminder to track
+                    follow-ups and deadlines.
                   </p>
-                  <Button 
+                  <Button
                     onClick={() => setIsCreateDialogOpen(true)}
                     className="bg-[#236383] hover:bg-[#1e5a75]"
                   >
@@ -535,28 +652,40 @@ export default function EventRemindersManagement() {
           ) : (
             <div className="space-y-4">
               {pendingReminders.map((reminder) => (
-                <Card key={reminder.id} className="hover:shadow-md transition-shadow">
+                <Card
+                  key={reminder.id}
+                  className="hover:shadow-md transition-shadow"
+                >
                   <CardContent className="pt-6">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
-                          <h3 className="font-semibold text-gray-900">{reminder.title}</h3>
-                          <Badge variant="outline">{getReminderTypeLabel(reminder.reminderType)}</Badge>
-                          <Badge className={getPriorityColor(reminder.priority)}>
-                            {reminder.priority.charAt(0).toUpperCase() + reminder.priority.slice(1)}
+                          <h3 className="font-semibold text-gray-900">
+                            {reminder.title}
+                          </h3>
+                          <Badge variant="outline">
+                            {getReminderTypeLabel(reminder.reminderType)}
+                          </Badge>
+                          <Badge
+                            className={getPriorityColor(reminder.priority)}
+                          >
+                            {reminder.priority.charAt(0).toUpperCase() +
+                              reminder.priority.slice(1)}
                           </Badge>
                         </div>
-                        
+
                         {reminder.description && (
-                          <p className="text-gray-600 text-sm mb-3">{reminder.description}</p>
+                          <p className="text-gray-600 text-sm mb-3">
+                            {reminder.description}
+                          </p>
                         )}
-                        
+
                         <div className="flex items-center gap-4 text-sm text-gray-500">
                           <div className="flex items-center gap-1">
                             <Calendar className="h-4 w-4" />
                             {getDueDateBadge(reminder.dueDate)}
                           </div>
-                          
+
                           {reminder.assignedToName && (
                             <div className="flex items-center gap-1">
                               <User className="h-4 w-4" />
@@ -565,7 +694,7 @@ export default function EventRemindersManagement() {
                           )}
                         </div>
                       </div>
-                      
+
                       <div className="flex items-center gap-2">
                         <Button
                           size="sm"
@@ -590,7 +719,9 @@ export default function EventRemindersManagement() {
               <CardContent className="pt-6">
                 <div className="text-center py-12">
                   <CheckCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No completed reminders</h3>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    No completed reminders
+                  </h3>
                   <p className="text-gray-600">
                     Completed reminders will appear here for reference.
                   </p>
@@ -605,38 +736,57 @@ export default function EventRemindersManagement() {
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
-                          <h3 className="font-semibold text-gray-900 line-through">{reminder.title}</h3>
-                          <Badge variant="outline">{getReminderTypeLabel(reminder.reminderType)}</Badge>
+                          <h3 className="font-semibold text-gray-900 line-through">
+                            {reminder.title}
+                          </h3>
+                          <Badge variant="outline">
+                            {getReminderTypeLabel(reminder.reminderType)}
+                          </Badge>
                           <Badge className="bg-green-100 text-green-800 border-green-200">
                             Completed
                           </Badge>
                         </div>
-                        
+
                         {reminder.description && (
-                          <p className="text-gray-600 text-sm mb-3">{reminder.description}</p>
+                          <p className="text-gray-600 text-sm mb-3">
+                            {reminder.description}
+                          </p>
                         )}
-                        
+
                         {reminder.completionNotes && (
                           <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-3">
                             <p className="text-sm text-green-800">
-                              <strong>Completion Notes:</strong> {reminder.completionNotes}
+                              <strong>Completion Notes:</strong>{" "}
+                              {reminder.completionNotes}
                             </p>
                           </div>
                         )}
-                        
+
                         <div className="flex items-center gap-4 text-sm text-gray-500">
                           <div className="flex items-center gap-1">
                             <Calendar className="h-4 w-4" />
-                            <span>Due: {format(new Date(reminder.dueDate), "MMM d, yyyy")}</span>
+                            <span>
+                              Due:{" "}
+                              {format(
+                                new Date(reminder.dueDate),
+                                "MMM d, yyyy"
+                              )}
+                            </span>
                           </div>
-                          
+
                           {reminder.completedAt && (
                             <div className="flex items-center gap-1">
                               <CheckCircle className="h-4 w-4" />
-                              <span>Completed: {format(new Date(reminder.completedAt), "MMM d, yyyy")}</span>
+                              <span>
+                                Completed:{" "}
+                                {format(
+                                  new Date(reminder.completedAt),
+                                  "MMM d, yyyy"
+                                )}
+                              </span>
                             </div>
                           )}
-                          
+
                           {reminder.assignedToName && (
                             <div className="flex items-center gap-1">
                               <User className="h-4 w-4" />
@@ -655,26 +805,37 @@ export default function EventRemindersManagement() {
       </Tabs>
 
       {/* Complete Reminder Dialog */}
-      <Dialog open={isCompleteDialogOpen} onOpenChange={setIsCompleteDialogOpen}>
+      <Dialog
+        open={isCompleteDialogOpen}
+        onOpenChange={setIsCompleteDialogOpen}
+      >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Complete Reminder</DialogTitle>
             <DialogDescription>
-              Mark this reminder as completed. Add any notes about the completion.
+              Mark this reminder as completed. Add any notes about the
+              completion.
             </DialogDescription>
           </DialogHeader>
-          
+
           {selectedReminder && (
             <div className="bg-gray-50 border rounded-lg p-4 mb-4">
-              <h4 className="font-medium text-gray-900">{selectedReminder.title}</h4>
+              <h4 className="font-medium text-gray-900">
+                {selectedReminder.title}
+              </h4>
               {selectedReminder.description && (
-                <p className="text-sm text-gray-600 mt-1">{selectedReminder.description}</p>
+                <p className="text-sm text-gray-600 mt-1">
+                  {selectedReminder.description}
+                </p>
               )}
             </div>
           )}
 
           <Form {...completeForm}>
-            <form onSubmit={completeForm.handleSubmit(onCompleteSubmit)} className="space-y-4">
+            <form
+              onSubmit={completeForm.handleSubmit(onCompleteSubmit)}
+              className="space-y-4"
+            >
               <FormField
                 control={completeForm.control}
                 name="completionNotes"
@@ -682,7 +843,7 @@ export default function EventRemindersManagement() {
                   <FormItem>
                     <FormLabel>Completion Notes (Optional)</FormLabel>
                     <FormControl>
-                      <Textarea 
+                      <Textarea
                         placeholder="Add any notes about how this was completed..."
                         rows={3}
                         {...field}
@@ -694,19 +855,21 @@ export default function EventRemindersManagement() {
               />
 
               <div className="flex justify-end gap-2 pt-4">
-                <Button 
-                  type="button" 
-                  variant="outline" 
+                <Button
+                  type="button"
+                  variant="outline"
                   onClick={() => setIsCompleteDialogOpen(false)}
                 >
                   Cancel
                 </Button>
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   disabled={completeReminderMutation.isPending}
                   className="bg-green-600 hover:bg-green-700"
                 >
-                  {completeReminderMutation.isPending ? "Completing..." : "Mark Complete"}
+                  {completeReminderMutation.isPending
+                    ? "Completing..."
+                    : "Mark Complete"}
                 </Button>
               </div>
             </form>

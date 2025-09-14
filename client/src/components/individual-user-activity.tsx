@@ -1,11 +1,30 @@
-import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { ArrowLeft, Eye, MousePointer, FileText, Clock, Calendar } from 'lucide-react';
+import React, { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  ArrowLeft,
+  Eye,
+  MousePointer,
+  FileText,
+  Clock,
+  Calendar,
+} from "lucide-react";
 
 interface User {
   id: string;
@@ -35,37 +54,51 @@ interface IndividualUserActivityProps {
 
 const getActionIcon = (action: string) => {
   switch (action) {
-    case 'View': return <Eye className="h-4 w-4" />;
-    case 'Click': return <MousePointer className="h-4 w-4" />;
-    case 'Submit': return <FileText className="h-4 w-4" />;
-    default: return <Clock className="h-4 w-4" />;
+    case "View":
+      return <Eye className="h-4 w-4" />;
+    case "Click":
+      return <MousePointer className="h-4 w-4" />;
+    case "Submit":
+      return <FileText className="h-4 w-4" />;
+    default:
+      return <Clock className="h-4 w-4" />;
   }
 };
 
 const getActionColor = (action: string) => {
   switch (action) {
-    case 'View': return 'bg-blue-100 text-blue-800';
-    case 'Click': return 'bg-green-100 text-green-800';
-    case 'Submit': return 'bg-purple-100 text-purple-800';
-    case 'Create': return 'bg-emerald-100 text-emerald-800';
-    case 'Update': return 'bg-orange-100 text-orange-800';
-    case 'Export': return 'bg-indigo-100 text-indigo-800';
-    default: return 'bg-gray-100 text-gray-800';
+    case "View":
+      return "bg-blue-100 text-blue-800";
+    case "Click":
+      return "bg-green-100 text-green-800";
+    case "Submit":
+      return "bg-purple-100 text-purple-800";
+    case "Create":
+      return "bg-emerald-100 text-emerald-800";
+    case "Update":
+      return "bg-orange-100 text-orange-800";
+    case "Export":
+      return "bg-indigo-100 text-indigo-800";
+    default:
+      return "bg-gray-100 text-gray-800";
   }
 };
 
 const formatFieldName = (fieldName: string) => {
   // Convert camelCase/snake_case to readable format
   return fieldName
-    .replace(/([A-Z])/g, ' $1')
-    .replace(/_/g, ' ')
-    .replace(/^./, str => str.toUpperCase())
+    .replace(/([A-Z])/g, " $1")
+    .replace(/_/g, " ")
+    .replace(/^./, (str) => str.toUpperCase())
     .trim();
 };
 
-export function IndividualUserActivity({ user, onBack }: IndividualUserActivityProps) {
-  const [timeFilter, setTimeFilter] = useState('7d');
-  const [actionFilter, setActionFilter] = useState('all');
+export function IndividualUserActivity({
+  user,
+  onBack,
+}: IndividualUserActivityProps) {
+  const [timeFilter, setTimeFilter] = useState("7d");
+  const [actionFilter, setActionFilter] = useState("all");
 
   // Fetch individual user activity data
   const { data: userActivity, isLoading } = useQuery<{
@@ -78,19 +111,25 @@ export function IndividualUserActivity({ user, onBack }: IndividualUserActivityP
       topSections: Array<{ section: string; count: number }>;
     };
   }>({
-    queryKey: ['/api/enhanced-user-activity', 'individual', user.id, timeFilter, actionFilter],
+    queryKey: [
+      "/api/enhanced-user-activity",
+      "individual",
+      user.id,
+      timeFilter,
+      actionFilter,
+    ],
     queryFn: async () => {
       const params = new URLSearchParams({
         userId: user.id,
         timeFilter,
         actionFilter,
-        individual: 'true'
+        individual: "true",
       });
       const response = await fetch(`/api/enhanced-user-activity?${params}`);
-      if (!response.ok) throw new Error('Failed to fetch user activity data');
+      if (!response.ok) throw new Error("Failed to fetch user activity data");
       return response.json();
     },
-    refetchInterval: 30000
+    refetchInterval: 30000,
   });
 
   const formatDate = (dateString: string) => {
@@ -98,7 +137,7 @@ export function IndividualUserActivity({ user, onBack }: IndividualUserActivityP
   };
 
   const formatDuration = (duration: number | null) => {
-    if (!duration) return 'N/A';
+    if (!duration) return "N/A";
     if (duration < 1000) return `${duration}ms`;
     if (duration < 60000) return `${(duration / 1000).toFixed(1)}s`;
     return `${(duration / 60000).toFixed(1)}m`;
@@ -116,10 +155,14 @@ export function IndividualUserActivity({ user, onBack }: IndividualUserActivityP
             </Button>
             <div>
               <CardTitle className="flex items-center gap-2">
-                <span>{user.firstName} {user.lastName}</span>
+                <span>
+                  {user.firstName} {user.lastName}
+                </span>
                 <Badge variant="secondary">{user.email}</Badge>
               </CardTitle>
-              <CardDescription>Individual user activity and engagement analytics</CardDescription>
+              <CardDescription>
+                Individual user activity and engagement analytics
+              </CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -169,23 +212,26 @@ export function IndividualUserActivity({ user, onBack }: IndividualUserActivityP
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-6">
-            <div className="text-2xl font-bold">{userActivity?.summary.totalActions || 0}</div>
+            <div className="text-2xl font-bold">
+              {userActivity?.summary.totalActions || 0}
+            </div>
             <p className="text-xs text-muted-foreground">Total Actions</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-6">
-            <div className="text-2xl font-bold">{userActivity?.summary.loginCount || 0}</div>
+            <div className="text-2xl font-bold">
+              {userActivity?.summary.loginCount || 0}
+            </div>
             <p className="text-xs text-muted-foreground">Login Sessions</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-6">
             <div className="text-sm font-bold">
-              {userActivity?.summary.lastActivity 
+              {userActivity?.summary.lastActivity
                 ? formatDate(userActivity.summary.lastActivity)
-                : 'Never'
-              }
+                : "Never"}
             </div>
             <p className="text-xs text-muted-foreground">Last Activity</p>
           </CardContent>
@@ -193,7 +239,7 @@ export function IndividualUserActivity({ user, onBack }: IndividualUserActivityP
         <Card>
           <CardContent className="p-6">
             <div className="text-sm font-bold">
-              {userActivity?.summary.topActions?.[0]?.action || 'N/A'}
+              {userActivity?.summary.topActions?.[0]?.action || "N/A"}
             </div>
             <p className="text-xs text-muted-foreground">Most Common Action</p>
           </CardContent>
@@ -209,16 +255,23 @@ export function IndividualUserActivity({ user, onBack }: IndividualUserActivityP
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {userActivity?.summary.topActions?.slice(0, 5).map((item, index) => (
-                <div key={item.action} className="flex items-center justify-between p-2 rounded border">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-bold text-muted-foreground">#{index + 1}</span>
-                    {getActionIcon(item.action)}
-                    <span className="font-medium">{item.action}</span>
+              {userActivity?.summary.topActions
+                ?.slice(0, 5)
+                .map((item, index) => (
+                  <div
+                    key={item.action}
+                    className="flex items-center justify-between p-2 rounded border"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-bold text-muted-foreground">
+                        #{index + 1}
+                      </span>
+                      {getActionIcon(item.action)}
+                      <span className="font-medium">{item.action}</span>
+                    </div>
+                    <Badge variant="secondary">{item.count}</Badge>
                   </div>
-                  <Badge variant="secondary">{item.count}</Badge>
-                </div>
-              )) || (
+                )) || (
                 <div className="text-center py-4 text-muted-foreground">
                   No action data available
                 </div>
@@ -234,15 +287,22 @@ export function IndividualUserActivity({ user, onBack }: IndividualUserActivityP
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {userActivity?.summary.topSections?.slice(0, 5).map((item, index) => (
-                <div key={item.section} className="flex items-center justify-between p-2 rounded border">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-bold text-muted-foreground">#{index + 1}</span>
-                    <span className="font-medium">{item.section}</span>
+              {userActivity?.summary.topSections
+                ?.slice(0, 5)
+                .map((item, index) => (
+                  <div
+                    key={item.section}
+                    className="flex items-center justify-between p-2 rounded border"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-bold text-muted-foreground">
+                        #{index + 1}
+                      </span>
+                      <span className="font-medium">{item.section}</span>
+                    </div>
+                    <Badge variant="secondary">{item.count}</Badge>
                   </div>
-                  <Badge variant="secondary">{item.count}</Badge>
-                </div>
-              )) || (
+                )) || (
                 <div className="text-center py-4 text-muted-foreground">
                   No section data available
                 </div>
@@ -256,7 +316,9 @@ export function IndividualUserActivity({ user, onBack }: IndividualUserActivityP
       <Card>
         <CardHeader>
           <CardTitle>Activity Timeline</CardTitle>
-          <CardDescription>Chronological list of all user activities</CardDescription>
+          <CardDescription>
+            Chronological list of all user activities
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <ScrollArea className="h-[600px]">
@@ -274,51 +336,79 @@ export function IndividualUserActivity({ user, onBack }: IndividualUserActivityP
                       <Badge className={getActionColor(activity.action)}>
                         {activity.action}
                       </Badge>
-                      <span className="text-sm font-medium">{activity.section}</span>
+                      <span className="text-sm font-medium">
+                        {activity.section}
+                      </span>
                       <span className="text-xs text-muted-foreground">·</span>
-                      <span className="text-xs text-muted-foreground">{activity.feature}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {activity.feature}
+                      </span>
                       {activity.duration && (
                         <>
-                          <span className="text-xs text-muted-foreground">·</span>
-                          <span className="text-xs text-muted-foreground">{formatDuration(activity.duration)}</span>
+                          <span className="text-xs text-muted-foreground">
+                            ·
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            {formatDuration(activity.duration)}
+                          </span>
                         </>
                       )}
                     </div>
-                    <p className="text-sm text-foreground">{activity.details}</p>
+                    <p className="text-sm text-foreground">
+                      {activity.details}
+                    </p>
                     {/* Show specific field changes for Updates */}
-                    {activity.action === 'Update' && activity.metadata?.auditDetails && (
-                      <div className="mt-2 p-2 bg-gray-50 rounded text-xs">
-                        <div className="font-medium text-gray-700 mb-1">Changes made:</div>
-                        <div className="space-y-1">
-                          {Object.entries(activity.metadata.auditDetails).map(([field, details]: [string, any]) => (
-                            <div key={field} className="flex flex-col">
-                              <span className="font-medium text-gray-600">{formatFieldName(field)}:</span>
-                              <div className="ml-2 text-gray-700">
-                                <span className="text-red-600">From: {details.from || '(empty)'}</span>
-                                <span className="mx-2">→</span>
-                                <span className="text-green-600">To: {details.to || '(empty)'}</span>
-                              </div>
-                            </div>
-                          ))}
+                    {activity.action === "Update" &&
+                      activity.metadata?.auditDetails && (
+                        <div className="mt-2 p-2 bg-gray-50 rounded text-xs">
+                          <div className="font-medium text-gray-700 mb-1">
+                            Changes made:
+                          </div>
+                          <div className="space-y-1">
+                            {Object.entries(activity.metadata.auditDetails).map(
+                              ([field, details]: [string, any]) => (
+                                <div key={field} className="flex flex-col">
+                                  <span className="font-medium text-gray-600">
+                                    {formatFieldName(field)}:
+                                  </span>
+                                  <div className="ml-2 text-gray-700">
+                                    <span className="text-red-600">
+                                      From: {details.from || "(empty)"}
+                                    </span>
+                                    <span className="mx-2">→</span>
+                                    <span className="text-green-600">
+                                      To: {details.to || "(empty)"}
+                                    </span>
+                                  </div>
+                                </div>
+                              )
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
                     <div className="flex items-center justify-between mt-2">
                       <span className="text-xs text-muted-foreground">
                         <Calendar className="h-3 w-3 mr-1 inline" />
                         {formatDate(activity.createdAt)}
                       </span>
-                      {activity.metadata && Object.keys(activity.metadata).length > 0 && (
-                        <span className="text-xs text-muted-foreground">
-                          {Object.keys(activity.metadata).length} metadata field{Object.keys(activity.metadata).length > 1 ? 's' : ''}
-                        </span>
-                      )}
+                      {activity.metadata &&
+                        Object.keys(activity.metadata).length > 0 && (
+                          <span className="text-xs text-muted-foreground">
+                            {Object.keys(activity.metadata).length} metadata
+                            field
+                            {Object.keys(activity.metadata).length > 1
+                              ? "s"
+                              : ""}
+                          </span>
+                        )}
                     </div>
                   </div>
                 </div>
               )) || (
                 <div className="text-center py-8 text-muted-foreground">
-                  {isLoading ? 'Loading activity data...' : 'No activity found for this user in the selected time period'}
+                  {isLoading
+                    ? "Loading activity data..."
+                    : "No activity found for this user in the selected time period"}
                 </div>
               )}
             </div>

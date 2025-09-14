@@ -1,7 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Users, MessageCircle, Shield, Car, Heart, Globe, Hash } from "lucide-react";
+import {
+  Users,
+  MessageCircle,
+  Shield,
+  Car,
+  Heart,
+  Globe,
+  Hash,
+} from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { formatDistanceToNow } from "date-fns";
 import io, { Socket } from "socket.io-client";
@@ -32,51 +40,57 @@ interface LiveChatHubProps {
   selectedChannel?: string;
 }
 
-const CHAT_CHANNELS: Omit<ChannelPreview, 'unreadCount' | 'lastMessage' | 'activeUsers' | 'messages'>[] = [
+const CHAT_CHANNELS: Omit<
+  ChannelPreview,
+  "unreadCount" | "lastMessage" | "activeUsers" | "messages"
+>[] = [
   {
     id: "general",
     name: "General",
     description: "Open discussion for all team members",
-    icon: <Hash className="h-4 w-4" />
+    icon: <Hash className="h-4 w-4" />,
   },
   {
     id: "core-team",
     name: "Core Team",
     description: "Private discussions for core team members",
     icon: <Shield className="h-4 w-4" />,
-    permission: "core_team_chat"
+    permission: "core_team_chat",
   },
   {
     id: "committee",
     name: "Committee",
     description: "Committee member discussions",
     icon: <Users className="h-4 w-4" />,
-    permission: "committee_chat"
+    permission: "committee_chat",
   },
   {
     id: "host",
     name: "Host Chat",
     description: "Communication for sandwich collection hosts",
     icon: <Heart className="h-4 w-4" />,
-    permission: "host_chat"
+    permission: "host_chat",
   },
   {
     id: "driver",
     name: "Driver Chat",
     description: "Coordination for delivery drivers",
     icon: <Car className="h-4 w-4" />,
-    permission: "driver_chat"
+    permission: "driver_chat",
   },
   {
     id: "recipient",
     name: "Recipient Chat",
     description: "Communication for recipient organizations",
     icon: <MessageCircle className="h-4 w-4" />,
-    permission: "recipient_chat"
-  }
+    permission: "recipient_chat",
+  },
 ];
 
-export default function LiveChatHub({ onChannelSelect, selectedChannel }: LiveChatHubProps) {
+export default function LiveChatHub({
+  onChannelSelect,
+  selectedChannel,
+}: LiveChatHubProps) {
   const [channels, setChannels] = useState<ChannelPreview[]>([]);
   const [socket, setSocket] = useState<Socket | null>(null);
   const { user } = useAuth();
@@ -90,46 +104,50 @@ export default function LiveChatHub({ onChannelSelect, selectedChannel }: LiveCh
     const socketInstance = io(socketUrl, {
       transports: ["polling", "websocket"],
       upgrade: true,
-      rememberUpgrade: false
+      rememberUpgrade: false,
     });
 
     setSocket(socketInstance);
 
     // Initialize channels with empty data
-    const initialChannels = CHAT_CHANNELS
-      .filter(channel => {
-        if (!channel.permission) return true;
-        if (!user?.permissions || !Array.isArray(user.permissions)) {
-          console.log(`[CHAT PERMISSIONS] Channel: ${channel.id}, No permissions found for user`);
-          return false;
-        }
-        
-        // Check both lowercase and uppercase versions of permissions
-        const hasLowercase = user.permissions.includes(channel.permission);
-        const hasUppercase = user.permissions.includes(channel.permission.toUpperCase());
-        const hasPermission = hasLowercase || hasUppercase;
-        
-        // Debug logging to troubleshoot permission issues
-        console.log(`[CHAT PERMISSIONS] Channel: ${channel.id}, Required: ${channel.permission}, Has lowercase: ${hasLowercase}, Has uppercase: ${hasUppercase}, Access granted: ${hasPermission}`);
-        
-        return hasPermission;
-      })
-      .map(channel => ({
-        ...channel,
-        unreadCount: 0,
-        lastMessage: undefined,
-        activeUsers: [],
-        messages: []
-      }));
+    const initialChannels = CHAT_CHANNELS.filter((channel) => {
+      if (!channel.permission) return true;
+      if (!user?.permissions || !Array.isArray(user.permissions)) {
+        console.log(
+          `[CHAT PERMISSIONS] Channel: ${channel.id}, No permissions found for user`
+        );
+        return false;
+      }
+
+      // Check both lowercase and uppercase versions of permissions
+      const hasLowercase = user.permissions.includes(channel.permission);
+      const hasUppercase = user.permissions.includes(
+        channel.permission.toUpperCase()
+      );
+      const hasPermission = hasLowercase || hasUppercase;
+
+      // Debug logging to troubleshoot permission issues
+      console.log(
+        `[CHAT PERMISSIONS] Channel: ${channel.id}, Required: ${channel.permission}, Has lowercase: ${hasLowercase}, Has uppercase: ${hasUppercase}, Access granted: ${hasPermission}`
+      );
+
+      return hasPermission;
+    }).map((channel) => ({
+      ...channel,
+      unreadCount: 0,
+      lastMessage: undefined,
+      activeUsers: [],
+      messages: [],
+    }));
 
     setChannels(initialChannels);
 
     // Auto-join all available channels for previews
-    initialChannels.forEach(channel => {
+    initialChannels.forEach((channel) => {
       socketInstance.emit("join-channel", {
         channel: channel.id,
         userId: user?.id || "unknown",
-        userName: user?.firstName || user?.email || "User"
+        userName: user?.firstName || user?.email || "User",
       });
     });
 
@@ -137,20 +155,24 @@ export default function LiveChatHub({ onChannelSelect, selectedChannel }: LiveCh
     socketInstance.on("message-history", (history: ChatMessage[]) => {
       if (history.length > 0) {
         const channelId = history[0].channel;
-        setChannels(prev => prev.map(ch => {
-          if (ch.id === channelId) {
-            const formattedHistory = history.map(msg => ({
-              ...msg,
-              timestamp: new Date(msg.timestamp || (msg as any).createdAt || Date.now())
-            }));
-            return {
-              ...ch,
-              messages: formattedHistory,
-              lastMessage: formattedHistory[formattedHistory.length - 1]
-            };
-          }
-          return ch;
-        }));
+        setChannels((prev) =>
+          prev.map((ch) => {
+            if (ch.id === channelId) {
+              const formattedHistory = history.map((msg) => ({
+                ...msg,
+                timestamp: new Date(
+                  msg.timestamp || (msg as any).createdAt || Date.now()
+                ),
+              }));
+              return {
+                ...ch,
+                messages: formattedHistory,
+                lastMessage: formattedHistory[formattedHistory.length - 1],
+              };
+            }
+            return ch;
+          })
+        );
       }
     });
 
@@ -158,21 +180,23 @@ export default function LiveChatHub({ onChannelSelect, selectedChannel }: LiveCh
     socketInstance.on("new-message", (message: ChatMessage) => {
       const formattedMessage = {
         ...message,
-        timestamp: new Date(message.timestamp)
+        timestamp: new Date(message.timestamp),
       };
-      
-      setChannels(prev => prev.map(ch => {
-        if (ch.id === message.channel) {
-          const updatedMessages = [...ch.messages, formattedMessage];
-          return {
-            ...ch,
-            messages: updatedMessages,
-            lastMessage: formattedMessage,
-            unreadCount: selectedChannel === ch.id ? 0 : ch.unreadCount + 1
-          };
-        }
-        return ch;
-      }));
+
+      setChannels((prev) =>
+        prev.map((ch) => {
+          if (ch.id === message.channel) {
+            const updatedMessages = [...ch.messages, formattedMessage];
+            return {
+              ...ch,
+              messages: updatedMessages,
+              lastMessage: formattedMessage,
+              unreadCount: selectedChannel === ch.id ? 0 : ch.unreadCount + 1,
+            };
+          }
+          return ch;
+        })
+      );
     });
 
     // Clean up on unmount
@@ -184,7 +208,7 @@ export default function LiveChatHub({ onChannelSelect, selectedChannel }: LiveCh
   // Auto-select General channel on mount
   useEffect(() => {
     if (!selectedChannel && channels.length > 0) {
-      const generalChannel = channels.find(ch => ch.id === "general");
+      const generalChannel = channels.find((ch) => ch.id === "general");
       if (generalChannel) {
         onChannelSelect("general");
       }
@@ -193,33 +217,38 @@ export default function LiveChatHub({ onChannelSelect, selectedChannel }: LiveCh
 
   const handleChannelClick = async (channelId: string) => {
     // Clear unread count for selected channel immediately (optimistic update)
-    setChannels(prev => prev.map(ch => 
-      ch.id === channelId ? { ...ch, unreadCount: 0 } : ch
-    ));
+    setChannels((prev) =>
+      prev.map((ch) => (ch.id === channelId ? { ...ch, unreadCount: 0 } : ch))
+    );
     onChannelSelect(channelId);
 
     // Mark messages as read on server
     try {
-      const response = await fetch('/api/message-notifications/mark-chat-read', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ channel: channelId }),
-        credentials: 'include',
-      });
+      const response = await fetch(
+        "/api/message-notifications/mark-chat-read",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ channel: channelId }),
+          credentials: "include",
+        }
+      );
 
       if (response.ok) {
         console.log(`Successfully marked ${channelId} chat messages as read`);
-        
+
         // Trigger a refresh of notification counts to clear the bell icon
-        const notificationRefreshEvent = new CustomEvent('refreshNotifications');
+        const notificationRefreshEvent = new CustomEvent(
+          "refreshNotifications"
+        );
         window.dispatchEvent(notificationRefreshEvent);
       } else {
-        console.error('Failed to mark chat messages as read:', response.status);
+        console.error("Failed to mark chat messages as read:", response.status);
       }
     } catch (error) {
-      console.error('Error marking chat messages as read:', error);
+      console.error("Error marking chat messages as read:", error);
     }
   };
 
@@ -245,13 +274,13 @@ export default function LiveChatHub({ onChannelSelect, selectedChannel }: LiveCh
         {channels.map((channel) => {
           const isSelected = selectedChannel === channel.id;
           const isCorteTeam = channel.id === "core-team";
-          
+
           return (
-            <Card 
+            <Card
               key={channel.id}
               className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
-                isSelected 
-                  ? isCorteTeam 
+                isSelected
+                  ? isCorteTeam
                     ? "bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200"
                     : "bg-blue-50 border-blue-200"
                   : "bg-white border-gray-200 hover:bg-gray-50"
@@ -261,27 +290,34 @@ export default function LiveChatHub({ onChannelSelect, selectedChannel }: LiveCh
               <CardContent className="p-3">
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex items-center space-x-2">
-                    <div className={`${
-                      isSelected 
-                        ? isCorteTeam 
-                          ? "text-amber-600"
-                          : "text-blue-600"
-                        : "text-gray-500"
-                    }`}>
+                    <div
+                      className={`${
+                        isSelected
+                          ? isCorteTeam
+                            ? "text-amber-600"
+                            : "text-blue-600"
+                          : "text-gray-500"
+                      }`}
+                    >
                       {channel.icon}
                     </div>
-                    <span className={`font-medium ${
-                      isSelected 
-                        ? isCorteTeam
-                          ? "text-amber-900"
-                          : "text-blue-900"
-                        : "text-gray-900"
-                    }`}>
+                    <span
+                      className={`font-medium ${
+                        isSelected
+                          ? isCorteTeam
+                            ? "text-amber-900"
+                            : "text-blue-900"
+                          : "text-gray-900"
+                      }`}
+                    >
                       {channel.name}
                     </span>
                   </div>
                   {channel.unreadCount > 0 && (
-                    <Badge variant="destructive" className="text-xs px-1.5 py-0.5">
+                    <Badge
+                      variant="destructive"
+                      className="text-xs px-1.5 py-0.5"
+                    >
                       {channel.unreadCount}
                     </Badge>
                   )}
@@ -291,7 +327,9 @@ export default function LiveChatHub({ onChannelSelect, selectedChannel }: LiveCh
                 {channel.lastMessage ? (
                   <div className="space-y-1">
                     <div className="text-xs text-gray-600 truncate">
-                      <span className="font-medium">{channel.lastMessage.userName}:</span>{" "}
+                      <span className="font-medium">
+                        {channel.lastMessage.userName}:
+                      </span>{" "}
                       {channel.lastMessage.content}
                     </div>
                     <div className="text-xs text-gray-400">

@@ -1,7 +1,7 @@
 // ⚠️ DEPRECATED - This component is no longer in use
 // The system now uses EnhancedPermissionsDialog instead
 // This file is kept for reference only - DO NOT USE
-// 
+//
 // Migration date: August 2025
 // Replaced by: client/src/components/enhanced-permissions-dialog.tsx
 // Reason: Enhanced UI with role presets and better permission categorization
@@ -75,26 +75,61 @@ interface UserPermissionsDialogProps {
 const PERMISSION_CATEGORIES = [
   {
     id: "content_management",
-    label: "Content Management Authority", 
+    label: "Content Management Authority",
     icon: Shield,
-    description: "Authority to edit/delete other users' content (you automatically own your own content)",
+    description:
+      "Authority to edit/delete other users' content (you automatically own your own content)",
     permissions: [
-      { key: PERMISSIONS.EDIT_ALL_COLLECTIONS, label: "Edit All Collections", description: "Edit any collection entry regardless of who created it" },
-      { key: PERMISSIONS.DELETE_ALL_COLLECTIONS, label: "Delete All Collections", description: "Delete any collection entry regardless of who created it" },
-      { key: PERMISSIONS.CREATE_PROJECTS, label: "Create Projects", description: "Create new projects + edit/delete own projects + edit projects where assigned" },
-      { key: PERMISSIONS.EDIT_ALL_PROJECTS, label: "Edit All Projects", description: "Edit any project regardless of ownership" },
-      { key: PERMISSIONS.DELETE_ALL_PROJECTS, label: "Delete All Projects", description: "Delete any project regardless of ownership" },
+      {
+        key: PERMISSIONS.EDIT_ALL_COLLECTIONS,
+        label: "Edit All Collections",
+        description: "Edit any collection entry regardless of who created it",
+      },
+      {
+        key: PERMISSIONS.DELETE_ALL_COLLECTIONS,
+        label: "Delete All Collections",
+        description: "Delete any collection entry regardless of who created it",
+      },
+      {
+        key: PERMISSIONS.CREATE_PROJECTS,
+        label: "Create Projects",
+        description:
+          "Create new projects + edit/delete own projects + edit projects where assigned",
+      },
+      {
+        key: PERMISSIONS.EDIT_ALL_PROJECTS,
+        label: "Edit All Projects",
+        description: "Edit any project regardless of ownership",
+      },
+      {
+        key: PERMISSIONS.DELETE_ALL_PROJECTS,
+        label: "Delete All Projects",
+        description: "Delete any project regardless of ownership",
+      },
     ],
   },
   {
     id: "organizational_management",
     label: "Organizational Data Management",
     icon: Database,
-    description: "Authority to manage organizational data (hosts, recipients, drivers)",
+    description:
+      "Authority to manage organizational data (hosts, recipients, drivers)",
     permissions: [
-      { key: PERMISSIONS.MANAGE_RECIPIENTS, label: "Manage Recipients", description: "Edit recipient information" },
-      { key: PERMISSIONS.MANAGE_HOSTS, label: "Manage Hosts", description: "Edit host information" },
-      { key: PERMISSIONS.MANAGE_DRIVERS, label: "Manage Drivers", description: "Edit driver information" },
+      {
+        key: PERMISSIONS.MANAGE_RECIPIENTS,
+        label: "Manage Recipients",
+        description: "Edit recipient information",
+      },
+      {
+        key: PERMISSIONS.MANAGE_HOSTS,
+        label: "Manage Hosts",
+        description: "Edit host information",
+      },
+      {
+        key: PERMISSIONS.MANAGE_DRIVERS,
+        label: "Manage Drivers",
+        description: "Edit driver information",
+      },
     ],
   },
   {
@@ -103,13 +138,41 @@ const PERMISSION_CATEGORIES = [
     icon: Eye,
     description: "Access to view different sections and data",
     permissions: [
-      { key: PERMISSIONS.VIEW_COLLECTIONS, label: "View Collections", description: "Access collection logs" },
-      { key: PERMISSIONS.VIEW_PROJECTS, label: "View Projects", description: "Access project information" },
-      { key: PERMISSIONS.VIEW_ANALYTICS, label: "View Analytics", description: "Access analytics dashboards" },
-      { key: PERMISSIONS.VIEW_REPORTS, label: "View Reports", description: "Access and generate reports" },
-      { key: PERMISSIONS.VIEW_MEETINGS, label: "View Meetings", description: "Access meeting information" },
-      { key: PERMISSIONS.VIEW_SUGGESTIONS, label: "View Suggestions", description: "View suggestion portal" },
-      { key: PERMISSIONS.SUBMIT_SUGGESTIONS, label: "Submit Suggestions", description: "Submit your own suggestions" },
+      {
+        key: PERMISSIONS.VIEW_COLLECTIONS,
+        label: "View Collections",
+        description: "Access collection logs",
+      },
+      {
+        key: PERMISSIONS.VIEW_PROJECTS,
+        label: "View Projects",
+        description: "Access project information",
+      },
+      {
+        key: PERMISSIONS.VIEW_ANALYTICS,
+        label: "View Analytics",
+        description: "Access analytics dashboards",
+      },
+      {
+        key: PERMISSIONS.VIEW_REPORTS,
+        label: "View Reports",
+        description: "Access and generate reports",
+      },
+      {
+        key: PERMISSIONS.VIEW_MEETINGS,
+        label: "View Meetings",
+        description: "Access meeting information",
+      },
+      {
+        key: PERMISSIONS.VIEW_SUGGESTIONS,
+        label: "View Suggestions",
+        description: "View suggestion portal",
+      },
+      {
+        key: PERMISSIONS.SUBMIT_SUGGESTIONS,
+        label: "Submit Suggestions",
+        description: "Submit your own suggestions",
+      },
     ],
   },
   {
@@ -118,12 +181,36 @@ const PERMISSION_CATEGORIES = [
     icon: MessageCircle,
     description: "Access to chat rooms and messaging features",
     permissions: [
-      { key: PERMISSIONS.GENERAL_CHAT, label: "General Chat", description: "Access to general chat room" },
-      { key: PERMISSIONS.COMMITTEE_CHAT, label: "Committee Chat", description: "Access to committee chat room" },
-      { key: PERMISSIONS.HOST_CHAT, label: "Host Chat", description: "Access to host chat room" },
-      { key: PERMISSIONS.DRIVER_CHAT, label: "Driver Chat", description: "Access to driver chat room" },
-      { key: PERMISSIONS.RECIPIENT_CHAT, label: "Recipient Chat", description: "Access to recipient chat room" },
-      { key: "core_team_chat", label: "Core Team Chat", description: "Access to core team chat room" },
+      {
+        key: PERMISSIONS.GENERAL_CHAT,
+        label: "General Chat",
+        description: "Access to general chat room",
+      },
+      {
+        key: PERMISSIONS.COMMITTEE_CHAT,
+        label: "Committee Chat",
+        description: "Access to committee chat room",
+      },
+      {
+        key: PERMISSIONS.HOST_CHAT,
+        label: "Host Chat",
+        description: "Access to host chat room",
+      },
+      {
+        key: PERMISSIONS.DRIVER_CHAT,
+        label: "Driver Chat",
+        description: "Access to driver chat room",
+      },
+      {
+        key: PERMISSIONS.RECIPIENT_CHAT,
+        label: "Recipient Chat",
+        description: "Access to recipient chat room",
+      },
+      {
+        key: "core_team_chat",
+        label: "Core Team Chat",
+        description: "Access to core team chat room",
+      },
     ],
   },
   {
@@ -132,10 +219,26 @@ const PERMISSION_CATEGORIES = [
     icon: Award,
     description: "Permissions for the kudos recognition system",
     permissions: [
-      { key: PERMISSIONS.SEND_KUDOS, label: "Send Kudos", description: "Send recognition kudos to other users" },
-      { key: PERMISSIONS.RECEIVE_KUDOS, label: "Receive Kudos", description: "Receive recognition kudos from other users" },
-      { key: PERMISSIONS.VIEW_KUDOS, label: "View Kudos", description: "View kudos messages in inbox" },
-      { key: PERMISSIONS.MANAGE_ALL_KUDOS, label: "Manage All Kudos", description: "Administrative control over all kudos (view, delete)" },
+      {
+        key: PERMISSIONS.SEND_KUDOS,
+        label: "Send Kudos",
+        description: "Send recognition kudos to other users",
+      },
+      {
+        key: PERMISSIONS.RECEIVE_KUDOS,
+        label: "Receive Kudos",
+        description: "Receive recognition kudos from other users",
+      },
+      {
+        key: PERMISSIONS.VIEW_KUDOS,
+        label: "View Kudos",
+        description: "View kudos messages in inbox",
+      },
+      {
+        key: PERMISSIONS.MANAGE_ALL_KUDOS,
+        label: "Manage All Kudos",
+        description: "Administrative control over all kudos (view, delete)",
+      },
     ],
   },
   {
@@ -144,12 +247,36 @@ const PERMISSION_CATEGORIES = [
     icon: UserCog,
     description: "System management and advanced administrative functions",
     permissions: [
-      { key: PERMISSIONS.MANAGE_USERS, label: "Full User Management", description: "Complete control over user accounts" },
-      { key: PERMISSIONS.MANAGE_ANNOUNCEMENTS, label: "Manage Announcements", description: "Create and edit system announcements" },
-      { key: PERMISSIONS.MANAGE_SUGGESTIONS, label: "Manage All Suggestions", description: "Review and update suggestion workflow" },
-      { key: PERMISSIONS.RESPOND_TO_SUGGESTIONS, label: "Official Responses", description: "Post official organizational responses" },
-      { key: "access_work_logs", label: "View Work Logs", description: "Access work log system" },
-      { key: "view_all_work_logs", label: "View All Work Logs", description: "See all user work logs for oversight" },
+      {
+        key: PERMISSIONS.MANAGE_USERS,
+        label: "Full User Management",
+        description: "Complete control over user accounts",
+      },
+      {
+        key: PERMISSIONS.MANAGE_ANNOUNCEMENTS,
+        label: "Manage Announcements",
+        description: "Create and edit system announcements",
+      },
+      {
+        key: PERMISSIONS.MANAGE_SUGGESTIONS,
+        label: "Manage All Suggestions",
+        description: "Review and update suggestion workflow",
+      },
+      {
+        key: PERMISSIONS.RESPOND_TO_SUGGESTIONS,
+        label: "Official Responses",
+        description: "Post official organizational responses",
+      },
+      {
+        key: "access_work_logs",
+        label: "View Work Logs",
+        description: "Access work log system",
+      },
+      {
+        key: "view_all_work_logs",
+        label: "View All Work Logs",
+        description: "See all user work logs for oversight",
+      },
     ],
   },
 ];
@@ -232,8 +359,9 @@ export function UserPermissionsDialog({
           </DialogDescription>
           <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg mt-3">
             <p className="text-sm text-blue-800">
-              <strong>Note:</strong> Users automatically own content they create or are assigned to. 
-              These permissions control what they can do with <em>other people's</em> content and system access.
+              <strong>Note:</strong> Users automatically own content they create
+              or are assigned to. These permissions control what they can do
+              with <em>other people's</em> content and system access.
             </p>
           </div>
         </DialogHeader>
@@ -263,7 +391,8 @@ export function UserPermissionsDialog({
                 </SelectContent>
               </Select>
               <p className="text-sm text-muted-foreground">
-                Changing the role will reset permissions to the default for that role
+                Changing the role will reset permissions to the default for that
+                role
               </p>
             </div>
 
@@ -273,7 +402,9 @@ export function UserPermissionsDialog({
               <ScrollArea className="h-[400px] border rounded-lg p-4">
                 <Accordion type="multiple" className="w-full">
                   {PERMISSION_CATEGORIES.map((category) => {
-                    const categoryPermissionKeys = category.permissions.map((p) => p.key);
+                    const categoryPermissionKeys = category.permissions.map(
+                      (p) => p.key
+                    );
                     const selectedCount = categoryPermissionKeys.filter((p) =>
                       editingPermissions.includes(p)
                     ).length;
@@ -286,7 +417,9 @@ export function UserPermissionsDialog({
                             <div className="flex items-center gap-3">
                               <Icon className="h-5 w-5 text-muted-foreground" />
                               <div className="text-left">
-                                <div className="font-semibold">{category.label}</div>
+                                <div className="font-semibold">
+                                  {category.label}
+                                </div>
                                 <div className="text-sm text-muted-foreground">
                                   {category.description}
                                 </div>
@@ -303,46 +436,57 @@ export function UserPermissionsDialog({
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => handleSelectAll(categoryPermissionKeys)}
+                                onClick={() =>
+                                  handleSelectAll(categoryPermissionKeys)
+                                }
                               >
                                 Select All
                               </Button>
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => handleDeselectAll(categoryPermissionKeys)}
+                                onClick={() =>
+                                  handleDeselectAll(categoryPermissionKeys)
+                                }
                               >
                                 Deselect All
                               </Button>
                             </div>
                             <div className="grid gap-3">
-                              {category.permissions.map(({ key, label, description }) => (
-                                <div
-                                  key={key}
-                                  className="flex items-start space-x-3 p-3 rounded-lg hover:bg-muted/50 transition-colors"
-                                >
-                                  <Checkbox
-                                    id={key}
-                                    checked={editingPermissions.includes(key)}
-                                    onCheckedChange={() => handlePermissionToggle(key)}
-                                    className="mt-0.5"
-                                  />
-                                  <div className="flex-1 space-y-1">
-                                    <Label
-                                      htmlFor={key}
-                                      className="font-medium cursor-pointer"
+                              {category.permissions.map(
+                                ({ key, label, description }) => (
+                                  <div
+                                    key={key}
+                                    className="flex items-start space-x-3 p-3 rounded-lg hover:bg-muted/50 transition-colors"
+                                  >
+                                    <Checkbox
+                                      id={key}
+                                      checked={editingPermissions.includes(key)}
+                                      onCheckedChange={() =>
+                                        handlePermissionToggle(key)
+                                      }
+                                      className="mt-0.5"
+                                    />
+                                    <div className="flex-1 space-y-1">
+                                      <Label
+                                        htmlFor={key}
+                                        className="font-medium cursor-pointer"
+                                      >
+                                        {label}
+                                      </Label>
+                                      <p className="text-sm text-muted-foreground">
+                                        {description}
+                                      </p>
+                                    </div>
+                                    <Badge
+                                      variant="outline"
+                                      className="text-xs"
                                     >
-                                      {label}
-                                    </Label>
-                                    <p className="text-sm text-muted-foreground">
-                                      {description}
-                                    </p>
+                                      {key}
+                                    </Badge>
                                   </div>
-                                  <Badge variant="outline" className="text-xs">
-                                    {key}
-                                  </Badge>
-                                </div>
-                              ))}
+                                )
+                              )}
                             </div>
                           </div>
                         </AccordionContent>

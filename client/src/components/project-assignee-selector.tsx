@@ -1,6 +1,12 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -30,99 +36,121 @@ interface SelectedUser {
   isSystemUser: boolean;
 }
 
-export function ProjectAssigneeSelector({ 
-  value, 
-  onChange, 
+export function ProjectAssigneeSelector({
+  value,
+  onChange,
   placeholder = "Add team members",
   label = "Assigned To",
   className,
-  multiple = true
+  multiple = true,
 }: ProjectAssigneeSelectorProps) {
   const [selectedUsers, setSelectedUsers] = useState<SelectedUser[]>([]);
-  const [customNameInput, setCustomNameInput] = useState('');
+  const [customNameInput, setCustomNameInput] = useState("");
 
   // Fetch system users for assignments
   const { data: users = [] } = useQuery<User[]>({
-    queryKey: ['/api/users/for-assignments'],
+    queryKey: ["/api/users/for-assignments"],
     retry: false,
   });
 
   // Initialize from existing value - handle both single names and comma-separated
   useEffect(() => {
     if (value && users.length > 0) {
-      const names = value.split(',').map(name => name.trim()).filter(name => name.length > 0);
+      const names = value
+        .split(",")
+        .map((name) => name.trim())
+        .filter((name) => name.length > 0);
       const allUsers: SelectedUser[] = [];
-      
-      names.forEach(name => {
-        const matchedUser = users.find(user => {
-          const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim();
+
+      names.forEach((name) => {
+        const matchedUser = users.find((user) => {
+          const fullName = `${user.firstName || ""} ${user.lastName ||
+            ""}`.trim();
           return fullName === name || user.email === name;
         });
-        
+
         if (matchedUser) {
-          const fullName = `${matchedUser.firstName || ''} ${matchedUser.lastName || ''}`.trim() || matchedUser.email;
-          allUsers.push({ id: matchedUser.id, name: fullName, isSystemUser: true });
+          const fullName =
+            `${matchedUser.firstName || ""} ${matchedUser.lastName ||
+              ""}`.trim() || matchedUser.email;
+          allUsers.push({
+            id: matchedUser.id,
+            name: fullName,
+            isSystemUser: true,
+          });
         } else {
           // Add as custom name
-          allUsers.push({ id: `custom_${Date.now()}_${Math.random()}`, name, isSystemUser: false });
+          allUsers.push({
+            id: `custom_${Date.now()}_${Math.random()}`,
+            name,
+            isSystemUser: false,
+          });
         }
       });
-      
+
       setSelectedUsers(allUsers);
     }
   }, [users, value]);
 
   const addUserById = (userId: string) => {
-    if (userId === 'none') {
+    if (userId === "none") {
       return; // Don't do anything for the placeholder option
     }
 
-    const user = users.find(u => u.id === userId);
+    const user = users.find((u) => u.id === userId);
     if (!user) return;
 
-    const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email;
-    
-    // Check if already selected
-    if (selectedUsers.some(u => u.id === user.id)) return;
+    const fullName =
+      `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.email;
 
-    const updatedUsers = [...selectedUsers, { id: user.id, name: fullName, isSystemUser: true }];
+    // Check if already selected
+    if (selectedUsers.some((u) => u.id === user.id)) return;
+
+    const updatedUsers = [
+      ...selectedUsers,
+      { id: user.id, name: fullName, isSystemUser: true },
+    ];
     setSelectedUsers(updatedUsers);
-    
+
     // Update parent
     updateParent(updatedUsers);
   };
 
   const addCustomName = () => {
     if (!customNameInput.trim()) return;
-    
+
     // Check if already exists
-    if (selectedUsers.some(u => u.name.toLowerCase() === customNameInput.trim().toLowerCase())) {
-      setCustomNameInput('');
+    if (
+      selectedUsers.some(
+        (u) => u.name.toLowerCase() === customNameInput.trim().toLowerCase()
+      )
+    ) {
+      setCustomNameInput("");
       return;
     }
 
     const customUser: SelectedUser = {
       id: `custom_${Date.now()}_${Math.random()}`,
       name: customNameInput.trim(),
-      isSystemUser: false
+      isSystemUser: false,
     };
 
     const updatedUsers = [...selectedUsers, customUser];
     setSelectedUsers(updatedUsers);
-    setCustomNameInput('');
-    
+    setCustomNameInput("");
+
     // Update parent
     updateParent(updatedUsers);
   };
 
   const updateParent = (users: SelectedUser[]) => {
-    const names = users.map(u => u.name).join(', ');
-    const systemUserIds = users.filter(u => u.isSystemUser).map(u => u.id);
+    const names = users.map((u) => u.name).join(", ");
+    const systemUserIds = users.filter((u) => u.isSystemUser).map((u) => u.id);
     onChange(names, systemUserIds);
   };
 
   const removeUser = (userId: string) => {
-    const updatedUsers = selectedUsers.filter(u => u.id !== userId);
+    const updatedUsers = selectedUsers.filter((u) => u.id !== userId);
     setSelectedUsers(updatedUsers);
     updateParent(updatedUsers);
   };
@@ -130,11 +158,13 @@ export function ProjectAssigneeSelector({
   return (
     <div className={className}>
       <Label className="mb-2 block">{label}</Label>
-      
+
       <div className="space-y-4">
         {/* System User Selection */}
         <div>
-          <Label className="text-sm text-slate-600 mb-2 block">Add Team Members</Label>
+          <Label className="text-sm text-slate-600 mb-2 block">
+            Add Team Members
+          </Label>
           <Select value="none" onValueChange={addUserById}>
             <SelectTrigger>
               <SelectValue placeholder="+ Add team member" />
@@ -142,11 +172,18 @@ export function ProjectAssigneeSelector({
             <SelectContent>
               <SelectItem value="none">Select a team member...</SelectItem>
               {users
-                .filter(user => !selectedUsers.some(selected => selected.id === user.id && selected.isSystemUser))
+                .filter(
+                  (user) =>
+                    !selectedUsers.some(
+                      (selected) =>
+                        selected.id === user.id && selected.isSystemUser
+                    )
+                )
                 .map((user) => (
                   <SelectItem key={user.id} value={user.id}>
                     <span className="font-medium">
-                      {`${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email}
+                      {`${user.firstName || ""} ${user.lastName ||
+                        ""}`.trim() || user.email}
                     </span>
                   </SelectItem>
                 ))}
@@ -156,14 +193,16 @@ export function ProjectAssigneeSelector({
 
         {/* Custom Name Input */}
         <div>
-          <Label className="text-sm text-slate-600 mb-2 block">Add Custom Names</Label>
+          <Label className="text-sm text-slate-600 mb-2 block">
+            Add Custom Names
+          </Label>
           <div className="flex gap-2">
             <Input
               value={customNameInput}
               onChange={(e) => setCustomNameInput(e.target.value)}
               placeholder="Enter custom name"
               onKeyPress={(e) => {
-                if (e.key === 'Enter') {
+                if (e.key === "Enter") {
                   e.preventDefault();
                   addCustomName();
                 }
@@ -187,9 +226,9 @@ export function ProjectAssigneeSelector({
             <Label className="text-sm text-slate-600">Assigned:</Label>
             <div className="flex flex-wrap gap-2">
               {selectedUsers.map((user) => (
-                <Badge 
-                  key={user.id} 
-                  variant={user.isSystemUser ? "default" : "outline"} 
+                <Badge
+                  key={user.id}
+                  variant={user.isSystemUser ? "default" : "outline"}
                   className="flex items-center gap-1 px-3 py-1"
                 >
                   <span>{user.name}</span>

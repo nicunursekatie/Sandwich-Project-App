@@ -2,7 +2,13 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Activity, Calendar, Eye, TrendingUp, User, Users } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
@@ -30,47 +36,57 @@ export default function UserActivityAnalytics() {
   const [viewMode, setViewMode] = useState<"summary" | "details">("summary");
 
   // Get all users activity summary
-  const { data: activitySummary, isLoading: summaryLoading, error: summaryError } = useQuery<UserActivitySummary[]>({
+  const {
+    data: activitySummary,
+    isLoading: summaryLoading,
+    error: summaryError,
+  } = useQuery<UserActivitySummary[]>({
     queryKey: ["/api/user-activity/summary", selectedPeriod],
     queryFn: async () => {
-      const res = await fetch(`/api/user-activity/summary?days=${selectedPeriod}`, {
-        credentials: 'include' // Include cookies for authentication
-      });
+      const res = await fetch(
+        `/api/user-activity/summary?days=${selectedPeriod}`,
+        {
+          credentials: "include", // Include cookies for authentication
+        }
+      );
       if (!res.ok) {
         if (res.status === 401) {
-          throw new Error('Authentication required - please login');
+          throw new Error("Authentication required - please login");
         }
         if (res.status === 403) {
-          throw new Error('Admin access required to view activity summary');
+          throw new Error("Admin access required to view activity summary");
         }
         throw new Error(`Failed to fetch activity summary: ${res.status}`);
       }
       const data = await res.json();
-      console.log('Activity summary data:', data);
+      console.log("Activity summary data:", data);
       // Ensure we return an array
       return Array.isArray(data) ? data : [];
     },
     enabled: viewMode === "summary",
-    retry: false // Don't retry auth errors
+    retry: false, // Don't retry auth errors
   });
 
   // Get individual user stats
   const { data: userStats, isLoading: statsLoading } = useQuery<ActivityStats>({
     queryKey: ["/api/user-activity/stats", selectedUser, selectedPeriod],
-    queryFn: () => fetch(`/api/user-activity/stats/${selectedUser}?days=${selectedPeriod}`).then(res => res.json()),
-    enabled: viewMode === "details" && !!selectedUser
+    queryFn: () =>
+      fetch(
+        `/api/user-activity/stats/${selectedUser}?days=${selectedPeriod}`
+      ).then((res) => res.json()),
+    enabled: viewMode === "details" && !!selectedUser,
   });
 
   const getSectionBadgeColor = (section: string) => {
     const colors: Record<string, string> = {
       dashboard: "bg-blue-100 text-blue-800",
-      collections: "bg-green-100 text-green-800", 
+      collections: "bg-green-100 text-green-800",
       messaging: "bg-purple-100 text-purple-800",
       admin: "bg-red-100 text-red-800",
       reports: "bg-yellow-100 text-yellow-800",
       projects: "bg-teal-100 text-teal-800",
       directory: "bg-orange-100 text-orange-800",
-      none: "bg-gray-100 text-gray-800"
+      none: "bg-gray-100 text-gray-800",
     };
     return colors[section] || "bg-gray-100 text-gray-800";
   };
@@ -83,9 +99,10 @@ export default function UserActivityAnalytics() {
   };
 
   const formatActionName = (action: string) => {
-    return action.split('_').map(word => 
-      word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-    ).join(' ');
+    return action
+      .split("_")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ");
   };
 
   return (
@@ -117,7 +134,7 @@ export default function UserActivityAnalytics() {
                 Individual Details
               </Button>
             </div>
-            
+
             <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
               <SelectTrigger className="w-[140px]">
                 <SelectValue />
@@ -140,8 +157,12 @@ export default function UserActivityAnalytics() {
                 </div>
               ) : summaryError ? (
                 <div className="text-center py-8">
-                  <div className="text-red-600 mb-4">Error loading activity data:</div>
-                  <div className="text-sm text-gray-600">{summaryError.message}</div>
+                  <div className="text-red-600 mb-4">
+                    Error loading activity data:
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    {summaryError.message}
+                  </div>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -149,44 +170,63 @@ export default function UserActivityAnalytics() {
                     {activitySummary?.map((user) => {
                       const activity = getActivityLevel(user.totalActions);
                       return (
-                        <div key={user.userId} className="border rounded-lg p-4 space-y-2">
+                        <div
+                          key={user.userId}
+                          className="border rounded-lg p-4 space-y-2"
+                        >
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
                               <div className="w-10 h-10 rounded-full bg-[#236383] text-white flex items-center justify-center text-sm font-medium">
-                                {(user.firstName?.[0] || user.email?.[0] || 'U').toUpperCase()}
+                                {(
+                                  user.firstName?.[0] ||
+                                  user.email?.[0] ||
+                                  "U"
+                                ).toUpperCase()}
                               </div>
                               <div>
                                 <div className="font-medium">
-                                  {user.firstName || 'Unknown'} {user.lastName || ''}
+                                  {user.firstName || "Unknown"}{" "}
+                                  {user.lastName || ""}
                                 </div>
-                                <div className="text-sm text-gray-600">{user.email || 'No email'}</div>
+                                <div className="text-sm text-gray-600">
+                                  {user.email || "No email"}
+                                </div>
                               </div>
                             </div>
                             <div className="text-right">
-                              <div className={`text-lg font-bold ${activity.color}`}>
+                              <div
+                                className={`text-lg font-bold ${activity.color}`}
+                              >
                                 {user.totalActions}
                               </div>
-                              <div className="text-sm text-gray-500">actions</div>
+                              <div className="text-sm text-gray-500">
+                                actions
+                              </div>
                             </div>
                           </div>
-                          
+
                           <div className="flex items-center justify-between text-sm">
                             <div className="flex items-center gap-4">
-                              <Badge className={getSectionBadgeColor(user.topSection || 'none')}>
-                                {user.topSection || 'No activity'}
+                              <Badge
+                                className={getSectionBadgeColor(
+                                  user.topSection || "none"
+                                )}
+                              >
+                                {user.topSection || "No activity"}
                               </Badge>
                               <span className={activity.color}>
                                 {activity.level} Activity
                               </span>
                             </div>
                             <div className="text-gray-500">
-                              {user.lastActive 
-                                ? `Active ${formatDistanceToNow(new Date(user.lastActive))} ago`
-                                : "No recent activity"
-                              }
+                              {user.lastActive
+                                ? `Active ${formatDistanceToNow(
+                                    new Date(user.lastActive)
+                                  )} ago`
+                                : "No recent activity"}
                             </div>
                           </div>
-                          
+
                           <Button
                             variant="outline"
                             size="sm"
@@ -203,7 +243,7 @@ export default function UserActivityAnalytics() {
                       );
                     })}
                   </div>
-                  
+
                   {(!activitySummary || activitySummary.length === 0) && (
                     <div className="text-center py-8 text-gray-500">
                       No user activity data found for the selected period.
@@ -218,7 +258,9 @@ export default function UserActivityAnalytics() {
             <div className="space-y-6">
               {!selectedUser ? (
                 <div className="text-center py-8">
-                  <div className="text-gray-500 mb-4">Select a user to view detailed activity stats</div>
+                  <div className="text-gray-500 mb-4">
+                    Select a user to view detailed activity stats
+                  </div>
                   <Button
                     onClick={() => setViewMode("summary")}
                     className="bg-[#236383] hover:bg-[#1e5470] text-white"
@@ -239,33 +281,46 @@ export default function UserActivityAnalytics() {
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="text-sm text-gray-600">Total Actions</p>
-                            <p className="text-2xl font-bold text-[#236383]">{userStats.totalActions}</p>
+                            <p className="text-sm text-gray-600">
+                              Total Actions
+                            </p>
+                            <p className="text-2xl font-bold text-[#236383]">
+                              {userStats.totalActions}
+                            </p>
                           </div>
                           <Activity className="h-8 w-8 text-[#236383]" />
                         </div>
                       </CardContent>
                     </Card>
-                    
+
                     <Card>
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="text-sm text-gray-600">Sections Used</p>
-                            <p className="text-2xl font-bold text-[#236383]">{userStats.sectionsUsed.length}</p>
+                            <p className="text-sm text-gray-600">
+                              Sections Used
+                            </p>
+                            <p className="text-2xl font-bold text-[#236383]">
+                              {userStats.sectionsUsed.length}
+                            </p>
                           </div>
                           <TrendingUp className="h-8 w-8 text-[#236383]" />
                         </div>
                       </CardContent>
                     </Card>
-                    
+
                     <Card>
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="text-sm text-gray-600">Daily Average</p>
+                            <p className="text-sm text-gray-600">
+                              Daily Average
+                            </p>
                             <p className="text-2xl font-bold text-[#236383]">
-                              {Math.round(userStats.totalActions / parseInt(selectedPeriod))}
+                              {Math.round(
+                                userStats.totalActions /
+                                  parseInt(selectedPeriod)
+                              )}
                             </p>
                           </div>
                           <Calendar className="h-8 w-8 text-[#236383]" />
@@ -282,14 +337,21 @@ export default function UserActivityAnalytics() {
                     <CardContent>
                       <div className="space-y-3">
                         {userStats.topActions.map((action, index) => (
-                          <div key={action.action} className="flex items-center justify-between">
+                          <div
+                            key={action.action}
+                            className="flex items-center justify-between"
+                          >
                             <div className="flex items-center gap-3">
                               <div className="w-8 h-8 rounded-full bg-[#236383] text-white flex items-center justify-center text-sm font-medium">
                                 {index + 1}
                               </div>
-                              <span className="font-medium">{formatActionName(action.action)}</span>
+                              <span className="font-medium">
+                                {formatActionName(action.action)}
+                              </span>
                             </div>
-                            <Badge variant="secondary">{action.count} times</Badge>
+                            <Badge variant="secondary">
+                              {action.count} times
+                            </Badge>
                           </div>
                         ))}
                         {userStats.topActions.length === 0 && (
@@ -309,8 +371,8 @@ export default function UserActivityAnalytics() {
                     <CardContent>
                       <div className="flex flex-wrap gap-2">
                         {userStats.sectionsUsed.map((section) => (
-                          <Badge 
-                            key={section} 
+                          <Badge
+                            key={section}
                             className={getSectionBadgeColor(section)}
                           >
                             {section.charAt(0).toUpperCase() + section.slice(1)}

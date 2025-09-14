@@ -19,16 +19,27 @@ export function useMessageReads() {
 
   // Mutation to mark messages as read
   const markMessagesReadMutation = useMutation({
-    mutationFn: async ({ committee, messageIds }: { committee: string; messageIds?: number[] }) => {
-      return apiRequest("POST", "/api/message-notifications/mark-chat-read", { channel: committee, messageIds });
+    mutationFn: async ({
+      committee,
+      messageIds,
+    }: {
+      committee: string;
+      messageIds?: number[];
+    }) => {
+      return apiRequest("POST", "/api/message-notifications/mark-chat-read", {
+        channel: committee,
+        messageIds,
+      });
     },
     onSuccess: () => {
       // Invalidate notification counts to update the bell icon
-      queryClient.invalidateQueries({ queryKey: ["/api/message-notifications/unread-counts"] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/message-notifications/unread-counts"],
+      });
     },
     onError: (error) => {
       console.error("Failed to mark messages as read:", error);
-    }
+    },
   });
 
   // Function to mark all messages in a committee as read
@@ -38,24 +49,33 @@ export function useMessageReads() {
   };
 
   // Function to mark specific messages as read
-  const markSpecificMessagesAsRead = (committee: string, messageIds: number[]) => {
+  const markSpecificMessagesAsRead = (
+    committee: string,
+    messageIds: number[]
+  ) => {
     if (!user || messageIds.length === 0) return;
     markMessagesReadMutation.mutate({ committee, messageIds });
   };
 
   // Hook to automatically mark messages as read when viewing a chat
-  const useAutoMarkAsRead = (committee: string, messages: Message[], enabled = true) => {
+  const useAutoMarkAsRead = (
+    committee: string,
+    messages: Message[],
+    enabled = true
+  ) => {
     useEffect(() => {
       if (!enabled || !user || !messages || messages.length === 0) return;
 
       // Filter out user's own messages and get only unread ones
-      const otherUserMessages = messages.filter(msg => msg.userId !== user.id);
-      
+      const otherUserMessages = messages.filter(
+        (msg) => msg.userId !== user.id
+      );
+
       if (otherUserMessages.length === 0) return;
 
       // Check if page is visible (not in background tab)
       const isPageVisible = () => !document.hidden;
-      
+
       // Mark all visible messages as read after a delay, but only if page is visible
       const timeoutId = setTimeout(() => {
         if (isPageVisible()) {
@@ -70,11 +90,14 @@ export function useMessageReads() {
         }
       };
 
-      document.addEventListener('visibilitychange', handleVisibilityChange);
+      document.addEventListener("visibilitychange", handleVisibilityChange);
 
       return () => {
         clearTimeout(timeoutId);
-        document.removeEventListener('visibilitychange', handleVisibilityChange);
+        document.removeEventListener(
+          "visibilitychange",
+          handleVisibilityChange
+        );
       };
     }, [committee, messages, enabled, user]);
   };

@@ -31,7 +31,7 @@ export function ConfirmationDialog({
   cancelText = "Cancel",
   onConfirm,
   variant = "default",
-  disabled = false
+  disabled = false,
 }: ConfirmationDialogProps) {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -59,11 +59,15 @@ export function ConfirmationDialog({
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isLoading}>{cancelText}</AlertDialogCancel>
+          <AlertDialogCancel disabled={isLoading}>
+            {cancelText}
+          </AlertDialogCancel>
           <AlertDialogAction
             onClick={handleConfirm}
             disabled={isLoading}
-            className={variant === "destructive" ? "bg-red-600 hover:bg-red-700" : ""}
+            className={
+              variant === "destructive" ? "bg-red-600 hover:bg-red-700" : ""
+            }
           >
             {isLoading ? "Processing..." : confirmText}
           </AlertDialogAction>
@@ -100,7 +104,9 @@ export function useConfirmation() {
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{dialogState.title}</AlertDialogTitle>
-          <AlertDialogDescription>{dialogState.description}</AlertDialogDescription>
+          <AlertDialogDescription>
+            {dialogState.description}
+          </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel onClick={() => setDialogState(null)}>

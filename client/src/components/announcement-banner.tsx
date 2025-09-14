@@ -7,8 +7,8 @@ interface Announcement {
   id: number;
   title: string;
   message: string;
-  type: 'event' | 'position' | 'alert' | 'general';
-  priority: 'low' | 'medium' | 'high' | 'urgent';
+  type: "event" | "position" | "alert" | "general";
+  priority: "low" | "medium" | "high" | "urgent";
   startDate: string;
   endDate: string;
   isActive: boolean;
@@ -18,7 +18,7 @@ interface Announcement {
 
 export default function AnnouncementBanner() {
   const [dismissedBanners, setDismissedBanners] = useState<number[]>(() => {
-    const saved = localStorage.getItem('dismissedBanners');
+    const saved = localStorage.getItem("dismissedBanners");
     return saved ? JSON.parse(saved) : [];
   });
 
@@ -29,15 +29,17 @@ export default function AnnouncementBanner() {
   });
 
   // Filter active announcements that haven't been dismissed
-  const activeAnnouncements = announcements.filter(announcement => {
+  const activeAnnouncements = announcements.filter((announcement) => {
     const now = new Date();
     const startDate = new Date(announcement.startDate);
     const endDate = new Date(announcement.endDate);
-    
-    return announcement.isActive && 
-           now >= startDate && 
-           now <= endDate && 
-           !dismissedBanners.includes(announcement.id);
+
+    return (
+      announcement.isActive &&
+      now >= startDate &&
+      now <= endDate &&
+      !dismissedBanners.includes(announcement.id)
+    );
   });
 
   // Get highest priority announcement
@@ -49,18 +51,18 @@ export default function AnnouncementBanner() {
   const dismissBanner = (id: number) => {
     const updated = [...dismissedBanners, id];
     setDismissedBanners(updated);
-    localStorage.setItem('dismissedBanners', JSON.stringify(updated));
+    localStorage.setItem("dismissedBanners", JSON.stringify(updated));
   };
 
   // Clear dismissed banners daily
   useEffect(() => {
-    const lastClear = localStorage.getItem('lastBannerClear');
+    const lastClear = localStorage.getItem("lastBannerClear");
     const today = new Date().toDateString();
-    
+
     if (lastClear !== today) {
       setDismissedBanners([]);
-      localStorage.setItem('dismissedBanners', JSON.stringify([]));
-      localStorage.setItem('lastBannerClear', today);
+      localStorage.setItem("dismissedBanners", JSON.stringify([]));
+      localStorage.setItem("lastBannerClear", today);
     }
   }, []);
 
@@ -68,40 +70,49 @@ export default function AnnouncementBanner() {
 
   const getIcon = (type: string) => {
     switch (type) {
-      case 'event': return <Calendar className="w-5 h-5" />;
-      case 'position': return <Users className="w-5 h-5" />;
-      case 'alert': return <AlertCircle className="w-5 h-5" />;
-      default: return <AlertCircle className="w-5 h-5" />;
+      case "event":
+        return <Calendar className="w-5 h-5" />;
+      case "position":
+        return <Users className="w-5 h-5" />;
+      case "alert":
+        return <AlertCircle className="w-5 h-5" />;
+      default:
+        return <AlertCircle className="w-5 h-5" />;
     }
   };
 
   const getBannerStyles = (priority: string, type: string) => {
     const baseStyles = "border-l-4 shadow-sm";
-    
+
     // Use brand colors: #236383 (teal), #FBAD3F (orange), #A31C41 (burgundy)
-    if (priority === 'urgent') {
+    if (priority === "urgent") {
       return `${baseStyles} bg-red-50 dark:bg-red-950/20 border-[#A31C41] text-[#A31C41] dark:text-red-200`;
     }
-    if (priority === 'high') {
+    if (priority === "high") {
       return `${baseStyles} bg-orange-50 dark:bg-orange-950/20 border-[#FBAD3F] text-orange-900 dark:text-orange-200`;
     }
-    if (type === 'event') {
+    if (type === "event") {
       return `${baseStyles} bg-teal-50 dark:bg-teal-950/20 border-[#236383] text-[#236383] dark:text-teal-200`;
     }
-    if (type === 'position') {
+    if (type === "position") {
       return `${baseStyles} bg-teal-50 dark:bg-teal-950/20 border-[#007E8C] text-[#007E8C] dark:text-teal-200`;
     }
-    if (type === 'alert') {
+    if (type === "alert") {
       return `${baseStyles} bg-orange-50 dark:bg-orange-950/20 border-[#FBAD3F] text-orange-900 dark:text-orange-200`;
     }
     return `${baseStyles} bg-blue-50 dark:bg-blue-950/20 border-[#236383] text-[#236383] dark:text-blue-200`;
   };
 
   return (
-    <div className={`w-full px-4 py-4 ${getBannerStyles(currentAnnouncement.priority, currentAnnouncement.type)} border-b-2 shadow-md relative overflow-hidden`}>
+    <div
+      className={`w-full px-4 py-4 ${getBannerStyles(
+        currentAnnouncement.priority,
+        currentAnnouncement.type
+      )} border-b-2 shadow-md relative overflow-hidden`}
+    >
       {/* Subtle animation for emphasis */}
       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse opacity-30"></div>
-      
+
       <div className="max-w-7xl mx-auto flex items-start justify-between gap-4 relative z-10">
         <div className="flex items-start gap-3 flex-1 min-w-0">
           <div className="flex-shrink-0 mt-0.5 p-1 rounded-full bg-white/20">
@@ -112,7 +123,8 @@ export default function AnnouncementBanner() {
               <h3 className="font-bold text-base">
                 {currentAnnouncement.title}
               </h3>
-              {(currentAnnouncement.priority === 'urgent' || currentAnnouncement.priority === 'high') && (
+              {(currentAnnouncement.priority === "urgent" ||
+                currentAnnouncement.priority === "high") && (
                 <span className="text-xs px-2 py-1 bg-white/30 dark:bg-white/10 rounded-full font-semibold uppercase tracking-wide">
                   {currentAnnouncement.priority}
                 </span>
@@ -122,13 +134,13 @@ export default function AnnouncementBanner() {
               {currentAnnouncement.message}
             </p>
             {currentAnnouncement.link && (
-              <a 
+              <a
                 href={currentAnnouncement.link}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-block mt-2 text-sm font-bold underline hover:no-underline bg-white/20 px-2 py-1 rounded"
               >
-                {currentAnnouncement.linkText || 'Learn More'}
+                {currentAnnouncement.linkText || "Learn More"}
               </a>
             )}
           </div>

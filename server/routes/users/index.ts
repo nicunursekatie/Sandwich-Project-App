@@ -5,20 +5,17 @@ import { requirePermission, createErrorHandler } from "../../middleware";
 const usersRouter = Router();
 
 // Error handling for this module (standard middleware applied at mount level)
-const errorHandler = createErrorHandler('users');
+const errorHandler = createErrorHandler("users");
 
 // User list for project assignments (available to anyone who can create projects)
-usersRouter.get(
-  "/for-assignments",
-  async (req, res, next) => {
-    try {
-      const assignableUsers = await userService.getUsersForAssignments();
-      res.json(assignableUsers);
-    } catch (error) {
-      next(error);
-    }
+usersRouter.get("/for-assignments", async (req, res, next) => {
+  try {
+    const assignableUsers = await userService.getUsersForAssignments();
+    res.json(assignableUsers);
+  } catch (error) {
+    next(error);
   }
-);
+});
 
 // User management routes requiring USERS_EDIT permission
 usersRouter.get(
@@ -40,12 +37,12 @@ usersRouter.post(
   async (req, res, next) => {
     try {
       const { email, firstName, lastName, role } = req.body;
-      
+
       const newUser = await userService.createUser({
         email,
         firstName,
         lastName,
-        role
+        role,
       });
 
       res.status(201).json(newUser);
@@ -70,13 +67,13 @@ usersRouter.patch(
     try {
       const { id } = req.params;
       const { role, permissions, metadata } = req.body;
-      
+
       const updatedUser = await userService.updateUser(id, {
         role,
         permissions,
-        metadata
+        metadata,
       });
-      
+
       res.json(updatedUser);
     } catch (error) {
       next(error);
@@ -91,7 +88,7 @@ usersRouter.patch(
     try {
       const { id } = req.params;
       const { isActive } = req.body;
-      
+
       const updatedUser = await userService.updateUserStatus(id, isActive);
       res.json(updatedUser);
     } catch (error) {
@@ -107,13 +104,13 @@ usersRouter.patch(
     try {
       const { id } = req.params;
       const { email, firstName, lastName, role, isActive } = req.body;
-      
+
       const updatedUser = await userService.updateUserProfile(
         id,
         { email, firstName, lastName, role, isActive },
         req.user?.id
       );
-      
+
       res.json(updatedUser);
     } catch (error) {
       next(error);
@@ -146,7 +143,10 @@ usersRouter.patch(
       await userService.setUserPassword(id, password);
       res.json({ success: true, message: "Password updated successfully" });
     } catch (error) {
-      if (error instanceof Error && error.message.includes("must be at least")) {
+      if (
+        error instanceof Error &&
+        error.message.includes("must be at least")
+      ) {
         return res.status(400).json({ message: error.message });
       }
       next(error);

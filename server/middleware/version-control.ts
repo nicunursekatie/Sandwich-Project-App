@@ -3,12 +3,12 @@ import { AuditLogger } from "../audit-logger";
 
 export interface VersionedRecord {
   id: string;
-  entityType: 'sandwich_collection' | 'host' | 'project' | 'contact';
+  entityType: "sandwich_collection" | "host" | "project" | "contact";
   entityId: number;
   version: number;
   data: any;
   changedFields: string[];
-  changeType: 'create' | 'update' | 'delete';
+  changeType: "create" | "update" | "delete";
   userId?: string;
   timestamp: Date;
   metadata?: Record<string, any>;
@@ -26,9 +26,9 @@ export class VersionControl {
   private static versionHistory: Map<string, VersionedRecord[]> = new Map();
 
   static async createVersion(
-    entityType: VersionedRecord['entityType'],
+    entityType: VersionedRecord["entityType"],
     entityId: number,
-    changeType: VersionedRecord['changeType'],
+    changeType: VersionedRecord["changeType"],
     newData: any,
     previousData?: any,
     userId?: string,
@@ -40,13 +40,15 @@ export class VersionControl {
 
     // Determine changed fields
     const changedFields: string[] = [];
-    if (previousData && changeType === 'update') {
-      Object.keys(newData).forEach(key => {
-        if (JSON.stringify(newData[key]) !== JSON.stringify(previousData[key])) {
+    if (previousData && changeType === "update") {
+      Object.keys(newData).forEach((key) => {
+        if (
+          JSON.stringify(newData[key]) !== JSON.stringify(previousData[key])
+        ) {
           changedFields.push(key);
         }
       });
-    } else if (changeType === 'create') {
+    } else if (changeType === "create") {
       changedFields.push(...Object.keys(newData));
     }
 
@@ -60,7 +62,7 @@ export class VersionControl {
       changeType,
       userId,
       timestamp: new Date(),
-      metadata
+      metadata,
     };
 
     // Store version
@@ -69,14 +71,14 @@ export class VersionControl {
 
     // Log the change
     await AuditLogger.log(
-      'version_created',
+      "version_created",
       entityType,
       entityId,
       {
         version,
         changeType,
         changedFields,
-        reason: metadata?.reason
+        reason: metadata?.reason,
       },
       { userId }
     );
@@ -85,7 +87,7 @@ export class VersionControl {
   }
 
   static async getVersionHistory(
-    entityType: VersionedRecord['entityType'],
+    entityType: VersionedRecord["entityType"],
     entityId: number
   ): Promise<VersionedRecord[]> {
     const entityKey = `${entityType}:${entityId}`;
@@ -93,22 +95,26 @@ export class VersionControl {
   }
 
   static async getVersion(
-    entityType: VersionedRecord['entityType'],
+    entityType: VersionedRecord["entityType"],
     entityId: number,
     version: number
   ): Promise<VersionedRecord | null> {
     const history = await this.getVersionHistory(entityType, entityId);
-    return history.find(v => v.version === version) || null;
+    return history.find((v) => v.version === version) || null;
   }
 
   static async restoreVersion(
-    entityType: VersionedRecord['entityType'],
+    entityType: VersionedRecord["entityType"],
     entityId: number,
     version: number,
     userId?: string
   ): Promise<boolean> {
     try {
-      const versionToRestore = await this.getVersion(entityType, entityId, version);
+      const versionToRestore = await this.getVersion(
+        entityType,
+        entityId,
+        version
+      );
       if (!versionToRestore) {
         throw new Error(`Version ${version} not found`);
       }
@@ -116,16 +122,16 @@ export class VersionControl {
       // Get current data for comparison
       let currentData: any;
       switch (entityType) {
-        case 'sandwich_collection':
+        case "sandwich_collection":
           currentData = await storage.getSandwichCollection(entityId);
           break;
-        case 'host':
+        case "host":
           currentData = await storage.getHost(entityId);
           break;
-        case 'project':
+        case "project":
           currentData = await storage.getProject(entityId);
           break;
-        case 'contact':
+        case "contact":
           currentData = await storage.getContact(entityId);
           break;
         default:
@@ -135,16 +141,16 @@ export class VersionControl {
       // Restore the data
       const restoredData = versionToRestore.data;
       switch (entityType) {
-        case 'sandwich_collection':
+        case "sandwich_collection":
           await storage.updateSandwichCollection(entityId, restoredData);
           break;
-        case 'host':
+        case "host":
           await storage.updateHost(entityId, restoredData);
           break;
-        case 'project':
+        case "project":
           await storage.updateProject(entityId, restoredData);
           break;
-        case 'contact':
+        case "contact":
           await storage.updateContact(entityId, restoredData);
           break;
       }
@@ -153,26 +159,26 @@ export class VersionControl {
       await this.createVersion(
         entityType,
         entityId,
-        'update',
+        "update",
         restoredData,
         currentData,
         userId,
-        { 
-          action: 'restore',
+        {
+          action: "restore",
           restoredFromVersion: version,
-          reason: `Restored from version ${version}`
+          reason: `Restored from version ${version}`,
         }
       );
 
       return true;
     } catch (error) {
-      console.error('Failed to restore version:', error);
+      console.error("Failed to restore version:", error);
       return false;
     }
   }
 
   static async compareVersions(
-    entityType: VersionedRecord['entityType'],
+    entityType: VersionedRecord["entityType"],
     entityId: number,
     version1: number,
     version2: number
@@ -185,7 +191,7 @@ export class VersionControl {
     const v2 = await this.getVersion(entityType, entityId, version2);
 
     if (!v1 || !v2) {
-      throw new Error('One or both versions not found');
+      throw new Error("One or both versions not found");
     }
 
     const added: Record<string, any> = {};
@@ -210,7 +216,9 @@ export class VersionControl {
     return { added, modified, removed };
   }
 
-  static async createChangeset(request: ChangesetRequest): Promise<{
+  static async createChangeset(
+    request: ChangesetRequest
+  ): Promise<{
     success: boolean;
     versionId?: string;
     error?: string;
@@ -219,16 +227,16 @@ export class VersionControl {
       // Get current data
       let currentData: any;
       switch (request.entityType) {
-        case 'sandwich_collection':
+        case "sandwich_collection":
           currentData = await storage.getSandwichCollection(request.entityId);
           break;
-        case 'host':
+        case "host":
           currentData = await storage.getHost(request.entityId);
           break;
-        case 'project':
+        case "project":
           currentData = await storage.getProject(request.entityId);
           break;
-        case 'contact':
+        case "contact":
           currentData = await storage.getContact(request.entityId);
           break;
         default:
@@ -236,7 +244,7 @@ export class VersionControl {
       }
 
       if (!currentData) {
-        throw new Error('Entity not found');
+        throw new Error("Entity not found");
       }
 
       // Apply changes
@@ -244,25 +252,25 @@ export class VersionControl {
 
       // Update the entity
       switch (request.entityType) {
-        case 'sandwich_collection':
+        case "sandwich_collection":
           await storage.updateSandwichCollection(request.entityId, updatedData);
           break;
-        case 'host':
+        case "host":
           await storage.updateHost(request.entityId, updatedData);
           break;
-        case 'project':
+        case "project":
           await storage.updateProject(request.entityId, updatedData);
           break;
-        case 'contact':
+        case "contact":
           await storage.updateContact(request.entityId, updatedData);
           break;
       }
 
       // Create version
       const version = await this.createVersion(
-        request.entityType as VersionedRecord['entityType'],
+        request.entityType as VersionedRecord["entityType"],
         request.entityId,
-        'update',
+        "update",
         updatedData,
         currentData,
         request.userId,
@@ -271,19 +279,18 @@ export class VersionControl {
 
       return {
         success: true,
-        versionId: version.id
+        versionId: version.id,
       };
-
     } catch (error) {
       return {
         success: false,
-        error: error.message
+        error: error.message,
       };
     }
   }
 
   static async getChangeStats(
-    entityType?: VersionedRecord['entityType'],
+    entityType?: VersionedRecord["entityType"],
     userId?: string,
     startDate?: Date,
     endDate?: Date
@@ -302,16 +309,16 @@ export class VersionControl {
 
     // Apply filters
     if (entityType) {
-      allVersions = allVersions.filter(v => v.entityType === entityType);
+      allVersions = allVersions.filter((v) => v.entityType === entityType);
     }
     if (userId) {
-      allVersions = allVersions.filter(v => v.userId === userId);
+      allVersions = allVersions.filter((v) => v.userId === userId);
     }
     if (startDate) {
-      allVersions = allVersions.filter(v => v.timestamp >= startDate);
+      allVersions = allVersions.filter((v) => v.timestamp >= startDate);
     }
     if (endDate) {
-      allVersions = allVersions.filter(v => v.timestamp <= endDate);
+      allVersions = allVersions.filter((v) => v.timestamp <= endDate);
     }
 
     // Calculate stats
@@ -321,7 +328,7 @@ export class VersionControl {
     }, {} as Record<string, number>);
 
     const changesByUser = allVersions.reduce((acc, v) => {
-      const user = v.userId || 'system';
+      const user = v.userId || "system";
       acc[user] = (acc[user] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
@@ -334,12 +341,12 @@ export class VersionControl {
       totalChanges: allVersions.length,
       changesByType,
       changesByUser,
-      recentActivity
+      recentActivity,
     };
   }
 
   static async exportVersionHistory(
-    entityType?: VersionedRecord['entityType'],
+    entityType?: VersionedRecord["entityType"],
     entityId?: number
   ): Promise<VersionedRecord[]> {
     if (entityType && entityId) {
@@ -348,11 +355,15 @@ export class VersionControl {
 
     let allVersions: VersionedRecord[] = [];
     for (const versions of this.versionHistory.values()) {
-      if (!entityType || versions.some(v => v.entityType === entityType)) {
-        allVersions.push(...versions.filter(v => !entityType || v.entityType === entityType));
+      if (!entityType || versions.some((v) => v.entityType === entityType)) {
+        allVersions.push(
+          ...versions.filter((v) => !entityType || v.entityType === entityType)
+        );
       }
     }
 
-    return allVersions.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+    return allVersions.sort(
+      (a, b) => b.timestamp.getTime() - a.timestamp.getTime()
+    );
   }
 }

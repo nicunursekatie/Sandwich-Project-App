@@ -1,7 +1,12 @@
 import { useState, useEffect } from "react";
 import { Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
@@ -19,16 +24,23 @@ interface MessageLikeButtonProps {
   className?: string;
 }
 
-export function MessageLikeButton({ messageId, className = "" }: MessageLikeButtonProps) {
+export function MessageLikeButton({
+  messageId,
+  className = "",
+}: MessageLikeButtonProps) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  
+
   // Convert messageId to number for API consistency
   const numericMessageId = Number(messageId);
-  
+
   // Debug logging
-  console.log("MessageLikeButton rendered:", { messageId, numericMessageId, user: user?.id });
-  
+  console.log("MessageLikeButton rendered:", {
+    messageId,
+    numericMessageId,
+    user: user?.id,
+  });
+
   // Fetch likes for this message
   const { data: likes = [], isLoading } = useQuery({
     queryKey: ["message-likes", numericMessageId],
@@ -36,7 +48,9 @@ export function MessageLikeButton({ messageId, className = "" }: MessageLikeButt
     staleTime: 30000, // 30 seconds
   });
 
-  const hasUserLiked = (likes || []).some((like: MessageLike) => like.userId === user?.id);
+  const hasUserLiked = (likes || []).some(
+    (like: MessageLike) => like.userId === user?.id
+  );
   const likeCount = likes.length;
 
   // Like/unlike mutation
@@ -50,7 +64,9 @@ export function MessageLikeButton({ messageId, className = "" }: MessageLikeButt
     },
     onSuccess: () => {
       // Invalidate and refetch likes
-      queryClient.invalidateQueries({ queryKey: ["message-likes", numericMessageId] });
+      queryClient.invalidateQueries({
+        queryKey: ["message-likes", numericMessageId],
+      });
     },
     onError: (error) => {
       console.error("Error toggling message like:", error);
@@ -71,9 +87,14 @@ export function MessageLikeButton({ messageId, className = "" }: MessageLikeButt
     } else if (likeCount === 2) {
       return `Liked by ${likes[0].userName} and ${likes[1].userName}`;
     } else {
-      const firstTwo = likes.slice(0, 2).map((like: MessageLike) => like.userName).join(", ");
+      const firstTwo = likes
+        .slice(0, 2)
+        .map((like: MessageLike) => like.userName)
+        .join(", ");
       const remaining = likeCount - 2;
-      return `Liked by ${firstTwo} and ${remaining} other${remaining > 1 ? 's' : ''}`;
+      return `Liked by ${firstTwo} and ${remaining} other${
+        remaining > 1 ? "s" : ""
+      }`;
     }
   };
 
@@ -98,13 +119,17 @@ export function MessageLikeButton({ messageId, className = "" }: MessageLikeButt
           >
             <Heart
               className={`w-4 h-4 mr-1 transition-colors ${
-                hasUserLiked 
-                  ? "text-red-500 fill-red-500" 
+                hasUserLiked
+                  ? "text-red-500 fill-red-500"
                   : "text-gray-400 hover:text-red-400"
               }`}
             />
             {likeCount > 0 && (
-              <span className={`text-xs ${hasUserLiked ? "text-red-500" : "text-gray-500"}`}>
+              <span
+                className={`text-xs ${
+                  hasUserLiked ? "text-red-500" : "text-gray-500"
+                }`}
+              >
                 {likeCount}
               </span>
             )}

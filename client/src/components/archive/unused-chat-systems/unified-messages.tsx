@@ -1,25 +1,32 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { 
-  MessageCircle, 
-  Plus, 
+import { useState, useEffect } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  MessageCircle,
+  Plus,
   Inbox,
   Send,
   ArrowLeft,
   Loader2,
   Reply,
-  User
-} from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
+  User,
+} from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
 
 interface Message {
   id: string;
@@ -46,17 +53,17 @@ interface User {
 export default function UnifiedMessagesPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [users, setUsers] = useState<User[]>([]);
-  const [activeTab, setActiveTab] = useState<'inbox' | 'sent'>('inbox');
+  const [activeTab, setActiveTab] = useState<"inbox" | "sent">("inbox");
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const [showCompose, setShowCompose] = useState(false);
   const [loading, setLoading] = useState(true);
-  
+
   // Compose form
-  const [recipientId, setRecipientId] = useState('');
-  const [subject, setSubject] = useState('');
-  const [body, setBody] = useState('');
+  const [recipientId, setRecipientId] = useState("");
+  const [subject, setSubject] = useState("");
+  const [body, setBody] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  
+
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -64,48 +71,55 @@ export default function UnifiedMessagesPage() {
   const fetchMessages = async () => {
     try {
       setLoading(true);
-      
+
       // Fetch both inbox and sent messages
       const [inboxResponse, sentResponse] = await Promise.all([
-        fetch('/api/messaging/inbox', {
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' }
+        fetch("/api/messaging/inbox", {
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
         }),
-        fetch('/api/messaging/sent', {
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' }
-        })
+        fetch("/api/messaging/sent", {
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+        }),
       ]);
-      
-      const inboxData = inboxResponse.ok ? await inboxResponse.json() : { messages: [] };
-      const sentData = sentResponse.ok ? await sentResponse.json() : { messages: [] };
-      
+
+      const inboxData = inboxResponse.ok
+        ? await inboxResponse.json()
+        : { messages: [] };
+      const sentData = sentResponse.ok
+        ? await sentResponse.json()
+        : { messages: [] };
+
       // Combine messages with proper recipient/sender info
       const combinedMessages = [
         ...(inboxData.messages || []).map((msg: any) => ({
           ...msg,
-          type: 'received',
+          type: "received",
           recipientId: (user as any)?.id,
-          recipientName: `${(user as any)?.firstName || ''} ${(user as any)?.lastName || ''}`.trim() || (user as any)?.email
+          recipientName:
+            `${(user as any)?.firstName || ""} ${(user as any)?.lastName ||
+              ""}`.trim() || (user as any)?.email,
         })),
         ...(sentData.messages || []).map((msg: any) => ({
           ...msg,
-          type: 'sent',
+          type: "sent",
           // Use actual recipient data from the message
-          recipientId: msg.recipientId || 'unknown',
-          recipientName: msg.recipientName || msg.recipient || 'Unknown Recipient'
-        }))
+          recipientId: msg.recipientId || "unknown",
+          recipientName:
+            msg.recipientName || msg.recipient || "Unknown Recipient",
+        })),
       ];
-      
-      console.log('Fetched messages:', {
+
+      console.log("Fetched messages:", {
         inbox: inboxData.messages?.length || 0,
         sent: sentData.messages?.length || 0,
-        total: combinedMessages.length
+        total: combinedMessages.length,
       });
-      
+
       setMessages(combinedMessages);
     } catch (error) {
-      console.error('Error fetching messages:', error);
+      console.error("Error fetching messages:", error);
       setMessages([]);
     } finally {
       setLoading(false);
@@ -115,19 +129,23 @@ export default function UnifiedMessagesPage() {
   // Fetch users for recipient selection
   const fetchUsers = async () => {
     try {
-      const response = await fetch('/api/users', {
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' }
+      const response = await fetch("/api/users", {
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
       });
-      
+
       if (response.ok) {
         const data = await response.json();
-        console.log('Fetched users:', data);
-        const activeUsers = Array.isArray(data) ? data : (data.users || []);
-        setUsers(activeUsers.filter((u: User) => u.isActive && u.id !== (user as any)?.id));
+        console.log("Fetched users:", data);
+        const activeUsers = Array.isArray(data) ? data : data.users || [];
+        setUsers(
+          activeUsers.filter(
+            (u: User) => u.isActive && u.id !== (user as any)?.id
+          )
+        );
       }
     } catch (error) {
-      console.error('Error fetching users:', error);
+      console.error("Error fetching users:", error);
     }
   };
 
@@ -137,10 +155,10 @@ export default function UnifiedMessagesPage() {
     if (!currentUserId) return [];
 
     switch (activeTab) {
-      case 'inbox':
-        return messages.filter(msg => msg.recipientId === currentUserId);
-      case 'sent':
-        return messages.filter(msg => msg.senderId === currentUserId);
+      case "inbox":
+        return messages.filter((msg) => msg.recipientId === currentUserId);
+      case "sent":
+        return messages.filter((msg) => msg.senderId === currentUserId);
       default:
         return messages;
     }
@@ -159,37 +177,37 @@ export default function UnifiedMessagesPage() {
 
     try {
       setSubmitting(true);
-      const response = await fetch('/api/messaging/send', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/messaging/send", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           recipientIds: [recipientId], // Convert to array format expected by API
           content: `Subject: ${subject}\n\n${body}`, // Combine subject and body
-          contextType: 'direct'
-        })
+          contextType: "direct",
+        }),
       });
 
       if (response.ok) {
         const result = await response.json();
-        console.log('Message sent:', result);
-        
+        console.log("Message sent:", result);
+
         toast({
           title: "Message Sent",
           description: "Your message has been sent successfully",
         });
 
         // Reset form and close dialog
-        setRecipientId('');
-        setSubject('');
-        setBody('');
+        setRecipientId("");
+        setSubject("");
+        setBody("");
         setShowCompose(false);
-        
+
         // Refresh messages
         await fetchMessages();
       } else {
         const errorData = await response.json();
-        console.error('Send failed:', errorData);
+        console.error("Send failed:", errorData);
         toast({
           title: "Send Failed",
           description: errorData.message || "Failed to send message",
@@ -197,7 +215,7 @@ export default function UnifiedMessagesPage() {
         });
       }
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error("Error sending message:", error);
       toast({
         title: "Error",
         description: "Failed to send message",
@@ -233,8 +251,8 @@ export default function UnifiedMessagesPage() {
     return (
       <div className="space-y-6">
         <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => setSelectedMessage(null)}
             className="gap-2"
           >
@@ -248,11 +266,16 @@ export default function UnifiedMessagesPage() {
           <CardHeader>
             <div className="flex items-start justify-between">
               <div>
-                <CardTitle className="text-lg">{selectedMessage.subject}</CardTitle>
+                <CardTitle className="text-lg">
+                  {selectedMessage.subject}
+                </CardTitle>
                 <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
                   <span>From: {selectedMessage.senderName}</span>
                   <span>To: {selectedMessage.recipientName}</span>
-                  <span>{formatDistanceToNow(new Date(selectedMessage.createdAt))} ago</span>
+                  <span>
+                    {formatDistanceToNow(new Date(selectedMessage.createdAt))}{" "}
+                    ago
+                  </span>
                 </div>
               </div>
             </div>
@@ -274,7 +297,7 @@ export default function UnifiedMessagesPage() {
           <MessageCircle className="h-6 w-6" />
           Direct Messages
         </h1>
-        
+
         <Dialog open={showCompose} onOpenChange={setShowCompose}>
           <DialogTrigger asChild>
             <Button className="gap-2">
@@ -289,7 +312,7 @@ export default function UnifiedMessagesPage() {
                 Send a direct message to another user
               </DialogDescription>
             </DialogHeader>
-            
+
             <div className="space-y-4">
               <div>
                 <Label htmlFor="recipient">Recipient</Label>
@@ -307,7 +330,7 @@ export default function UnifiedMessagesPage() {
                   ))}
                 </select>
               </div>
-              
+
               <div>
                 <Label htmlFor="subject">Subject</Label>
                 <Input
@@ -318,7 +341,7 @@ export default function UnifiedMessagesPage() {
                   className="mt-1"
                 />
               </div>
-              
+
               <div>
                 <Label htmlFor="body">Message</Label>
                 <Textarea
@@ -330,13 +353,13 @@ export default function UnifiedMessagesPage() {
                   className="mt-1"
                 />
               </div>
-              
+
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setShowCompose(false)}>
                   Cancel
                 </Button>
-                <Button 
-                  onClick={handleSendMessage} 
+                <Button
+                  onClick={handleSendMessage}
                   disabled={submitting}
                   className="gap-2"
                 >
@@ -356,20 +379,26 @@ export default function UnifiedMessagesPage() {
       {/* Tab Navigation */}
       <div className="flex gap-2 p-1 bg-muted rounded-lg w-fit">
         <Button
-          variant={activeTab === 'inbox' ? 'default' : 'ghost'}
-          onClick={() => setActiveTab('inbox')}
+          variant={activeTab === "inbox" ? "default" : "ghost"}
+          onClick={() => setActiveTab("inbox")}
           className="gap-2"
         >
           <Inbox className="h-4 w-4" />
-          Inbox ({messages.filter(msg => msg.recipientId === (user as any)?.id).length})
+          Inbox (
+          {
+            messages.filter((msg) => msg.recipientId === (user as any)?.id)
+              .length
+          }
+          )
         </Button>
         <Button
-          variant={activeTab === 'sent' ? 'default' : 'ghost'}
-          onClick={() => setActiveTab('sent')}
+          variant={activeTab === "sent" ? "default" : "ghost"}
+          onClick={() => setActiveTab("sent")}
           className="gap-2"
         >
           <Send className="h-4 w-4" />
-          Sent ({messages.filter(msg => msg.senderId === (user as any)?.id).length})
+          Sent (
+          {messages.filter((msg) => msg.senderId === (user as any)?.id).length})
         </Button>
       </div>
 
@@ -377,21 +406,23 @@ export default function UnifiedMessagesPage() {
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">
-            {activeTab === 'inbox' ? 'Received Messages' : 'Sent Messages'}
+            {activeTab === "inbox" ? "Received Messages" : "Sent Messages"}
           </CardTitle>
         </CardHeader>
         <CardContent>
           {filteredMessages.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <MessageCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>No {activeTab === 'inbox' ? 'received' : 'sent'} messages found</p>
+              <p>
+                No {activeTab === "inbox" ? "received" : "sent"} messages found
+              </p>
             </div>
           ) : (
             <ScrollArea className="h-[500px]">
               <div className="space-y-2">
                 {filteredMessages.map((message) => (
-                  <Card 
-                    key={message.id} 
+                  <Card
+                    key={message.id}
                     className="cursor-pointer hover:bg-accent transition-colors"
                     onClick={() => setSelectedMessage(message)}
                   >
@@ -401,19 +432,26 @@ export default function UnifiedMessagesPage() {
                           <div className="flex items-center gap-2">
                             <User className="h-4 w-4 text-muted-foreground" />
                             <span className="font-medium text-sm">
-                              {activeTab === 'inbox' ? message.senderName : message.recipientName}
+                              {activeTab === "inbox"
+                                ? message.senderName
+                                : message.recipientName}
                             </span>
                             <span className="text-xs text-muted-foreground">
-                              {formatDistanceToNow(new Date(message.createdAt))} ago
+                              {formatDistanceToNow(new Date(message.createdAt))}{" "}
+                              ago
                             </span>
                           </div>
-                          <h4 className="font-medium truncate mt-1">{message.subject}</h4>
+                          <h4 className="font-medium truncate mt-1">
+                            {message.subject}
+                          </h4>
                           <p className="text-sm text-muted-foreground truncate mt-1">
                             {message.body}
                           </p>
                         </div>
-                        {activeTab === 'inbox' && !message.isRead && (
-                          <Badge variant="secondary" className="ml-2">New</Badge>
+                        {activeTab === "inbox" && !message.isRead && (
+                          <Badge variant="secondary" className="ml-2">
+                            New
+                          </Badge>
                         )}
                       </div>
                     </CardContent>

@@ -41,27 +41,30 @@ function MessageNotifications({ user }: MessageNotificationsProps) {
   }
 
   // Query for unread message counts - only when authenticated
-  const { data: unreadCounts, refetch, error, isLoading } = useQuery<UnreadCounts>({
-    queryKey: ['/api/message-notifications/unread-counts'],
+  const { data: unreadCounts, refetch, error, isLoading } = useQuery<
+    UnreadCounts
+  >({
+    queryKey: ["/api/message-notifications/unread-counts"],
     enabled: !!user && isAuthenticated,
     refetchInterval: isAuthenticated ? 120000 : false, // Check every 2 minutes only when authenticated (reduced from 30 seconds)
   });
-
-
 
   // Listen for custom refresh events from chat system
   useEffect(() => {
     if (!user) return;
 
     const handleRefreshNotifications = () => {
-      console.log('Refreshing notification counts after chat read');
+      console.log("Refreshing notification counts after chat read");
       refetch();
     };
 
-    window.addEventListener('refreshNotifications', handleRefreshNotifications);
-    
+    window.addEventListener("refreshNotifications", handleRefreshNotifications);
+
     return () => {
-      window.removeEventListener('refreshNotifications', handleRefreshNotifications);
+      window.removeEventListener(
+        "refreshNotifications",
+        handleRefreshNotifications
+      );
     };
   }, [user, refetch]);
 
@@ -78,15 +81,15 @@ function MessageNotifications({ user }: MessageNotificationsProps) {
     try {
       // Fix WebSocket URL construction for different environments
       const getWebSocketUrl = () => {
-        if (typeof window === 'undefined') return '';
-        
-        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        if (typeof window === "undefined") return "";
+
+        const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
         const host = window.location.host;
-        
+
         // Handle different deployment scenarios
-        if (host.includes('replit.dev') || host.includes('replit.com')) {
+        if (host.includes("replit.dev") || host.includes("replit.com")) {
           return `${protocol}//${host}/notifications`;
-        } else if (host.includes('localhost') || host.startsWith('127.0.0.1')) {
+        } else if (host.includes("localhost") || host.startsWith("127.0.0.1")) {
           // For localhost development, always use port 5000 explicitly
           return `${protocol}//localhost:5000/notifications`;
         } else {
@@ -96,71 +99,75 @@ function MessageNotifications({ user }: MessageNotificationsProps) {
       };
 
       const wsUrl = getWebSocketUrl();
-      console.log('Connecting to WebSocket at:', wsUrl);
-      
+      console.log("Connecting to WebSocket at:", wsUrl);
+
       if (!wsUrl) {
-        console.warn('Unable to construct WebSocket URL');
+        console.warn("Unable to construct WebSocket URL");
         return;
       }
 
       const connectWebSocket = () => {
         try {
           socket = new WebSocket(wsUrl);
-        
-        socket.onopen = () => {
-          console.log('WebSocket connected successfully');
-          // Send identification message
-          if (socket && user) {
-            socket.send(JSON.stringify({
-              type: 'identify',
-              userId: user.id
-            }));
-          }
-        };
-        
-        socket.onmessage = (event) => {
-          try {
-            const data = JSON.parse(event.data);
-            console.log('WebSocket notification received:', data);
-            
-            // Refresh counts when notifications are received
-            if (data.type === 'notification') {
-              refetch();
-              setLastCheck(Date.now());
+
+          socket.onopen = () => {
+            console.log("WebSocket connected successfully");
+            // Send identification message
+            if (socket && user) {
+              socket.send(
+                JSON.stringify({
+                  type: "identify",
+                  userId: user.id,
+                })
+              );
             }
-          } catch (error) {
-            console.error('Error parsing WebSocket message:', error);
-          }
-        };
-        
-        socket.onclose = (event) => {
-          console.log('WebSocket connection closed:', event.code, event.reason);
-          socket = null;
-          
-          // Attempt to reconnect after a delay if not intentionally closed
-          if (event.code !== 1000) {
-            reconnectTimeoutId = setTimeout(connectWebSocket, 5000);
-          }
-        };
-        
-        socket.onerror = (error) => {
-          console.error('WebSocket error:', error);
-          // Prevent unhandled promise rejections
-          socket = null;
-        };
-        
-      } catch (error) {
-        console.error('Failed to create WebSocket connection:', error);
-        // Retry after delay
-        reconnectTimeoutId = setTimeout(connectWebSocket, 10000);
-      }
+          };
+
+          socket.onmessage = (event) => {
+            try {
+              const data = JSON.parse(event.data);
+              console.log("WebSocket notification received:", data);
+
+              // Refresh counts when notifications are received
+              if (data.type === "notification") {
+                refetch();
+                setLastCheck(Date.now());
+              }
+            } catch (error) {
+              console.error("Error parsing WebSocket message:", error);
+            }
+          };
+
+          socket.onclose = (event) => {
+            console.log(
+              "WebSocket connection closed:",
+              event.code,
+              event.reason
+            );
+            socket = null;
+
+            // Attempt to reconnect after a delay if not intentionally closed
+            if (event.code !== 1000) {
+              reconnectTimeoutId = setTimeout(connectWebSocket, 5000);
+            }
+          };
+
+          socket.onerror = (error) => {
+            console.error("WebSocket error:", error);
+            // Prevent unhandled promise rejections
+            socket = null;
+          };
+        } catch (error) {
+          console.error("Failed to create WebSocket connection:", error);
+          // Retry after delay
+          reconnectTimeoutId = setTimeout(connectWebSocket, 10000);
+        }
       };
 
       // Initialize WebSocket connection
       connectWebSocket();
-
     } catch (error) {
-      console.error('Failed to initialize WebSocket:', error);
+      console.error("Failed to initialize WebSocket:", error);
     }
 
     return () => {
@@ -168,14 +175,17 @@ function MessageNotifications({ user }: MessageNotificationsProps) {
         clearTimeout(reconnectTimeoutId);
       }
       if (socket) {
-        socket.close(1000, 'Component unmounting');
+        socket.close(1000, "Component unmounting");
       }
     };
   }, [user, refetch]);
 
   // Request notification permission on mount
   useEffect(() => {
-    if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
+    if (
+      typeof Notification !== "undefined" &&
+      Notification.permission === "default"
+    ) {
       Notification.requestPermission();
     }
   }, []);
@@ -190,15 +200,23 @@ function MessageNotifications({ user }: MessageNotificationsProps) {
   }
 
   const finalUnreadCounts = unreadCounts || {
-    general: 0, committee: 0, hosts: 0, drivers: 0, recipients: 0,
-    core_team: 0, direct: 0, groups: 0, kudos: 0, total: 0
+    general: 0,
+    committee: 0,
+    hosts: 0,
+    drivers: 0,
+    recipients: 0,
+    core_team: 0,
+    direct: 0,
+    groups: 0,
+    kudos: 0,
+    total: 0,
   };
 
   const totalUnread = finalUnreadCounts.total || 0;
 
   const handleMarkAllRead = async () => {
     try {
-      await apiRequest('POST', '/api/message-notifications/mark-all-read');
+      await apiRequest("POST", "/api/message-notifications/mark-all-read");
       refetch();
     } catch (error) {
       // Silently handle errors
@@ -207,78 +225,83 @@ function MessageNotifications({ user }: MessageNotificationsProps) {
 
   const getChatDisplayName = (committee: string) => {
     const names = {
-      general: 'General Chat',
-      committee: 'Committee Chat',
-      hosts: 'Host Chat',
-      drivers: 'Driver Chat',
-      recipients: 'Recipient Chat',
-      core_team: 'Core Team',
-      direct: 'Direct Messages',
-      groups: 'Group Messages',
-      kudos: 'Kudos Received'
+      general: "General Chat",
+      committee: "Committee Chat",
+      hosts: "Host Chat",
+      drivers: "Driver Chat",
+      recipients: "Recipient Chat",
+      core_team: "Core Team",
+      direct: "Direct Messages",
+      groups: "Group Messages",
+      kudos: "Kudos Received",
     };
     return names[committee as keyof typeof names] || committee;
   };
 
   const navigateToChat = (chatType: string) => {
     // Updated navigation - route all chat notifications to the current messaging system
-    if (chatType === 'direct' || chatType === 'groups') {
+    if (chatType === "direct" || chatType === "groups") {
       // Direct messages and groups go to messages inbox
       if ((window as any).dashboardSetActiveSection) {
-        (window as any).dashboardSetActiveSection('gmail-inbox');
+        (window as any).dashboardSetActiveSection("gmail-inbox");
       } else {
-        window.location.href = '/dashboard?section=gmail-inbox';
+        window.location.href = "/dashboard?section=gmail-inbox";
       }
-    } else if (chatType === 'kudos') {
+    } else if (chatType === "kudos") {
       // Kudos go to inbox where they can be viewed
       if ((window as any).dashboardSetActiveSection) {
-        (window as any).dashboardSetActiveSection('gmail-inbox');
+        (window as any).dashboardSetActiveSection("gmail-inbox");
       } else {
-        window.location.href = '/dashboard?section=gmail-inbox';
+        window.location.href = "/dashboard?section=gmail-inbox";
       }
-    } else if (chatType === 'general') {
+    } else if (chatType === "general") {
       // General chat goes to the Team Chat section (SocketChatHub)
       if ((window as any).dashboardSetActiveSection) {
-        (window as any).dashboardSetActiveSection('chat');
+        (window as any).dashboardSetActiveSection("chat");
       } else {
-        window.location.href = '/dashboard?section=chat';
+        window.location.href = "/dashboard?section=chat";
       }
     } else {
       // Other chat types (committee, hosts, drivers, recipients, core_team) go to their respective chat sections
       if ((window as any).dashboardSetActiveSection) {
-        (window as any).dashboardSetActiveSection('chat');
+        (window as any).dashboardSetActiveSection("chat");
       } else {
-        window.location.href = '/dashboard?section=chat';
+        window.location.href = "/dashboard?section=chat";
       }
     }
   };
 
-
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className="relative p-2 rounded-lg transition-colors hover:bg-teal-50">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="relative p-2 rounded-lg transition-colors hover:bg-teal-50"
+        >
           <Bell className="w-4 h-4 sm:w-5 sm:h-5 text-teal-600" />
           {totalUnread > 0 && (
-            <Badge 
-              variant="destructive" 
+            <Badge
+              variant="destructive"
               className="absolute -top-1 -right-1 h-4 w-4 sm:h-5 sm:w-5 flex items-center justify-center p-0 text-xs font-medium bg-red-500 hover:bg-red-600"
             >
-              {totalUnread > 99 ? '99+' : totalUnread}
+              {totalUnread > 99 ? "99+" : totalUnread}
             </Badge>
           )}
         </Button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end" className="w-72 sm:w-80 max-h-96 overflow-y-auto">
+      <DropdownMenuContent
+        align="end"
+        className="w-72 sm:w-80 max-h-96 overflow-y-auto"
+      >
         <DropdownMenuLabel className="font-semibold text-sm">
           <div className="flex items-center justify-between">
             <span>Notifications</span>
             {totalUnread > 0 && (
-              <Button 
-                variant="ghost" 
-                size="sm" 
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={handleMarkAllRead}
                 className="text-xs h-6 px-2 hover:bg-gray-100"
               >
@@ -296,18 +319,23 @@ function MessageNotifications({ user }: MessageNotificationsProps) {
         ) : (
           <div className="space-y-1">
             {Object.entries(finalUnreadCounts)
-              .filter(([key, count]) => key !== 'total' && count > 0)
+              .filter(([key, count]) => key !== "total" && count > 0)
               .map(([committee, count]) => (
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   key={committee}
                   className="flex items-center justify-between cursor-pointer hover:bg-gray-50 p-3 rounded-md"
                   onClick={() => navigateToChat(committee)}
                 >
                   <div className="flex items-center gap-2">
                     <MessageCircle className="h-4 w-4 text-blue-500" />
-                    <span className="text-sm font-medium">{getChatDisplayName(committee)}</span>
+                    <span className="text-sm font-medium">
+                      {getChatDisplayName(committee)}
+                    </span>
                   </div>
-                  <Badge variant="secondary" className="ml-2 bg-blue-100 text-blue-800">
+                  <Badge
+                    variant="secondary"
+                    className="ml-2 bg-blue-100 text-blue-800"
+                  >
                     {count}
                   </Badge>
                 </DropdownMenuItem>

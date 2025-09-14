@@ -1,72 +1,86 @@
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { DynamicErrorMessageDisplay, useDynamicError } from './dynamic-error-message';
-import { useErrorHandler } from '@/hooks/useErrorHandler';
-import { Badge } from '@/components/ui/badge';
+import React from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  DynamicErrorMessageDisplay,
+  useDynamicError,
+} from "./dynamic-error-message";
+import { useErrorHandler } from "@/hooks/useErrorHandler";
+import { Badge } from "@/components/ui/badge";
 
 export function ErrorDemoComponent() {
-  const { currentError, showError, clearError, handleErrorAction } = useDynamicError();
+  const {
+    currentError,
+    showError,
+    clearError,
+    handleErrorAction,
+  } = useDynamicError();
   const errorHandler = useErrorHandler();
 
   const demoErrors = [
     {
-      code: 'AUTH_EXPIRED',
-      label: 'Session Expired',
-      description: 'Simulate an expired authentication session'
+      code: "AUTH_EXPIRED",
+      label: "Session Expired",
+      description: "Simulate an expired authentication session",
     },
     {
-      code: 'PERMISSION_DENIED',
-      label: 'Access Denied',
-      description: 'Simulate insufficient permissions'
+      code: "PERMISSION_DENIED",
+      label: "Access Denied",
+      description: "Simulate insufficient permissions",
     },
     {
-      code: 'NETWORK_ERROR',
-      label: 'Connection Issue',
-      description: 'Simulate network connectivity problems'
+      code: "NETWORK_ERROR",
+      label: "Connection Issue",
+      description: "Simulate network connectivity problems",
     },
     {
-      code: 'VALIDATION_ERROR',
-      label: 'Form Validation',
-      description: 'Simulate form validation errors'
+      code: "VALIDATION_ERROR",
+      label: "Form Validation",
+      description: "Simulate form validation errors",
     },
     {
-      code: 'DATABASE_ERROR',
-      label: 'Save Failed',
-      description: 'Simulate database operation failure'
+      code: "DATABASE_ERROR",
+      label: "Save Failed",
+      description: "Simulate database operation failure",
     },
     {
-      code: 'FILE_UPLOAD_ERROR',
-      label: 'Upload Failed',
-      description: 'Simulate file upload problems'
+      code: "FILE_UPLOAD_ERROR",
+      label: "Upload Failed",
+      description: "Simulate file upload problems",
     },
     {
-      code: 'DATA_LOADING_ERROR',
-      label: 'Loading Failed',
-      description: 'Simulate data loading issues'
+      code: "DATA_LOADING_ERROR",
+      label: "Loading Failed",
+      description: "Simulate data loading issues",
     },
     {
-      code: 'EXTERNAL_SERVICE_ERROR',
-      label: 'Service Down',
-      description: 'Simulate external service unavailability'
-    }
+      code: "EXTERNAL_SERVICE_ERROR",
+      label: "Service Down",
+      description: "Simulate external service unavailability",
+    },
   ];
 
   const triggerError = (errorCode: string) => {
     const context = {
-      userRole: 'core_team',
-      currentPage: '/error-demo',
-      attemptedAction: 'demo error trigger',
-      userId: 'demo-user'
+      userRole: "core_team",
+      currentPage: "/error-demo",
+      attemptedAction: "demo error trigger",
+      userId: "demo-user",
     };
-    
+
     showError(errorCode, context);
   };
 
   const triggerRealNetworkError = async () => {
     try {
       // Try to fetch from a non-existent endpoint
-      await fetch('/api/non-existent-endpoint');
+      await fetch("/api/non-existent-endpoint");
     } catch (error) {
       errorHandler.handleNetworkError(error as Error);
     }
@@ -75,12 +89,12 @@ export function ErrorDemoComponent() {
   const triggerFormError = () => {
     // Simulate a form error with validation data
     const mockFormData = {
-      email: 'invalid-email',
-      password: '',
-      confirmPassword: 'different'
+      email: "invalid-email",
+      password: "",
+      confirmPassword: "different",
     };
-    
-    errorHandler.handleFormError('VALIDATION_ERROR', mockFormData);
+
+    errorHandler.handleFormError("VALIDATION_ERROR", mockFormData);
   };
 
   return (
@@ -89,11 +103,14 @@ export function ErrorDemoComponent() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             🚨 Dynamic Error Message System
-            <Badge variant="outline" className="text-xs">Demo</Badge>
+            <Badge variant="outline" className="text-xs">
+              Demo
+            </Badge>
           </CardTitle>
           <CardDescription>
-            Test the new dynamic error handling system with contextual recovery suggestions.
-            This system provides user-friendly error messages with actionable recovery steps.
+            Test the new dynamic error handling system with contextual recovery
+            suggestions. This system provides user-friendly error messages with
+            actionable recovery steps.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -107,13 +124,17 @@ export function ErrorDemoComponent() {
                 className="flex flex-col h-auto p-3 text-left"
               >
                 <span className="font-medium text-sm">{error.label}</span>
-                <span className="text-xs text-gray-500 mt-1">{error.description}</span>
+                <span className="text-xs text-gray-500 mt-1">
+                  {error.description}
+                </span>
               </Button>
             ))}
           </div>
-          
+
           <div className="mt-4 pt-4 border-t">
-            <h4 className="font-medium text-sm mb-3">Advanced Error Handling:</h4>
+            <h4 className="font-medium text-sm mb-3">
+              Advanced Error Handling:
+            </h4>
             <div className="flex flex-wrap gap-2">
               <Button
                 variant="destructive"
@@ -122,18 +143,14 @@ export function ErrorDemoComponent() {
               >
                 Real Network Error
               </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={triggerFormError}
-              >
+              <Button variant="secondary" size="sm" onClick={triggerFormError}>
                 Form Validation Error
               </Button>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  throw new Error('Uncaught JavaScript Error for Testing');
+                  throw new Error("Uncaught JavaScript Error for Testing");
                 }}
               >
                 JavaScript Error
@@ -160,14 +177,16 @@ export function ErrorDemoComponent() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <h4 className="font-medium text-sm mb-2">🎯 Smart Error Detection</h4>
+              <h4 className="font-medium text-sm mb-2">
+                🎯 Smart Error Detection
+              </h4>
               <ul className="text-sm text-gray-600 space-y-1">
                 <li>• Automatically categorizes error types</li>
                 <li>• Provides context-aware messages</li>
                 <li>• Suggests specific recovery actions</li>
               </ul>
             </div>
-            
+
             <div>
               <h4 className="font-medium text-sm mb-2">🔧 Recovery Actions</h4>
               <ul className="text-sm text-gray-600 space-y-1">
@@ -176,7 +195,7 @@ export function ErrorDemoComponent() {
                 <li>• Smart navigation suggestions</li>
               </ul>
             </div>
-            
+
             <div>
               <h4 className="font-medium text-sm mb-2">📊 Error Analytics</h4>
               <ul className="text-sm text-gray-600 space-y-1">
@@ -185,7 +204,7 @@ export function ErrorDemoComponent() {
                 <li>• Helps improve user experience</li>
               </ul>
             </div>
-            
+
             <div>
               <h4 className="font-medium text-sm mb-2">💡 Prevention Tips</h4>
               <ul className="text-sm text-gray-600 space-y-1">

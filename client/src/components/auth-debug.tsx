@@ -1,5 +1,11 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -38,11 +44,11 @@ export default function AuthDebug() {
   const fetchDebugInfo = async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const [sessionResponse, statusResponse] = await Promise.all([
-        fetch('/api/debug/session'),
-        fetch('/api/debug/auth-status')
+        fetch("/api/debug/session"),
+        fetch("/api/debug/auth-status"),
       ]);
 
       if (sessionResponse.ok) {
@@ -55,8 +61,8 @@ export default function AuthDebug() {
         setAuthStatus(statusData);
       }
     } catch (err) {
-      setError('Failed to fetch debug information');
-      console.error('Debug fetch error:', err);
+      setError("Failed to fetch debug information");
+      console.error("Debug fetch error:", err);
     } finally {
       setLoading(false);
     }
@@ -74,7 +80,11 @@ export default function AuthDebug() {
     );
   };
 
-  const getStatusBadge = (status: boolean, trueText: string, falseText: string) => {
+  const getStatusBadge = (
+    status: boolean,
+    trueText: string,
+    falseText: string
+  ) => {
     return (
       <Badge variant={status ? "default" : "destructive"}>
         {status ? trueText : falseText}
@@ -97,7 +107,9 @@ export default function AuthDebug() {
         <CardContent>
           <div className="flex gap-2 mb-4">
             <Button onClick={fetchDebugInfo} disabled={loading}>
-              <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+              <RefreshCw
+                className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`}
+              />
               Refresh Debug Info
             </Button>
           </div>
@@ -113,7 +125,9 @@ export default function AuthDebug() {
             <div className="grid md:grid-cols-2 gap-6">
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Authentication Status</CardTitle>
+                  <CardTitle className="text-lg">
+                    Authentication Status
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="flex items-center justify-between">
@@ -123,7 +137,7 @@ export default function AuthDebug() {
                       {getStatusBadge(authStatus.isAuthenticated, "Yes", "No")}
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center justify-between">
                     <span>Session Exists:</span>
                     <div className="flex items-center gap-2">
@@ -131,7 +145,7 @@ export default function AuthDebug() {
                       {getStatusBadge(authStatus.sessionExists, "Yes", "No")}
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center justify-between">
                     <span>User in Session:</span>
                     <div className="flex items-center gap-2">
@@ -139,12 +153,18 @@ export default function AuthDebug() {
                       {getStatusBadge(authStatus.userInSession, "Yes", "No")}
                     </div>
                   </div>
-                  
+
                   {authStatus.userEmail && (
                     <div className="pt-2 border-t">
-                      <div className="text-sm text-gray-600">User: {authStatus.userEmail}</div>
-                      <div className="text-sm text-gray-600">Role: {authStatus.userRole}</div>
-                      <div className="text-sm text-gray-600">ID: {authStatus.userId}</div>
+                      <div className="text-sm text-gray-600">
+                        User: {authStatus.userEmail}
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        Role: {authStatus.userRole}
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        ID: {authStatus.userId}
+                      </div>
                     </div>
                   )}
                 </CardContent>
@@ -158,19 +178,28 @@ export default function AuthDebug() {
                   <CardContent className="space-y-3">
                     <div className="flex items-center justify-between">
                       <span>Session Store:</span>
-                      {getStatusBadge(debugInfo.sessionStore, "PostgreSQL", "None")}
+                      {getStatusBadge(
+                        debugInfo.sessionStore,
+                        "PostgreSQL",
+                        "None"
+                      )}
                     </div>
-                    
+
                     <div className="flex items-center justify-between">
                       <span>Environment:</span>
                       <Badge variant="outline">{debugInfo.environment}</Badge>
                     </div>
-                    
+
                     <div className="text-sm space-y-1">
-                      <div><strong>Session ID:</strong> {debugInfo.sessionId}</div>
-                      <div><strong>Timestamp:</strong> {new Date(debugInfo.timestamp).toLocaleString()}</div>
+                      <div>
+                        <strong>Session ID:</strong> {debugInfo.sessionId}
+                      </div>
+                      <div>
+                        <strong>Timestamp:</strong>{" "}
+                        {new Date(debugInfo.timestamp).toLocaleString()}
+                      </div>
                     </div>
-                    
+
                     {debugInfo.cookies && (
                       <div className="pt-2 border-t">
                         <div className="text-sm">
@@ -191,9 +220,13 @@ export default function AuthDebug() {
             <Alert className="mt-4">
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription>
-                User is not authenticated. Try logging in again or check if cookies are being blocked.
+                User is not authenticated. Try logging in again or check if
+                cookies are being blocked.
                 <div className="mt-2">
-                  <Button size="sm" onClick={() => window.location.href = "/api/login"}>
+                  <Button
+                    size="sm"
+                    onClick={() => (window.location.href = "/api/login")}
+                  >
                     Go to Login Page
                   </Button>
                 </div>
