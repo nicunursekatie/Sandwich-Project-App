@@ -173,10 +173,11 @@ export function createErrorHandler(moduleId: string) {
 }
 
 /**
- * CORS configuration for development
+ * DEPRECATED: Legacy CORS configuration - use centralized config instead
+ * @deprecated Use getExpressCorsConfig() from './config/cors' instead
  */
 export const corsConfig = {
-  origin: true, // Allow all origins in development
+  origin: false, // Disabled - use centralized config
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],

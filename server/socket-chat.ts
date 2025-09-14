@@ -5,6 +5,7 @@ import { EmailNotificationService } from './services/email-notification-service'
 import { db } from './db';
 import { users } from '@shared/schema';
 import { eq } from 'drizzle-orm';
+import { getSocketCorsConfig } from './config/cors';
 
 interface ChatMessage {
   id: string;
@@ -25,17 +26,13 @@ interface ConnectedUser {
 
 export function setupSocketChat(httpServer: HttpServer) {
   const io = new SocketServer(httpServer, {
-    cors: {
-      origin: '*',
-      methods: ['GET', 'POST'],
-      credentials: true,
-    },
+    cors: getSocketCorsConfig(),
     path: '/socket.io/',
     transports: ['websocket', 'polling'],
     allowEIO3: true,
   });
 
-  console.log('✓ Socket.IO server initialized on /socket.io/');
+  console.log('✓ Socket.IO server initialized on /socket.io/ with secure CORS');
 
   // Store active users
   const activeUsers = new Map<string, ConnectedUser>();

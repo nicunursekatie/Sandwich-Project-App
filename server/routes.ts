@@ -7,6 +7,7 @@ import { storage } from './storage-wrapper';
 import { createActivityLogger } from './middleware/activity-logger';
 import createMainRoutes from './routes/index';
 import { requirePermission } from './middleware/auth';
+import { createCorsMiddleware, logCorsConfig } from './config/cors';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Use database-backed session store for deployment persistence
@@ -18,54 +19,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     tableName: 'sessions',
   });
 
-  // Add CORS middleware before session middleware
-  app.use((req, res, next) => {
-    const origin = req.headers.origin;
-
-    // Secure CORS handling - no wildcard with credentials
-    const allowedOrigins = ['https://localhost:5000', 'https://127.0.0.1:5000'];
-
-    // Add Replit dev origins dynamically
-    if (origin && origin.includes('.replit.dev')) {
-      allowedOrigins.push(origin);
-    }
-
-    if (process.env.NODE_ENV === 'development') {
-      // In development, allow specific dev origins only
-      if (
-        origin &&
-        (allowedOrigins.includes(origin) ||
-          origin.includes('localhost') ||
-          origin.includes('127.0.0.1'))
-      ) {
-        res.header('Access-Control-Allow-Origin', origin);
-      } else if (!origin) {
-        // Allow same-origin requests (no origin header)
-        res.header('Access-Control-Allow-Origin', 'null');
-      }
-    } else {
-      // In production, only allow known secure origins
-      if (origin && allowedOrigins.includes(origin)) {
-        res.header('Access-Control-Allow-Origin', origin);
-      }
-    }
-
-    res.header('Access-Control-Allow-Credentials', 'true');
-    res.header(
-      'Access-Control-Allow-Methods',
-      'GET,PUT,POST,DELETE,OPTIONS,PATCH'
-    );
-    res.header(
-      'Access-Control-Allow-Headers',
-      'Origin,X-Requested-With,Content-Type,Accept,Authorization,Cache-Control,Pragma'
-    );
-
-    if (req.method === 'OPTIONS') {
-      res.sendStatus(200);
-    } else {
-      next();
-    }
-  });
+  // Add secure CORS middleware before session middleware
+  logCorsConfig(); // Log configuration for debugging
+  app.use(createCorsMiddleware());
 
   // Add session middleware with enhanced security
   app.use(

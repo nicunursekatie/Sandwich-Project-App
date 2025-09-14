@@ -284,9 +284,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.header('Access-Control-Allow-Origin', origin);
         console.log(`CORS: Allowing origin: ${origin}`);
       } else {
-        // For development, allow all origins as fallback
-        res.header('Access-Control-Allow-Origin', '*');
-        console.log('CORS: Allowing all origins (development fallback)');
+        // SECURITY FIX: Even in development, avoid wildcards when possible
+        console.log('CORS: Using restricted development fallback');
+        // Only allow if no origin header (same-origin requests)
+        if (!origin) {
+          res.header('Access-Control-Allow-Origin', 'null');
+        }
       }
     } else {
       // In production, be more restrictive
@@ -294,8 +297,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.header('Access-Control-Allow-Origin', origin);
         console.log(`CORS: Allowing origin: ${origin}`);
       } else {
-        res.header('Access-Control-Allow-Origin', '*');
-        console.log('CORS: Allowing all origins (production fallback)');
+        // SECURITY FIX: Never use wildcard in production
+        console.log('CORS: Origin not allowed in production');
+        // Don't set CORS headers for unauthorized origins
       }
     }
     
