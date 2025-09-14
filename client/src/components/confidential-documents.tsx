@@ -393,7 +393,7 @@ export function ConfidentialDocuments() {
                             </button>
                           </p>
                           <p className="text-xs text-gray-500 mt-1">
-                            PDF, DOC, DOCX, XLS, XLSX (max 10MB)
+                            PDF, DOC, DOCX, XLS, XLSX (max 100MB)
                           </p>
                         </div>
                       )}
