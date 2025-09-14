@@ -2835,6 +2835,43 @@ export class MemStorage implements IStorage {
   async deleteEventReminder(id: number): Promise<boolean> {
     return this.eventReminders.delete(id);
   }
+
+  // Confidential Document Methods (fallback implementations for memory storage)
+  async createConfidentialDocument(data: InsertConfidentialDocument): Promise<ConfidentialDocument> {
+    // For memory storage, create a minimal implementation
+    const id = Date.now(); // Simple ID generation
+    const now = new Date();
+    const document: ConfidentialDocument = {
+      id,
+      filename: data.filename,
+      originalFilename: data.originalFilename,
+      mimeType: data.mimeType,
+      fileSize: data.fileSize,
+      allowedEmails: data.allowedEmails,
+      uploadedBy: data.uploadedBy,
+      uploadedAt: now,
+      ...data,
+    };
+    return document;
+  }
+
+  async getConfidentialDocumentsForUser(userEmail: string): Promise<ConfidentialDocument[]> {
+    // For memory storage fallback, return empty array
+    // This prevents the "method not found" error
+    return [];
+  }
+
+  async getConfidentialDocumentById(id: number, userEmail: string): Promise<ConfidentialDocument | null> {
+    // For memory storage fallback, return null
+    // This prevents the "method not found" error
+    return null;
+  }
+
+  async deleteConfidentialDocument(id: number, userEmail: string): Promise<boolean> {
+    // For memory storage fallback, return false (not found)
+    // This prevents the "method not found" error
+    return false;
+  }
 }
 
 // GoogleSheetsStorage removed completely to prevent conflicts with meeting management system
