@@ -310,7 +310,7 @@ async function startServer() {
           const { startBackgroundSync } = await import(
             './background-sync-service'
           );
-          startBackgroundSync(storage);
+          startBackgroundSync(storage as any); // TODO: Fix storage interface types
           console.log('✓ Background Google Sheets sync service started');
 
           // Routes already registered during server startup

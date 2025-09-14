@@ -1,6 +1,11 @@
 import type { IStorage } from './storage';
 import { GoogleSheetsSyncService } from './google-sheets-sync';
 import { getEventRequestsGoogleSheetsService } from './google-sheets-event-requests-sync';
+import { db } from './db.js';
+import { sql } from 'drizzle-orm';
+import { createServiceLogger } from './utils/logger.js';
+
+const syncLogger = createServiceLogger('background-sync');
 
 export class BackgroundSyncService {
   private syncInterval: NodeJS.Timeout | null = null;
@@ -48,20 +53,67 @@ export class BackgroundSyncService {
 
   /**
    * Perform sync for both projects and event requests
+   * Uses database coordination to ensure only one instance syncs at a time
    */
   private async performSync() {
-    console.log('📊 Starting automated background sync...');
+    const SYNC_LOCK_KEY = 1001; // Advisory lock key for Google Sheets sync
+    const startTime = Date.now();
 
     try {
-      // Sync Projects from Google Sheets
-      await this.syncProjects();
+      // Try to acquire the advisory lock (non-blocking)
+      const lockResult = await db.execute(
+        sql`SELECT pg_try_advisory_lock(${SYNC_LOCK_KEY}) as acquired`
+      );
 
-      // Sync Event Requests from Google Sheets
-      await this.syncEventRequests();
+      const acquired = lockResult.rows?.[0]?.acquired;
 
-      console.log('✅ Background sync completed successfully');
-    } catch (error) {
-      console.error('❌ Background sync failed:', error);
+      if (!acquired) {
+        syncLogger.debug('Background sync skipped - another instance is running it', {
+          lockKey: SYNC_LOCK_KEY
+        });
+        return;
+      }
+
+      syncLogger.info('Background sync acquired lock - starting execution', {
+        lockKey: SYNC_LOCK_KEY
+      });
+      console.log('📊 Starting automated background sync...');
+
+      try {
+        // Sync Projects from Google Sheets
+        await this.syncProjects();
+
+        // Sync Event Requests from Google Sheets
+        await this.syncEventRequests();
+
+        const duration = Date.now() - startTime;
+        syncLogger.info('Background sync completed successfully', {
+          lockKey: SYNC_LOCK_KEY,
+          duration: `${duration}ms`
+        });
+        console.log('✅ Background sync completed successfully');
+
+      } catch (syncError) {
+        const duration = Date.now() - startTime;
+        syncLogger.error('Background sync failed during execution', {
+          lockKey: SYNC_LOCK_KEY,
+          duration: `${duration}ms`,
+          error: syncError
+        });
+        console.error('❌ Background sync failed:', syncError);
+
+      } finally {
+        // Always release the lock when done
+        await db.execute(sql`SELECT pg_advisory_unlock(${SYNC_LOCK_KEY})`);
+        syncLogger.debug('Released lock for background sync', { lockKey: SYNC_LOCK_KEY });
+      }
+
+    } catch (coordinationError) {
+      syncLogger.error('Background sync coordination failed', {
+        lockKey: SYNC_LOCK_KEY,
+        error: coordinationError
+      });
+      console.error('❌ Background sync coordination failed:', coordinationError);
     }
   }
 
