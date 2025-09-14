@@ -315,7 +315,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     session({
       store: sessionStore,
       secret: process.env.SESSION_SECRET || "temp-secret-key-for-development",
-      resave: true, // Force session save on every request to prevent data loss
+      resave: false, // Only save session when modified - prevents unnecessary DB writes
       saveUninitialized: false,
       cookie: {
         secure: false, // Should be true in production with HTTPS, false for development
