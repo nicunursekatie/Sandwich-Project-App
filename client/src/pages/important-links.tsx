@@ -151,32 +151,22 @@ export default function ImportantLinks() {
                   </Button>
                 </div>
 
-                {/* Embedded Calculator */}
-                <div className="border rounded-lg overflow-hidden flex-1 min-h-[800px] bg-gray-50 relative">
-                  <iframe
-                    src={inventoryCalculatorUrl}
-                    className="w-full h-full border-0 relative z-10"
-                    title="Inventory Calculator"
-                    loading="lazy"
-                    sandbox="allow-scripts allow-same-origin allow-forms allow-top-navigation"
-                    referrerPolicy="no-referrer-when-downgrade"
-                    onLoad={() => {
-                      // Hide loading indicator when iframe loads
-                      const loader = document.getElementById('calculator-loader');
-                      if (loader) loader.style.display = 'none';
-                    }}
-                    onError={() => {
-                      console.log('Calculator iframe failed to load');
-                    }}
-                  />
-                  <div 
-                    id="calculator-loader"
-                    className="absolute inset-0 flex items-center justify-center text-gray-500 pointer-events-none z-0"
-                  >
-                    <div className="text-center p-8">
-                      <Calculator className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                      <p className="text-lg font-medium mb-2">Calculator Loading...</p>
-                      <p className="text-sm">If the calculator doesn't load, use the "Open Calculator" button above.</p>
+                {/* Calculator Notice */}
+                <div className="border rounded-lg overflow-hidden flex-1 min-h-[400px] bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
+                  <div className="text-center p-8 max-w-md mx-auto">
+                    <Calculator className="w-16 h-16 mx-auto mb-6 text-[#236383]" />
+                    <h3 className="text-xl font-bold text-gray-900 mb-4">Inventory Calculator</h3>
+                    <p className="text-gray-600 mb-6 leading-relaxed">
+                      The interactive calculator is optimized for direct access. Click the button above to open the full-featured calculator in a new window for the best experience.
+                    </p>
+                    <div className="flex gap-3 justify-center">
+                      <Button
+                        onClick={() => window.open(inventoryCalculatorUrl, '_blank')}
+                        className="bg-[#236383] hover:bg-[#007E8C] text-white"
+                      >
+                        <Calculator className="w-4 h-4 mr-2" />
+                        Open Calculator
+                      </Button>
                     </div>
                   </div>
                 </div>

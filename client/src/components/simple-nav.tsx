@@ -122,12 +122,12 @@ export default function SimpleNav({ onSectionChange, activeSection, isCollapsed 
     ...(hasPermission(user, PERMISSIONS.EVENT_REQUESTS_VIEW) ? [{ id: "event-reminders", label: "Event Reminders", icon: Clock, href: "event-reminders", group: "planning" }] : []),
     { id: "signup-genius", label: "SignUp Genius", icon: Users, href: "signup-genius", group: "planning" },
     { id: "wishlist", label: "Amazon Wishlist", icon: Gift, href: "wishlist", group: "planning" },
-    { id: "important-links", label: "Important Links", icon: Link, href: "important-links", group: "planning" },
     { id: "toolkit", label: "Toolkit", icon: FolderOpen, href: "toolkit", group: "planning" },
     
     // DOCUMENTATION
     ...(hasPermission(user, PERMISSIONS.DOCUMENTS_MANAGE) || hasPermission(user, PERMISSIONS.DOCUMENTS_VIEW) ? [{ id: "documents", label: "Document Management", icon: FileText, href: "documents", group: "documentation" }] : []),
     ...(hasPermission(user, PERMISSIONS.ADMIN_ACCESS) ? [{ id: "admin", label: "Important Documents", icon: FileText, href: "admin", group: "documentation" }] : []),
+    { id: "important-links", label: "Important Links", icon: Link, href: "important-links", group: "documentation" },
     ...(hasPermission(user, PERMISSIONS.DOCUMENTS_VIEW) ? [{ id: "governance", label: "Governance", icon: Scale, href: "governance", group: "documentation" }] : []),
     
     // ADMIN
