@@ -199,8 +199,35 @@ const getCategoryIcon = (category: string) => {
 
 // Project Tasks Component
 function ProjectTasksView({ projectId }: { projectId: number }) {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  
   const { data: tasks = [], isLoading } = useQuery<ProjectTask[]>({
     queryKey: [`/api/projects/${projectId}/tasks`],
+  });
+
+  // Mutation for marking tasks as complete
+  const markTaskCompleteMutation = useMutation({
+    mutationFn: async (taskId: number) => {
+      return await apiRequest('POST', `/api/tasks/${taskId}/complete`, {
+        notes: 'Task marked complete during agenda planning',
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/tasks`] });
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+      toast({
+        title: 'Task Completed',
+        description: 'Task has been marked as complete',
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: 'Failed to Complete Task',
+        description: error.message || 'Failed to mark task as complete',
+        variant: 'destructive',
+      });
+    },
   });
 
   if (isLoading) {
@@ -246,11 +273,29 @@ function ProjectTasksView({ projectId }: { projectId: number }) {
                   </div>
                 )}
               </div>
-              {task.dueDate && (
-                <div className="text-gray-500 text-xs">
-                  Due: {formatDateForDisplay(task.dueDate)}
-                </div>
-              )}
+              <div className="flex items-center gap-2">
+                {task.dueDate && (
+                  <div className="text-gray-500 text-xs">
+                    Due: {formatDateForDisplay(task.dueDate)}
+                  </div>
+                )}
+                {task.status !== 'completed' && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-6 px-2 text-xs"
+                    onClick={() => markTaskCompleteMutation.mutate(task.id)}
+                    disabled={markTaskCompleteMutation.isPending}
+                    data-testid={`button-complete-task-${task.id}`}
+                  >
+                    {markTaskCompleteMutation.isPending ? (
+                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-gray-400"></div>
+                    ) : (
+                      <Check className="w-3 h-3" />
+                    )}
+                  </Button>
+                )}
+              </div>
             </div>
           ))}
       </div>
