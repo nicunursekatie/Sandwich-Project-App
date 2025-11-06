@@ -1,4 +1,4 @@
-/**
+'''/**
  * Centralized CORS Configuration
  * 
  * Provides secure, environment-aware CORS configuration for both Express routes
@@ -86,6 +86,10 @@ export function isOriginAllowed(origin: string | undefined): boolean {
   // Allow any replit.dev domain (both development and production)
   // Replit uses dynamic .replit.dev domains for deployments
   if (origin.includes('.replit.dev')) {
+    return true;
+  }
+  
+  if (origin.includes('.cloudworkstations.dev')) {
     return true;
   }
 
@@ -187,3 +191,4 @@ export function logCorsConfig() {
   console.log('  Credentials:', true);
   console.log('  Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS');
 }
+''
