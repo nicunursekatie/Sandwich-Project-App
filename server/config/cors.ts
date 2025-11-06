@@ -1,4 +1,4 @@
-'''/**
+/**
  * Centralized CORS Configuration
  * 
  * Provides secure, environment-aware CORS configuration for both Express routes
@@ -191,4 +191,3 @@ export function logCorsConfig() {
   console.log('  Credentials:', true);
   console.log('  Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS');
 }
-''

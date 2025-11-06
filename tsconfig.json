@@ -24,6 +24,8 @@
     "paths": {
       "@/*": ["./client/src/*"],
       "@shared/*": ["./shared/*"]
-    }
+    },
+    "target": "esnext",
+    "downlevelIteration": true
   }
 }
