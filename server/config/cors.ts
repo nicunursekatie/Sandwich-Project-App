@@ -1,3 +1,5 @@
+import { Request, Response, NextFunction } from 'express';
+
 /**
  * Centralized CORS Configuration
  * 
@@ -148,8 +150,8 @@ export function getSocketCorsConfig() {
  * Express middleware for CORS handling
  */
 export function createCorsMiddleware() {
-  return (req: any, res: any, next: any) => {
-    const origin = req.headers.origin;
+  return (req: Request, res: Response, next: NextFunction) => {
+    const origin = req.headers.origin as string | undefined;
     const config = getExpressCorsConfig();
     
     // Handle CORS for allowed origins
