@@ -6,55 +6,81 @@ import { logger } from '@/lib/logger';
 export interface WebSocketConfig {
   path: string;
   protocol?: 'ws' | 'wss';
+  baseUrl?: string;
   maxRetries?: number;
   retryDelay?: number;
+}
+
+const sanitizePath = (path: string): string =>
+  path.startsWith('/') ? path : `/${path}`;
+
+function applyWebSocketProtocol(url: URL, forcedProtocol?: 'ws' | 'wss') {
+  if (forcedProtocol) {
+    url.protocol = forcedProtocol;
+    return;
+  }
+
+  if (url.protocol === 'http:') {
+    url.protocol = 'ws:';
+  } else if (url.protocol === 'https:') {
+    url.protocol = 'wss:';
+  } else if (url.protocol !== 'ws:' && url.protocol !== 'wss:') {
+    url.protocol = url.protocol === 'http:' ? 'ws:' : 'wss:';
+  }
 }
 
 export function getWebSocketUrl(config: WebSocketConfig): string {
   if (typeof window === 'undefined') return '';
 
-  const { path, protocol: forcedProtocol, maxRetries = 3, retryDelay = 5000 } = config;
+  const { path, protocol: forcedProtocol } = config;
+  const sanitizedPath = sanitizePath(path);
 
-  // Determine protocol
-  const protocol = forcedProtocol || (window.location.protocol === 'https:' ? 'wss:' : 'ws:');
+  const preferredBase =
+    config.baseUrl ??
+    import.meta.env.VITE_WS_BASE_URL ??
+    import.meta.env.VITE_API_BASE_URL ??
+    null;
 
-  // Get hostname and port from current location
-  const hostname = window.location.hostname;
-  const port = window.location.port;
-
-  logger.log('WebSocket URL Construction Debug:', {
-    hostname,
-    port,
-    protocol,
-    path,
-    fullHost: window.location.host,
-    origin: window.location.origin
-  });
-
-  let host;
-
-  // Handle different deployment scenarios
-  if (hostname.includes('replit.dev') || hostname.includes('replit.com') || hostname.includes('replit.app') || hostname.includes('spock.replit.dev')) {
-    // In Replit development, always use port 5000
-    host = `${hostname}:5000`;
-    logger.log('Detected Replit environment, using host with port:', host);
-  } else if (hostname === 'localhost' || hostname === '127.0.0.1') {
-    // Local development - force port 5000 if no port specified
-    const resolvedPort = port || '5000';
-    host = `${hostname}:${resolvedPort}`;
-    logger.log('Detected localhost environment, using host:', host);
-  } else if (hostname) {
-    // Other deployments - use hostname with port if available
-    host = port ? `${hostname}:${port}` : hostname;
-    logger.log('Detected other environment, using host:', host);
-  } else {
-    // Fallback
-    host = 'localhost:5000';
-    logger.warn('Unable to detect hostname, using fallback:', host);
+  if (preferredBase) {
+    try {
+      const normalizedBase = preferredBase.includes('://')
+        ? preferredBase
+        : `https://${preferredBase}`;
+      const base = new URL(normalizedBase);
+      applyWebSocketProtocol(base, forcedProtocol);
+      const resolved = new URL(sanitizedPath, base);
+      applyWebSocketProtocol(resolved, forcedProtocol);
+      logger.log('WebSocket URL (from preferred base):', resolved.toString());
+      return resolved.toString();
+    } catch (error) {
+      logger.error('Invalid WebSocket base URL provided', {
+        preferredBase,
+        error,
+      });
+    }
   }
 
-  const url = `${protocol}//${host}${path}`;
-  logger.log('Final WebSocket URL:', url);
+  const location = window.location;
+  const protocol =
+    forcedProtocol || (location.protocol === 'https:' ? 'wss:' : 'ws:');
+  const hostname = location.hostname || 'localhost';
+  const defaultPort =
+    location.port ||
+    (hostname === 'localhost' || hostname === '127.0.0.1' ? '5000' : '');
+  const portSegment = defaultPort ? `:${defaultPort}` : '';
+  const host = `${hostname}${portSegment}`;
+
+  logger.log('WebSocket URL Construction Debug (fallback):', {
+    hostname,
+    port: location.port,
+    protocol,
+    path: sanitizedPath,
+    fullHost: location.host,
+    origin: location.origin,
+  });
+
+  const url = `${protocol}//${host}${sanitizedPath}`;
+  logger.log('Final WebSocket URL (fallback):', url);
 
   return url;
 }

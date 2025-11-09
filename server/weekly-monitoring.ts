@@ -4,6 +4,7 @@ import { sandwichCollections, hosts, hostContacts } from '@shared/schema';
 import { eq, sql, and, gte, lte, like, or } from 'drizzle-orm';
 import { logger } from './utils/production-safe-logger';
 import { batchSendEmails } from './utils/batch-operations';
+import { getConfiguredAppBaseUrl, joinUrl } from './utils/url-config';
 
 if (!process.env.SENDGRID_API_KEY) {
   logger.error(
@@ -784,9 +785,8 @@ export async function sendEmailReminder(
       }
     }
 
-    const loginUrl =
-      appUrl ||
-      'https://sandwich-project-platform-final-katielong2316.replit.app/';
+    const baseAppUrl = appUrl || getConfiguredAppBaseUrl() || 'http://localhost:5000';
+    const loginUrl = joinUrl(baseAppUrl, '/');
     const previousWednesday = getPreviousWednesday();
     const weekLabel = previousWednesday.toLocaleDateString('en-US', {
       weekday: 'long',
@@ -954,9 +954,8 @@ async function sendDunwoodyTargetedEmail(
       };
     }
 
-    const loginUrl =
-      appUrl ||
-      'https://sandwich-project-platform-final-katielong2316.replit.app/';
+    const baseAppUrl = appUrl || getConfiguredAppBaseUrl() || 'http://localhost:5000';
+    const loginUrl = joinUrl(baseAppUrl, '/');
     const previousWednesday = getPreviousWednesday();
     const weekLabel = previousWednesday.toLocaleDateString('en-US', {
       weekday: 'long',

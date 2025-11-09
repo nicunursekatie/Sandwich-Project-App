@@ -1,10 +1,11 @@
-import { Router } from 'express';
+import { Router, type Request } from 'express';
 import { isAuthenticated } from '../auth';
 import { requirePermission } from '../middleware/auth';
 import { sendEmail } from '../sendgrid';
 import { storage } from '../storage';
 import { z } from 'zod';
 import { logger } from '../utils/production-safe-logger';
+import { getConfiguredAppBaseUrl, joinUrl } from '../utils/url-config';
 
 const router = Router();
 
@@ -12,6 +13,23 @@ const sendAnnouncementSchema = z.object({
   testMode: z.boolean().optional().default(false),
   testEmail: z.string().email().optional(),
 });
+
+function resolveAppUrl(req: Request): string {
+  const configured = getConfiguredAppBaseUrl();
+  if (configured) return configured;
+
+  const originHeader = Array.isArray(req.headers.origin)
+    ? req.headers.origin[0]
+    : req.headers.origin;
+  if (originHeader) return originHeader;
+
+  const host = req.get('host');
+  if (host) {
+    return `${req.protocol}://${host}`;
+  }
+
+  return 'http://localhost:5000';
+}
 
 /**
  * Send SMS capability announcement to all registered users
@@ -54,11 +72,8 @@ router.post(
         });
       }
 
-      const appUrl = process.env.REPLIT_DOMAIN
-        ? `https://${process.env.REPLIT_DOMAIN}`
-        : req.headers.origin || 'https://your-app.replit.app';
-
-      const smsOptInUrl = `${appUrl}/sms-opt-in`;
+      const appUrl = resolveAppUrl(req);
+      const smsOptInUrl = joinUrl(appUrl, '/sms-opt-in');
 
       // Email content
       const subject = testMode

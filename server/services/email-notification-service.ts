@@ -4,6 +4,7 @@ import { users } from '@shared/schema';
 import { eq, or, like, sql, inArray } from 'drizzle-orm';
 import { EMAIL_FOOTER_HTML } from '../utils/email-footer';
 import { logger } from '../utils/production-safe-logger';
+import { getConfiguredAppBaseUrl, joinUrl } from '../utils/url-config';
 
 // Initialize SendGrid
 if (!process.env.SENDGRID_API_KEY) {
@@ -26,6 +27,10 @@ export interface ChatMentionNotification {
 }
 
 export class EmailNotificationService {
+  private static getBaseUrl(): string {
+    return getConfiguredAppBaseUrl() ?? 'http://localhost:5000';
+  }
+
   /**
    * Detect @mentions in chat message content
    * Supports formats like @username, @"display name", @email@domain.com
@@ -477,14 +482,11 @@ To unsubscribe from these emails, please contact us at katie@thesandwichproject.
    * Generate chat room URL for the notification
    */
   private static getChatUrl(channel: string): string {
-    const baseUrl =
-      process.env.NODE_ENV === 'production'
-        ? 'https://sandwich-project-platform-katielong2316.replit.app'
-        : 'http://localhost:5000';
-
-    return `${baseUrl}/dashboard?section=chat&channel=${encodeURIComponent(
-      channel
-    )}`;
+    const baseUrl = this.getBaseUrl();
+    return joinUrl(
+      baseUrl,
+      `/dashboard?section=chat&channel=${encodeURIComponent(channel)}`
+    );
   }
 
   /**
@@ -616,24 +618,16 @@ To unsubscribe from these emails, please contact us at katie@thesandwichproject.
    * Generate event URL for the notification
    */
   private static getEventUrl(eventId: number): string {
-    const baseUrl =
-      process.env.NODE_ENV === 'production'
-        ? 'https://sandwich-project-platform-katielong2316.replit.app'
-        : 'http://localhost:5000';
-
-    return `${baseUrl}/event-requests-v2?eventId=${eventId}`;
+    const baseUrl = this.getBaseUrl();
+    return joinUrl(baseUrl, `/event-requests-v2?eventId=${eventId}`);
   }
 
   /**
    * Generate team board URL for the notification
    */
   private static getTeamBoardUrl(): string {
-    const baseUrl =
-      process.env.NODE_ENV === 'production'
-        ? 'https://sandwich-project-platform-katielong2316.replit.app'
-        : 'http://localhost:5000';
-
-    return `${baseUrl}/dashboard?section=team-board`;
+    const baseUrl = this.getBaseUrl();
+    return joinUrl(baseUrl, '/dashboard?section=team-board');
   }
 
   /**

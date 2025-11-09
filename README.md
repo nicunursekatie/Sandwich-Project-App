@@ -189,6 +189,11 @@ Copy `.env.example` to `.env` and configure:
 # Database
 DATABASE_URL=postgresql://... (or use SQLite locally)
 
+# Application URLs
+APP_BASE_URL=http://localhost:5000
+API_BASE_URL=http://localhost:5000
+ALLOWED_ORIGINS=http://localhost:5000,http://localhost:5173
+
 # Session
 SESSION_SECRET=your-secret-key-min-32-chars
 

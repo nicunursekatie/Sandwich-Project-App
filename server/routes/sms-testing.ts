@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, type Request } from 'express';
 import { isAuthenticated } from '../auth';
 import { requirePermission } from '../middleware/auth';
 import {
@@ -9,6 +9,7 @@ import {
 } from '../sms-service';
 import { z } from 'zod';
 import { logger } from '../utils/production-safe-logger';
+import { getConfiguredAppBaseUrl } from '../utils/url-config';
 
 const router = Router();
 
@@ -20,6 +21,23 @@ const testSMSSchema = z.object({
 const reminderSMSSchema = z.object({
   hostLocation: z.string().min(1, 'Host location is required'),
 });
+
+function resolveAppUrl(req: Request): string {
+  const configured = getConfiguredAppBaseUrl();
+  if (configured) return configured;
+
+  const originHeader = Array.isArray(req.headers.origin)
+    ? req.headers.origin[0]
+    : req.headers.origin;
+  if (originHeader) return originHeader;
+
+  const host = req.get('host');
+  if (host) {
+    return `${req.protocol}://${host}`;
+  }
+
+  return 'http://localhost:5000';
+}
 
 /**
  * Get SMS configuration status
@@ -95,9 +113,7 @@ router.post(
   async (req, res) => {
     try {
       const { phoneNumber, message } = testSMSSchema.parse(req.body);
-      const appUrl = process.env.REPLIT_DOMAIN
-        ? `https://${process.env.REPLIT_DOMAIN}`
-        : req.headers.origin || 'https://your-app.replit.app';
+      const appUrl = resolveAppUrl(req);
 
       logger.log(
         `🧪 Sending test SMS to ${phoneNumber} from user ${req.user?.email}`
@@ -140,9 +156,7 @@ router.post(
   async (req, res) => {
     try {
       const { hostLocation } = reminderSMSSchema.parse(req.body);
-      const appUrl = process.env.REPLIT_DOMAIN
-        ? `https://${process.env.REPLIT_DOMAIN}`
-        : req.headers.origin || 'https://your-app.replit.app';
+      const appUrl = resolveAppUrl(req);
 
       logger.log(
         `📱 Sending SMS reminder for location "${hostLocation}" from user ${req.user?.email}`
@@ -196,9 +210,7 @@ router.post(
         })
         .parse(req.body);
 
-      const appUrl = process.env.REPLIT_DOMAIN
-        ? `https://${process.env.REPLIT_DOMAIN}`
-        : req.headers.origin || 'https://your-app.replit.app';
+      const appUrl = resolveAppUrl(req);
 
       logger.log(
         `📱 Sending weekly SMS reminders for ${missingLocations.length} locations from user ${req.user?.email}`

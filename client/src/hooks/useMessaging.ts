@@ -60,29 +60,6 @@ export function useMessaging() {
     return u && typeof u === 'object' && 'id' in u && 'email' in u;
   };
 
-  // Fix WebSocket URL construction with better port handling
-  const getWebSocketUrl = () => {
-    if (typeof window === 'undefined') return '';
-
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const hostname = window.location.hostname;
-    const port = window.location.port;
-
-    // Handle different deployment scenarios
-    if (hostname.includes('replit.dev') || hostname.includes('replit.com') || hostname.includes('replit.app')) {
-      // Replit environment - use current host with port
-      const host = port ? `${hostname}:${port}` : hostname;
-      return `${protocol}//${host}/notifications`;
-    } else if (hostname === 'localhost' || hostname === '127.0.0.1') {
-      // Local development - always use port 5000 explicitly
-      return `${protocol}//${hostname}:5000/notifications`;
-    } else {
-      // Other deployments - use current host
-      const host = port ? `${hostname}:${port}` : hostname;
-      return `${protocol}//${host}/notifications`;
-    }
-  };
-
   // Get unread message counts
   const {
     data: unreadCounts = {
