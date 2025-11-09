@@ -5,6 +5,7 @@ import crypto from 'crypto';
 import sgMail from '@sendgrid/mail';
 import bcrypt from 'bcrypt';
 import { logger } from '../utils/production-safe-logger';
+import { getConfiguredAppBaseUrl, joinUrl } from '../utils/url-config';
 
 // Store password reset tokens temporarily (in production, use Redis or database)
 const resetTokens = new Map<
@@ -60,39 +61,19 @@ export function createPasswordResetRouter(deps: RouterDependencies) {
     // Send password reset email
     try {
       // Use the proper domain for reset links
-      let baseUrl;
+      const configuredBase =
+        process.env.RESET_BASE_URL || getConfiguredAppBaseUrl();
+      const baseUrl =
+        configuredBase ||
+        (() => {
+          const host = req.get('host');
+          if (host) {
+            return `${req.protocol || 'http'}://${host}`;
+          }
+          return 'http://localhost:5000';
+        })();
 
-      // Check if we have a custom RESET_BASE_URL environment variable (for production)
-      if (process.env.RESET_BASE_URL) {
-        baseUrl = process.env.RESET_BASE_URL;
-      }
-      // Check if we're in a deployed environment using REPLIT_DEPLOYMENT
-      else if (process.env.REPLIT_DEPLOYMENT) {
-        // Use the production domain from REPLIT_DOMAINS or construct the .replit.app domain
-        const domains = process.env.REPLIT_DOMAINS;
-        if (domains) {
-          baseUrl = `https://${domains.split(',')[0].trim()}`;
-        } else {
-          // Construct the standard Replit app domain
-          baseUrl = `https://${process.env.REPL_SLUG}.replit.app`;
-        }
-      }
-      // Development environment
-      else {
-        // For development, try to use a cleaner URL without port if possible
-        const host = req.get('host') || 'localhost:5000';
-        const protocol = req.protocol || 'http';
-
-        // If we have REPLIT_DOMAINS in development, use it (cleaner for emails)
-        if (process.env.REPLIT_DOMAINS) {
-          const devDomain = process.env.REPLIT_DOMAINS.split(',')[0].trim();
-          baseUrl = `https://${devDomain}`;
-        } else {
-          baseUrl = `${protocol}://${host}`;
-        }
-      }
-
-      const resetLink = `${baseUrl}/reset-password?token=${resetToken}`;
+      const resetLink = joinUrl(baseUrl, `/reset-password?token=${resetToken}`);
 
       // Use SendGrid directly for password reset emails
       if (!process.env.SENDGRID_API_KEY) {

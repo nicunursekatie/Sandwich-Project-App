@@ -19,47 +19,62 @@ export interface CorsConfig {
 /**
  * Get allowed origins based on environment and current domain
  */
+function toUrlList(value?: string): string[] {
+  if (!value) return [];
+
+  return value
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter((origin) => origin.length > 0);
+}
+
+function normalizeOrigin(origin: string): string | null {
+  try {
+    const url = new URL(origin);
+    return url.origin;
+  } catch {
+    // Allow bare domains (e.g., localhost:5173)
+    if (/^[\w.-]+(:\d+)?$/.test(origin)) {
+      const protocol = origin.startsWith('localhost') || origin.startsWith('127.') ? 'http' : 'https';
+      return `${protocol}://${origin}`;
+    }
+    return null;
+  }
+}
+
 function getAllowedOrigins(): string[] {
-  const origins: string[] = [];
-  
-  // Always allow the current Replit domain if available
-  if (process.env.REPL_SLUG && process.env.REPL_OWNER) {
-    const replitDomain = `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co`;
-    origins.push(replitDomain);
-    
-    // Also allow the .replit.dev variant
-    const replitDevDomain = `https://${process.env.REPL_SLUG}--${process.env.REPL_OWNER}.repl.co`;
-    origins.push(replitDevDomain);
-    
-    // CRITICAL: Also allow the .replit.app production domain format
-    const replitAppDomain = `https://${process.env.REPL_SLUG}-${process.env.REPL_OWNER}.replit.app`;
-    origins.push(replitAppDomain);
-  }
-  
-  // Development specific origins
-  if (process.env.NODE_ENV === 'development') {
-    origins.push(
+  const origins = new Set<string>();
+
+  const addOrigin = (origin?: string) => {
+    if (!origin) return;
+    const normalized = normalizeOrigin(origin);
+    if (normalized) {
+      origins.add(normalized);
+    }
+  };
+
+  // Allow explicitly configured application URLs
+  addOrigin(process.env.APP_BASE_URL);
+  addOrigin(process.env.API_BASE_URL);
+
+  // Additional explicit origins from environment variable (comma separated)
+  toUrlList(process.env.ALLOWED_ORIGINS).forEach(addOrigin);
+
+  // Development defaults for local usage
+  if (!origins.size || process.env.NODE_ENV === 'development') {
+    [
       'http://localhost:5000',
-      'https://localhost:5000',
       'http://127.0.0.1:5000',
-      'https://127.0.0.1:5000'
-    );
+      'http://localhost:5173',
+      'http://127.0.0.1:5173',
+      'https://localhost:5000',
+      'https://127.0.0.1:5000',
+      'https://localhost:5173',
+      'https://127.0.0.1:5173',
+    ].forEach(addOrigin);
   }
-  
-  // Add any additional production origins from environment variable
-  if (process.env.ALLOWED_ORIGINS) {
-    const additionalOrigins = process.env.ALLOWED_ORIGINS.split(',')
-      .map(origin => origin.trim())
-      .filter(origin => origin.length > 0);
-    origins.push(...additionalOrigins);
-  }
-  
-  // CRITICAL: Ensure the exact production URL is always allowed
-  if (process.env.NODE_ENV === 'production') {
-    origins.push('https://sandwich-project-platform-final-katielong2316.replit.app');
-  }
-  
-  return [...new Set(origins)]; // Remove duplicates
+
+  return Array.from(origins);
 }
 
 /**
@@ -85,16 +100,6 @@ export function isOriginAllowed(origin: string | undefined): boolean {
     }
   }
   
-  // Allow any replit.dev domain (both development and production)
-  // Replit uses dynamic .replit.dev domains for deployments
-  if (origin.includes('.replit.dev')) {
-    return true;
-  }
-  
-  if (origin.includes('.cloudworkstations.dev')) {
-    return true;
-  }
-
   // In production, only allow explicitly configured domains
   return false;
 }

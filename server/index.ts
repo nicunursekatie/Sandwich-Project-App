@@ -8,7 +8,7 @@ import { createServer } from 'http';
 import { WebSocketServer } from 'ws';
 import compression from 'compression';
 import { registerRoutes } from './routes';
-import { setupVite, serveStatic, log } from './vite';
+import { setupVite, log } from './vite';
 import { initializeDatabase } from './db-init';
 import { setupSocketChat } from './socket-chat';
 import { startBackgroundSync } from './background-sync-service';
@@ -24,6 +24,11 @@ import {
   sentryErrorHandler,
   initializeSentry,
 } from './monitoring';
+import {
+  getEffectiveAppBaseUrl,
+  getEffectiveApiBaseUrl,
+  joinUrl,
+} from './utils/url-config';
 
 const app = express();
 const serverLogger = createServiceLogger('server');
@@ -148,7 +153,11 @@ async function bootstrap() {
     serverLogger.info('🚀 Starting The Sandwich Project server...');
 
     // Use PORT from environment (Replit Autoscale sets PORT=80), fallback to 80 for production, 5000 for dev
-    const port = process.env.PORT || (process.env.NODE_ENV === 'production' ? 80 : 5000);
+    const portValue = process.env.PORT ?? process.env.APP_PORT ?? '5000';
+    const port = Number(portValue);
+    if (Number.isNaN(port)) {
+      throw new Error(`Invalid port specified: ${portValue}`);
+    }
     const host = '0.0.0.0';
 
     serverLogger.info(
@@ -173,39 +182,40 @@ async function bootstrap() {
     app.use('/attached_assets', express.static('attached_assets'));
 
     // Health check route - available before full initialization
-    app.get('/health', (_req: Request, res: Response) => {
+    app.get('/health', (req: Request, res: Response) => {
       res.status(200).json({
         status: 'healthy',
         timestamp: new Date().toISOString(),
         uptime: process.uptime(),
         environment: process.env.NODE_ENV || 'development',
+        appBaseUrl: getEffectiveAppBaseUrl(req),
+        apiBaseUrl: getEffectiveApiBaseUrl(req),
       });
     });
 
     // Health check route for deployment - API endpoint
-    app.get('/api/health', (_req: Request, res: Response) => {
+    app.get('/api/health', (req: Request, res: Response) => {
       res.status(200).json({
         status: 'healthy',
         timestamp: new Date().toISOString(),
         uptime: process.uptime(),
         environment: process.env.NODE_ENV || 'development',
         version: '1.0.0',
+        appBaseUrl: getEffectiveAppBaseUrl(req),
+        apiBaseUrl: getEffectiveApiBaseUrl(req),
       });
     });
 
     // Dynamic PWA manifest with correct production URL
-    app.get('/manifest.json', (_req: Request, res: Response) => {
-      const productionUrl = 'https://sandwich-project-platform-final-katielong2316.replit.app';
-      const devUrl = `https://${process.env.REPLIT_DEV_DOMAIN || 'localhost:5000'}`;
-      const isProduction = process.env.NODE_ENV === 'production';
-      const baseUrl = isProduction ? productionUrl : devUrl;
+    app.get('/manifest.json', (req: Request, res: Response) => {
+      const baseUrl = getEffectiveAppBaseUrl(req);
 
       res.setHeader('Content-Type', 'application/manifest+json');
       res.json({
         name: "The Sandwich Project",
         short_name: "TSP",
         description: "Comprehensive operations platform for The Sandwich Project nonprofit managing sandwich collections, volunteer coordination, and event planning",
-        start_url: baseUrl + "/",
+        start_url: joinUrl(baseUrl, '/'),
         display: "standalone",
         background_color: "#FFFFFF",
         theme_color: "#F7931E",
@@ -231,21 +241,21 @@ async function bootstrap() {
             name: "Collection Log",
             short_name: "Collections",
             description: "View and manage sandwich collections",
-            url: baseUrl + "/?section=collection-log",
+            url: joinUrl(baseUrl, '/?section=collection-log'),
             icons: [{ src: "/attached_assets/LOGOS/sandwich logo.png", sizes: "96x96" }]
           },
           {
             name: "Event Requests",
             short_name: "Events",
             description: "Manage event requests and planning",
-            url: baseUrl + "/?section=event-requests",
+            url: joinUrl(baseUrl, '/?section=event-requests'),
             icons: [{ src: "/attached_assets/LOGOS/TSP_transparent.png", sizes: "96x96" }]
           },
           {
             name: "Messages",
             short_name: "Messages",
             description: "View team messages and notifications",
-            url: baseUrl + "/?section=real-time-messages",
+            url: joinUrl(baseUrl, '/?section=real-time-messages'),
             icons: [{ src: "/attached_assets/LOGOS/TSP_transparent.png", sizes: "96x96" }]
           }
         ],
@@ -505,34 +515,6 @@ async function bootstrap() {
     // Handle shutdown signals properly
     process.on('SIGTERM', () => shutdown('SIGTERM'));
     process.on('SIGINT', () => shutdown('SIGINT'));
-
-    // PRODUCTION MODE: Aggressive exit prevention
-    if (process.env.NODE_ENV === 'production') {
-      logger.log({ message: '✅ Production exit prevention installed', level: 'info' });
-
-      // Strategy 1: Keep stdin open
-      process.stdin.resume();
-
-      // Strategy 2: Prevent beforeExit
-      process.on('beforeExit', (code) => {
-        logger.log({ message: `⚠ Prevented process exit with code ${code} - keeping alive`, level: 'warn' });
-        setTimeout(() => {}, 1000);
-      });
-
-      // Strategy 3: Override process.exit
-      const originalExit = process.exit;
-      process.exit = ((code?: number) => {
-        logger.log({ message: `⚠ Prevented process.exit(${code}) in production mode`, level: 'warn' });
-        return undefined as never;
-      }) as typeof process.exit;
-
-      // Production heartbeat
-      setInterval(() => {
-        logger.log({ message: `✅ Production heartbeat - uptime: ${Math.floor(process.uptime())}s`, level: 'info' });
-      }, 60000);
-
-      logger.log({ message: '✅ Production infinite keep-alive loop started', level: 'info' });
-    }
 
     logger.log({ message: '✅ Health endpoint ready: /healthz', level: 'info' });
     logger.log({ message: '✅ Server startup complete - ready for traffic', level: 'info' });

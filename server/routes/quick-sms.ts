@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { SMSProviderFactory } from '../sms-providers/provider-factory';
 import { logger } from '../utils/production-safe-logger';
+import { getConfiguredAppBaseUrl, joinUrl } from '../utils/url-config';
 
 const router = Router();
 
@@ -31,12 +32,13 @@ router.post('/send', async (req, res) => {
     }
 
     // Build the app URL
-    const appUrl = process.env.REPLIT_DOMAIN
-      ? `https://${process.env.REPLIT_DOMAIN}`
-      : 'https://your-app.replit.app';
+    const appUrl = getConfiguredAppBaseUrl() ?? 'http://localhost:5000';
     
     // Build the direct link to the app section
-    const directLink = `${appUrl}/${appSection}`;
+    const normalizedSection = appSection.startsWith('/')
+      ? appSection
+      : `/${appSection}`;
+    const directLink = joinUrl(appUrl, normalizedSection);
 
     // Build the message
     let message: string;

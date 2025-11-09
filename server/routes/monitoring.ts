@@ -7,6 +7,7 @@ import {
   validateSMSConfig,
 } from '../sms-service';
 import { logger } from '../utils/production-safe-logger';
+import { getConfiguredAppBaseUrl, joinUrl } from '../utils/url-config';
 
 const router = Router();
 
@@ -498,7 +499,8 @@ router.post('/test-email', async (req, res) => {
       year: 'numeric',
     });
 
-    const loginUrl = 'https://sandwich-project-platform-final-katielong2316.replit.app/';
+    const appUrl = getConfiguredAppBaseUrl() ?? 'http://localhost:5000';
+    const loginUrl = joinUrl(appUrl, '/');
     const emailSubject = `🥪 Friendly Reminder: Weekly Sandwich Collection Numbers`;
     const contactName = 'Katie';
     const location = 'Test Location';

@@ -5,9 +5,16 @@ import { hosts } from '@shared/schema';
 import { eq, and } from 'drizzle-orm';
 import { getUserMetadata } from '../shared/types';
 import { logger } from './utils/production-safe-logger';
+import {
+  getConfiguredApiBaseUrl,
+  getConfiguredAppBaseUrl,
+  joinUrl,
+} from './utils/url-config';
 
 // Initialize SMS provider
 let smsProvider: SMSProvider | null = null;
+const DEFAULT_APP_URL = getConfiguredAppBaseUrl() ?? 'http://localhost:5000';
+const DEFAULT_API_URL = getConfiguredApiBaseUrl() ?? DEFAULT_APP_URL;
 
 try {
   const factory = SMSProviderFactory.getInstance();
@@ -47,9 +54,7 @@ interface TollFreeVerificationResult {
  */
 export async function sendSMSReminder(
   hostLocation: string,
-  appUrl: string = process.env.REPLIT_DOMAIN
-    ? `https://${process.env.REPLIT_DOMAIN}`
-    : 'https://your-app.replit.app'
+  appUrl: string = DEFAULT_APP_URL
 ): Promise<SMSReminderResult> {
   if (!smsProvider) {
     return {
@@ -214,7 +219,7 @@ export async function sendTestSMS(
     logger.log(`📱 Formatting phone number: ${toPhoneNumber} -> ${formattedPhone}`);
 
     const testMessage = `🧪 Test SMS from The Sandwich Project! This is a test of the SMS reminder system. App link: ${
-      appUrl || 'https://your-app.replit.app'
+      appUrl || DEFAULT_APP_URL
     }`;
 
     const result = await smsProvider.sendSMS({
@@ -373,14 +378,16 @@ export async function sendConfirmationSMS(
       logger.log('📤 Sending SMS via Twilio...');
       logger.log('Message length:', confirmationMessage.length, 'characters');
 
+      const statusCallback =
+        process.env.SMS_STATUS_CALLBACK_URL ??
+        joinUrl(DEFAULT_API_URL, '/api/users/sms-webhook/status');
+
       const result = await twilioClient.messages.create({
         body: confirmationMessage,
         from: process.env.TWILIO_PHONE_NUMBER,
         to: formattedPhone,
         // Add status callback to track delivery
-        statusCallback: process.env.REPLIT_DOMAIN
-          ? `https://${process.env.REPLIT_DOMAIN}/api/users/sms-webhook/status`
-          : undefined,
+        statusCallback,
       });
 
       logger.log(`✅ SMS confirmation sent to ${phoneNumber} (${result.sid})`);
@@ -554,8 +561,8 @@ export async function sendTspContactAssignmentSMS(
       : 'TBD';
 
     // Create app URL with event link
-    const appUrl = 'https://sandwich-project-platform-final-katielong2316.replit.app';
-    const eventUrl = `${appUrl}/event-requests`;
+    const appUrl = DEFAULT_APP_URL;
+    const eventUrl = joinUrl(appUrl, '/event-requests');
 
     // Craft message
     const message = `The Sandwich Project: You've been assigned as TSP contact for ${organizationName} (${formattedDate}). View details: ${eventUrl}`;
@@ -683,7 +690,7 @@ export async function submitTollFreeVerification(): Promise<TollFreeVerification
 
     // Build form data with PascalCase field names (Twilio REST API format)
     const form = new URLSearchParams();
-    const baseUrl = process.env.REPLIT_DOMAIN ? `https://${process.env.REPLIT_DOMAIN}` : 'https://your-app.replit.app';
+    const baseUrl = DEFAULT_APP_URL;
 
     // Required IDs
     form.append('TollfreePhoneNumberSid', phoneNumberSid);
@@ -704,7 +711,7 @@ export async function submitTollFreeVerification(): Promise<TollFreeVerification
 
     // Opt-in - repeat key for each URL
     form.append('OptInType', 'WEB_FORM');
-    [`${baseUrl}/profile-notifications-signup.png`].forEach(url =>
+    [joinUrl(baseUrl, '/profile-notifications-signup.png')].forEach((url) =>
       form.append('OptInImageUrls', url)
     );
 
@@ -727,7 +734,9 @@ export async function submitTollFreeVerification(): Promise<TollFreeVerification
     form.append('BusinessType', 'NON_PROFIT');
 
     logger.log(`📤 Submitting TFV with MessageVolume: 1000, UseCaseCategories: ACCOUNT_NOTIFICATION`);
-    logger.log(`📷 Opt-in image URL: ${baseUrl}/profile-notifications-signup.png`);
+    logger.log(
+      `📷 Opt-in image URL: ${joinUrl(baseUrl, '/profile-notifications-signup.png')}`
+    );
 
     // Submit toll-free verification using REST API with correct snake_case fields
     const response = await fetch('https://messaging.twilio.com/v1/Tollfree/Verifications', {
