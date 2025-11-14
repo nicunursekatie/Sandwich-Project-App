@@ -28,29 +28,41 @@ CREATE TABLE IF NOT EXISTS activities (
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
 );
-
+--> statement-breakpoint
 -- Add comment for documentation
 COMMENT ON TABLE activities IS 'Unified table for tasks, events, projects, messages, and more with built-in threading';
+--> statement-breakpoint
 COMMENT ON COLUMN activities.parent_id IS 'Points to parent activity for threaded replies. NULL = root activity';
+--> statement-breakpoint
 COMMENT ON COLUMN activities.root_id IS 'Denormalized ID of root activity for efficient thread queries';
+--> statement-breakpoint
 COMMENT ON COLUMN activities.thread_count IS 'Cached count of all replies including nested (updated by app logic)';
+--> statement-breakpoint
 COMMENT ON COLUMN activities.last_activity_at IS 'Updated when activity or any reply is created/updated';
-
+--> statement-breakpoint
 -- Performance indexes for activities
 CREATE INDEX IF NOT EXISTS idx_activities_type ON activities(type);
+--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS idx_activities_created_by ON activities(created_by);
+--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS idx_activities_parent_id ON activities(parent_id);
+--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS idx_activities_root_id ON activities(root_id);
+--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS idx_activities_context ON activities(context_type, context_id);
+--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS idx_activities_last_activity ON activities(last_activity_at);
+--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS idx_activities_is_deleted ON activities(is_deleted);
+--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS idx_activities_status ON activities(status);
+--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS idx_activities_created_at ON activities(created_at);
 
 -- ============================================================================
 -- ACTIVITY PARTICIPANTS - Track who's involved in each activity
 -- ============================================================================
-
+--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS activity_participants (
   id SERIAL PRIMARY KEY,
   activity_id VARCHAR NOT NULL,  -- FK to activities.id
@@ -63,20 +75,24 @@ CREATE TABLE IF NOT EXISTS activity_participants (
   -- Constraints
   CONSTRAINT unique_activity_user_role UNIQUE (activity_id, user_id, role)
 );
-
+--> statement-breakpoint
 COMMENT ON TABLE activity_participants IS 'Tracks who is involved in each activity for permissions, notifications, and unread status';
+--> statement-breakpoint
 COMMENT ON COLUMN activity_participants.role IS 'User role: assignee (assigned to work), follower (watching), mentioned (tagged), creator (author)';
+--> statement-breakpoint
 COMMENT ON COLUMN activity_participants.last_read_at IS 'Last time user viewed this activity thread (for unread badges)';
-
+--> statement-breakpoint
 -- Performance indexes for participants
 CREATE INDEX IF NOT EXISTS idx_activity_participants_activity ON activity_participants(activity_id);
+--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS idx_activity_participants_user ON activity_participants(user_id);
+--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS idx_activity_participants_activity_user ON activity_participants(activity_id, user_id);
 
 -- ============================================================================
 -- ACTIVITY REACTIONS - Likes, celebrates, helpful markers
 -- ============================================================================
-
+--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS activity_reactions (
   id SERIAL PRIMARY KEY,
   activity_id VARCHAR NOT NULL,  -- FK to activities.id
@@ -87,18 +103,20 @@ CREATE TABLE IF NOT EXISTS activity_reactions (
   -- Constraints
   CONSTRAINT unique_activity_user_reaction UNIQUE (activity_id, user_id, reaction_type)
 );
-
+--> statement-breakpoint
 COMMENT ON TABLE activity_reactions IS 'Lightweight reactions (likes, celebrates, etc.) on activities and messages';
+--> statement-breakpoint
 COMMENT ON COLUMN activity_reactions.reaction_type IS 'Reaction types: like, celebrate, helpful, complete, question';
-
+--> statement-breakpoint
 -- Performance indexes for reactions
 CREATE INDEX IF NOT EXISTS idx_activity_reactions_activity ON activity_reactions(activity_id);
+--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS idx_activity_reactions_user ON activity_reactions(user_id);
 
 -- ============================================================================
 -- ACTIVITY ATTACHMENTS - File uploads on threads
 -- ============================================================================
-
+--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS activity_attachments (
   id SERIAL PRIMARY KEY,
   activity_id VARCHAR NOT NULL,  -- FK to activities.id
@@ -109,12 +127,14 @@ CREATE TABLE IF NOT EXISTS activity_attachments (
   uploaded_by VARCHAR NOT NULL,  -- FK to users.id
   uploaded_at TIMESTAMP DEFAULT NOW()
 );
-
+--> statement-breakpoint
 COMMENT ON TABLE activity_attachments IS 'File attachments on activity threads (images, PDFs, documents)';
+--> statement-breakpoint
 COMMENT ON COLUMN activity_attachments.file_url IS 'Full URL to file in Google Cloud Storage';
-
+--> statement-breakpoint
 -- Performance indexes for attachments
 CREATE INDEX IF NOT EXISTS idx_activity_attachments_activity ON activity_attachments(activity_id);
+--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS idx_activity_attachments_uploaded_by ON activity_attachments(uploaded_by);
 
 -- ============================================================================
@@ -142,7 +162,7 @@ CREATE INDEX IF NOT EXISTS idx_activity_attachments_uploaded_by ON activity_atta
 -- ============================================================================
 -- FEATURE FLAG: Enable Phase 1
 -- ============================================================================
-
+--> statement-breakpoint
 -- Update the feature flag to indicate schema is created
 UPDATE feature_flags
 SET enabled = false,  -- Keep disabled until Phase 2 (read operations)
@@ -152,7 +172,7 @@ SET enabled = false,  -- Keep disabled until Phase 2 (read operations)
       to_jsonb(NOW())
     )
 WHERE flag_name = 'unified-activities-schema';
-
+--> statement-breakpoint
 -- Success message
 DO $$
 BEGIN
