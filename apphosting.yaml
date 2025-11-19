@@ -1,4 +1,7 @@
 run:
+  source: .
   runtime: nodejs20
-  source: server/
+  build:
+    command: ["npm", "run", "build"]
   command: ["npm", "start"]
+  workingDirectory: .
