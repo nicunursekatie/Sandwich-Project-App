@@ -8,7 +8,15 @@ import { createServer } from 'http';
 import { WebSocketServer } from 'ws';
 import compression from 'compression';
 import { registerRoutes } from './routes';
-import { setupVite, log } from './vite';
+let setupVite: any;
+let log: any;
+
+if (process.env.NODE_ENV === 'development') {
+  const viteModule = await import('./vite.js');  // OR './vite'
+  setupVite = viteModule.setupVite;
+  log = viteModule.log;
+}
+
 import { initializeDatabase } from './db-init';
 import { setupSocketChat } from './socket-chat';
 import { startBackgroundSync } from './background-sync-service';
