@@ -1,0 +1,4 @@
+run:
+  runtime: nodejs20
+  source: server/
+  command: ["npm", "start"]
