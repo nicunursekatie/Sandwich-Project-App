@@ -3,26 +3,37 @@ import { Response } from 'express';
 import { randomUUID } from 'crypto';
 import { logger } from './utils/production-safe-logger';
 
-const REPLIT_SIDECAR_ENDPOINT = 'http://127.0.0.1:1106';
+// Initialize Google Cloud Storage with service account credentials
+// For Firebase/GCP: Uses GOOGLE_PROJECT_ID, GOOGLE_SERVICE_ACCOUNT_EMAIL, and GOOGLE_PRIVATE_KEY
+let objectStorageClient: Storage;
 
-// The object storage client is used to interact with the object storage service.
-export const objectStorageClient = new Storage({
-  credentials: {
-    audience: 'replit',
-    subject_token_type: 'access_token',
-    token_url: `${REPLIT_SIDECAR_ENDPOINT}/token`,
-    type: 'external_account',
-    credential_source: {
-      url: `${REPLIT_SIDECAR_ENDPOINT}/credential`,
-      format: {
-        type: 'json',
-        subject_token_field_name: 'access_token',
+try {
+  const projectId = process.env.GOOGLE_PROJECT_ID;
+  const clientEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
+  const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n');
+
+  if (projectId && clientEmail && privateKey) {
+    // Firebase/GCP: Use service account credentials
+    objectStorageClient = new Storage({
+      projectId,
+      credentials: {
+        client_email: clientEmail,
+        private_key: privateKey,
       },
-    },
-    universe_domain: 'googleapis.com',
-  },
-  projectId: '',
-});
+    });
+    logger.info('Google Cloud Storage initialized with service account credentials');
+  } else {
+    // Fallback: Use default credentials (will work on GCP with default service account)
+    objectStorageClient = new Storage();
+    logger.warn('Google Cloud Storage initialized with default credentials. Set GOOGLE_PROJECT_ID, GOOGLE_SERVICE_ACCOUNT_EMAIL, and GOOGLE_PRIVATE_KEY for explicit authentication.');
+  }
+} catch (error) {
+  logger.error('Failed to initialize Google Cloud Storage', { error });
+  // Create a fallback instance
+  objectStorageClient = new Storage();
+}
+
+export { objectStorageClient };
 
 export class ObjectNotFoundError extends Error {
   constructor() {
@@ -218,29 +229,23 @@ async function signObjectURL({
   method: 'GET' | 'PUT' | 'DELETE' | 'HEAD';
   ttlSec: number;
 }): Promise<string> {
-  const request = {
-    bucket_name: bucketName,
-    object_name: objectName,
-    method,
-    expires_at: new Date(Date.now() + ttlSec * 1000).toISOString(),
-  };
-  const response = await fetch(
-    `${REPLIT_SIDECAR_ENDPOINT}/object-storage/signed-object-url`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(request),
-    }
-  );
-  if (!response.ok) {
+  try {
+    const bucket = objectStorageClient.bucket(bucketName);
+    const file = bucket.file(objectName);
+
+    // Generate signed URL using Google Cloud Storage SDK
+    const options = {
+      version: 'v4' as const,
+      action: method.toLowerCase() as 'read' | 'write' | 'delete',
+      expires: Date.now() + ttlSec * 1000,
+    };
+
+    const [signedUrl] = await file.getSignedUrl(options);
+    return signedUrl;
+  } catch (error) {
+    logger.error('Failed to sign object URL', { error, bucketName, objectName, method });
     throw new Error(
-      `Failed to sign object URL, errorcode: ${response.status}, ` +
-        `make sure you're running on Replit`
+      `Failed to sign object URL. Ensure Google Cloud credentials are properly configured.`
     );
   }
-
-  const { signed_url: signedURL } = await response.json();
-  return signedURL;
 }

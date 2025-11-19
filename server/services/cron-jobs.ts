@@ -137,7 +137,7 @@ async function sendVolunteerReminders(): Promise<{
               !volunteer.smsReminder1SentAt &&
               volunteerPhone
             ) {
-              const appUrl = process.env.REPL_URL || 'https://app.thesandwichproject.org';
+              const appUrl = process.env.APP_URL || 'https://app.thesandwichproject.org';
               const smsSent = await sendEventReminderSMS(
                 volunteerPhone,
                 volunteerName,
@@ -197,7 +197,7 @@ async function sendVolunteerReminders(): Promise<{
               !volunteer.smsReminder2SentAt &&
               volunteerPhone
             ) {
-              const appUrl = process.env.REPL_URL || 'https://app.thesandwichproject.org';
+              const appUrl = process.env.APP_URL || 'https://app.thesandwichproject.org';
               const smsSent = await sendEventReminderSMS(
                 volunteerPhone,
                 volunteerName,
@@ -291,7 +291,7 @@ async function sendVolunteerReminders(): Promise<{
                 (preferences.primaryReminderType === 'sms' || preferences.primaryReminderType === 'both') &&
                 contactPhone
               ) {
-                const appUrl = process.env.REPL_URL || 'https://app.thesandwichproject.org';
+                const appUrl = process.env.APP_URL || 'https://app.thesandwichproject.org';
                 await sendEventReminderSMS(
                   contactPhone,
                   contactName,
@@ -333,7 +333,7 @@ async function sendVolunteerReminders(): Promise<{
                 (preferences.secondaryReminderType === 'sms' || preferences.secondaryReminderType === 'both') &&
                 contactPhone
               ) {
-                const appUrl = process.env.REPL_URL || 'https://app.thesandwichproject.org';
+                const appUrl = process.env.APP_URL || 'https://app.thesandwichproject.org';
                 await sendEventReminderSMS(
                   contactPhone,
                   contactName,
