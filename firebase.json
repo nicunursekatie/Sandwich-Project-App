@@ -1,6 +1,11 @@
 {
+  "apphosting": {
+    "deploy": {
+      "command": "npm install && npm run build && NODE_ENV=production node dist/index.js"
+    }
+  },
   "hosting": {
-    "public": "public",
+    "public": "dist/public",
     "ignore": [
       "firebase.json",
       "**/.*",
