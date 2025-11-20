@@ -4,7 +4,7 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "dev": "NODE_ENV=development tsx server/index.ts",
+    "dev": "NODE_ENV=development PORT=3001 tsx server/index.ts",
     "build": "vite build && esbuild server/index.ts --platform=node --external:./vite.js --external:vite --external:@google-cloud/storage --packages=external --bundle --format=esm --outdir=dist && esbuild server/meeting-agenda-pdf-generator.ts --platform=node --external:date-fns --packages=external --bundle --format=esm --outdir=dist",
     "start": "NODE_ENV=production node dist/index.js",
     "check": "tsc",
@@ -33,7 +33,6 @@
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^7.3.4",
-    "@esbuild/linux-x64": "^0.25.10",
     "@google-cloud/local-auth": "^3.0.1",
     "@google-cloud/storage": "^7.7.0",
     "@hookform/resolvers": "^3.10.0",
