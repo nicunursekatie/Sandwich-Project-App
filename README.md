@@ -212,6 +212,15 @@ SENTRY_DSN=https://xxxxx@sentry.io/xxxxx
 # Optional
 NODE_ENV=development
 LOG_LEVEL=debug
+
+# Firebase (client SDK)
+VITE_FIREBASE_API_KEY=your-api-key
+VITE_FIREBASE_AUTH_DOMAIN=sandwich-project-app.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=sandwich-project-app
+VITE_FIREBASE_STORAGE_BUCKET=sandwich-project-app.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=your-messaging-sender-id
+VITE_FIREBASE_APP_ID=1:XXXXXXXXXXXX:web:XXXXXXXXXXXX
+VITE_FIREBASE_DATABASE_URL=https://sandwich-project-app-default-rtdb.firebaseio.com
 ```
 
 ### Testing
