@@ -49,7 +49,7 @@ export class NotificationService {
             <p style="margin: 0; font-size: 16px; line-height: 1.5;">${messageContent}</p>
           </div>
           <p>
-            <a href="${process.env.REPL_URL || 'https://your-platform-url.com'}/messages" 
+            <a href="${process.env.APP_URL || 'https://your-platform-url.com'}/messages" 
                style="background: #236383; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">
               View Message
             </a>
@@ -65,7 +65,7 @@ export class NotificationService {
         from: this.FROM_EMAIL,
         subject,
         html: htmlContent,
-        text: `New message from ${senderName}: ${messageContent}\n\nView the message at: ${process.env.REPL_URL || 'https://your-platform-url.com'}/messages`,
+        text: `New message from ${senderName}: ${messageContent}\n\nView the message at: ${process.env.APP_URL || 'https://your-platform-url.com'}/messages`,
       };
 
       await mailService.send(emailData);
@@ -108,7 +108,7 @@ export class NotificationService {
             Please log into the Sandwich Project platform to view project details and get started.
           </p>
           <p>
-            <a href="${process.env.REPL_URL || 'https://your-platform-url.com'}/projects/${projectId}" 
+            <a href="${process.env.APP_URL || 'https://your-platform-url.com'}/projects/${projectId}" 
                style="background: #236383; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">
               View Project
             </a>
@@ -124,7 +124,7 @@ export class NotificationService {
         from: this.FROM_EMAIL,
         subject,
         html: htmlContent,
-        text: `You've been assigned to project: ${projectTitle}\n\n${assignedBy ? `Assigned by: ${assignedBy}\n\n` : ''}Please log into the platform to view project details.\n\nView project at: ${process.env.REPL_URL || 'https://your-platform-url.com'}/projects/${projectId}`,
+        text: `You've been assigned to project: ${projectTitle}\n\n${assignedBy ? `Assigned by: ${assignedBy}\n\n` : ''}Please log into the platform to view project details.\n\nView project at: ${process.env.APP_URL || 'https://your-platform-url.com'}/projects/${projectId}`,
       };
 
       await mailService.send(emailData);
@@ -192,7 +192,7 @@ export class NotificationService {
     try {
       const subject = 'Get Text Notifications from The Sandwich Project 📱';
       const displayName = recipientName || 'there';
-      const settingsUrl = `${process.env.REPL_URL || 'https://your-platform-url.com'}/profile`;
+      const settingsUrl = `${process.env.APP_URL || 'https://your-platform-url.com'}/profile`;
       
       const htmlContent = `
         <!DOCTYPE html>
@@ -362,7 +362,7 @@ Thanks for helping us fight hunger, one sandwich at a time! 🥪
             <p>You have been assigned to work on the project <strong>${data.projectTitle}</strong>.</p>
             ${data.assignedBy ? `<p>Assigned by: ${data.assignedBy}</p>` : ''}
             <p>Please log into the Sandwich Project platform to view project details and get started.</p>
-            <p><a href="${process.env.REPL_URL || 'https://your-platform-url.com'}/projects/${data.projectId}">View Project</a></p>
+            <p><a href="${process.env.APP_URL || 'https://your-platform-url.com'}/projects/${data.projectId}">View Project</a></p>
           `,
           recipients: data.assignedTo || [],
         };
@@ -374,7 +374,7 @@ Thanks for helping us fight hunger, one sandwich at a time! 🥪
             <h2>Project Update</h2>
             <p>The project <strong>${data.projectTitle}</strong> has been updated.</p>
             <p>Please check the project page for the latest information.</p>
-            <p><a href="${process.env.REPL_URL || 'https://your-platform-url.com'}/projects/${data.projectId}">View Project</a></p>
+            <p><a href="${process.env.APP_URL || 'https://your-platform-url.com'}/projects/${data.projectId}">View Project</a></p>
           `,
           recipients: data.assignedTo || [],
         };
@@ -386,7 +386,7 @@ Thanks for helping us fight hunger, one sandwich at a time! 🥪
             <h2>New Task Added</h2>
             <p>A new task <strong>${data.taskTitle}</strong> has been added to project <strong>${data.projectTitle}</strong>.</p>
             <p>Please check the project page to view task details.</p>
-            <p><a href="${process.env.REPL_URL || 'https://your-platform-url.com'}/projects/${data.projectId}">View Project</a></p>
+            <p><a href="${process.env.APP_URL || 'https://your-platform-url.com'}/projects/${data.projectId}">View Project</a></p>
           `,
           recipients: data.assignedTo || [],
         };
@@ -398,7 +398,7 @@ Thanks for helping us fight hunger, one sandwich at a time! 🥪
             <h2>New Task Assignment</h2>
             <p>You have been assigned the task <strong>${data.taskTitle}</strong> in project <strong>${data.projectTitle}</strong>.</p>
             ${data.assignedBy ? `<p>Assigned by: ${data.assignedBy}</p>` : ''}
-            <p><a href="${process.env.REPL_URL || 'https://your-platform-url.com'}/projects/${data.projectId}">View Project</a></p>
+            <p><a href="${process.env.APP_URL || 'https://your-platform-url.com'}/projects/${data.projectId}">View Project</a></p>
           `,
           recipients: data.assignedTo || [],
         };
@@ -409,7 +409,7 @@ Thanks for helping us fight hunger, one sandwich at a time! 🥪
           body: `
             <h2>Project Status Update</h2>
             <p>The status of project <strong>${data.projectTitle}</strong> has changed from <strong>${data.oldStatus}</strong> to <strong>${data.newStatus}</strong>.</p>
-            <p><a href="${process.env.REPL_URL || 'https://your-platform-url.com'}/projects/${data.projectId}">View Project</a></p>
+            <p><a href="${process.env.APP_URL || 'https://your-platform-url.com'}/projects/${data.projectId}">View Project</a></p>
           `,
           recipients: data.assignedTo || [],
         };
@@ -421,7 +421,7 @@ Thanks for helping us fight hunger, one sandwich at a time! 🥪
             <h2>Project Due Date Reminder</h2>
             <p>The project <strong>${data.projectTitle}</strong> is due on <strong>${data.dueDate}</strong>.</p>
             <p>Please ensure all tasks are completed on time.</p>
-            <p><a href="${process.env.REPL_URL || 'https://your-platform-url.com'}/projects/${data.projectId}">View Project</a></p>
+            <p><a href="${process.env.APP_URL || 'https://your-platform-url.com'}/projects/${data.projectId}">View Project</a></p>
           `,
           recipients: data.assignedTo || [],
         };
@@ -432,7 +432,7 @@ Thanks for helping us fight hunger, one sandwich at a time! 🥪
           body: `
             <h2>Project Update</h2>
             <p>There has been an update to project <strong>${data.projectTitle}</strong>.</p>
-            <p><a href="${process.env.REPL_URL || 'https://your-platform-url.com'}/projects/${data.projectId}">View Project</a></p>
+            <p><a href="${process.env.APP_URL || 'https://your-platform-url.com'}/projects/${data.projectId}">View Project</a></p>
           `,
           recipients: data.assignedTo || [],
         };
