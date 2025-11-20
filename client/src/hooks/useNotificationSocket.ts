@@ -3,6 +3,7 @@ import { io, Socket } from 'socket.io-client';
 import { useAuth } from './useAuth';
 import { queryClient } from '@/lib/queryClient';
 import { logger } from '@/lib/logger';
+import { getSocketIoUrl } from '@/utils/api-config';
 
 interface NotificationActionEvent {
   notificationId: number;
@@ -25,8 +26,8 @@ export function useNotificationSocket() {
   useEffect(() => {
     if (!user) return;
 
-    // Use current origin for Socket.IO connection
-    const socketUrl = window.location.origin;
+    // Use API base URL for Socket.IO connection (connects to backend server)
+    const socketUrl = getSocketIoUrl();
     logger.log('[NotificationSocket] Connecting to:', socketUrl);
 
     const newSocket = io(socketUrl, {

@@ -64,9 +64,11 @@ export function getWebSocketUrl(config: WebSocketConfig): string {
   const protocol =
     forcedProtocol || (location.protocol === 'https:' ? 'wss:' : 'ws:');
   const hostname = location.hostname || 'localhost';
+  // For WebSocket connections, we need to connect to the server port (3001),
+  // not the client dev server port. Use environment variable or fallback to 3001.
+  const serverPort = import.meta.env.VITE_SERVER_PORT || '3001';
   const defaultPort =
-    location.port ||
-    (hostname === 'localhost' || hostname === '127.0.0.1' ? '5000' : '');
+    (hostname === 'localhost' || hostname === '127.0.0.1') ? serverPort : location.port || '';
   const portSegment = defaultPort ? `:${defaultPort}` : '';
   const host = `${hostname}${portSegment}`;
 

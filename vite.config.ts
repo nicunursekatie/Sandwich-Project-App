@@ -73,6 +73,29 @@ export default defineConfig(async ({ mode }) => {
     server: {
       allowedHosts,
       host: true,
+      port: 5173,
+      proxy: {
+        // Proxy API requests to the backend server
+        '/api': {
+          target: 'http://localhost:3001',
+          changeOrigin: true,
+          secure: false,
+        },
+        // Proxy Socket.IO requests
+        '/socket.io': {
+          target: 'http://localhost:3001',
+          changeOrigin: true,
+          secure: false,
+          ws: true,
+        },
+        // Proxy WebSocket notifications
+        '/notifications': {
+          target: 'ws://localhost:3001',
+          changeOrigin: true,
+          secure: false,
+          ws: true,
+        },
+      },
       fs: {
         strict: true,
         deny: ['**/.*'],
