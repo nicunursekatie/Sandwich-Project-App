@@ -1,5 +1,5 @@
-// Clean error handling for Replit - let Replit handle restarts
-// Replit already monitors and restarts crashed apps automatically
+// Clean error handling - let the platform handle restarts
+// Firebase App Hosting, Cloud Run, and other platforms monitor and restart crashed apps automatically
 
 // Note: OpenAPI extension removed due to platform compatibility issues
 
@@ -160,7 +160,7 @@ async function bootstrap() {
   try {
     serverLogger.info('🚀 Starting The Sandwich Project server...');
 
-    // Use PORT from environment (Replit Autoscale sets PORT=80), fallback to 80 for production, 5000 for dev
+    // Use PORT from environment (Cloud platforms set PORT automatically), fallback to 5000 for dev
     const portValue = process.env.PORT ?? process.env.APP_PORT ?? '5000';
     const port = Number(portValue);
     if (Number.isNaN(port)) {
@@ -495,9 +495,9 @@ async function bootstrap() {
         } catch (initError) {
           serverLogger.error('✗ Background initialization failed:', initError);
           serverLogger.error(
-            'This is a fatal error - exiting to allow Replit to restart'
+            'This is a fatal error - exiting to allow platform to restart'
           );
-          // Let Replit restart the app to recover from initialization failures
+          // Let the platform (Firebase/Cloud Run/etc) restart the app to recover from initialization failures
           process.exit(1);
         }
       });

@@ -56,6 +56,7 @@ function getAllowedOrigins(): string[] {
   // Allow explicitly configured application URLs
   addOrigin(process.env.APP_BASE_URL);
   addOrigin(process.env.API_BASE_URL);
+  addOrigin(process.env.APP_URL);
 
   // Additional explicit origins from environment variable (comma separated)
   toUrlList(process.env.ALLOWED_ORIGINS).forEach(addOrigin);
@@ -85,21 +86,36 @@ export function isOriginAllowed(origin: string | undefined): boolean {
     // Allow same-origin requests (no origin header)
     return true;
   }
-  
+
   const allowedOrigins = getAllowedOrigins();
-  
+
   // Exact match
   if (allowedOrigins.includes(origin)) {
     return true;
   }
-  
+
   // In development, allow any localhost or 127.0.0.1 variants
   if (process.env.NODE_ENV === 'development') {
     if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
       return true;
     }
   }
-  
+
+  // Allow Firebase hosting domains
+  if (origin.endsWith('.web.app') || origin.endsWith('.firebaseapp.com')) {
+    return true;
+  }
+
+  // Allow Google Cloud Workstations (for Firebase development/preview)
+  if (origin.includes('.cloudworkstations.dev')) {
+    return true;
+  }
+
+  // Allow Cloud Run domains (for Firebase App Hosting)
+  if (origin.endsWith('.run.app')) {
+    return true;
+  }
+
   // In production, only allow explicitly configured domains
   return false;
 }

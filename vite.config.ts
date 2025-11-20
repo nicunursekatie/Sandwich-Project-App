@@ -1,23 +1,29 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
-import runtimeErrorOverlay from '@replit/vite-plugin-runtime-error-modal';
 
 export default defineConfig(async ({ mode }) => {
   const isProduction = mode === 'production';
 
   const plugins = [react()];
 
+  // Optional Replit-specific plugins (only load if available and explicitly enabled)
   if (process.env.DISABLE_RUNTIME_ERROR_OVERLAY !== 'true') {
-    plugins.push(runtimeErrorOverlay());
+    try {
+      const runtimeErrorOverlay = await import('@replit/vite-plugin-runtime-error-modal');
+      plugins.push(runtimeErrorOverlay.default());
+    } catch (error) {
+      // Replit plugin not available - skip it (expected in non-Replit environments)
+    }
   }
 
-  if (
-    process.env.ENABLE_REPLIT_CARTOGRAPHER === 'true' ||
-    (process.env.REPL_ID && !isProduction)
-  ) {
-    const { cartographer } = await import('@replit/vite-plugin-cartographer');
-    plugins.push(cartographer());
+  if (process.env.ENABLE_REPLIT_CARTOGRAPHER === 'true') {
+    try {
+      const { cartographer } = await import('@replit/vite-plugin-cartographer');
+      plugins.push(cartographer());
+    } catch (error) {
+      // Replit plugin not available - skip it (expected in non-Replit environments)
+    }
   }
 
   const allowedHosts =
