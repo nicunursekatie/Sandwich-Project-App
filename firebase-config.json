@@ -1,0 +1,14 @@
+{
+    "version": "2",
+    "projectNumber": "1054056200619",
+    "projectId": "sandwich-project-app",
+    "appId": "1:1054056200619:web:4abd7b9a3d7493d7a2faee",
+    "realtimeDatabaseInstanceUri": "https://sandwich-project-app-default-rtdb.firebaseio.com",
+    "realtimeDatabaseUrl": "",
+    "storageBucket": "sandwich-project-app.firebasestorage.app",
+    "locationId": "",
+    "apiKey": "AIzaSyCQQa9cfa7bXzvvAUbvngjDvfOXOoIYK0E",
+    "authDomain": "sandwich-project-app.firebaseapp.com",
+    "messagingSenderId": "1054056200619",
+    "measurementId": ""
+  }  

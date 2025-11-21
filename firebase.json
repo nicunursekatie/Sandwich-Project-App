@@ -1,9 +1,22 @@
 {
-  "apphosting": {
-    "deploy": {
-      "command": "npm install && npm run build && NODE_ENV=production node dist/index.js"
+  "apphosting": [
+    {
+      "deploy": {
+        "command": "npm install && npm run build && NODE_ENV=production node dist/index.js"
+      }
+    },
+    {
+      "backendId": "sandwich-project-app-backend",
+      "rootDir": "/",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "functions"
+      ]
     }
-  },
+  ],
   "hosting": {
     "public": "dist/public",
     "ignore": [
@@ -17,5 +30,17 @@
         "destination": "/index.html"
       }
     ]
+  },
+  "firestore": {
+    "database": "(default)",
+    "location": "nam5",
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  },
+  "database": {
+    "rules": "database.rules.json"
   }
 }
